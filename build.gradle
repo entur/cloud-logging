@@ -1,0 +1,175 @@
+
+plugins {
+    id 'com.github.ben-manes.versions' version '0.46.0' apply false
+    id 'org.owasp.dependencycheck' version '8.2.1' apply false
+    id "com.github.spotbugs" version "4.7.1" apply false
+    id "org.sonarqube" version "4.0.0.2929"
+}
+
+// Split projects into buildable: examples and libraries. 
+// This omits 'wrapper' directories. See also settings.gradle
+ 
+def buildProjects() {
+    subprojects.findAll { new File(it.projectDir, 'build.gradle').file }
+}
+
+def exampleProjects() {
+    buildProjects().findAll { it.name.endsWith("-example") }
+}
+
+def libraryProjects() {
+    buildProjects().findAll { !exampleProjects().contains(it) }
+}
+
+configure(exampleProjects()) {
+    apply plugin: 'java'
+
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+configure(libraryProjects()) {
+    apply plugin: 'java-library'
+    
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+configure(buildProjects()) {
+    apply plugin: 'java'
+    apply plugin: 'com.github.ben-manes.versions'
+    apply plugin: 'com.github.spotbugs'
+    
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    
+    ext {
+        junitJupiterVersion = '5.9.3'
+        mockitoVersion = '5.3.1'
+        logbackLogstashVersion = '7.3'
+        slf4jVersion = '2.0.7'
+        googleTruthVersion = '1.1.5'
+        logbackVersion = '1.4.7'
+        jacksonVersion = '2.15.2'
+        jacksonDatabindVersion = '2.15.2'
+        nettyTcnativeBoringsslStaticVersion = '2.0.61.Final'
+        nettyVersion = '4.1.92.Final'
+
+        commonsIoVersion = '2.11.0'
+        grpcNettyVersion = '1.55.1'
+        grpcVersion = '1.55.1'
+        grpcCommonsVersion = '2.17.0'
+        grpcProtobufVersion = '3.22.4'
+        jsonAssertVersion = '0.6.2'
+        jsonPathVersion = '2.8.0'
+        jsonSmartVersion = '2.4.10'
+    }
+
+    test {
+        useJUnitPlatform {
+            includeEngines 'junit-jupiter', 'junit-vintage'
+        }
+    }
+
+    dependencies {
+        // JUnit Jupiter API and TestEngine implementation
+        testImplementation("org.junit.jupiter:junit-jupiter:${junitJupiterVersion}")
+
+        testImplementation("org.mockito:mockito-core:${mockitoVersion}")
+
+        testImplementation("com.google.truth:truth:${googleTruthVersion}")
+        testImplementation("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
+    }
+
+    spotbugsMain {
+        reports {
+            xml.enabled = false
+            html.enabled = true
+        }
+    }
+
+    tasks.matching {task -> task.name.startsWith('spotbugs')}.forEach {
+        it.reports {
+            html.enabled = true
+            xml.enabled = false // spotbugs does not allow to generate a xml and html report at once https://github.com/spotbugs/spotbugs/issues/857
+        }
+        it.excludeFilter = file("$rootDir/spotbugs-exclude.xml")
+    }
+}
+
+// projects which should be published
+configure(libraryProjects()) {
+    apply plugin: 'maven-publish'
+    
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                groupId = "$groupId"
+                artifactId = "$artifactId"
+                version = "$version"
+
+                from components.java
+            }
+        }
+    }
+}
+ 
+allprojects {
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
+    apply plugin: 'org.owasp.dependencycheck'
+
+    // OWASP Dependency Check settings
+    dependencyCheck {
+        analyzedTypes = ['jar'] // the default artifact types that will be analyzed.
+        format = 'ALL'
+        failBuildOnCVSS = 7
+        // Specifies if the build should be failed if a CVSS score equal to or above a specified level is identified.
+        suppressionFiles = ["$projectDir/dependencycheck-base-suppression.xml", "$rootDir/dependencycheck-root-suppression.xml"]
+        // specify a list of known issues which contain false-positives
+        scanConfigurations = configurations.findAll {
+            (!it.name.startsWithAny('androidTest', 'test', 'debug', 'lint', 'kapt', 'spotbugs') && !it.name.contains("AndroidTest") && !it.name.contains("Test") && !it.name.contains("AnnotationProcessor"))
+        }.collect {
+            it.name
+        }
+    }
+
+    eclipse {
+        classpath {
+            downloadSources = true
+            downloadJavadoc = true
+        }
+    }
+
+    // Tell idea to output to build/classes/main instead of /out/
+    idea {
+        module {
+            outputDir file('build/classes/main')
+            testOutputDir file('build/classes/test')
+        }
+    }
+    
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+gradle.projectsEvaluated {
+    // do not scan testing tools and so on, see https://medium.com/@appmattus/android-security-scanning-your-app-for-known-vulnerabilities-421384603fc5
+    // note: must be set after project is evaluated, as Android creates configurations based on the build types
+    dependencyCheck {
+        scanConfigurations = configurations.findAll {
+            (!it.name.startsWithAny('androidTest', 'test', 'debug', 'lint', 'kapt') && !it.name.contains("AndroidTest") && !it.name.contains("Test") && !it.name.contains("AnnotationProcessor"))
+        }.collect {
+            it.name
+        }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:deprecation"
+    }
+
+}
+
+

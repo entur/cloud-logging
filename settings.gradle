@@ -1,0 +1,5 @@
+include 'api'
+include 'test:test-truth', 'test:test-assertj'
+include 'trace:server:correlation-id-trace-spring-boot-web', 'trace:server:correlation-id-trace-spring-boot-reactive'
+include 'gcp:logback-logstash-gcp', 'gcp:test-gcp', 'gcp:spring-boot-starter-gcp', 'gcp:micrometer-gcp'
+
