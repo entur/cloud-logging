@@ -57,6 +57,9 @@ public class DevOpsMarker implements Marker {
 	 */
 	private volatile List<Marker> referenceList;
 
+	public DevOpsLevel getDevOpsLevel() {
+		return devOpsLevel;
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -199,5 +202,22 @@ public class DevOpsMarker implements Marker {
 		sb.append(" ]");
 
 		return sb.toString();
+	}
+
+	public static DevOpsLevel searchSeverityMarker(Marker marker) {
+		if (marker instanceof DevOpsMarker) {
+			DevOpsMarker devOpsMarker = (DevOpsMarker) marker;
+
+			return devOpsMarker.getDevOpsLevel();
+		} else if(marker.hasReferences()) {
+			Iterator<Marker> iterator = marker.iterator();
+			while(iterator.hasNext()) {
+				DevOpsLevel level = searchSeverityMarker(iterator.next());
+				if(level != null) {
+					return level;
+				}
+			}
+		}
+		return null;
 	}
 }

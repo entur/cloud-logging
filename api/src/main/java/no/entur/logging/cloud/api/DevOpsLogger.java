@@ -8,7 +8,7 @@ import org.slf4j.Marker;
  * operations: tellMeTomorrow, interruptMyDinner and wakeMeUpRightNow.
  */
 
-interface DevOpsLogger extends Logger {
+public interface DevOpsLogger extends Logger {
 
 	void errorInterruptMyDinner(String msg);
 

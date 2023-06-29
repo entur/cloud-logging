@@ -46,7 +46,7 @@ configure(buildProjects()) {
     ext {
         junitJupiterVersion = '5.9.3'
         mockitoVersion = '5.3.1'
-        logbackLogstashVersion = '7.3'
+        logbackLogstashVersion = '7.4'
         slf4jVersion = '2.0.7'
         googleTruthVersion = '1.1.5'
         logbackVersion = '1.4.7'
@@ -54,6 +54,7 @@ configure(buildProjects()) {
         jacksonDatabindVersion = '2.15.2'
         nettyTcnativeBoringsslStaticVersion = '2.0.61.Final'
         nettyVersion = '4.1.92.Final'
+        micrometerVersion = '1.11.1'
 
         commonsIoVersion = '2.11.0'
         grpcNettyVersion = '1.55.1'

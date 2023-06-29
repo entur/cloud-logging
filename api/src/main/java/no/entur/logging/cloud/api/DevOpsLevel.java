@@ -6,6 +6,8 @@ public enum DevOpsLevel {
     DEBUG,
     INFO,
 
+    WARN,
+
     @Deprecated
     ERROR,
     ERROR_TELL_ME_TOMORROW,
