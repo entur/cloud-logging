@@ -3,7 +3,6 @@ package no.entur.logging.cloud.gcp.spring;
 
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics;
 import no.entur.logging.cloud.gcp.micrometer.StackdriverLogbackMetrics;
-import no.entur.logging.cloud.micrometer.DevOpsLogbackMetrics;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -21,9 +20,9 @@ public class GcpLoggingAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnClass(DevOpsLogbackMetrics.class)
+    @ConditionalOnClass(no.entur.logging.cloud.micrometer.DevOpsLogbackMetrics.class)
     public LogbackMetrics logbackMetrics() {
-        return new DevOpsLogbackMetrics();
+        return new no.entur.logging.cloud.micrometer.DevOpsLogbackMetrics();
     }
 
 }

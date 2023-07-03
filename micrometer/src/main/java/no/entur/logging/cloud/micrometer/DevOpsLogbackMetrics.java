@@ -26,7 +26,7 @@ import static java.util.Collections.emptyList;
  */
 @NonNullApi
 @NonNullFields
-public class DevOpsLogbackMetrics extends io.micrometer.core.instrument.binder.logging.LogbackMetrics { // extend since there is not interface type
+public class DevOpsLogbackMetrics extends io.micrometer.core.instrument.binder.logging.LogbackMetrics { // extend since there is no interface type
 	static ThreadLocal<Boolean> ignoreMetrics = new ThreadLocal<>();
 
 	private final LoggerContext loggerContext;

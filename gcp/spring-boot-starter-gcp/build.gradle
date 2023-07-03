@@ -10,8 +10,8 @@ dependencies {
     api project(':gcp:logback-logstash-encoder-gcp')
     api project(':gcp:micrometer-gcp')
 
-    // omit this as a dependency; users must manually override to get the standard log levels
-    compileOnly(project(':micrometer'))
+    // TODO omit this as a dependency; users must manually override to get the standard log levels
+    api(project(':micrometer'))
 
     api("org.springframework.boot:spring-boot-actuator-autoconfigure:${springBootVersion}")
 

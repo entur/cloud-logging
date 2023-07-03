@@ -11,6 +11,17 @@ dependencies {
     api ("com.github.skjolber.jackson:jackson-syntax-highlight:${jacksonSyntaxHighlightVersion}")
     api ("com.github.skjolber.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
 
+    // junit
+    api (project(":api"))
+    api("net.minidev:json-smart:${jsonSmartVersion}")
+    api("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+    api("com.toomuchcoding.jsonassert:jsonassert:${jsonAssertVersion}") {
+        exclude group: 'net.minidev', module: 'json-smart'
+    }
+    api("com.jayway.jsonpath:json-path:${jsonPathVersion}") {
+        exclude group: 'net.minidev', module: 'json-smart'
+    }
+
     testImplementation(project(":configuration:console-async-appender-classic"))
 }
 

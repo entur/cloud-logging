@@ -6,7 +6,7 @@
 
 	<appender name="STDOUT" class="no.entur.logging.cloud.gcp.spring.test.SpringCompositeConsoleAppender">
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>${CONSOLE_LOG_THRESHOLD}</level>
+			<level>${CONSOLE_LOG_THRESHOLD:-INFO}</level>
 		</filter>
 		<humanReadablePlainEncoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 			<pattern>${CONSOLE_LOG_PATTERN}</pattern>
