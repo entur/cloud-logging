@@ -1,0 +1,10 @@
+<included>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="no.entur.logging.cloud.gcp.logback.logstash.StackdriverLogstashEncoder">
+            <provider class="no.entur.logging.cloud.gcp.logback.logstash.StackdriverServiceContextJsonProvider">
+                <service>${entur.logging.servicecontext.service:-undefined}</service>
+                <version>${entur.logging.servicecontext.version:-undefined}</version>
+            </provider>
+        </encoder>
+    </appender>
+</included>

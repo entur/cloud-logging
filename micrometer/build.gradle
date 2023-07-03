@@ -1,7 +1,9 @@
 
 dependencies {
     api project(':api')
-    api project(':gcp:logback-logstash-gcp')
+
+    api ("ch.qos.logback:logback-classic:${logbackVersion}")
+    api ("ch.qos.logback:logback-core:${logbackVersion}")
 
     api("org.slf4j:slf4j-api")
     api ("io.micrometer:micrometer-core:${micrometerVersion}")

@@ -1,0 +1,23 @@
+
+dependencies {
+    api("org.slf4j:slf4j-api")
+    api ("org.codehaus.janino:commons-compiler:${janinoVersion}")
+    api ("org.codehaus.janino:janino:${janinoVersion}")
+
+    api (project(":api"))
+    api (project(":test:test-logback"))
+
+    api(project(":configuration:console-async-appender-classic"))
+
+    api("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
+    api("org.springframework.boot:spring-boot-actuator-autoconfigure:${springBootVersion}")
+
+    api ("com.github.skjolber.jackson:jackson-syntax-highlight:${jacksonSyntaxHighlightVersion}")
+    api ("com.github.skjolber.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
+
+
+}
+
+
+
+

@@ -1,0 +1,14 @@
+<configuration>
+    <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
+   
+		<encoder class="net.logstash.logback.encoder.LogstashEncoder">
+		</encoder>
+    </appender>
+
+	<logger name="io.grpc.netty" severity="WARN"/>
+	<logger name="io.netty" severity="INFO"/>
+
+	<root severity="DEBUG">
+		<appender-ref ref="STDOUT_JSON" />
+	</root>
+</configuration>

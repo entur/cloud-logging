@@ -1,0 +1,20 @@
+<configuration>
+    <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="net.logstash.logback.encoder.LogstashEncoder">
+		</encoder>
+    </appender>
+
+	<appender name="STDOUT_JSON_ASYNC" class="org.entur.logging.grpc.mdc.GrpcMdcContextAsyncAppender">
+		<discardingThreshold>0</discardingThreshold>
+		<maxFlushTime>0</maxFlushTime>
+		<appender-ref ref="STDOUT_JSON" />
+	</appender>
+
+	<logger name="io.grpc.netty" severity="WARN"/>
+	<logger name="io.netty" severity="INFO"/>
+
+	<root severity="DEBUG">
+		<appender-ref ref="STDOUT_JSON_ASYNC" />
+	</root>
+
+</configuration>

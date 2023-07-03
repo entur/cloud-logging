@@ -55,7 +55,11 @@ configure(buildProjects()) {
         nettyTcnativeBoringsslStaticVersion = '2.0.61.Final'
         nettyVersion = '4.1.92.Final'
         micrometerVersion = '1.11.1'
+        springBootVersion = '3.1.0'
+        janinoVersion = '3.1.9'
 
+        jacksonSyntaxHighlightVersion = '1.0.7'
+        logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.0.6'
         commonsIoVersion = '2.11.0'
         grpcNettyVersion = '1.55.1'
         grpcVersion = '1.55.1'

@@ -1,0 +1,19 @@
+
+dependencies {
+    api("org.slf4j:slf4j-api") {
+        version {
+            strictly slf4jVersion
+        }
+    }
+    api ("ch.qos.logback:logback-classic:${logbackVersion}")
+    api ("ch.qos.logback:logback-core:${logbackVersion}")
+
+    api ("com.github.skjolber.jackson:jackson-syntax-highlight:${jacksonSyntaxHighlightVersion}")
+    api ("com.github.skjolber.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
+
+    testImplementation(project(":configuration:console-async-appender-classic"))
+}
+
+
+
+

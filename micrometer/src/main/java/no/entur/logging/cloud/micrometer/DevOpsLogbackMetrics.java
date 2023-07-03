@@ -12,8 +12,6 @@ import io.micrometer.core.lang.NonNullApi;
 import io.micrometer.core.lang.NonNullFields;
 import no.entur.logging.cloud.api.DevOpsLevel;
 import no.entur.logging.cloud.api.DevOpsMarker;
-import no.entur.logging.cloud.gcp.logback.logstash.StackdriverLogSeverityJsonProvider;
-import no.entur.logging.cloud.gcp.logback.logstash.StackdriverSeverity;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 
@@ -137,7 +135,26 @@ class DevOpsMetricsTurboFilter extends TurboFilter {
 								errorInterruptMyDinnerCounter.increment();
 								break;
 							}
-		
+							case ERROR_TELL_ME_TOMORROW: {
+								errorTellMeTomorrowCounter.increment();
+								break;
+							}
+							case WARN: {
+								warnCounter.increment();
+								break;
+							}
+							case INFO: {
+								infoCounter.increment();
+								break;
+							}
+							case DEBUG: {
+								debugCounter.increment();
+								break;
+							}
+							case TRACE: {
+								traceCounter.increment();
+								break;
+							}
 							default : {
 								errorTellMeTomorrowCounter.increment();
 							}

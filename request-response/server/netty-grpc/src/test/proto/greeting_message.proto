@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+package org.entur.oidc.grpc.test;
+
+message GreetingRequest {
+    string message = 1;
+    sint64 returnMessageSize = 2;
+    google.protobuf.Timestamp timestamp = 3;
+}
+
+message GreetingResponse {
+    sint64 status = 1;
+    string message = 2;
+    google.protobuf.Timestamp timestamp = 3;
+}
+
+message GreetingMetadata {
+    string message = 1;
+}

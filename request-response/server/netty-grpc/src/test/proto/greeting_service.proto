@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+package org.entur.oidc.grpc.test;
+import "greeting_message.proto";
+
+// gRPC service definitions for sync messages
+service GreetingService {
+
+	rpc greeting1 (org.entur.oidc.grpc.test.GreetingRequest) returns (org.entur.oidc.grpc.test.GreetingResponse);
+	
+	rpc exceptionLogging (org.entur.oidc.grpc.test.GreetingRequest) returns (org.entur.oidc.grpc.test.GreetingResponse);
+
+	rpc greeting3 (org.entur.oidc.grpc.test.GreetingRequest) returns (stream org.entur.oidc.grpc.test.GreetingResponse);
+	
+	rpc greeting4 (org.entur.oidc.grpc.test.GreetingRequest) returns (org.entur.oidc.grpc.test.GreetingResponse);
+
+	// for test of filtering
+	rpc noLogging (org.entur.oidc.grpc.test.GreetingRequest) returns (org.entur.oidc.grpc.test.GreetingResponse);
+
+	rpc fullLogging (org.entur.oidc.grpc.test.GreetingRequest) returns (org.entur.oidc.grpc.test.GreetingResponse);
+
+	rpc summaryLogging (org.entur.oidc.grpc.test.GreetingRequest) returns (org.entur.oidc.grpc.test.GreetingResponse);
+
+	rpc downstreamGreeting (org.entur.oidc.grpc.test.GreetingRequest) returns (org.entur.oidc.grpc.test.GreetingResponse);
+
+	rpc greetingWithResponseObserverOnErrorCall (org.entur.oidc.grpc.test.GreetingRequest) returns (org.entur.oidc.grpc.test.GreetingResponse);
+
+	rpc greeting5 (org.entur.oidc.grpc.test.GreetingRequest) returns (org.entur.oidc.grpc.test.GreetingResponse);
+
+}
+
+service DownstreamGreetingService {
+
+	rpc greeting1 (org.entur.oidc.grpc.test.GreetingRequest) returns (org.entur.oidc.grpc.test.GreetingResponse);
+
+}

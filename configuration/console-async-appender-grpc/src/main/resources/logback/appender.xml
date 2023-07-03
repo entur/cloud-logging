@@ -1,0 +1,13 @@
+<included>
+
+	<appender name="STDOUT_JSON_ASYNC" class="org.entur.logging.grpc.mdc.GrpcMdcContextAsyncAppender">
+		<discardingThreshold>0</discardingThreshold>
+		<maxFlushTime>0</maxFlushTime>
+		<appender-ref ref="STDOUT" />
+	</appender>
+
+	<root severity="INFO">
+		<appender-ref ref="STDOUT_ASYNC" />
+	</root>
+
+</included>
