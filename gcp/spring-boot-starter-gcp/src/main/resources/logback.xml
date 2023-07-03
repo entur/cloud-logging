@@ -1,0 +1,5 @@
+<configuration>
+	<include resource="logback/appender.xml" />
+	<include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+	<include resource="logback/logback-default-server.xml" />
+</configuration>

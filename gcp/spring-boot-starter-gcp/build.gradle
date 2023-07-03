@@ -1,39 +1,16 @@
 
 dependencies {
+
+    api ("org.slf4j:slf4j-api")
+    api ("org.codehaus.janino:commons-compiler:${janinoVersion}")
+    api ("org.codehaus.janino:janino:${janinoVersion}")
+
     api project(':api')
     api project(':configuration:console-async-appender-classic')
     api project(':gcp:logback-logstash-encoder-gcp')
 
-    testImplementation project(':gcp:spring-boot-starter-gcp-test')
+    api ("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
 
-    api("org.slf4j:slf4j-api") {
-        version {
-            strictly slf4jVersion
-        }
-    }
-    api("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
-
+    testImplementation project(':gcp:spring-boot-starter-test-gcp')
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
-
-
 }
-
-
-
-
-/*
-
-include 'api'
-include 'test:test-truth', 'test:test-assertj'
-include 'configuration:console-async-appender-classic', 'configuration:console-async-appender-grpc'
-include 'trace:server:correlation-id-trace-spring-boot-web', 'trace:server:correlation-id-trace-spring-boot-reactive'
-include 'gcp:logback-logstash-encoder-gcp', 'gcp:test-gcp', 'gcp:spring-boot-starter-gcp', 'gcp:spring-boot-starter-gcp-test'
-include 'micrometer', 'gcp:micrometer-gcp'
-
-include 'trace:mdc-context-grpc-netty', 'trace:server:correlation-id-trace-spring-boot-web', 'trace:server:correlation-id-trace-spring-boot-reactive', 'trace:server:correlation-id-trace-grpc-netty'
-
-include 'request-response:server:netty-grpc'
-
-
-
- */

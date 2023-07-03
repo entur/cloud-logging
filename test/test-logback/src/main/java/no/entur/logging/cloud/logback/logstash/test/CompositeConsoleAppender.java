@@ -4,21 +4,10 @@ import ch.qos.logback.core.encoder.Encoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 public class CompositeConsoleAppender<E> extends ch.qos.logback.core.ConsoleAppender<E> {
-
-    private static CompositeConsoleAppender INSTANCE;
-
-    public static CompositeConsoleAppender getInstance() {
-        // TODO crude mechanism, could this be pulled from the logging context?
-       return INSTANCE;
-    }
-
-    public CompositeConsoleAppender() {
-        if(INSTANCE != null) {
-            throw new IllegalStateException();
-        }
-        INSTANCE = this;
-    }
 
     protected Encoder<E> humanReadablePlainEncoder;
 
@@ -46,6 +35,8 @@ public class CompositeConsoleAppender<E> extends ch.qos.logback.core.ConsoleAppe
         this.humanReadablePlainEncoder = humanReadablePlainEncoder;
         if(this.encoder == null) {
             this.setEncoder(humanReadablePlainEncoder);
+
+            CompositeConsoleOutputControl.useHumanReadablePlainEncoder();
         }
     }
 
@@ -57,6 +48,8 @@ public class CompositeConsoleAppender<E> extends ch.qos.logback.core.ConsoleAppe
         this.humanReadableJsonEncoder = humanReadableJsonEncoder;
         if(this.encoder == null) {
             this.setEncoder(humanReadableJsonEncoder);
+
+            CompositeConsoleOutputControl.useHumanReadableJsonEncoder();
         }
     }
 
@@ -68,16 +61,50 @@ public class CompositeConsoleAppender<E> extends ch.qos.logback.core.ConsoleAppe
         this.machineReadableJsonEncoder = machineReadableJsonEncoder;
         if(this.encoder == null) {
             this.setEncoder(machineReadableJsonEncoder);
+
+            CompositeConsoleOutputControl.useMachineReadableJsonEncoder();
         }
     }
 
-    @Override
-    public void doAppend(E eventObject) {
-        super.doAppend(eventObject);
+    protected void writeOut(E event) throws IOException {
+        CompositeConsoleOutputType output = CompositeConsoleOutputControl.getOutput();
+        byte[] byteArray;
+        switch (output) {
+            case humanReadablePlainEncoder: {
+                writeBytes(this.humanReadablePlainEncoder.encode(event));
+                break;
+            }
+            case humanReadableJsonEncoder: {
+                writeBytes(this.humanReadableJsonEncoder.encode(event));
+                break;
+            }
+            case machineReadableJsonEncoder: {
+                writeBytes(this.machineReadableJsonEncoder.encode(event));
+                break;
+            }
+            default : {
+                writeBytes(this.encoder.encode(event));
+                break;
+            }
+        }
+
     }
 
-    @Override
-    public void setEncoder(Encoder<E> encoder) {
-        super.setEncoder(encoder);
+    // copy of superclass method
+    private void writeBytes(byte[] byteArray) throws IOException {
+        if (byteArray == null || byteArray.length == 0)
+            return;
+
+        lock.lock();
+        try {
+            OutputStream outputStream = getOutputStream();
+            outputStream.write(byteArray);
+            if (isImmediateFlush()) {
+                outputStream.flush();
+            }
+        } finally {
+            lock.unlock();
+        }
     }
+
 }
