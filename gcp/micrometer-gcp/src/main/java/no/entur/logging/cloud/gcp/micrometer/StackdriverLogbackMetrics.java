@@ -65,7 +65,7 @@ class StackdriverMetricsTurboFilter extends TurboFilter {
 	private final Counter warnCounter;
 	private final Counter infoCounter;
 	private final Counter debugCounter;
-	private final Counter traceCounter;
+	private final Counter defaultCounter;
 
 	StackdriverMetricsTurboFilter(MeterRegistry registry, Iterable<Tag> tags) {
 		// emergency level is not in use
@@ -106,7 +106,7 @@ class StackdriverMetricsTurboFilter extends TurboFilter {
 				.baseUnit("events")
 				.register(registry);
 
-		traceCounter = Counter.builder("logback.gcp.events")
+		defaultCounter = Counter.builder("logback.gcp.events")
 				.tags(tags).tags("severity", "default")
 				.description("Number of default level events that made it to the logs")
 				.baseUnit("events")
@@ -137,10 +137,6 @@ class StackdriverMetricsTurboFilter extends TurboFilter {
 								criticalCounter.increment();
 								break;
 							}
-							case ERROR_TELL_ME_TOMORROW: {
-								errorCounter.increment();
-								break;
-							}
 							case WARN: {
 								warnCounter.increment();
 								break;
@@ -154,9 +150,10 @@ class StackdriverMetricsTurboFilter extends TurboFilter {
 								break;
 							}
 							case TRACE: {
-								traceCounter.increment();
+								defaultCounter.increment();
 								break;
 							}
+							case ERROR_TELL_ME_TOMORROW:
 							default : {
 								errorCounter.increment();
 								break;
@@ -179,7 +176,7 @@ class StackdriverMetricsTurboFilter extends TurboFilter {
 				debugCounter.increment();
 				break;
 			case Level.TRACE_INT:
-				traceCounter.increment();
+				defaultCounter.increment();
 				break;
 			default : {
 				// do nothing

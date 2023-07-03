@@ -8,8 +8,16 @@ dependencies {
     api project(':api')
     api project(':configuration:console-async-appender-classic')
     api project(':gcp:logback-logstash-encoder-gcp')
+    api project(':gcp:micrometer-gcp')
+
+    // omit this as a dependency; users must manually override to get the standard log levels
+    compileOnly(project(':micrometer'))
+
+    api("org.springframework.boot:spring-boot-actuator-autoconfigure:${springBootVersion}")
 
     api ("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
+
+    api ("io.micrometer:micrometer-core:${micrometerVersion}")
 
     testImplementation project(':gcp:spring-boot-starter-test-gcp')
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
