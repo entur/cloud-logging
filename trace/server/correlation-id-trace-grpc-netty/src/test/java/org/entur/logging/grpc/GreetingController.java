@@ -4,8 +4,8 @@ package org.entur.logging.grpc;
 import io.grpc.Metadata;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import org.entur.oidc.grpc.test.GreetingResponse;
-import org.entur.oidc.grpc.test.GreetingServiceGrpc;
+import no.entur.logging.cloud.grpc.trace.test.GreetingResponse;
+import no.entur.logging.cloud.grpc.trace.test.GreetingServiceGrpc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -19,7 +19,7 @@ public class GreetingController extends GreetingServiceGrpc.GreetingServiceImplB
 
 	private final AtomicLong counter = new AtomicLong();
 
-	public void greeting1(org.entur.oidc.grpc.test.GreetingRequest request,
+	public void greeting1(no.entur.logging.cloud.grpc.trace.test.GreetingRequest request,
 						  io.grpc.stub.StreamObserver<GreetingResponse> responseObserver) {
 
 		MDC.put("localKey", "value");
@@ -33,7 +33,7 @@ public class GreetingController extends GreetingServiceGrpc.GreetingServiceImplB
 		responseObserver.onCompleted();
 	}
 
-	public void exceptionLogging(org.entur.oidc.grpc.test.GreetingRequest request, io.grpc.stub.StreamObserver<GreetingResponse> responseObserver) {
+	public void exceptionLogging(no.entur.logging.cloud.grpc.trace.test.GreetingRequest request, io.grpc.stub.StreamObserver<GreetingResponse> responseObserver) {
 		Status status = Status.INVALID_ARGUMENT.withDescription("Mock exception");
 		throw status.asRuntimeException();
 	}
@@ -42,7 +42,7 @@ public class GreetingController extends GreetingServiceGrpc.GreetingServiceImplB
 	 * Multiple responses
 	 */
 
-	public void greeting3(org.entur.oidc.grpc.test.GreetingRequest request,
+	public void greeting3(no.entur.logging.cloud.grpc.trace.test.GreetingRequest request,
 						  io.grpc.stub.StreamObserver<GreetingResponse> responseObserver) {
 
 		String traceId = UUID.randomUUID().toString();
@@ -56,7 +56,7 @@ public class GreetingController extends GreetingServiceGrpc.GreetingServiceImplB
 		responseObserver.onCompleted();
 	}
 
-	public void noLogging(org.entur.oidc.grpc.test.GreetingRequest request,
+	public void noLogging(no.entur.logging.cloud.grpc.trace.test.GreetingRequest request,
 						  io.grpc.stub.StreamObserver<GreetingResponse> responseObserver) {
 
 		log.info("Hello no logging");
@@ -65,7 +65,7 @@ public class GreetingController extends GreetingServiceGrpc.GreetingServiceImplB
 		responseObserver.onCompleted();
 	}
 
-	public void fullLogging(org.entur.oidc.grpc.test.GreetingRequest request,
+	public void fullLogging(no.entur.logging.cloud.grpc.trace.test.GreetingRequest request,
 						  io.grpc.stub.StreamObserver<GreetingResponse> responseObserver) {
 
 		log.info("Hello full logging");
@@ -74,7 +74,7 @@ public class GreetingController extends GreetingServiceGrpc.GreetingServiceImplB
 		responseObserver.onCompleted();
 	}
 
-	public void summaryLogging(org.entur.oidc.grpc.test.GreetingRequest request,
+	public void summaryLogging(no.entur.logging.cloud.grpc.trace.test.GreetingRequest request,
 							io.grpc.stub.StreamObserver<GreetingResponse> responseObserver) {
 
 		log.info("Hello summary logging");
@@ -83,7 +83,7 @@ public class GreetingController extends GreetingServiceGrpc.GreetingServiceImplB
 		responseObserver.onCompleted();
 	}
 
-	protected GreetingResponse createResponse(org.entur.oidc.grpc.test.GreetingRequest request) {
+	protected GreetingResponse createResponse(no.entur.logging.cloud.grpc.trace.test.GreetingRequest request) {
 		StringBuilder builder = new StringBuilder("Hello");
 
 		long size = request.getReturnMessageSize();
@@ -97,12 +97,12 @@ public class GreetingController extends GreetingServiceGrpc.GreetingServiceImplB
 		return GreetingResponse.newBuilder().setMessage(builder.toString()).setStatus(counter.incrementAndGet()).build();
 	}
 
-	public void greetingWithResponseObserverOnErrorCall(org.entur.oidc.grpc.test.GreetingRequest request,
+	public void greetingWithResponseObserverOnErrorCall(no.entur.logging.cloud.grpc.trace.test.GreetingRequest request,
 														io.grpc.stub.StreamObserver<GreetingResponse> responseObserver) {
 		responseObserver.onError(new StatusRuntimeException(Status.INTERNAL));
 	}
 
-	public void greeting5(org.entur.oidc.grpc.test.GreetingRequest request,
+	public void greeting5(no.entur.logging.cloud.grpc.trace.test.GreetingRequest request,
 						  io.grpc.stub.StreamObserver<GreetingResponse> responseObserver) {
 
 		MDC.put("localKey", "value");

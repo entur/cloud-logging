@@ -4,11 +4,11 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.Timestamp;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
-import org.entur.oidc.grpc.test.GreetingRequest;
-import org.entur.oidc.grpc.test.GreetingResponse;
-import org.entur.oidc.grpc.test.GreetingServiceGrpc.GreetingServiceBlockingStub;
-import org.entur.oidc.grpc.test.GreetingServiceGrpc.GreetingServiceFutureStub;
-import org.entur.oidc.grpc.test.GreetingServiceGrpc.GreetingServiceStub;
+import no.entur.logging.cloud.grpc.trace.test.GreetingRequest;
+import no.entur.logging.cloud.grpc.trace.test.GreetingResponse;
+import no.entur.logging.cloud.grpc.trace.test.GreetingServiceGrpc.GreetingServiceBlockingStub;
+import no.entur.logging.cloud.grpc.trace.test.GreetingServiceGrpc.GreetingServiceFutureStub;
+import no.entur.logging.cloud.grpc.trace.test.GreetingServiceGrpc.GreetingServiceStub;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

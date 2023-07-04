@@ -1,0 +1,18 @@
+<configuration>
+
+	<appender name="STDOUT" class="no.entur.logging.cloud.logback.logstash.test.CompositeConsoleAppender">
+		<humanReadablePlainEncoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</humanReadablePlainEncoder>
+		<humanReadableJsonEncoder class="net.logstash.logback.encoder.LogstashEncoder">
+		</humanReadableJsonEncoder>
+		<machineReadableJsonEncoder class="net.logstash.logback.encoder.LogstashEncoder">
+		</machineReadableJsonEncoder>
+	</appender>
+
+	<!-- sync -->
+	<root level="INFO">
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>

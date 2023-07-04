@@ -2,7 +2,6 @@
 plugins {
     id 'com.github.ben-manes.versions' version '0.46.0' apply false
     id 'org.owasp.dependencycheck' version '8.2.1' apply false
-    id "com.github.spotbugs" version "4.7.1" apply false
     id "org.sonarqube" version "4.0.0.2929"
 }
 
@@ -38,8 +37,7 @@ configure(libraryProjects()) {
 configure(buildProjects()) {
     apply plugin: 'java'
     apply plugin: 'com.github.ben-manes.versions'
-    apply plugin: 'com.github.spotbugs'
-    
+
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
     
@@ -57,6 +55,7 @@ configure(buildProjects()) {
         micrometerVersion = '1.11.1'
         springBootVersion = '3.1.0'
         janinoVersion = '3.1.9'
+        servletVersion = '6.0.0' // jakarta
 
         jacksonSyntaxHighlightVersion = '1.0.7'
         logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.0.6'
@@ -77,6 +76,8 @@ configure(buildProjects()) {
     }
 
     dependencies {
+        api("org.slf4j:slf4j-api:${slf4jVersion}")
+
         // JUnit Jupiter API and TestEngine implementation
         testImplementation("org.junit.jupiter:junit-jupiter:${junitJupiterVersion}")
 
@@ -86,20 +87,6 @@ configure(buildProjects()) {
         testImplementation("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
     }
 
-    spotbugsMain {
-        reports {
-            xml.enabled = false
-            html.enabled = true
-        }
-    }
-
-    tasks.matching {task -> task.name.startsWith('spotbugs')}.forEach {
-        it.reports {
-            html.enabled = true
-            xml.enabled = false // spotbugs does not allow to generate a xml and html report at once https://github.com/spotbugs/spotbugs/issues/857
-        }
-        it.excludeFilter = file("$rootDir/spotbugs-exclude.xml")
-    }
 }
 
 // projects which should be published

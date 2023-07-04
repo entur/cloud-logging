@@ -5,16 +5,11 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.util.TransmitStatusRuntimeExceptionInterceptor;
-import org.entur.logging.grpc.filter.GrpcServerLoggingFilters;
-import org.entur.logging.grpc.mdc.GrpcMdcContextInterceptor;
-import org.entur.logging.grpc.slf4jv17.ClassicGrpcServerLoggingInterceptor;
-import org.entur.logging.grpc.trace.GrpcAddMdcTraceToResponseInterceptor;
-import org.entur.logging.grpc.trace.GrpcTraceMdcContextInterceptor;
-import org.entur.oidc.grpc.test.GreetingRequest;
-import org.entur.oidc.grpc.test.GreetingServiceGrpc;
-import org.entur.oidc.grpc.test.GreetingServiceGrpc.GreetingServiceBlockingStub;
-import org.entur.oidc.grpc.test.GreetingServiceGrpc.GreetingServiceFutureStub;
-import org.entur.oidc.grpc.test.GreetingServiceGrpc.GreetingServiceStub;
+import no.entur.logging.cloud.grpc.mdc.GrpcMdcContextInterceptor;
+import no.entur.logging.cloud.grpc.trace.GrpcAddMdcTraceToResponseInterceptor;
+import no.entur.logging.cloud.grpc.trace.GrpcTraceMdcContextInterceptor;
+import no.entur.logging.cloud.grpc.trace.test.GreetingRequest;
+import no.entur.logging.cloud.grpc.trace.test.GreetingServiceGrpc;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
@@ -47,18 +42,6 @@ public class AbstractGrpcTest {
 	@BeforeAll
 	public static void start() throws Exception {
 
-		ClassicGrpcServerLoggingInterceptor grpcServerLoggingInterceptor = ClassicGrpcServerLoggingInterceptor
-				.newBuilder()
-				.withFilters(GrpcServerLoggingFilters
-						.newBuilder()
-						.classicDefaultLogging()
-						.fullLoggingForPrefix("/org.entur.oidc.grpc.test.GreetingService/greeting3")
-						.fullLoggingForPrefix("/org.entur.oidc.grpc.test.GreetingService/fullLogging")
-						.summaryLoggingForPrefix("/org.entur.oidc.grpc.test.GreetingService/summaryLogging")
-						.noLoggingForPrefix("/org.entur.oidc.grpc.test.GreetingService/noLogging")
-						.build())
-				.build();
-
 		server = ServerBuilder
 				.forPort(port)
 				.addService(new GreetingController())
@@ -66,7 +49,6 @@ public class AbstractGrpcTest {
 				// the status runtime exception interceptor should be the closest to the actual controller
 				.intercept(TransmitStatusRuntimeExceptionInterceptor.instance())
 				.intercept(new GrpcAddMdcTraceToResponseInterceptor())
-				.intercept(grpcServerLoggingInterceptor)
 				.intercept(GrpcTraceMdcContextInterceptor.newBuilder().build())
 				.intercept(GrpcMdcContextInterceptor.newBuilder().build())
 
@@ -83,39 +65,39 @@ public class AbstractGrpcTest {
 		}
 	}
 
-	protected GreetingServiceBlockingStub stub() {
+	protected GreetingServiceGrpc.GreetingServiceBlockingStub stub() {
 		ManagedChannel managedChannel = ManagedChannelBuilder.forAddress("localhost", port).usePlaintext().build();
-		GreetingServiceBlockingStub greetingService = GreetingServiceGrpc.newBlockingStub(managedChannel);
+		GreetingServiceGrpc.GreetingServiceBlockingStub greetingService = GreetingServiceGrpc.newBlockingStub(managedChannel);
 		return greetingService;
 	}
 	
-	protected void shutdown(GreetingServiceBlockingStub stub) throws InterruptedException {
+	protected void shutdown(GreetingServiceGrpc.GreetingServiceBlockingStub stub) throws InterruptedException {
 		ManagedChannel m = (ManagedChannel)stub.getChannel();
 		m.shutdown();
 		m.awaitTermination(15, TimeUnit.SECONDS);
 	}
 	
-	protected GreetingServiceFutureStub futureStub() {
+	protected GreetingServiceGrpc.GreetingServiceFutureStub futureStub() {
 		ManagedChannel managedChannel = ManagedChannelBuilder.forAddress("localhost", port).usePlaintext().build();
 		return GreetingServiceGrpc.newFutureStub(managedChannel);
 	}
 	
-	protected void shutdown(GreetingServiceFutureStub stub) throws InterruptedException {
+	protected void shutdown(GreetingServiceGrpc.GreetingServiceFutureStub stub) throws InterruptedException {
 		ManagedChannel m = (ManagedChannel)stub.getChannel();
 		m.shutdown();
 		m.awaitTermination(15, TimeUnit.SECONDS);
 	}
 	
-	protected void shutdown(GreetingServiceStub stub) throws InterruptedException {
+	protected void shutdown(GreetingServiceGrpc.GreetingServiceStub stub) throws InterruptedException {
 		ManagedChannel m = (ManagedChannel)stub.getChannel();
 		m.shutdown();
 		m.awaitTermination(15, TimeUnit.SECONDS);
 	}
 
 
-	protected GreetingServiceStub async() {
+	protected GreetingServiceGrpc.GreetingServiceStub async() {
 		ManagedChannel managedChannel = ManagedChannelBuilder.forAddress("localhost", port).usePlaintext().build();
-		GreetingServiceStub greetingService = GreetingServiceGrpc.newStub(managedChannel)
+		GreetingServiceGrpc.GreetingServiceStub greetingService = GreetingServiceGrpc.newStub(managedChannel)
 				.withMaxInboundMessageSize(maxInboundMessageSize)
 				.withMaxOutboundMessageSize(maxOutboundMessageSize)
 				;

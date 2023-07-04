@@ -1,7 +1,7 @@
 # MDC Context Logging for gRPC
 MDC call context with projection for gRPC.
 
-Requires use of a custom Async Appender `org.entur.logging.grpc.mdc.GrpcMdcContextAsyncAppender` in the log configuration:
+Requires use of a custom Async Appender `no.entur.logging.cloud.grpc.mdc.GrpcMdcContextAsyncAppender` in the log configuration:
 
 ```xml
 <configuration>
@@ -10,7 +10,7 @@ Requires use of a custom Async Appender `org.entur.logging.grpc.mdc.GrpcMdcConte
 		</encoder>
     </appender>
 
-	<appender name="STDOUT_JSON_ASYNC" class="org.entur.logging.grpc.mdc.GrpcMdcContextAsyncAppender">
+	<appender name="STDOUT_JSON_ASYNC" class="no.entur.logging.cloud.grpc.mdc.GrpcMdcContextAsyncAppender">
 		<discardingThreshold>0</discardingThreshold>
 		<maxFlushTime>0</maxFlushTime>
 		<appender-ref ref="STDOUT_JSON" />

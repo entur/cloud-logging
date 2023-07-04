@@ -3,7 +3,7 @@ syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 
 option java_multiple_files = true;
-package org.entur.oidc.grpc.test;
+package no.entur.logging.cloud.grpc.trace.test;
 
 message GreetingRequest {
     string message = 1;

@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.toomuchcoding.jsonassert.JsonAssertion;
 import com.toomuchcoding.jsonassert.JsonVerifiable;
+import net.logstash.logback.encoder.CompositeJsonEncoder;
 import net.logstash.logback.encoder.LogstashEncoder;
 
 import java.nio.charset.StandardCharsets;
@@ -20,11 +21,11 @@ public class LogStatement {
 		}
 	};
 	
-	private LogstashEncoder encoder;
+	private CompositeJsonEncoder encoder;
 	private ILoggingEvent event;
 	private String json;
 
-	public LogStatement(LogstashEncoder encoder, ILoggingEvent event) {
+	public LogStatement(CompositeJsonEncoder encoder, ILoggingEvent event) {
 		super();
 		this.encoder = encoder;
 		this.event = event;

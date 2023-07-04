@@ -35,15 +35,15 @@ public class StackdriverLogbackMetricsTest {
 
 	    Collection<Counter> counters = oneSimpleMeter.find("logback.gcp.events").counters();
 
-	    Optional<Counter> error = counters.stream().filter(counter -> counter.getId().getTag("level").equals("error")).findAny();
+	    Optional<Counter> error = counters.stream().filter(counter -> counter.getId().getTag("severity").equals("error")).findAny();
 	    assertTrue(error.isPresent());
 	    assertThat(error.get().count()).isEqualTo(1.0);
 	    
-	    Optional<Counter> alert = counters.stream().filter(counter -> counter.getId().getTag("level").equals("alert")).findAny();
+	    Optional<Counter> alert = counters.stream().filter(counter -> counter.getId().getTag("severity").equals("alert")).findAny();
 	    assertTrue(alert.isPresent());
 	    assertThat(alert.get().count()).isEqualTo(2.0);
 
-	    Optional<Counter> critical = counters.stream().filter(counter -> counter.getId().getTag("level").equals("critical")).findAny();
+	    Optional<Counter> critical = counters.stream().filter(counter -> counter.getId().getTag("severity").equals("critical")).findAny();
 	    assertTrue(critical.isPresent());
 	    assertThat(critical.get().count()).isEqualTo(3.0);
 	}

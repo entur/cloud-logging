@@ -1,6 +1,6 @@
 <included>
 
-	<appender name="STDOUT_JSON_ASYNC" class="org.entur.logging.grpc.mdc.GrpcMdcContextAsyncAppender">
+	<appender name="STDOUT_JSON_ASYNC" class="no.entur.logging.cloud.grpc.mdc.GrpcMdcContextAsyncAppender">
 		<!-- https://logback.qos.ch/manual/appenders.html#AsyncAppender -->
 		<discardingThreshold>0</discardingThreshold>
 		<maxFlushTime>0</maxFlushTime>

@@ -7,7 +7,7 @@ import io.grpc.ClientInterceptor;
 import io.grpc.ForwardingClientCall;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
-import org.entur.oidc.grpc.test.GreetingMetadata;
+import no.entur.logging.cloud.grpc.trace.test.GreetingMetadata;
 
 public class GreetingClientInterceptor implements ClientInterceptor {
 

@@ -1,10 +1,11 @@
 
 dependencies {
-    api("org.slf4j:slf4j-api") {
-        version {
-            strictly slf4jVersion
-        }
-    }
+    api("org.slf4j:slf4j-api")
+    api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
+    api("jakarta.servlet:jakarta.servlet-api:${servletVersion}")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+
 }
 
 

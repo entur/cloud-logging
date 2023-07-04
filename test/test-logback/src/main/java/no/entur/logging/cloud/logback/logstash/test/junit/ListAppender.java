@@ -66,12 +66,14 @@ public class ListAppender extends AppenderBase<ILoggingEvent> {
 	}
 		
 	protected List<ILoggingEvent> filterLevel(List<ILoggingEvent> capture, DevOpsLevel level) {
+
 		int levelInteger = LogbackTestExtension.toLevelInteger(level);
 
 		List<ILoggingEvent> result = capture
 					.stream()
-					.filter(p ->  p.getLevel().toInt() >= levelInteger)
+					.filter(p -> LogbackTestExtension.toLevelInteger(p) >= levelInteger)
 					.collect(Collectors.toList());
+
 		return result;
 	}
 

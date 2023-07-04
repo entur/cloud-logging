@@ -50,10 +50,6 @@ dependencies {
     testImplementation("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
 }
 
-spotbugs {
-    onlyAnalyze = ['org.entur.logging.grpc.*', 'org.entur.logging.javapgv.*']
-}
-
 sourceSets {
     test.java.srcDirs += "${protobuf.generatedFilesBaseDir}/test/java"
     test.java.srcDirs += "${protobuf.generatedFilesBaseDir}/test/grpc"
@@ -75,4 +71,5 @@ protobuf {
   }
 }
 
+tasks.compileTestJava { dependsOn("generateTestProto") }
 

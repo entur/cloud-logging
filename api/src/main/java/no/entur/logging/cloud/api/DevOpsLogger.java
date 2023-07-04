@@ -5,7 +5,7 @@ import org.slf4j.Marker;
 
 /**
  * SLF4J-style logger with more explicit error log levels for communication with
- * operations: tellMeTomorrow, interruptMyDinner and wakeMeUpRightNow.
+ * operations: "Tell Me Tomorrow", "Interrupt My Dinner" and "Wake Me Up RightNow".
  */
 
 public interface DevOpsLogger extends Logger {

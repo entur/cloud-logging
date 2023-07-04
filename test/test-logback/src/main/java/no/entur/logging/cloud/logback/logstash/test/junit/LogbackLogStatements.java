@@ -2,6 +2,7 @@ package no.entur.logging.cloud.logback.logstash.test.junit;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import net.logstash.logback.encoder.CompositeJsonEncoder;
 import net.logstash.logback.encoder.LogstashEncoder;
 import no.entur.logging.cloud.api.DevOpsLevel;
 
@@ -18,8 +19,6 @@ public class LogbackLogStatements extends LogStatements {
 	
 	protected final String[] targets;
 	protected final DevOpsLevel level;
-	protected final DevOpsLevel severity;
-	
 	protected final LogbackTestExtension extension;
 	
 	public LogbackLogStatements(DevOpsLevel level, LogbackTestExtension extension) {
@@ -29,10 +28,8 @@ public class LogbackLogStatements extends LogStatements {
 	public LogbackLogStatements(String[] targets, DevOpsLevel level, LogbackTestExtension extension) {
 		super(extension.getFlushDelay());
 		this.targets = Arrays.copyOf(targets, targets.length); // make findbugs happy
-		this.severity = level;
-		this.extension = extension;
-		
 		this.level = level;
+		this.extension = extension;
 	}
 
 	/**
@@ -41,8 +38,8 @@ public class LogbackLogStatements extends LogStatements {
 	 */
 
 	protected void refresh() {
-		LogstashEncoder encoder = extension.getEncoder();
-		List<ILoggingEvent> capture = extension.nextEvents(severity);
+		CompositeJsonEncoder encoder = extension.getEncoder();
+		List<ILoggingEvent> capture = extension.nextEvents(level);
 		
 		for(int i = 0; i < capture.size(); i++) {
 			if(targets.length > 0) {

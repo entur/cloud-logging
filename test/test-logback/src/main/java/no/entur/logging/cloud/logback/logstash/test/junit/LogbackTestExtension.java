@@ -5,6 +5,9 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.ConsoleAppender;
+import ch.qos.logback.core.encoder.Encoder;
+import net.logstash.logback.encoder.CompositeJsonEncoder;
 import net.logstash.logback.encoder.LogstashEncoder;
 import no.entur.logging.cloud.api.DevOpsLevel;
 import no.entur.logging.cloud.api.DevOpsMarker;
@@ -44,6 +47,21 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 			case ERROR_WAKE_ME_UP_RIGHT_NOW : return 70000;
 		}
 		return Level.TRACE_INT;
+	}
+
+	public static final Level toLevel(DevOpsLevel devOpsLevel) {
+		switch(devOpsLevel) {
+			case TRACE : return Level.TRACE;
+			case DEBUG : return Level.DEBUG;
+			case INFO : return Level.INFO;
+			case WARN : return Level.WARN;
+			case ERROR :
+			case ERROR_TELL_ME_TOMORROW:
+			case ERROR_INTERRUPT_MY_DINNER:
+			case ERROR_WAKE_ME_UP_RIGHT_NOW :
+				return Level.ERROR;
+		}
+		return Level.TRACE;
 	}
 	public static final int toLevelInteger(ILoggingEvent event) {
 
@@ -234,7 +252,7 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 	}
 
 	protected ListAppender add(String name, DevOpsLevel severity) {
-		return add(name, severity);
+		return add(name, toLevel(severity));
 	}
 
 	protected ListAppender add(String name, Level level) {
@@ -302,17 +320,30 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 		return result;
 	}
 	
-	protected LogstashEncoder getEncoder() {
-		Iterator<Appender<ILoggingEvent>> appenderIterator = LOGGER.iteratorForAppenders();
+	protected CompositeJsonEncoder getEncoder() {
+		Logger logger = LOGGER.getLoggerContext().getLogger(Logger.ROOT_LOGGER_NAME);
+
+		Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders();
 		while (appenderIterator.hasNext()) {
 			Appender<ILoggingEvent> appender = appenderIterator.next();
-			if(appender instanceof CompositeConsoleAppender) {
-				CompositeConsoleAppender compositeConsoleAppender = (CompositeConsoleAppender)appender;
-				return (LogstashEncoder) compositeConsoleAppender.getMachineReadableJsonEncoder();
+			if(appender instanceof CompositeConsoleAppender<ILoggingEvent>) {
+				CompositeConsoleAppender<ILoggingEvent> compositeConsoleAppender = (CompositeConsoleAppender<ILoggingEvent>)appender;
+				return (CompositeJsonEncoder) compositeConsoleAppender.getMachineReadableJsonEncoder();
+			}
+		}
+		appenderIterator = logger.iteratorForAppenders();
+		while (appenderIterator.hasNext()) {
+			Appender<ILoggingEvent> appender = appenderIterator.next();
+			if(appender instanceof ConsoleAppender<ILoggingEvent>) {
+				ConsoleAppender<ILoggingEvent> compositeConsoleAppender = (ConsoleAppender<ILoggingEvent>)appender;
+				Encoder<ILoggingEvent> encoder = compositeConsoleAppender.getEncoder();
+				if(encoder instanceof CompositeJsonEncoder) {
+					return (CompositeJsonEncoder) encoder;
+				}
 			}
 		}
 
-		throw new IllegalStateException("Unable to get encoder");
+		throw new IllegalStateException("Unable to get Appender with LogstashEncoder encoder, has logback initialize yet?");
 	}
 	
 	public long getFlushDelay() {
