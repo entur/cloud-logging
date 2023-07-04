@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Test logging (manual verification).
  *
  */
-public class GreetingTest extends AbstractGrpcTest {
+public class GreetingTest extends AbstractGreetingTest {
 
 	@Test 
 	public void testBlockingRequestsOnSameStub() throws InterruptedException {

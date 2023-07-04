@@ -40,7 +40,7 @@ public class LogbackLogStatements extends LogStatements {
 	protected void refresh() {
 		CompositeJsonEncoder encoder = extension.getEncoder();
 		List<ILoggingEvent> capture = extension.nextEvents(level);
-		
+
 		for(int i = 0; i < capture.size(); i++) {
 			if(targets.length > 0) {
 				String loggerName = capture.get(i).getLoggerName();

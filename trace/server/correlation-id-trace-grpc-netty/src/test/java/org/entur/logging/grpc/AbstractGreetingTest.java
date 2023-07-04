@@ -1,21 +1,21 @@
-package no.entur.logging.cloud.grpc.mdc;
+package org.entur.logging.grpc;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.util.TransmitStatusRuntimeExceptionInterceptor;
-import no.entur.logging.cloud.grpc.mdc.test.GreetingRequest;
-import no.entur.logging.cloud.grpc.mdc.test.GreetingServiceGrpc;
-import no.entur.logging.cloud.grpc.mdc.test.GreetingServiceGrpc.GreetingServiceBlockingStub;
-import no.entur.logging.cloud.grpc.mdc.test.GreetingServiceGrpc.GreetingServiceFutureStub;
-import no.entur.logging.cloud.grpc.mdc.test.GreetingServiceGrpc.GreetingServiceStub;
+import no.entur.logging.cloud.grpc.mdc.GrpcMdcContextInterceptor;
+import no.entur.logging.cloud.grpc.trace.GrpcAddMdcTraceToResponseInterceptor;
+import no.entur.logging.cloud.grpc.trace.GrpcTraceMdcContextInterceptor;
+import no.entur.logging.cloud.grpc.trace.test.GreetingRequest;
+import no.entur.logging.cloud.grpc.trace.test.GreetingServiceGrpc;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.util.concurrent.TimeUnit;
 
-public class AbstractGrpcTest {
+public class AbstractGreetingTest {
 
 	// https://github.com/olivere/grpc-demo/blob/master/java-client/src/main/java/com/altf4/grpc/client/ExampleClient.java
 	public static final int MAX_INBOUND_MESSAGE_SIZE = 1 << 20;
@@ -30,11 +30,11 @@ public class AbstractGrpcTest {
 	protected final int maxOutboundMessageSize;
 	protected final int maxInboundMessageSize;
 
-	public AbstractGrpcTest() {
+	public AbstractGreetingTest() {
 		this(MAX_INBOUND_MESSAGE_SIZE, MAX_OUTBOUND_MESSAGE_SIZE);
 	}
 
-	public AbstractGrpcTest(int maxInboundMessageSize, int maxOutboundMessageSize) {
+	public AbstractGreetingTest(int maxInboundMessageSize, int maxOutboundMessageSize) {
 		this.maxInboundMessageSize = maxInboundMessageSize;
 		this.maxOutboundMessageSize = maxOutboundMessageSize;
 	}
@@ -48,7 +48,8 @@ public class AbstractGrpcTest {
 				// reverse order;
 				// the status runtime exception interceptor should be the closest to the actual controller
 				.intercept(TransmitStatusRuntimeExceptionInterceptor.instance())
-				.intercept(new TestMdcContextInterceptor())
+				.intercept(new GrpcAddMdcTraceToResponseInterceptor())
+				.intercept(GrpcTraceMdcContextInterceptor.newBuilder().build())
 				.intercept(GrpcMdcContextInterceptor.newBuilder().build())
 
 		  .build();
@@ -64,39 +65,39 @@ public class AbstractGrpcTest {
 		}
 	}
 
-	protected GreetingServiceBlockingStub stub() {
+	protected GreetingServiceGrpc.GreetingServiceBlockingStub stub() {
 		ManagedChannel managedChannel = ManagedChannelBuilder.forAddress("localhost", port).usePlaintext().build();
-		GreetingServiceBlockingStub greetingService = GreetingServiceGrpc.newBlockingStub(managedChannel);
+		GreetingServiceGrpc.GreetingServiceBlockingStub greetingService = GreetingServiceGrpc.newBlockingStub(managedChannel);
 		return greetingService;
 	}
 	
-	protected void shutdown(GreetingServiceBlockingStub stub) throws InterruptedException {
+	protected void shutdown(GreetingServiceGrpc.GreetingServiceBlockingStub stub) throws InterruptedException {
 		ManagedChannel m = (ManagedChannel)stub.getChannel();
 		m.shutdown();
 		m.awaitTermination(15, TimeUnit.SECONDS);
 	}
 	
-	protected GreetingServiceFutureStub futureStub() {
+	protected GreetingServiceGrpc.GreetingServiceFutureStub futureStub() {
 		ManagedChannel managedChannel = ManagedChannelBuilder.forAddress("localhost", port).usePlaintext().build();
 		return GreetingServiceGrpc.newFutureStub(managedChannel);
 	}
 	
-	protected void shutdown(GreetingServiceFutureStub stub) throws InterruptedException {
+	protected void shutdown(GreetingServiceGrpc.GreetingServiceFutureStub stub) throws InterruptedException {
 		ManagedChannel m = (ManagedChannel)stub.getChannel();
 		m.shutdown();
 		m.awaitTermination(15, TimeUnit.SECONDS);
 	}
 	
-	protected void shutdown(GreetingServiceStub stub) throws InterruptedException {
+	protected void shutdown(GreetingServiceGrpc.GreetingServiceStub stub) throws InterruptedException {
 		ManagedChannel m = (ManagedChannel)stub.getChannel();
 		m.shutdown();
 		m.awaitTermination(15, TimeUnit.SECONDS);
 	}
 
 
-	protected GreetingServiceStub async() {
+	protected GreetingServiceGrpc.GreetingServiceStub async() {
 		ManagedChannel managedChannel = ManagedChannelBuilder.forAddress("localhost", port).usePlaintext().build();
-		GreetingServiceStub greetingService = GreetingServiceGrpc.newStub(managedChannel)
+		GreetingServiceGrpc.GreetingServiceStub greetingService = GreetingServiceGrpc.newStub(managedChannel)
 				.withMaxInboundMessageSize(maxInboundMessageSize)
 				.withMaxOutboundMessageSize(maxOutboundMessageSize)
 				;

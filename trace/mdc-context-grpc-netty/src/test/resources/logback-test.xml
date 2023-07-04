@@ -13,7 +13,7 @@
 	<logger name="io.grpc.netty" severity="WARN"/>
 	<logger name="io.netty" severity="INFO"/>
 
-	<root severity="DEBUG">
+	<root severity="INFO">
 		<appender-ref ref="STDOUT_JSON_ASYNC" />
 	</root>
 

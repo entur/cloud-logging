@@ -1,5 +1,6 @@
 package no.entur.logging.cloud.logback.logstash.test;
 
+import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.encoder.Encoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

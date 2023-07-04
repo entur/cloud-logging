@@ -50,6 +50,9 @@ dependencies {
 
     testImplementation("com.google.truth:truth:${googleTruthVersion}")
     testImplementation("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
+
+    testImplementation project(":api")
+    testImplementation project(":test:test-logback")
 }
 
 sourceSets {

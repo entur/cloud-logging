@@ -13,3 +13,5 @@ The first two encoders are for printing to console:
 # machine-readable (for unit testing)
 The last encoder is for unit testing, i.e. machine-readable JSON output.
 
+## Known issues
+Can not yet assert against MDC fields set gRPC MDC context.

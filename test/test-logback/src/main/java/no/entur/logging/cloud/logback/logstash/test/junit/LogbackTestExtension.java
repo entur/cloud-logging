@@ -1,5 +1,6 @@
 package no.entur.logging.cloud.logback.logstash.test.junit;
 
+import ch.qos.logback.classic.AsyncAppender;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -263,6 +264,8 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 
 		Logger logger = (Logger) LoggerFactory.getLogger(name);
 
+		// TODO intercept appender so to capture GRPC MDC context using appender
+
 		logger.addAppender(appender);
 		logger.setLevel(level);
 
@@ -319,19 +322,19 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 		Collections.sort(result, ListAppender.loggingEventTimestampComparator);
 		return result;
 	}
-	
-	protected CompositeJsonEncoder getEncoder() {
-		Logger logger = LOGGER.getLoggerContext().getLogger(Logger.ROOT_LOGGER_NAME);
 
-		Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders();
+	protected CompositeJsonEncoder searchMachineReadableJsonEncoder(Iterator<Appender<ILoggingEvent>> appenderIterator) {
 		while (appenderIterator.hasNext()) {
 			Appender<ILoggingEvent> appender = appenderIterator.next();
-			if(appender instanceof CompositeConsoleAppender<ILoggingEvent>) {
-				CompositeConsoleAppender<ILoggingEvent> compositeConsoleAppender = (CompositeConsoleAppender<ILoggingEvent>)appender;
+			if (appender instanceof CompositeConsoleAppender<ILoggingEvent>) {
+				CompositeConsoleAppender<ILoggingEvent> compositeConsoleAppender = (CompositeConsoleAppender<ILoggingEvent>) appender;
 				return (CompositeJsonEncoder) compositeConsoleAppender.getMachineReadableJsonEncoder();
 			}
 		}
-		appenderIterator = logger.iteratorForAppenders();
+		return null;
+	}
+
+	protected CompositeJsonEncoder searchCompositeJsonEncoder(Iterator<Appender<ILoggingEvent>> appenderIterator) {
 		while (appenderIterator.hasNext()) {
 			Appender<ILoggingEvent> appender = appenderIterator.next();
 			if(appender instanceof ConsoleAppender<ILoggingEvent>) {
@@ -342,7 +345,41 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 				}
 			}
 		}
+		return null;
+	}
 
+	protected CompositeJsonEncoder getEncoder() {
+		Logger logger = LOGGER.getLoggerContext().getLogger(Logger.ROOT_LOGGER_NAME);
+
+		CompositeJsonEncoder compositeJsonEncoder = searchMachineReadableJsonEncoder(logger.iteratorForAppenders());
+		if(compositeJsonEncoder != null) {
+			return compositeJsonEncoder;
+		}
+		compositeJsonEncoder = searchCompositeJsonEncoder(logger.iteratorForAppenders());
+		if(compositeJsonEncoder != null) {
+			return compositeJsonEncoder;
+		}
+
+		// drill into async appender
+		Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders();
+		while (appenderIterator.hasNext()) {
+			Appender<ILoggingEvent> appender = appenderIterator.next();
+			if(appender instanceof AsyncAppender) {
+				AsyncAppender asyncAppender = (AsyncAppender)appender;
+
+				asyncAppender.iteratorForAppenders();
+
+				 compositeJsonEncoder = searchMachineReadableJsonEncoder(asyncAppender.iteratorForAppenders());
+				if(compositeJsonEncoder != null) {
+					return compositeJsonEncoder;
+				}
+				compositeJsonEncoder = searchCompositeJsonEncoder(asyncAppender.iteratorForAppenders());
+				if(compositeJsonEncoder != null) {
+					return compositeJsonEncoder;
+				}
+			}
+
+		}
 		throw new IllegalStateException("Unable to get Appender with LogstashEncoder encoder, has logback initialize yet?");
 	}
 	
