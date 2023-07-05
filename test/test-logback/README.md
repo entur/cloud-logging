@@ -5,6 +5,7 @@ Composite appender with room for three encoders.
 The first two encoders are for printing to console:
 
 - 'classic' one-line logging
+  - color coded
 - 'friendly' JSON logging
   - pretty-printed,
   - color coded, and

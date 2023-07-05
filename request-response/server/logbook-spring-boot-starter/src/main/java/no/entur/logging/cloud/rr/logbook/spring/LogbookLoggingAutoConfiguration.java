@@ -19,10 +19,10 @@ import org.zalando.logbook.autoconfigure.LogbookAutoConfiguration;
 @Configuration
 public class LogbookLoggingAutoConfiguration {
 
-    @Value("entur.logging.request-response.logger.level")
+    @Value("${entur.logging.request-response.logger.level}")
     protected String loggerLevel;
 
-    @Value("entur.logging.request-response.logger.name")
+    @Value("${entur.logging.request-response.logger.name}")
     protected String loggerName;
 
 
