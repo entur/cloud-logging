@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.zalando.logbook.BodyFilter;
-import org.zalando.logbook.common.MediaTypeQuery;
+import org.zalando.logbook.ContentType;
 
 import java.io.StringWriter;
 import java.util.function.Predicate;
@@ -20,7 +20,6 @@ import java.util.function.Predicate;
 
 public class JsonMaxBodySizeFilter implements BodyFilter {
 
-    private static final Predicate<String> json = MediaTypeQuery.compile("application/json", "application/*+json");
     private final long maxBodySize;
 
     public static JsonMaxBodySizeFilter newInstance(int maxBodySize) {
@@ -36,7 +35,7 @@ public class JsonMaxBodySizeFilter implements BodyFilter {
 
     @Override
     public String filter(String contentType, String body) {
-        return json.test(contentType) ? filter(body) : body;
+        return ContentType.isJsonMediaType(contentType) ? filter(body) : body;
     }
 
     public String filter(final String body) {

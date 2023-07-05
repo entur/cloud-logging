@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.zalando.logbook.BodyFilter;
-import org.zalando.logbook.common.MediaTypeQuery;
+import org.zalando.logbook.ContentType;
 
 import java.io.StringWriter;
 import java.util.Arrays;
@@ -22,8 +22,6 @@ import java.util.function.Predicate;
  */
 
 public class JsonFieldBodyFilter implements BodyFilter {
-
-	private static final Predicate<String> json = MediaTypeQuery.compile("application/json", "application/*+json");
 
 	public static JsonFieldBodyFilter newInstance(String ... fieldNames) {
 		return new JsonFieldBodyFilter(Arrays.asList(fieldNames));
@@ -43,7 +41,7 @@ public class JsonFieldBodyFilter implements BodyFilter {
 
 	@Override
 	public String filter(String contentType, String body) {
-		return json.test(contentType) ? filter(body) : body;
+		return ContentType.isJsonMediaType(contentType) ? filter(body) : body;
 	}
 
 	public String filter(final String body) {
