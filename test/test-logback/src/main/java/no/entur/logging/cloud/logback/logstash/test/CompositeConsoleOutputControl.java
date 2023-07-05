@@ -1,7 +1,5 @@
 package no.entur.logging.cloud.logback.logstash.test;
 
-import ch.qos.logback.core.encoder.Encoder;
-
 /**
  *
  * Global log output console for use with testing.
@@ -9,21 +7,21 @@ import ch.qos.logback.core.encoder.Encoder;
  */
 public class CompositeConsoleOutputControl {
 
-    private static CompositeConsoleOutputType output = CompositeConsoleOutputType.humanReadablePlainEncoder;
+    private static CompositeConsoleOutputType output = CompositeConsoleOutputType.humanReadablePlain;
 
     public static CompositeConsoleOutputType getOutput() {
         return output;
     }
 
     public static void useHumanReadablePlainEncoder() {
-        output = CompositeConsoleOutputType.humanReadablePlainEncoder;
+        output = CompositeConsoleOutputType.humanReadablePlain;
     }
 
     public static void useHumanReadableJsonEncoder() {
-        output = CompositeConsoleOutputType.humanReadableJsonEncoder;
+        output = CompositeConsoleOutputType.humanReadableJson;
     }
 
     public static void useMachineReadableJsonEncoder() {
-        output = CompositeConsoleOutputType.machineReadableJsonEncoder;
+        output = CompositeConsoleOutputType.machineReadableJson;
     }
 }

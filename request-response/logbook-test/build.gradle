@@ -1,0 +1,17 @@
+
+dependencies {
+    api("org.slf4j:slf4j-api")
+    api project(":test:test-logback")
+    api project(":request-response:logbook")
+
+    api("org.zalando:logbook-api:${logbookVersion}")
+
+    api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
+    api("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
+
+    api("org.apache.commons:commons-text:${commonsTextVersion}")
+}
+
+
+
+

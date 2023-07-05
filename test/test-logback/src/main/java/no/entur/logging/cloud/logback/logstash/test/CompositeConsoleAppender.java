@@ -1,9 +1,6 @@
 package no.entur.logging.cloud.logback.logstash.test;
 
-import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.encoder.Encoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -71,15 +68,15 @@ public class CompositeConsoleAppender<E> extends ch.qos.logback.core.ConsoleAppe
         CompositeConsoleOutputType output = CompositeConsoleOutputControl.getOutput();
         byte[] byteArray;
         switch (output) {
-            case humanReadablePlainEncoder: {
+            case humanReadablePlain: {
                 writeBytes(this.humanReadablePlainEncoder.encode(event));
                 break;
             }
-            case humanReadableJsonEncoder: {
+            case humanReadableJson: {
                 writeBytes(this.humanReadableJsonEncoder.encode(event));
                 break;
             }
-            case machineReadableJsonEncoder: {
+            case machineReadableJson: {
                 writeBytes(this.machineReadableJsonEncoder.encode(event));
                 break;
             }

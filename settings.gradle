@@ -9,4 +9,6 @@ include 'micrometer', 'gcp:micrometer-gcp'
 include 'trace:mdc-context-grpc-netty', 'trace:server:correlation-id-trace-spring-boot-web', 'trace:server:correlation-id-trace-spring-boot-reactive', 'trace:server:correlation-id-trace-grpc-netty'
 
 include 'request-response:server:netty-grpc'
+include 'request-response:logbook', 'request-response:logbook-test', 'request-response:server:logbook-spring-boot-starter', 'request-response:server:logbook-spring-boot-starter-test'
+
 

@@ -245,14 +245,6 @@ public class LogStatements implements List<LogStatement> {
 	 * @return log statements
 	 */
 
-	public LogStatements forHttpLogger() {
-		return forLogger("org.entur.http");
-	}
-
-	public LogStatements forGrpcHttpLogger() {
-		return forLogger("org.entur.logging.grpc.AbstractGrpcServerLoggingInterceptor");
-	}
-
 	protected void waitForFlushAndRefresh() {
 		try {
 			Thread.sleep(flushDelay);

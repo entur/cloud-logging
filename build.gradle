@@ -56,10 +56,12 @@ configure(buildProjects()) {
         springBootVersion = '3.1.0'
         janinoVersion = '3.1.9'
         servletVersion = '6.0.0' // jakarta
-
+        logbookVersion = '3.1.0'
         jacksonSyntaxHighlightVersion = '1.0.7'
         logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.0.6'
         commonsIoVersion = '2.11.0'
+        commonsTextVersion = '1.10.0'
+
         grpcNettyVersion = '1.55.1'
         grpcVersion = '1.55.1'
         grpcCommonsVersion = '2.17.0'

@@ -1,0 +1,16 @@
+
+dependencies {
+    api("org.slf4j:slf4j-api")
+
+    api (project(":request-response:logbook"))
+
+    api "org.zalando:logbook-spring-boot-starter:${logbookVersion}"
+
+    api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+
+}
+
+
+
+

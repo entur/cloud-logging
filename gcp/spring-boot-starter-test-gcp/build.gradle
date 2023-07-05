@@ -11,7 +11,7 @@ dependencies {
     api(project(":configuration:console-async-appender-classic"))
 
     api("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
-    api("org.springframework.boot:spring-boot-actuator-autoconfigure:${springBootVersion}")
+    api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
 
     api ("com.github.skjolber.jackson:jackson-syntax-highlight:${jacksonSyntaxHighlightVersion}")
     api ("com.github.skjolber.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
