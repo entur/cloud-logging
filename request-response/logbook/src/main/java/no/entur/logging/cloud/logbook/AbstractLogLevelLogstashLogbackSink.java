@@ -1,9 +1,6 @@
 package no.entur.logging.cloud.logbook;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
-import org.slf4j.event.Level;
 import org.zalando.logbook.Correlation;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
@@ -14,65 +11,48 @@ import java.io.IOException;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
-import static org.slf4j.event.EventConstants.DEBUG_INT;
-import static org.slf4j.event.EventConstants.ERROR_INT;
-import static org.slf4j.event.EventConstants.INFO_INT;
-import static org.slf4j.event.EventConstants.TRACE_INT;
-import static org.slf4j.event.EventConstants.WARN_INT;
-
-public abstract class AbstractLogLevelLogstashLogbackSink implements Sink {
+public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLevelSink {
 
     protected final BiConsumer<Marker, String> logConsumer;
-    protected final BooleanSupplier logLevelEnabled;
 
     protected final boolean validateRequestJsonBody;
     protected final boolean validateResponseJsonBody;
 
-    public AbstractLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, boolean validateRequestJsonBody, boolean validateResponseJsonBody) {
+    protected final int maxBodySize;
+    protected final int maxSize;
+
+    public AbstractLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, boolean validateRequestJsonBody, boolean validateResponseJsonBody, int maxBodySize, int maxSize) {
+        super(logLevelEnabled);
+
         this.logConsumer = logConsumer;
-        this.logLevelEnabled = logLevelEnabled;
         this.validateRequestJsonBody = validateRequestJsonBody;
         this.validateResponseJsonBody = validateResponseJsonBody;
-    }
-
-    @Override public boolean isActive() {
-        return logLevelEnabled.getAsBoolean();
+        this.maxBodySize = maxBodySize;
+        this.maxSize = maxSize;
     }
 
     @Override
     public void write(final Precorrelation precorrelation, final HttpRequest request) throws IOException {
         Marker marker = createRequestSingleFieldAppendingMarker(request);
-        logConsumer.accept (marker, requestMessage(request));
+        StringBuilder stringBuilder = new StringBuilder(256);
+        requestMessage(request, stringBuilder);
+        logConsumer.accept (marker, stringBuilder.toString());
     }
 
     protected abstract Marker createRequestSingleFieldAppendingMarker(HttpRequest request);
 
-    private String requestMessage(HttpRequest request) {
-        return request.getMethod() + " " + request.getRequestUri();
-    }
-
     public void write(Correlation correlation, final HttpRequest request, HttpResponse response) throws IOException {
-        Marker marker = createResponseMarker(correlation, response);
-        logConsumer.accept (marker,  responseMessage(request, response));
+        try {
+            Marker marker = createResponseMarker(correlation, response);
+            StringBuilder stringBuilder = new StringBuilder(256);
+            responseMessage(request, response, stringBuilder);
+            logConsumer.accept(marker, stringBuilder.toString());
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     protected abstract Marker createResponseMarker(Correlation correlation, HttpResponse response);
 
-    protected String responseMessage(HttpRequest request, HttpResponse response) {
-        final String requestUri = request.getRequestUri();
-        final StringBuilder messageBuilder = new StringBuilder(64 + requestUri.length());
-        messageBuilder.append(response.getStatus());
-        final String reasonPhrase = response.getReasonPhrase();
-        if (reasonPhrase != null) {
-            messageBuilder.append(' ');
-            messageBuilder.append(reasonPhrase);
-        }
-        messageBuilder.append(' ');
-        messageBuilder.append(request.getMethod());
-        messageBuilder.append(' ');
-        messageBuilder.append(requestUri);
-
-        return messageBuilder.toString();
-    }
 
 }

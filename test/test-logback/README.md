@@ -12,7 +12,9 @@ The first two encoders are for printing to console:
   - with fewer default fields
 
 # machine-readable (for unit testing)
-The last encoder is for unit testing, i.e. machine-readable JSON output.
+The last encoder is for unit testing of logging, i.e. machine-readable JSON output.
 
 ## Known issues
-Can not yet assert against MDC fields set gRPC MDC context.
+Can not yet assert against MDC fields set in gRPC MDC context.
+
+When using an async appender, there is a race condition for in-flight log events when switching from one encoder to another.

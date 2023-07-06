@@ -1,0 +1,23 @@
+
+dependencies {
+    api project(":gcp:spring-boot-autoconfigure-gcp")
+
+    api project(':gcp:micrometer-gcp')
+    api project(':micrometer')
+
+    api project(":request-response:server:logbook-spring-boot-autoconfigure")
+
+    api("org.slf4j:slf4j-api")
+    api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
+
+    api "org.zalando:logbook-spring-boot-webflux-autoconfigure:${logbookVersion}"
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testImplementation project(":request-response:server:logbook-spring-boot-autoconfigure-test")
+    testImplementation project(":gcp:spring-boot-autoconfigure-test-gcp")
+
+}
+
+
+
+

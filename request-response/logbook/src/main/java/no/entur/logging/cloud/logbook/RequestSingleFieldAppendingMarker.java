@@ -1,42 +1,59 @@
 package no.entur.logging.cloud.logbook;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.PrettyPrinter;
 import net.logstash.logback.marker.SingleFieldAppendingMarker;
-import org.zalando.logbook.ContentType;
 import org.zalando.logbook.HttpRequest;
 
 import java.io.IOException;
-import java.io.StringReader;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 
 public class RequestSingleFieldAppendingMarker extends AbstractSingleFieldAppendingMarker<HttpRequest> {
 
     public static final String MARKER_NAME = SingleFieldAppendingMarker.MARKER_NAME_PREFIX + "REQUEST";
 
-    public RequestSingleFieldAppendingMarker(HttpRequest request, boolean validateJsonBody) {
-        super(MARKER_NAME, validateJsonBody, request);
+    protected String origin;
+    protected String protocol;
+    protected String remote;
+    protected String method;
+    protected String uri;
+    protected String host;
+    protected String path;
+    protected String scheme;
+    protected Optional<Integer> port;
+
+    public RequestSingleFieldAppendingMarker(HttpRequest request, boolean validateJsonBody, int maxBodySize, int maxSize) {
+        super(MARKER_NAME, validateJsonBody, request, maxBodySize, maxSize);
+    }
+
+    @Override
+    protected void prepareForDeferredProcessing(HttpRequest message) {
+        super.prepareForDeferredProcessing(message);
+
+        origin = message.getOrigin().name().toLowerCase(Locale.ROOT);
+        protocol = message.getProtocolVersion();
+        remote = message.getRemote();
+        method = message.getMethod();
+        uri = message.getRequestUri();
+        host = message.getHost();
+        path = message.getPath();
+        scheme = message.getScheme();
+        port = message.getPort();
     }
 
     @Override
     protected void writeFieldValue(JsonGenerator generator) throws IOException {
         generator.writeStartObject();
 
-        generator.writeStringField("origin", message.getOrigin().name().toLowerCase(Locale.ROOT));
+        generator.writeStringField("origin", origin);
         generator.writeStringField("type", "request");
-        generator.writeStringField("protocol", message.getProtocolVersion());
-        generator.writeStringField("remote", message.getRemote());
-        generator.writeStringField("method", message.getMethod());
-        generator.writeStringField("uri", message.getRequestUri());
-        generator.writeStringField("host", message.getHost());
-        generator.writeStringField("path", message.getPath());
-        generator.writeStringField("scheme", message.getScheme());
-        Optional<Integer> port = message.getPort();
+        generator.writeStringField("protocol", protocol);
+        generator.writeStringField("remote", remote);
+        generator.writeStringField("method", method);
+        generator.writeStringField("uri", uri);
+        generator.writeStringField("host", host);
+        generator.writeStringField("path", path);
+        generator.writeStringField("scheme", scheme);
         if(port.isEmpty()) {
             generator.writeNumberField("port", 80);
         } else {

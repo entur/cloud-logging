@@ -1,11 +1,14 @@
 package no.entur.logging.cloud.logback.logstash.test;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.encoder.Encoder;
+import org.slf4j.Marker;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 
-public class CompositeConsoleAppender<E> extends ch.qos.logback.core.ConsoleAppender<E> {
+public class CompositeConsoleAppender<E extends ILoggingEvent> extends ch.qos.logback.core.ConsoleAppender<E> {
 
     protected Encoder<E> humanReadablePlainEncoder;
 
@@ -65,8 +68,9 @@ public class CompositeConsoleAppender<E> extends ch.qos.logback.core.ConsoleAppe
     }
 
     protected void writeOut(E event) throws IOException {
-        CompositeConsoleOutputType output = CompositeConsoleOutputControl.getOutput();
-        byte[] byteArray;
+        // TODO should messages be flushed before the output type changes?
+
+        CompositeConsoleOutputType output = getOutputType(event);
         switch (output) {
             case humanReadablePlain: {
                 writeBytes(this.humanReadablePlainEncoder.encode(event));
@@ -80,12 +84,26 @@ public class CompositeConsoleAppender<E> extends ch.qos.logback.core.ConsoleAppe
                 writeBytes(this.machineReadableJsonEncoder.encode(event));
                 break;
             }
-            default : {
+            default: {
                 writeBytes(this.encoder.encode(event));
                 break;
             }
         }
 
+    }
+
+    private CompositeConsoleOutputType getOutputType(E event) {
+        List<Marker> markerList = event.getMarkerList();
+        if(markerList != null) {
+            for (Marker marker : markerList) {
+                if (marker instanceof CompositeConsoleOutputMarker) {
+                    CompositeConsoleOutputMarker m = (CompositeConsoleOutputMarker) marker;
+                    return m.getCompositeConsoleOutputType();
+                }
+            }
+        }
+
+        return CompositeConsoleOutputControl.getOutput();
     }
 
     // copy of superclass method

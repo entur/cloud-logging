@@ -1,0 +1,12 @@
+plugins {
+    id "org.springframework.boot" version "3.0.6"
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+dependencies {
+    implementation project(":common-logging-spring-boot-starter")
+    implementation('org.springframework.boot:spring-boot-starter-jersey')
+
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
+}

@@ -7,7 +7,7 @@
 		<appender-ref ref="STDOUT" />
 	</appender>
 
-	<root severity="INFO">
+	<root>
 		<appender-ref ref="STDOUT_ASYNC" />
 	</root>
 

@@ -3,6 +3,9 @@ dependencies {
     api("org.slf4j:slf4j-api")
 
     api("org.zalando:logbook-api:${logbookVersion}")
+    api("org.zalando:logbook-api:${logbookVersion}")
+
+    api "commons-io:commons-io:${commonsIoVersion}"
 
     api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
     api("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")

@@ -23,27 +23,34 @@ public class PrettyPrintingLogLevelLogstashLogbackSink extends AbstractLogLevelL
     public static class Builder extends AbstractSinkBuilder<Builder, Builder> {
 
         public PrettyPrintingLogLevelLogstashLogbackSink build() {
+            if(maxBodySize == -1) {
+                throw new IllegalStateException("Expected max body size");
+            }
+            if(maxSize == -1) {
+                throw new IllegalStateException("Expected max size");
+            }
             if(logger == null) {
-                logger = LoggerFactory.getLogger("no.entur.logging.cloud.logbook");
+                throw new IllegalStateException("Expected logger");
             }
             if(level == null) {
-                level = Level.INFO;
+                throw new IllegalStateException("Expected log level");
             }
-            return new PrettyPrintingLogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), validateRequestJsonBody, validateResponseJsonBody);
+
+            return new PrettyPrintingLogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), validateRequestJsonBody, validateResponseJsonBody, maxBodySize, maxSize);
         }
 
     }
 
-    public PrettyPrintingLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, boolean validateRequestJsonBody, boolean validateResponseJsonBody) {
-        super(logConsumer, logLevelEnabled, validateRequestJsonBody, validateResponseJsonBody);
+    public PrettyPrintingLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, boolean validateRequestJsonBody, boolean validateResponseJsonBody, int maxBodySize, int maxSize) {
+        super(logConsumer, logLevelEnabled, validateRequestJsonBody, validateResponseJsonBody, maxBodySize, maxSize);
     }
 
     protected Marker createRequestSingleFieldAppendingMarker(HttpRequest request) {
-        return new PrettyPrintingRequestSingleFieldAppendingMarker(request, validateRequestJsonBody);
+        return new PrettyPrintingRequestSingleFieldAppendingMarker(request, validateRequestJsonBody, maxBodySize, maxSize);
     }
 
     protected Marker createResponseMarker(Correlation correlation, HttpResponse response) {
-        return new PrettyPrintingResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), validateRequestJsonBody);
+        return new PrettyPrintingResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), validateRequestJsonBody, maxBodySize, maxSize);
     }
 
 }

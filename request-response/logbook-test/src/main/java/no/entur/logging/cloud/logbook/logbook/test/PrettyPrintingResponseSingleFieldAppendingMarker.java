@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.PrettyPrinter;
+import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
+import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputMarker;
+import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputType;
 import no.entur.logging.cloud.logbook.RequestSingleFieldAppendingMarker;
 import no.entur.logging.cloud.logbook.ResponseSingleFieldAppendingMarker;
 import org.zalando.logbook.HttpRequest;
@@ -13,12 +16,12 @@ import java.io.IOException;
 
 public class PrettyPrintingResponseSingleFieldAppendingMarker extends ResponseSingleFieldAppendingMarker {
 
-public PrettyPrintingResponseSingleFieldAppendingMarker(HttpResponse response, long duration, boolean validateJsonBody) {
-        super(response, duration, validateJsonBody);
+    public PrettyPrintingResponseSingleFieldAppendingMarker(HttpResponse response, long duration, boolean validateJsonBody, int maxBodySize, int maxSize) {
+        super(response, duration, validateJsonBody, maxBodySize, maxSize);
     }
 
     @Override
-    protected void writeApprovedBody(JsonGenerator generator, String bodyAsString) throws IOException {
+    protected void writeApprovedBody(JsonGenerator generator, byte[] bodyAsString) throws IOException {
         final PrettyPrinter prettyPrinter = generator.getPrettyPrinter();
 
         if (prettyPrinter == null) {
@@ -33,6 +36,6 @@ public PrettyPrintingResponseSingleFieldAppendingMarker(HttpResponse response, l
                 }
             }
         }
-
     }
+
 }

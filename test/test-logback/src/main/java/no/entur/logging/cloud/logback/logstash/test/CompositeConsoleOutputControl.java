@@ -9,7 +9,7 @@ import java.io.Closeable;
  */
 public class CompositeConsoleOutputControl {
 
-    private static final Closeable PLAIN = new CompositeConsoleOutputControlClosable();
+    private static final CompositeConsoleOutputControlClosable PLAIN = new CompositeConsoleOutputControlClosable();
 
     private static CompositeConsoleOutputType output = CompositeConsoleOutputType.humanReadablePlain;
 
@@ -17,20 +17,20 @@ public class CompositeConsoleOutputControl {
         return output;
     }
 
-    public static Closeable useHumanReadablePlainEncoder() {
+    public static CompositeConsoleOutputControlClosable useHumanReadablePlainEncoder() {
         output = CompositeConsoleOutputType.humanReadablePlain;
 
         return PLAIN;
     }
 
-    public static Closeable useHumanReadableJsonEncoder() {
+    public static CompositeConsoleOutputControlClosable useHumanReadableJsonEncoder() {
 
         output = CompositeConsoleOutputType.humanReadableJson;
 
         return PLAIN;
     }
 
-    public static Closeable useMachineReadableJsonEncoder() {
+    public static CompositeConsoleOutputControlClosable useMachineReadableJsonEncoder() {
         output = CompositeConsoleOutputType.machineReadableJson;
 
         return PLAIN;

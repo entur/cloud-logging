@@ -1,14 +1,13 @@
 include 'api'
 include 'test:test-logback', 'test:test-truth', 'test:test-assertj'
 include 'configuration:console-async-appender-classic', 'configuration:console-async-appender-grpc'
-include 'trace:server:correlation-id-trace-spring-boot-web', 'trace:server:correlation-id-trace-spring-boot-reactive'
-include 'gcp:logback-logstash-encoder-gcp', 'gcp:spring-boot-starter-gcp', 'gcp:spring-boot-starter-test-gcp'
+include 'gcp:logback-logstash-encoder-gcp', 'gcp:spring-boot-autoconfigure-gcp', 'gcp:spring-boot-autoconfigure-test-gcp',  'gcp:spring-boot-starter-gcp-web', 'gcp:spring-boot-starter-gcp-webflux'
 
 include 'micrometer', 'gcp:micrometer-gcp'
 
-include 'trace:mdc-context-grpc-netty', 'trace:server:correlation-id-trace-spring-boot-web', 'trace:server:correlation-id-trace-spring-boot-reactive', 'trace:server:correlation-id-trace-grpc-netty'
+include 'trace:mdc-context-grpc-netty', 'trace:server:correlation-id-trace-spring-boot-web', 'trace:server:correlation-id-trace-spring-boot-webflux', 'trace:server:correlation-id-trace-grpc-netty'
 
 include 'request-response:server:netty-grpc'
-include 'request-response:logbook', 'request-response:logbook-test', 'request-response:server:logbook-spring-boot-starter', 'request-response:server:logbook-spring-boot-starter-test'
+include 'request-response:logbook', 'request-response:logbook-test', 'request-response:server:logbook-spring-boot-autoconfigure', 'request-response:server:logbook-spring-boot-autoconfigure-test'
 
-
+include 'examples:gcp-web-example'

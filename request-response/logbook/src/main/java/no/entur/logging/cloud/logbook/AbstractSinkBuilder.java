@@ -6,6 +6,7 @@ import org.slf4j.event.Level;
 
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 import static org.slf4j.event.EventConstants.DEBUG_INT;
 import static org.slf4j.event.EventConstants.ERROR_INT;
@@ -21,6 +22,9 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
 
     protected boolean validateRequestJsonBody;
     protected boolean validateResponseJsonBody;
+
+    protected int maxSize = -1;
+    protected int maxBodySize = -1;
 
     public B withLogger(Logger logger) {
         this.logger = logger;
@@ -45,7 +49,15 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
         return (B) this;
     }
 
+    public B withMaxBodySize(int size) {
+        this.maxBodySize = size;
+        return (B) this;
+    }
 
+    public B withMaxSize(int size) {
+        this.maxSize = size;
+        return (B) this;
+    }
 
     protected BooleanSupplier logEnabledToBooleanSupplier() {
         int levelInt = level.toInt();
@@ -84,4 +96,6 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
         }
 
     }
+
+
 }

@@ -1,0 +1,32 @@
+plugins {
+    id "org.springframework.boot" version "3.1.0"
+    id 'eclipse'
+    id 'idea'
+}
+
+test {
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter', 'junit-vintage'
+    }
+}
+
+
+dependencies {
+    implementation project(":gcp:spring-boot-starter-gcp-web");
+    implementation project(":gcp:spring-boot-autoconfigure-test-gcp");
+    implementation project(":request-response:server:logbook-spring-boot-autoconfigure-test");
+
+    implementation("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
+
+    implementation("org.springframework.boot:spring-boot-starter-jersey:${springBootVersion}")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+
+    // JUnit Jupiter API and TestEngine implementation
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+
+    testImplementation ("com.google.truth:truth:${googleTruthVersion}")
+    testImplementation ("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
+}
+

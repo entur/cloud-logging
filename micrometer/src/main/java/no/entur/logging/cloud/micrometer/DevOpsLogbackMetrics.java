@@ -62,6 +62,9 @@ class DevOpsMetricsTurboFilter extends TurboFilter {
 	private final Counter errorWakeMeUpRightNowCounter;
 	private final Counter errorInterruptMyDinnerCounter;
 	private final Counter errorTellMeTomorrowCounter;
+
+	private final Counter errorCounter; // alias for all errors / backwards compatibility
+
 	private final Counter warnCounter;
 	private final Counter infoCounter;
 	private final Counter debugCounter;
@@ -83,6 +86,12 @@ class DevOpsMetricsTurboFilter extends TurboFilter {
 		errorTellMeTomorrowCounter = Counter.builder("logback.events")
 				.tags(tags).tags("level", "errorTellMeTomorrow")
 				.description("Number of error 'Tell Me Tomorrow' level events that made it to the logs")
+				.baseUnit("events")
+				.register(registry);
+
+		errorCounter = Counter.builder("logback.events")
+				.tags(tags).tags("level", "error")
+				.description("Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)")
 				.baseUnit("events")
 				.register(registry);
 
@@ -122,44 +131,14 @@ class DevOpsMetricsTurboFilter extends TurboFilter {
 		if (level.isGreaterOrEqual(logger.getEffectiveLevel()) && format != null) {
 			switch (level.toInt()) {
 			case Level.ERROR_INT:
+				errorCounter.increment();
 
 				if(marker != null) {
 					DevOpsLevel severity = DevOpsMarker.searchSeverityMarker(marker);
 					if(severity != null) {
-						switch(severity) {
-							case ERROR_WAKE_ME_UP_RIGHT_NOW : {
-								errorWakeMeUpRightNowCounter.increment();
-								break;
-							}
-							case ERROR_INTERRUPT_MY_DINNER : {
-								errorInterruptMyDinnerCounter.increment();
-								break;
-							}
-							case ERROR_TELL_ME_TOMORROW: {
-								errorTellMeTomorrowCounter.increment();
-								break;
-							}
-							case WARN: {
-								warnCounter.increment();
-								break;
-							}
-							case INFO: {
-								infoCounter.increment();
-								break;
-							}
-							case DEBUG: {
-								debugCounter.increment();
-								break;
-							}
-							case TRACE: {
-								traceCounter.increment();
-								break;
-							}
-							default : {
-								errorTellMeTomorrowCounter.increment();
-							}
-						}
-						break;
+						increment(severity);
+					} else  {
+						errorTellMeTomorrowCounter.increment();
 					}
 				} else {
 					errorTellMeTomorrowCounter.increment();
@@ -185,5 +164,41 @@ class DevOpsMetricsTurboFilter extends TurboFilter {
 		}
 
 		return FilterReply.NEUTRAL;
+	}
+
+	private void increment(DevOpsLevel severity) {
+		switch(severity) {
+			case ERROR_WAKE_ME_UP_RIGHT_NOW : {
+				errorWakeMeUpRightNowCounter.increment();
+				break;
+			}
+			case ERROR_INTERRUPT_MY_DINNER : {
+				errorInterruptMyDinnerCounter.increment();
+				break;
+			}
+			case ERROR_TELL_ME_TOMORROW: {
+				errorTellMeTomorrowCounter.increment();
+				break;
+			}
+			case WARN: {
+				warnCounter.increment();
+				break;
+			}
+			case INFO: {
+				infoCounter.increment();
+				break;
+			}
+			case DEBUG: {
+				debugCounter.increment();
+				break;
+			}
+			case TRACE: {
+				traceCounter.increment();
+				break;
+			}
+			default : {
+				errorTellMeTomorrowCounter.increment();
+			}
+		}
 	}
 }

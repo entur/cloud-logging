@@ -72,43 +72,43 @@ class StackdriverMetricsTurboFilter extends TurboFilter {
 
 		alertCounter = Counter.builder("logback.gcp.events")
 				.tags(tags).tags("severity", "alert")
-				.description("Number of alert level events that made it to the logs")
+				.description("Number of alert severity events that made it to the logs")
 				.baseUnit("events")
 				.register(registry);
 
 		criticalCounter = Counter.builder("logback.gcp.events")
 				.tags(tags).tags("severity", "critical")
-				.description("Number of critical level events that made it to the logs")
+				.description("Number of critical severity events that made it to the logs")
 				.baseUnit("events")
 				.register(registry);
 
 		errorCounter = Counter.builder("logback.gcp.events")
 				.tags(tags).tags("severity", "error")
-				.description("Number of error level events that made it to the logs")
+				.description("Number of error severity events that made it to the logs")
 				.baseUnit("events")
 				.register(registry);
 
 		warnCounter = Counter.builder("logback.gcp.events")
 				.tags(tags).tags("severity", "warning")
-				.description("Number of warn level events that made it to the logs")
+				.description("Number of warn severity events that made it to the logs")
 				.baseUnit("events")
 				.register(registry);
 
 		infoCounter = Counter.builder("logback.gcp.events")
 				.tags(tags).tags("severity", "info")
-				.description("Number of info level events that made it to the logs")
+				.description("Number of info severity events that made it to the logs")
 				.baseUnit("events")
 				.register(registry);
 
 		debugCounter = Counter.builder("logback.gcp.events")
 				.tags(tags).tags("severity", "debug")
-				.description("Number of debug level events that made it to the logs")
+				.description("Number of debug severity events that made it to the logs")
 				.baseUnit("events")
 				.register(registry);
 
 		defaultCounter = Counter.builder("logback.gcp.events")
 				.tags(tags).tags("severity", "default")
-				.description("Number of default level events that made it to the logs")
+				.description("Number of default severity events that made it to the logs")
 				.baseUnit("events")
 				.register(registry);
 	}
@@ -128,38 +128,9 @@ class StackdriverMetricsTurboFilter extends TurboFilter {
 				if(marker != null) {
 					DevOpsLevel severity = DevOpsMarker.searchSeverityMarker(marker);
 					if(severity != null) {
-						switch(severity) {
-							case ERROR_WAKE_ME_UP_RIGHT_NOW: {
-								alertCounter.increment();
-								break;
-							}
-							case ERROR_INTERRUPT_MY_DINNER: {
-								criticalCounter.increment();
-								break;
-							}
-							case WARN: {
-								warnCounter.increment();
-								break;
-							}
-							case INFO: {
-								infoCounter.increment();
-								break;
-							}
-							case DEBUG: {
-								debugCounter.increment();
-								break;
-							}
-							case TRACE: {
-								defaultCounter.increment();
-								break;
-							}
-							case ERROR_TELL_ME_TOMORROW:
-							default : {
-								errorCounter.increment();
-								break;
-							}
-						}
-						break;
+						increment(severity);
+					} else {
+						errorCounter.increment();
 					}
 				} else {
 					errorCounter.increment();
@@ -185,5 +156,39 @@ class StackdriverMetricsTurboFilter extends TurboFilter {
 		}
 
 		return FilterReply.NEUTRAL;
+	}
+
+	private void increment(DevOpsLevel severity) {
+		switch(severity) {
+			case ERROR_WAKE_ME_UP_RIGHT_NOW: {
+				alertCounter.increment();
+				break;
+			}
+			case ERROR_INTERRUPT_MY_DINNER: {
+				criticalCounter.increment();
+				break;
+			}
+			case WARN: {
+				warnCounter.increment();
+				break;
+			}
+			case INFO: {
+				infoCounter.increment();
+				break;
+			}
+			case DEBUG: {
+				debugCounter.increment();
+				break;
+			}
+			case TRACE: {
+				defaultCounter.increment();
+				break;
+			}
+			case ERROR_TELL_ME_TOMORROW:
+			default : {
+				errorCounter.increment();
+				break;
+			}
+		}
 	}
 }

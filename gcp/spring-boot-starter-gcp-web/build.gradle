@@ -1,0 +1,23 @@
+
+dependencies {
+    api project(":gcp:spring-boot-autoconfigure-gcp")
+
+    // metrics
+    api project(':gcp:micrometer-gcp')
+    api project(':micrometer')
+
+    // request-response logging
+    api project(":request-response:server:logbook-spring-boot-autoconfigure")
+
+    api("org.slf4j:slf4j-api")
+    api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testImplementation project(":request-response:server:logbook-spring-boot-autoconfigure-test")
+    testImplementation project(":gcp:spring-boot-autoconfigure-test-gcp")
+
+}
+
+
+
+

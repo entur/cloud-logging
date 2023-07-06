@@ -30,22 +30,10 @@ public class CompositeSink implements Sink {
 
     public static class Builder {
 
-        private Logger logger;
-
-        private Level level;
-
-        private boolean validateRequestJsonBody;
-        private boolean validateResponseJsonBody;
-
         private Sink humanReadablePlainSink;
         private Sink humanReadableJsonSink;
 
         private Sink machineReadableJsonSink;
-
-        public Builder withLogger(Logger logger) {
-            this.logger = logger;
-            return this;
-        }
 
         public Builder withHumanReadableJsonSink(Sink humanReadableJsonSink) {
             this.humanReadableJsonSink = humanReadableJsonSink;
@@ -62,29 +50,7 @@ public class CompositeSink implements Sink {
             return this;
         }
 
-        public Builder withValidateRequestJsonBody(boolean validateRequestJsonBody) {
-            this.validateRequestJsonBody = validateRequestJsonBody;
-            return this;
-        }
-
-        public Builder withValidateResponseJsonBody(boolean validateResponseJsonBody) {
-            this.validateResponseJsonBody = validateResponseJsonBody;
-            return this;
-        }
-
-        public Builder withLogLevel(Level level) {
-            this.level = level;
-            return this;
-        }
-
         public CompositeSink build() {
-            if(logger == null) {
-                logger = LoggerFactory.getLogger("no.entur.logging.cloud.logbook");
-            }
-            if(level == null) {
-                level = Level.INFO;
-            }
-
             if(humanReadablePlainSink == null) {
                 throw new IllegalStateException();
             }
@@ -95,65 +61,16 @@ public class CompositeSink implements Sink {
                 throw new IllegalStateException();
             }
 
-            return new CompositeSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), validateRequestJsonBody, validateResponseJsonBody, humanReadablePlainSink, humanReadableJsonSink, machineReadableJsonSink);
-        }
-
-        private BooleanSupplier logEnabledToBooleanSupplier() {
-            int levelInt = level.toInt();
-            switch (levelInt) {
-                case (TRACE_INT):
-                    return logger::isTraceEnabled;
-                case (DEBUG_INT):
-                    return logger::isDebugEnabled;
-                case (INFO_INT):
-                    return logger::isInfoEnabled;
-                case (WARN_INT):
-                    return logger::isWarnEnabled;
-                case (ERROR_INT):
-                    return logger::isErrorEnabled;
-                default:
-                    throw new IllegalStateException("Level [" + level + "] not recognized.");
-            }
-        }
-
-        private BiConsumer<Marker, String> loggerToBiConsumer() {
-
-            int levelInt = level.toInt();
-            switch (levelInt) {
-                case (TRACE_INT):
-                    return logger::trace;
-                case (DEBUG_INT):
-                    return  logger::debug;
-                case (INFO_INT):
-                    return logger::info;
-                case (WARN_INT):
-                    return  logger::warn;
-                case (ERROR_INT):
-                    return logger::error;
-                default:
-                    throw new IllegalStateException("Level [" + level + "] not recognized.");
-            }
-
+            return new CompositeSink(humanReadablePlainSink, humanReadableJsonSink, machineReadableJsonSink);
         }
     }
-
-    protected final BiConsumer<Marker, String> logConsumer;
-    protected final BooleanSupplier logLevelEnabled;
-
-    protected final boolean validateRequestJsonBody;
-    protected final boolean validateResponseJsonBody;
 
     private Sink humanReadablePlainSink;
     private Sink humanReadableJsonSink;
 
     private Sink machineReadableJsonSink;
 
-    public CompositeSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, boolean validateRequestJsonBody, boolean validateResponseJsonBody, Sink humanReadablePlainSink, Sink humanReadableJsonSink, Sink machineReadableJsonSink) {
-        this.logConsumer = logConsumer;
-        this.logLevelEnabled = logLevelEnabled;
-        this.validateRequestJsonBody = validateRequestJsonBody;
-        this.validateResponseJsonBody = validateResponseJsonBody;
-
+    public CompositeSink(Sink humanReadablePlainSink, Sink humanReadableJsonSink, Sink machineReadableJsonSink) {
         this.humanReadablePlainSink = humanReadablePlainSink;
         this.humanReadableJsonSink = humanReadableJsonSink;
         this.machineReadableJsonSink = machineReadableJsonSink;
