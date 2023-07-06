@@ -28,25 +28,6 @@ public class ConsoleOutputTypeResponseMarker extends ResponseSingleFieldAppendin
     }
 
     @Override
-    protected void writeApprovedBody(JsonGenerator generator, byte[] bodyAsString) throws IOException {
-        final PrettyPrinter prettyPrinter = generator.getPrettyPrinter();
-
-        if (prettyPrinter == null) {
-            super.writeFieldValue(generator);
-        } else {
-            final JsonFactory factory = generator.getCodec().getFactory();
-
-            // append to existing tree event by event
-            try (final JsonParser parser = factory.createParser(super.getFieldValue().toString())) {
-                while (parser.nextToken() != null) {
-                    generator.copyCurrentEvent(parser);
-                }
-            }
-        }
-
-    }
-
-    @Override
     public CompositeConsoleOutputType getCompositeConsoleOutputType() {
         return compositeConsoleOutputType;
     }

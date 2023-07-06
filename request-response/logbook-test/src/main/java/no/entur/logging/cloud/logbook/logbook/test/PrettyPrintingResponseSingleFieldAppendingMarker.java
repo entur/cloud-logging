@@ -13,6 +13,7 @@ import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class PrettyPrintingResponseSingleFieldAppendingMarker extends ResponseSingleFieldAppendingMarker {
 
@@ -23,14 +24,13 @@ public class PrettyPrintingResponseSingleFieldAppendingMarker extends ResponseSi
     @Override
     protected void writeApprovedBody(JsonGenerator generator, byte[] bodyAsString) throws IOException {
         final PrettyPrinter prettyPrinter = generator.getPrettyPrinter();
-
         if (prettyPrinter == null) {
-            super.writeFieldValue(generator);
+            generator.writeRawValue(new String(body, StandardCharsets.UTF_8));
         } else {
             final JsonFactory factory = generator.getCodec().getFactory();
 
             // append to existing tree event by event
-            try (final JsonParser parser = factory.createParser(super.getFieldValue().toString())) {
+            try (final JsonParser parser = factory.createParser(body)) {
                 while (parser.nextToken() != null) {
                     generator.copyCurrentEvent(parser);
                 }

@@ -21,6 +21,7 @@ public class ConsoleOutputTypeRequestMarker extends RequestSingleFieldAppendingM
         super(request, validateJsonBody, maxBodySize, maxSize);
     }
 
+    @Override
     protected void prepareForDeferredProcessing(HttpRequest message) {
         super.prepareForDeferredProcessing(message);
 

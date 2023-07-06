@@ -40,12 +40,25 @@ public class DemoApplicationTest {
 	}
 
 	@Test 
-	public void filterJson() throws InterruptedException {
+	public void useHumanReadableJsonEncoderTest() throws InterruptedException {
 		MyEntity entity = new MyEntity();
 		entity.setName("Entur");
 		entity.setSecret("mySecret");
 
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
+			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/document/some/method", entity, MyEntity.class);
+			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		}
+
+	}
+
+	@Test
+	public void useMachineReadableJsonEncoder() throws InterruptedException {
+		MyEntity entity = new MyEntity();
+		entity.setName("Entur");
+		entity.setSecret("mySecret");
+
+		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
 			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/document/some/method", entity, MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		}
