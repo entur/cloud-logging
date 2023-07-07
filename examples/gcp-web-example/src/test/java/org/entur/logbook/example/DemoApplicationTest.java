@@ -30,7 +30,7 @@ public class DemoApplicationTest {
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void filterPlain() {
+	public void useHumanReadablePlainEncoderTest() {
 		MyEntity entity = new MyEntity();
 		entity.setName("Entur");
 		entity.setSecret("mySecret");

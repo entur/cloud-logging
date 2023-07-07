@@ -3,21 +3,19 @@ package no.entur.logging.cloud.logbook.logbook.test;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
-import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputType;
-import no.entur.logging.cloud.logback.logstash.test.DefaultCompositeConsoleOutputMarker;
+import com.github.skjolber.jackson.jsh.AnsiSyntaxHighlight;
+import com.github.skjolber.jackson.jsh.DefaultSyntaxHighlighter;
+import com.github.skjolber.jackson.jsh.SyntaxHighlighter;
+import com.github.skjolber.jackson.jsh.SyntaxHighlightingJsonGenerator;
 import no.entur.logging.cloud.logbook.AbstractLogLevelSink;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 import org.slf4j.event.Level;
 import org.zalando.logbook.ContentType;
 import org.zalando.logbook.Correlation;
-import org.zalando.logbook.HttpMessage;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
-import org.zalando.logbook.Origin;
 import org.zalando.logbook.Precorrelation;
-import org.zalando.logbook.RequestURI;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -45,6 +43,8 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
 
         protected Level level;
 
+        protected SyntaxHighlighter syntaxHighlighter;
+
         public Builder withLogLevel(Level level) {
             this.level = level;
             return this;
@@ -55,6 +55,11 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
             return this;
         }
 
+        public Builder withSyntaxHighlighter(SyntaxHighlighter syntaxHighlighter) {
+            this.syntaxHighlighter = syntaxHighlighter;
+            return this;
+        }
+
         public PrettyPrintingSink build() {
             if(logger == null) {
                 throw new IllegalStateException("Expected logger");
@@ -62,11 +67,14 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
             if(level == null) {
                 throw new IllegalStateException("Expected log level");
             }
+            if(syntaxHighlighter == null) {
+                throw new IllegalStateException("Expected Json syntax highlighter level");
+            }
 
-            return new PrettyPrintingSink(logEnabledToBooleanSupplier(), loggerToConsumer(), new JsonFactory());
+            return new PrettyPrintingSink(logEnabledToBooleanSupplier(), loggerToConsumer(), new JsonFactory(), syntaxHighlighter);
         }
 
-        protected BiConsumer<Marker, String> loggerToConsumer() {
+        protected Consumer<String> loggerToConsumer() {
 
             int levelInt = level.toInt();
             switch (levelInt) {
@@ -105,13 +113,16 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
         }
 
     }
-    protected final BiConsumer<Marker, String> logBiConsumer;
+    protected final Consumer<String> logConsumer;
     protected final JsonFactory jsonFactory;
 
-    public PrettyPrintingSink(BooleanSupplier logLevelEnabled, BiConsumer<Marker, String> logBiConsumer, JsonFactory jsonFactory) {
+    protected final SyntaxHighlighter syntaxHighlighter;
+
+    public PrettyPrintingSink(BooleanSupplier logLevelEnabled, Consumer<String> logConsumer, JsonFactory jsonFactory, SyntaxHighlighter syntaxHighlighter) {
         super(logLevelEnabled);
-        this.logBiConsumer = logBiConsumer;
+        this.logConsumer = logConsumer;
         this.jsonFactory = jsonFactory;
+        this.syntaxHighlighter = syntaxHighlighter;
     }
 
     @Override
@@ -125,7 +136,7 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
         writeHeaders(request.getHeaders(), result);
         writeBody(body, request.getContentType(), result);
 
-        logBiConsumer.accept(DefaultCompositeConsoleOutputMarker.getCurrentCompositeOutput(), result.toString());
+        logConsumer.accept(result.toString());
     }
 
     public void write(Correlation correlation, HttpRequest request, HttpResponse response) throws IOException {
@@ -141,7 +152,7 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
         writeHeaders(response.getHeaders(), result);
         writeBody(body, response.getContentType(), result);
 
-        logBiConsumer.accept(DefaultCompositeConsoleOutputMarker.getCurrentCompositeOutput(), result.toString());
+        logConsumer.accept(result.toString());
     }
 
     private void writeHeaders(final Map<String, List<String>> headers, final StringBuilder output) {
@@ -150,7 +161,14 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
         }
 
         for (final Map.Entry<String, List<String>> entry : headers.entrySet()) {
-            output.append(entry.getKey());
+            output.append(AnsiSyntaxHighlight.ESC_START);
+            output.append(AnsiSyntaxHighlight.CYAN);
+            output.append(AnsiSyntaxHighlight.ESC_END);
+            output.append(entry.getKey().toLowerCase());
+            output.append(AnsiSyntaxHighlight.ESC_START);
+            output.append(AnsiSyntaxHighlight.CLEAR);
+            output.append(AnsiSyntaxHighlight.ESC_END);
+
             output.append(": ");
             final List<String> headerValues = entry.getValue();
             if (!headerValues.isEmpty()) {
@@ -177,7 +195,6 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
         }
     }
 
-
     public String prettyPrint(String body) {
 
         if (body != null && body.length() > 0) {
@@ -186,11 +203,11 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
                 StringWriter writer = new StringWriter(body.length() * 2);
                 JsonGenerator generator = jsonFactory.createGenerator(writer);
             ) {
-                generator.useDefaultPrettyPrinter();
+                JsonGenerator jsonGenerator = new SyntaxHighlightingJsonGenerator(generator, syntaxHighlighter,true);
                 while (parser.nextToken() != null) {
-                    generator.copyCurrentEvent(parser);
+                    jsonGenerator.copyCurrentEvent(parser);
                 }
-                generator.flush();
+                jsonGenerator.flush();
                 return writer.toString();
             } catch (IOException e) {
                 // ignore, keep payload as-is

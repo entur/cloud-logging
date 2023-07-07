@@ -1,0 +1,16 @@
+
+dependencies {
+
+    api project(':api')
+    api project(':gcp:logback-logstash-encoder-gcp')
+    api project(':gcp:spring-boot-starter-gcp-webflux')
+    api project(":request-response:server:logbook-spring-boot-autoconfigure")
+
+    api "org.zalando:logbook-spring-boot-autoconfigure:${logbookVersion}"
+
+    api ("org.slf4j:slf4j-api")
+    api ("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
+    api ("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+}

@@ -1,6 +1,0 @@
-<configuration>
-	<include resource="logback/appender.xml" />
-	<!-- https://github.com/spring-projects/spring-boot/blob/main/spring-boot-project/spring-boot/src/main/resources/org/springframework/boot/logging/logback/defaults.xml -->
-	<include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-	<include resource="logback/logback-default-server.xml" />
-</configuration>

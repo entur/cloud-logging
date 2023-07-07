@@ -1,1 +1,1 @@
-no.entur.logging.cloud.rr.logbook.spring.test.LogbookLoggingTestAutoConfiguration
+no.entur.logging.cloud.spring.logbook.test.LogbookLoggingTestAutoConfiguration

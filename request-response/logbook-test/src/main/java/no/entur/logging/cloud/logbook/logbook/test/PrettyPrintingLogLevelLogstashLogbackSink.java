@@ -3,9 +3,7 @@ package no.entur.logging.cloud.logbook.logbook.test;
 import no.entur.logging.cloud.logbook.AbstractLogLevelLogstashLogbackSink;
 
 import no.entur.logging.cloud.logbook.AbstractSinkBuilder;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
-import org.slf4j.event.Level;
 import org.zalando.logbook.Correlation;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;

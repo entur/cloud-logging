@@ -1,0 +1,20 @@
+
+dependencies {
+    api project(':gcp:micrometer-gcp')
+    api project(':micrometer')
+
+    api project(':trace:mdc-context-grpc-netty')
+    api project(':trace:server:correlation-id-trace-grpc-netty')
+
+    api("org.slf4j:slf4j-api")
+    api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
+    api("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testImplementation project(":gcp:spring-boot-gcp-test")
+
+}
+
+
+
+

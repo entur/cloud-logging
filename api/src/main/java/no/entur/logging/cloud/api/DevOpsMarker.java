@@ -66,11 +66,6 @@ public class DevOpsMarker implements Marker {
 	 */
 	@Override
 	public String getName() {
-		try {
-			throw new RuntimeException();
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
 		return MARKER_NAME;
 	}
 

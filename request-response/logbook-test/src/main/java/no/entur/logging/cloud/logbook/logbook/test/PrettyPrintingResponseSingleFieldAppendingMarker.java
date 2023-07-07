@@ -4,12 +4,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.PrettyPrinter;
-import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
-import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputMarker;
-import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputType;
-import no.entur.logging.cloud.logbook.RequestSingleFieldAppendingMarker;
 import no.entur.logging.cloud.logbook.ResponseSingleFieldAppendingMarker;
-import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
 
 import java.io.IOException;

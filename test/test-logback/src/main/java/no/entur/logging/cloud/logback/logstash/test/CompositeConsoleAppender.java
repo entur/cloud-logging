@@ -93,14 +93,9 @@ public class CompositeConsoleAppender<E extends ILoggingEvent> extends ch.qos.lo
     }
 
     private CompositeConsoleOutputType getOutputType(E event) {
-        List<Marker> markerList = event.getMarkerList();
-        if(markerList != null) {
-            for (Marker marker : markerList) {
-                if (marker instanceof CompositeConsoleOutputMarker) {
-                    CompositeConsoleOutputMarker m = (CompositeConsoleOutputMarker) marker;
-                    return m.getCompositeConsoleOutputType();
-                }
-            }
+        if(event instanceof CompositeConsoleOutputDelegateILoggingEvent) {
+            CompositeConsoleOutputDelegateILoggingEvent composite = (CompositeConsoleOutputDelegateILoggingEvent)event;
+            return composite.getCompositeConsoleOutputType();
         }
 
         return CompositeConsoleOutputControl.getOutput();

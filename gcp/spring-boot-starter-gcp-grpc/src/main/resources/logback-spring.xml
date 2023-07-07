@@ -1,0 +1,19 @@
+<configuration>
+
+    <!-- https://github.com/spring-projects/spring-boot/blob/main/spring-boot-project/spring-boot/src/main/resources/org/springframework/boot/logging/logback/defaults.xml -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="logback/logback-default-server.xml" />
+
+    <!-- custom MDC handling for gRPC -->
+    <appender name="STDOUT_JSON_ASYNC" class="no.entur.logging.cloud.grpc.mdc.GrpcMdcContextAsyncAppender">
+        <!-- https://logback.qos.ch/manual/appenders.html#AsyncAppender -->
+        <discardingThreshold>0</discardingThreshold>
+        <maxFlushTime>0</maxFlushTime>
+        <appender-ref ref="STDOUT" />
+    </appender>
+
+    <root>
+        <appender-ref ref="STDOUT_ASYNC" />
+    </root>
+
+</configuration>

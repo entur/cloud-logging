@@ -1,0 +1,23 @@
+
+dependencies {
+    api project(":api")
+    api project(":test:test-logback")
+
+    api ("org.slf4j:slf4j-api:${slf4jVersion}")
+    api ("ch.qos.logback:logback-classic:${logbackVersion}")
+    api ("ch.qos.logback:logback-core:${logbackVersion}")
+
+    api("net.minidev:json-smart:${jsonSmartVersion}")
+    api("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+    api("com.toomuchcoding.jsonassert:jsonassert:${jsonAssertVersion}") {
+        exclude group: 'net.minidev', module: 'json-smart'
+    }
+    api("com.jayway.jsonpath:json-path:${jsonPathVersion}") {
+        exclude group: 'net.minidev', module: 'json-smart'
+    }
+
+}
+
+
+
+

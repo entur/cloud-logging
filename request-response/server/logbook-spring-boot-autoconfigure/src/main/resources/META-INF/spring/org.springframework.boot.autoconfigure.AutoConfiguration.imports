@@ -1,1 +1,1 @@
-no.entur.logging.cloud.rr.logbook.spring.LogbookLoggingAutoConfiguration
+no.entur.logging.cloud.spring.logbook.LogbookLoggingAutoConfiguration

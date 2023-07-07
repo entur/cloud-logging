@@ -51,6 +51,7 @@ dependencies {
 
     testImplementation project(":api")
     testImplementation project(":test:test-logback")
+    testImplementation project(":test:test-logback-junit")
 
 }
 

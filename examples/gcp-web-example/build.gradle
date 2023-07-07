@@ -13,12 +13,13 @@ test {
 
 dependencies {
     implementation project(":gcp:spring-boot-starter-gcp-web");
-    implementation project(":gcp:spring-boot-autoconfigure-test-gcp");
-    implementation project(":request-response:server:logbook-spring-boot-autoconfigure-test");
+    implementation project(":gcp:logbook-spring-boot-starter-gcp-web");
 
     implementation("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
-
     implementation("org.springframework.boot:spring-boot-starter-jersey:${springBootVersion}")
+
+    testImplementation project(":gcp:spring-boot-starter-gcp-web-test");
+    testImplementation project(":gcp:logbook-spring-boot-starter-gcp-web-test");
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 

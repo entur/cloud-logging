@@ -1,7 +1,9 @@
 include 'api'
-include 'test:test-logback', 'test:test-truth', 'test:test-assertj'
-include 'configuration:console-async-appender-classic', 'configuration:console-async-appender-grpc'
-include 'gcp:logback-logstash-encoder-gcp', 'gcp:spring-boot-autoconfigure-gcp', 'gcp:spring-boot-autoconfigure-test-gcp',  'gcp:spring-boot-starter-gcp-web', 'gcp:spring-boot-starter-gcp-webflux'
+include 'test:test-logback', 'test:test-truth', 'test:test-assertj', 'test:test-logback-junit'
+include 'gcp:logback-logstash-encoder-gcp'
+include 'gcp:spring-boot-starter-gcp-web', 'gcp:spring-boot-starter-gcp-webflux', 'gcp:spring-boot-starter-gcp-grpc', 'gcp:spring-boot-starter-gcp-web-test', 'gcp:spring-boot-starter-gcp-webflux-test', 'gcp:spring-boot-starter-gcp-grpc-test'
+
+include 'gcp:spring-boot-gcp-test', 'gcp:logbook-spring-boot-starter-gcp-web', 'gcp:logbook-spring-boot-starter-gcp-webflux', 'gcp:logbook-spring-boot-starter-gcp-web-test', 'gcp:logbook-spring-boot-starter-gcp-webflux-test'
 
 include 'micrometer', 'gcp:micrometer-gcp'
 

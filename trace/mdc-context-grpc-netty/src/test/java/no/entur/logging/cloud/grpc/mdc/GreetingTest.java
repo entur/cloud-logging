@@ -10,14 +10,11 @@ import no.entur.logging.cloud.grpc.mdc.test.GreetingServiceGrpc.GreetingServiceB
 import no.entur.logging.cloud.grpc.mdc.test.GreetingServiceGrpc.GreetingServiceFutureStub;
 import no.entur.logging.cloud.grpc.mdc.test.GreetingServiceGrpc.GreetingServiceStub;
 import no.entur.logging.cloud.logback.logstash.test.junit.CaptureLogStatements;
-import no.entur.logging.cloud.logback.logstash.test.junit.LogStatement;
 import no.entur.logging.cloud.logback.logstash.test.junit.LogStatements;
-import no.entur.logging.cloud.logback.logstash.test.junit.PackageLogger;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -35,12 +32,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Test logging (manual verification).
  *
  */
-
 @CaptureLogStatements
 public class GreetingTest extends AbstractGreetingTest {
 
 	@Test 
-	public void testBlockingRequestsOnSameStub(@PackageLogger("no.entur.logging.cloud.grpc.mdc") LogStatements statements) throws InterruptedException {
+	public void testBlockingRequestsOnSameStub(LogStatements statements) throws InterruptedException {
 		GreetingServiceBlockingStub stub = stub();
 		// run a few times to see that no unintented state is kept around
 		for(int i = 0; i < 100; i++) {
