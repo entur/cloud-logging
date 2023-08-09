@@ -37,12 +37,11 @@ public class LogLevelLogstashLogbackSink extends AbstractLogLevelLogstashLogback
         super(logConsumer, logLevelEnabled, validateRequestJsonBody, validateResponseJsonBody, maxBodySize, maxSize);
     }
 
-
-    protected Marker createRequestSingleFieldAppendingMarker(HttpRequest request) {
+    public Marker createRequestMarker(HttpRequest request) {
         return new RequestSingleFieldAppendingMarker(request, validateRequestJsonBody, maxBodySize, maxSize);
     }
 
-    protected Marker createResponseMarker(Correlation correlation, HttpResponse response) {
+    public Marker createResponseMarker(Correlation correlation, HttpResponse response) {
         return new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), validateRequestJsonBody, maxBodySize, maxSize);
     }
 

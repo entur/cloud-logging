@@ -8,6 +8,10 @@ import com.github.skjolber.jackson.jsh.DefaultSyntaxHighlighter;
 import com.github.skjolber.jackson.jsh.SyntaxHighlighter;
 import com.github.skjolber.jackson.jsh.SyntaxHighlightingJsonGenerator;
 import no.entur.logging.cloud.logbook.AbstractLogLevelSink;
+import no.entur.logging.cloud.logbook.AbstractSinkBuilder;
+import no.entur.logging.cloud.logbook.LogLevelLogstashLogbackSink;
+import no.entur.logging.cloud.logbook.RequestSingleFieldAppendingMarker;
+import no.entur.logging.cloud.logbook.ResponseSingleFieldAppendingMarker;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 import org.slf4j.event.Level;
@@ -31,29 +35,13 @@ import static org.slf4j.event.EventConstants.INFO_INT;
 import static org.slf4j.event.EventConstants.TRACE_INT;
 import static org.slf4j.event.EventConstants.WARN_INT;
 
-public class PrettyPrintingSink extends AbstractLogLevelSink {
+/** Pretty printing + coloring of request-response logging */
 
-    public static Builder newBuilder() {
-        return new Builder();
-    }
+public class PrettyPrintingSink extends LogLevelLogstashLogbackSink {
 
-    public static class Builder {
-
-        protected Logger logger;
-
-        protected Level level;
+    public static class Builder extends AbstractSinkBuilder<Builder, Builder> {
 
         protected SyntaxHighlighter syntaxHighlighter;
-
-        public Builder withLogLevel(Level level) {
-            this.level = level;
-            return this;
-        }
-
-        public Builder withLogger(Logger logger) {
-            this.logger = logger;
-            return this;
-        }
 
         public Builder withSyntaxHighlighter(SyntaxHighlighter syntaxHighlighter) {
             this.syntaxHighlighter = syntaxHighlighter;
@@ -61,6 +49,12 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
         }
 
         public PrettyPrintingSink build() {
+            if(maxBodySize == -1) {
+                throw new IllegalStateException("Expected max body size");
+            }
+            if(maxSize == -1) {
+                throw new IllegalStateException("Expected max size");
+            }
             if(logger == null) {
                 throw new IllegalStateException("Expected logger");
             }
@@ -71,88 +65,43 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
                 throw new IllegalStateException("Expected Json syntax highlighter level");
             }
 
-            return new PrettyPrintingSink(logEnabledToBooleanSupplier(), loggerToConsumer(), new JsonFactory(), syntaxHighlighter);
-        }
-
-        protected Consumer<String> loggerToConsumer() {
-
-            int levelInt = level.toInt();
-            switch (levelInt) {
-                case (TRACE_INT):
-                    return logger::trace;
-                case (DEBUG_INT):
-                    return  logger::debug;
-                case (INFO_INT):
-                    return logger::info;
-                case (WARN_INT):
-                    return  logger::warn;
-                case (ERROR_INT):
-                    return logger::error;
-                default:
-                    throw new IllegalStateException("Level [" + level + "] not recognized.");
-            }
-
-        }
-
-        protected BooleanSupplier logEnabledToBooleanSupplier() {
-            int levelInt = level.toInt();
-            switch (levelInt) {
-                case (TRACE_INT):
-                    return logger::isTraceEnabled;
-                case (DEBUG_INT):
-                    return logger::isDebugEnabled;
-                case (INFO_INT):
-                    return logger::isInfoEnabled;
-                case (WARN_INT):
-                    return logger::isWarnEnabled;
-                case (ERROR_INT):
-                    return logger::isErrorEnabled;
-                default:
-                    throw new IllegalStateException("Level [" + level + "] not recognized.");
-            }
+            return new PrettyPrintingSink(logEnabledToBooleanSupplier(), loggerToBiConsumer(), validateRequestJsonBody, validateResponseJsonBody, maxBodySize, maxSize, new JsonFactory(), syntaxHighlighter);
         }
 
     }
-    protected final Consumer<String> logConsumer;
     protected final JsonFactory jsonFactory;
 
     protected final SyntaxHighlighter syntaxHighlighter;
 
-    public PrettyPrintingSink(BooleanSupplier logLevelEnabled, Consumer<String> logConsumer, JsonFactory jsonFactory, SyntaxHighlighter syntaxHighlighter) {
-        super(logLevelEnabled);
-        this.logConsumer = logConsumer;
+    public PrettyPrintingSink(BooleanSupplier logLevelEnabled, BiConsumer<Marker, String> logConsumer, boolean validateRequestJsonBody, boolean validateResponseJsonBody, int maxBodySize, int maxSize, JsonFactory jsonFactory, SyntaxHighlighter syntaxHighlighter) {
+        super(logConsumer, logLevelEnabled, validateRequestJsonBody, validateResponseJsonBody, maxBodySize, maxSize);
         this.jsonFactory = jsonFactory;
         this.syntaxHighlighter = syntaxHighlighter;
     }
 
     @Override
-    public void write(Precorrelation precorrelation, HttpRequest request) throws IOException {
+    protected void requestMessage(HttpRequest request, StringBuilder messageBuilder) throws IOException {
+        super.requestMessage(request, messageBuilder);
+
         final String body = request.getBodyAsString();
 
-        final StringBuilder result = new StringBuilder(body.length() + 2048);
-
-        requestMessage(request, result);
-        result.append('\n');
-        writeHeaders(request.getHeaders(), result);
-        writeBody(body, request.getContentType(), result);
-
-        logConsumer.accept(result.toString());
+        messageBuilder.append('\n');
+        writeHeaders(request.getHeaders(), messageBuilder);
+        writeBody(body, request.getContentType(), messageBuilder);
     }
 
-    public void write(Correlation correlation, HttpRequest request, HttpResponse response) throws IOException {
+    @Override
+    protected void responseMessage(Correlation correlation, HttpRequest request, HttpResponse response, StringBuilder messageBuilder) throws IOException {
+        super.responseMessage(correlation, request, response, messageBuilder);
+
         final String body = response.getBodyAsString();
 
-        final StringBuilder result = new StringBuilder(body.length() + 2048);
+        messageBuilder.append('\n');
+        writeHeaders(response.getHeaders(), messageBuilder);
+        if(body != null) {
+            writeBody(body, response.getContentType(), messageBuilder);
+        }
 
-        responseMessage(request, response, result);
-        result.append(" (in ");
-        result.append(correlation.getDuration().toMillis());
-        result.append(" ms)\n");
-
-        writeHeaders(response.getHeaders(), result);
-        writeBody(body, response.getContentType(), result);
-
-        logConsumer.accept(result.toString());
     }
 
     private void writeHeaders(final Map<String, List<String>> headers, final StringBuilder output) {
@@ -215,6 +164,5 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
         }
         return body;
     }
-
 
 }

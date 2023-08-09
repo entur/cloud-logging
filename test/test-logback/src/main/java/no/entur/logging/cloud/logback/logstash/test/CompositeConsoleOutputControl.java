@@ -9,7 +9,9 @@ import java.io.Closeable;
  */
 public class CompositeConsoleOutputControl {
 
-    private static final CompositeConsoleOutputControlClosable PLAIN = new CompositeConsoleOutputControlClosable();
+    private static final CompositeConsoleOutputControlClosable HUMAN_READABLE_PLAIN = new CompositeConsoleOutputControlClosable(CompositeConsoleOutputType.humanReadablePlain);
+    private static final CompositeConsoleOutputControlClosable HUMAN_READABLE_JSON = new CompositeConsoleOutputControlClosable(CompositeConsoleOutputType.humanReadableJson);
+    private static final CompositeConsoleOutputControlClosable MACHINE_READABLE_JSON = new CompositeConsoleOutputControlClosable(CompositeConsoleOutputType.machineReadableJson);
 
     private static CompositeConsoleOutputType output = CompositeConsoleOutputType.humanReadablePlain;
 
@@ -17,22 +19,44 @@ public class CompositeConsoleOutputControl {
         return output;
     }
 
-    public static CompositeConsoleOutputControlClosable useHumanReadablePlainEncoder() {
-        output = CompositeConsoleOutputType.humanReadablePlain;
+    public static void setOutput(CompositeConsoleOutputType output) {
+        CompositeConsoleOutputControl.output = output;
+    }
 
-        return PLAIN;
+    public static CompositeConsoleOutputControlClosable useHumanReadablePlainEncoder() {
+        CompositeConsoleOutputType output = getOutput();
+        try {
+            setOutput(CompositeConsoleOutputType.humanReadablePlain);
+        } finally {
+            return toClosable(output);
+        }
     }
 
     public static CompositeConsoleOutputControlClosable useHumanReadableJsonEncoder() {
-
-        output = CompositeConsoleOutputType.humanReadableJson;
-
-        return PLAIN;
+        CompositeConsoleOutputType output = getOutput();
+        try {
+            setOutput(CompositeConsoleOutputType.humanReadableJson);
+        } finally {
+            return toClosable(output);
+        }
     }
 
     public static CompositeConsoleOutputControlClosable useMachineReadableJsonEncoder() {
-        output = CompositeConsoleOutputType.machineReadableJson;
+        CompositeConsoleOutputType output = getOutput();
+        try {
+            setOutput(CompositeConsoleOutputType.machineReadableJson);
+        } finally {
+            return toClosable(output);
+        }
+    }
 
-        return PLAIN;
+    private static CompositeConsoleOutputControlClosable toClosable(CompositeConsoleOutputType output) {
+        switch (output) {
+            case humanReadableJson: return HUMAN_READABLE_JSON;
+            case machineReadableJson: return MACHINE_READABLE_JSON;
+            case humanReadablePlain: return HUMAN_READABLE_PLAIN;
+
+            default: throw new IllegalStateException("Unexpected output type " + output);
+        }
     }
 }

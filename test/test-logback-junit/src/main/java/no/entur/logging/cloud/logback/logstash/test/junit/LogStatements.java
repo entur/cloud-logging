@@ -231,7 +231,7 @@ public class LogStatements implements List<LogStatement> {
 		return messages;
 	}
 	
-	public List<LogStatement> forLogger(Class<?> cls) {
+	public LogStatements forLogger(Class<?> cls) {
 		return forLogger(cls.getName());
 	}
 	

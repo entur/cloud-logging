@@ -22,12 +22,7 @@ public class GreetingController extends GreetingServiceGrpc.GreetingServiceImplB
 	public void greeting1(org.entur.oidc.grpc.test.GreetingRequest request,
 						  io.grpc.stub.StreamObserver<org.entur.oidc.grpc.test.GreetingResponse> responseObserver) {
 
-		MDC.put("localKey", "value");
-		try {
-			log.info("Hello greeting 1");
-		} finally {
-			MDC.remove("localKey");
-		}
+		log.info("Hello greeting 1");
 
 		responseObserver.onNext(createResponse(request));
 		responseObserver.onCompleted();
@@ -105,12 +100,8 @@ public class GreetingController extends GreetingServiceGrpc.GreetingServiceImplB
 	public void greeting5(org.entur.oidc.grpc.test.GreetingRequest request,
 						  io.grpc.stub.StreamObserver<org.entur.oidc.grpc.test.GreetingResponse> responseObserver) {
 
-		MDC.put("localKey", "value");
-		try {
-			log.info("Hello greeting 5");
-		} finally {
-			MDC.remove("localKey");
-		}
+		log.info("Hello greeting 5");
+
 
 		GreetingResponse response = createResponse(request);
 

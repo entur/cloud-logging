@@ -19,8 +19,11 @@ public class DocumentEndpoint {
     @Path("/some/method")
 	@Produces(MediaType.APPLICATION_JSON)
 	public MyEntity someMessage(MyEntity entity) {
-		logger.info("Hello entity with secret");
-		
+		logger.trace("Hello entity with secret / trace");
+		logger.debug("Hello entity with secret / debug");
+		logger.info("Hello entity with secret / info");
+		logger.warn("Hello entity with secret / warn");
+
 		entity.setName("Entur respons");
 		return entity;
 	}

@@ -1,41 +1,35 @@
 package no.entur.logging.cloud.rr.grpc.marker;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import no.entur.logging.cloud.rr.grpc.message.GrpcResponse;
 
 import java.io.IOException;
-import java.util.Map;
 
-public class GrpcResponseMarker extends GrpcPayloadMarker {
+public class GrpcResponseMarker extends GrpcConnectionMarker<GrpcResponse> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final int status;
-
-	/**
-	 * 
-	 * Constructor
-	 * 
-	 * @param headers map with headers, or null
-	 * @param body body or null 
-	 * @param remote remote address, or null
-	 * @param uri request uri or path
-	 * @param origin remote (i.e. for incoming) or local (i.e. for outgoing)
-	 * @param status HTTP status
-	 */	
-	
-	public GrpcResponseMarker(Map<String, ?> headers, String remote, String uri, String body, String origin, int status) {
-		super(GrpcResponseMarker.class.getName(), headers, remote, uri, "response", body, origin);
-		this.status = status;
+	public GrpcResponseMarker(GrpcResponse message) {
+		super(GrpcResponseMarker.class.getName(), message);
 	}
 
 	@Override
 	protected void writeFields(JsonGenerator generator) throws IOException {
 
 		generator.writeFieldName("status");
-		generator.writeNumber(status);
-		
+		generator.writeNumber(message.getStatusCode().value());
+
 		super.writeFields(generator);
 
+		String body = message.getBody();
+		if (body != null) {
+			writeBodyField(generator, body);
+		}
+	}
+
+	protected void writeBodyField(JsonGenerator generator, String body) throws IOException {
+		generator.writeFieldName("body");
+		generator.writeRawValue(body);
 	}
 
 	// make spotbugs happy

@@ -1,11 +1,19 @@
 package no.entur.logging.cloud.rr.grpc;
 
+import com.google.protobuf.util.JsonFormat;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.util.TransmitStatusRuntimeExceptionInterceptor;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcServerLoggingFilters;
+import no.entur.logging.cloud.rr.grpc.mapper.DefaultGrpcPayloadJsonMapper;
+import no.entur.logging.cloud.rr.grpc.mapper.DefaultMetadataJsonMapper;
+import no.entur.logging.cloud.rr.grpc.mapper.GrpcMetadataJsonMapper;
+import no.entur.logging.cloud.rr.grpc.mapper.GrpcStatusMapper;
+import no.entur.logging.cloud.rr.grpc.mapper.JsonPrinterFactory;
+import no.entur.logging.cloud.rr.grpc.mapper.JsonPrinterStatusMapper;
+import no.entur.logging.cloud.rr.grpc.mapper.TypeRegistryFactory;
 import org.entur.oidc.grpc.test.GreetingRequest;
 import org.entur.oidc.grpc.test.GreetingServiceGrpc;
 import org.entur.oidc.grpc.test.GreetingServiceGrpc.GreetingServiceBlockingStub;
@@ -14,6 +22,7 @@ import org.entur.oidc.grpc.test.GreetingServiceGrpc.GreetingServiceStub;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 public class AbstractGrpcTest {
@@ -21,7 +30,11 @@ public class AbstractGrpcTest {
 	// https://github.com/olivere/grpc-demo/blob/master/java-client/src/main/java/com/altf4/grpc/client/ExampleClient.java
 	public static final int MAX_INBOUND_MESSAGE_SIZE = 1 << 20;
 	public static final int MAX_OUTBOUND_MESSAGE_SIZE = 1 << 20;
-	
+
+	public static final int DEFAULT_JSON_MESSAGE_SIZE = 99 * 1024;
+	public static final int DEFAULT_BINARY_MESSAGE_SIZE = 40 * 1024;
+
+
 	protected GreetingRequest greetingRequest = GreetingRequest.newBuilder().build();
 
 	private final static Integer port = 8097;
@@ -42,9 +55,21 @@ public class AbstractGrpcTest {
 
 	@BeforeAll
 	public static void start() throws Exception {
+		JsonFormat.Printer printer = JsonPrinterFactory.createPrinter(false, TypeRegistryFactory.createDefaultTypeRegistry());
 
-		GrpcServerLoggingInterceptor grpcServerLoggingInterceptor = GrpcServerLoggingInterceptor
+		DefaultGrpcPayloadJsonMapper grpcPayloadJsonMapper = new DefaultGrpcPayloadJsonMapper(printer, DEFAULT_JSON_MESSAGE_SIZE, DEFAULT_BINARY_MESSAGE_SIZE);
+
+		GrpcStatusMapper grpcStatusMapper = new JsonPrinterStatusMapper(printer);
+
+		GrpcMetadataJsonMapper grpcMetadataJsonMapper = new DefaultMetadataJsonMapper(grpcStatusMapper, new HashMap<>());
+
+		GrpcSink sink = LogbackLogstashGrpcSink.newBuilder().build();
+
+		GrpcLoggingServerInterceptor grpcLoggingServerInterceptor = GrpcLoggingServerInterceptor
 				.newBuilder()
+				.withPayloadJsonMapper(grpcPayloadJsonMapper)
+				.withMetadataJsonMapper(grpcMetadataJsonMapper)
+				.withSink(sink)
 				.withFilters(GrpcServerLoggingFilters
 						.newBuilder()
 						.classicDefaultLogging()
@@ -62,12 +87,12 @@ public class AbstractGrpcTest {
 				// the status runtime exception interceptor should be the closest to the actual controller
 				.intercept(new MyValidationServerInterceptor())
 				.intercept(TransmitStatusRuntimeExceptionInterceptor.instance())
-				.intercept(grpcServerLoggingInterceptor)
-		  .build();
- 
+				.intercept(grpcLoggingServerInterceptor)
+				.build();
+
 		server.start();
 	}
-	
+
 	@AfterAll
 	public static  void stop() throws InterruptedException {
 		if(server != null) {
@@ -81,24 +106,24 @@ public class AbstractGrpcTest {
 		GreetingServiceBlockingStub greetingService = GreetingServiceGrpc.newBlockingStub(managedChannel);
 		return greetingService;
 	}
-	
+
 	protected void shutdown(GreetingServiceBlockingStub stub) throws InterruptedException {
 		ManagedChannel m = (ManagedChannel)stub.getChannel();
 		m.shutdown();
 		m.awaitTermination(15, TimeUnit.SECONDS);
 	}
-	
+
 	protected GreetingServiceFutureStub futureStub() {
 		ManagedChannel managedChannel = ManagedChannelBuilder.forAddress("localhost", port).usePlaintext().build();
 		return GreetingServiceGrpc.newFutureStub(managedChannel);
 	}
-	
+
 	protected void shutdown(GreetingServiceFutureStub stub) throws InterruptedException {
 		ManagedChannel m = (ManagedChannel)stub.getChannel();
 		m.shutdown();
 		m.awaitTermination(15, TimeUnit.SECONDS);
 	}
-	
+
 	protected void shutdown(GreetingServiceStub stub) throws InterruptedException {
 		ManagedChannel m = (ManagedChannel)stub.getChannel();
 		m.shutdown();
@@ -110,10 +135,9 @@ public class AbstractGrpcTest {
 		ManagedChannel managedChannel = ManagedChannelBuilder.forAddress("localhost", port).usePlaintext().build();
 		GreetingServiceStub greetingService = GreetingServiceGrpc.newStub(managedChannel)
 				.withMaxInboundMessageSize(maxInboundMessageSize)
-				.withMaxOutboundMessageSize(maxOutboundMessageSize)
-				;
+				.withMaxOutboundMessageSize(maxOutboundMessageSize);
 		return greetingService;
 	}
-	
-	
+
+
 }

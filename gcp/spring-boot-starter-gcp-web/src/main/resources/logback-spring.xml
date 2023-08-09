@@ -6,7 +6,6 @@
 
     <!-- TODO is there a way to support MDC in webflux? -->
     <appender name="STDOUT_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
-        <!-- https://logback.qos.ch/manual/appenders.html#AsyncAppender -->
         <discardingThreshold>0</discardingThreshold>
         <maxFlushTime>0</maxFlushTime>
         <appender-ref ref="STDOUT" />

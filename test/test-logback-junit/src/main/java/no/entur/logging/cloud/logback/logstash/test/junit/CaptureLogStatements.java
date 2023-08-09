@@ -20,7 +20,7 @@ public @interface CaptureLogStatements {
 	 * 
 	 * @return array of package names
 	 */
-	String[] value() default {"no.entur", "org.entur"};
+	String[] value() default {};
 	
 	DevOpsLevel level() default DevOpsLevel.INFO;
 }

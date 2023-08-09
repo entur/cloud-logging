@@ -24,7 +24,6 @@ public class SingleLoggerLogStatements extends LogStatements {
 		parent.refresh();
 		
 		List<LogStatement> parentStatements = parent.getStatements();
-
 		if(count < parentStatements.size()) {
 			for(int i = count; i < parentStatements.size(); i++) {
 				LogStatement logStatement = parentStatements.get(i);

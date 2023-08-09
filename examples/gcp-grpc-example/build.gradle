@@ -1,0 +1,57 @@
+plugins {
+    id "org.springframework.boot" version "3.1.2"
+    id 'eclipse'
+    id 'idea'
+    id "com.google.protobuf" version "0.9.4"
+}
+
+test {
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter', 'junit-vintage'
+    }
+}
+
+dependencies {
+    implementation project(':gcp:spring-boot-starter-gcp-grpc-lognet');
+    implementation project(':gcp:request-response-spring-boot-starter-gcp-grpc-lognet');
+
+    implementation project(':trace:mdc-context-grpc-netty')
+
+    implementation("io.grpc:grpc-api:$grpcVersion")
+    implementation("io.grpc:grpc-core:$grpcVersion")
+
+    testImplementation project(":gcp:spring-boot-starter-gcp-grpc-test");
+    testImplementation project(':gcp:request-response-spring-boot-starter-gcp-grpc-lognet-test')
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+
+    // JUnit Jupiter API and TestEngine implementation
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+
+    testImplementation project(":test:test-logback-junit")
+    testImplementation ("com.google.truth:truth:${googleTruthVersion}")
+    testImplementation ("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
+}
+
+sourceSets {
+    test.java.srcDirs += "${protobuf.generatedFilesBaseDir}/test/java"
+    test.java.srcDirs += "${protobuf.generatedFilesBaseDir}/test/grpc"
+}
+
+tasks.compileTestJava { dependsOn("generateTestProto") }
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${grpcProtobufVersion}"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}

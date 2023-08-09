@@ -1,23 +1,13 @@
 package no.entur.logging.cloud.rr.grpc.marker;
 
-import java.util.Map;
+import no.entur.logging.cloud.rr.grpc.message.GrpcDisconnect;
 
-public class GrpcDisconnectMarker extends GrpcConnectionMarker {
+public class GrpcDisconnectMarker extends GrpcConnectionMarker<GrpcDisconnect> {
 	
 	private static final long serialVersionUID = 1L;
 	
-	/**
-	 * 
-	 * Constructor
-	 * 
-	 * @param headers map with headers, or null
-	 * @param remote remote address, or null
-	 * @param uri request uri or path
-	 * @param origin origin; local or remote
-	 */
-	
-	public GrpcDisconnectMarker(Map<String, ?> headers, String remote, String uri, String origin) {
-		super(GrpcDisconnectMarker.class.getName(), headers, remote, uri, "disconnect", origin);
+	public GrpcDisconnectMarker(GrpcDisconnect message) {
+		super(GrpcDisconnectMarker.class.getName(), message);
 	}
 	
 	// make spotbugs happy

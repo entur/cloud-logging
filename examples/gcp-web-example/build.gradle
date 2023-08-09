@@ -1,5 +1,5 @@
 plugins {
-    id "org.springframework.boot" version "3.1.0"
+    id "org.springframework.boot" version "3.1.2"
     id 'eclipse'
     id 'idea'
 }
@@ -10,16 +10,15 @@ test {
     }
 }
 
-
 dependencies {
     implementation project(":gcp:spring-boot-starter-gcp-web");
-    implementation project(":gcp:logbook-spring-boot-starter-gcp-web");
+    implementation project(":gcp:request-response-spring-boot-starter-gcp-web");
 
     implementation("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
     implementation("org.springframework.boot:spring-boot-starter-jersey:${springBootVersion}")
 
     testImplementation project(":gcp:spring-boot-starter-gcp-web-test");
-    testImplementation project(":gcp:logbook-spring-boot-starter-gcp-web-test");
+    testImplementation project(":gcp:request-response-spring-boot-starter-gcp-web-test");
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 

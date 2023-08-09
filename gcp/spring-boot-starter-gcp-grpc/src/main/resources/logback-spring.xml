@@ -5,8 +5,7 @@
     <include resource="logback/logback-default-server.xml" />
 
     <!-- custom MDC handling for gRPC -->
-    <appender name="STDOUT_JSON_ASYNC" class="no.entur.logging.cloud.grpc.mdc.GrpcMdcContextAsyncAppender">
-        <!-- https://logback.qos.ch/manual/appenders.html#AsyncAppender -->
+    <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.grpc.mdc.GrpcMdcContextAsyncAppender">
         <discardingThreshold>0</discardingThreshold>
         <maxFlushTime>0</maxFlushTime>
         <appender-ref ref="STDOUT" />

@@ -44,9 +44,13 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
                 .withString(AnsiSyntaxHighlight.GREEN)
                 .build();
 
-        Sink humanReadablePlainSink = PrettyPrintingSink.newBuilder()
+        Sink humanReadablePlainSink = new PrettyPrintingSink.Builder()
                 .withLogger(logger)
                 .withLogLevel(level)
+                .withMaxBodySize(maxBodySize)
+                .withMaxSize(maxSize)
+                .withValidateRequestJsonBody(true)
+                .withValidateResponseJsonBody(false)
                 .withSyntaxHighlighter(highlighter)
                 .build();
 

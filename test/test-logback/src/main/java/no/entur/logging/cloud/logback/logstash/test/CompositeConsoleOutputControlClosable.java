@@ -10,8 +10,15 @@ import java.io.IOException;
  */
 public class CompositeConsoleOutputControlClosable implements Closeable {
 
+
+    private final CompositeConsoleOutputType output;
+
+    public CompositeConsoleOutputControlClosable(CompositeConsoleOutputType output) {
+        this.output = output;
+    }
+
     @Override
     public void close() {
-        CompositeConsoleOutputControl.useHumanReadablePlainEncoder();
+        CompositeConsoleOutputControl.setOutput(output);
     }
 }

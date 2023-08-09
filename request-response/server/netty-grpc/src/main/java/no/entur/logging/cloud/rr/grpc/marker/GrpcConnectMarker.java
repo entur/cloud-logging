@@ -1,23 +1,13 @@
 package no.entur.logging.cloud.rr.grpc.marker;
 
-import java.util.Map;
+import no.entur.logging.cloud.rr.grpc.message.GrpcConnect;
 
-public class GrpcConnectMarker extends GrpcConnectionMarker {
+public class GrpcConnectMarker extends GrpcConnectionMarker<GrpcConnect> {
 	
 	private static final long serialVersionUID = 1L;
-	
-	/**
-	 * 
-	 * Constructor
-	 * 
-	 * @param headers map with headers, or null
-	 * @param remote remote address, or null
-	 * @param uri request uri or path
-	 * @param origin origin; local or remote
-	 */
-	
-	public GrpcConnectMarker(Map<String, ?> headers, String remote, String uri, String origin) {
-		super(GrpcConnectMarker.class.getName(), headers, remote, uri, "connect", origin);
+
+	public GrpcConnectMarker(GrpcConnect message) {
+		super(GrpcConnectMarker.class.getName(), message);
 	}
 	
 	// make spotbugs happy

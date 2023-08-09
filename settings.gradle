@@ -1,15 +1,15 @@
 include 'api'
 include 'test:test-logback', 'test:test-truth', 'test:test-assertj', 'test:test-logback-junit'
 include 'gcp:logback-logstash-encoder-gcp'
-include 'gcp:spring-boot-starter-gcp-web', 'gcp:spring-boot-starter-gcp-webflux', 'gcp:spring-boot-starter-gcp-grpc', 'gcp:spring-boot-starter-gcp-web-test', 'gcp:spring-boot-starter-gcp-webflux-test', 'gcp:spring-boot-starter-gcp-grpc-test'
+include 'gcp:spring-boot-starter-gcp-web', 'gcp:spring-boot-starter-gcp-webflux', 'gcp:spring-boot-starter-gcp-grpc', 'gcp:spring-boot-starter-gcp-web-test', 'gcp:spring-boot-starter-gcp-webflux-test', 'gcp:spring-boot-starter-gcp-grpc-test', 'gcp:spring-boot-starter-gcp-grpc-lognet'
 
-include 'gcp:spring-boot-gcp-test', 'gcp:logbook-spring-boot-starter-gcp-web', 'gcp:logbook-spring-boot-starter-gcp-webflux', 'gcp:logbook-spring-boot-starter-gcp-web-test', 'gcp:logbook-spring-boot-starter-gcp-webflux-test'
+include 'gcp:spring-boot-gcp-test', 'gcp:request-response-spring-boot-starter-gcp-web', 'gcp:request-response-spring-boot-starter-gcp-webflux', 'gcp:request-response-spring-boot-starter-gcp-web-test', 'gcp:request-response-spring-boot-starter-gcp-webflux-test', 'gcp:request-response-spring-boot-starter-gcp-grpc-lognet', 'gcp:request-response-spring-boot-starter-gcp-grpc-lognet-test'
 
 include 'micrometer', 'gcp:micrometer-gcp'
 
 include 'trace:mdc-context-grpc-netty', 'trace:server:correlation-id-trace-spring-boot-web', 'trace:server:correlation-id-trace-spring-boot-webflux', 'trace:server:correlation-id-trace-grpc-netty'
 
-include 'request-response:server:netty-grpc'
+include 'request-response:server:netty-grpc', 'request-response:server:netty-grpc-test'
 include 'request-response:logbook', 'request-response:logbook-test', 'request-response:server:logbook-spring-boot-autoconfigure', 'request-response:server:logbook-spring-boot-autoconfigure-test'
 
-include 'examples:gcp-web-example'
+include 'examples:gcp-web-example', 'examples:gcp-grpc-example'

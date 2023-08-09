@@ -1,0 +1,23 @@
+
+dependencies {
+    api project(':gcp:spring-boot-starter-gcp-grpc')
+    api project(':trace:mdc-context-grpc-netty')
+    api project(':trace:server:correlation-id-trace-grpc-netty')
+
+    api("org.slf4j:slf4j-api:${slf4jVersion}")
+    api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
+    api("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
+
+    api ("io.github.lognet:grpc-spring-boot-starter:${lognetVersion}") {
+        exclude group: 'io.grpc', module: 'grpc-netty-shaded'
+    }
+    api "io.grpc:grpc-netty:${grpcNettyVersion}"
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testImplementation project(":gcp:spring-boot-gcp-test")
+
+}
+
+
+
+

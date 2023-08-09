@@ -1,41 +1,36 @@
 package no.entur.logging.cloud.rr.grpc.marker;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import no.entur.logging.cloud.rr.grpc.message.GrpcRequest;
 
 import java.io.IOException;
-import java.util.Map;
 
-public class GrpcRequestMarker extends GrpcPayloadMarker {
+public class GrpcRequestMarker extends GrpcConnectionMarker<GrpcRequest> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String method;
-
-	/**
-	 * 
-	 * Constructor
-	 * 
-	 * @param headers map with headers, or null
-	 * @param body body or null 
-	 * @param remote remote address, or null
-	 * @param uri request uri or path
-	 * @param method http method
-	 * @param origin remote (i.e. for incoming) or local (i.e. for outgoing)
-	 */
-	
-	public GrpcRequestMarker(Map<String, ?> headers, String remote, String uri, String body, String method, String origin) {
-		super(GrpcRequestMarker.class.getName(), headers, remote, uri, "request", body, origin);
-		this.method = method;
+	public GrpcRequestMarker(GrpcRequest message) {
+		super(GrpcRequestMarker.class.getName(), message);
 	}
 
 	@Override
 	protected void writeFields(JsonGenerator generator) throws IOException {
-		generator.writeFieldName("method");
-		generator.writeString(method);
+//		generator.writeFieldName("method");
+//		generator.writeString(message.getMethod());
 		
 		super.writeFields(generator);
+
+		String body = message.getBody();
+		if(body != null) {
+			writeBodyField(generator, body);
+		}
 	}
-	
+
+	protected void writeBodyField(JsonGenerator generator, String body) throws IOException {
+		generator.writeFieldName("body");
+		generator.writeRawValue(body);
+	}
+
 	// make spotbugs happy
 	@Override
 	public boolean equals(Object obj) {
@@ -45,10 +40,6 @@ public class GrpcRequestMarker extends GrpcPayloadMarker {
 	@Override
 	public int hashCode() {
 		return super.hashCode();
-	}
-
-	public String getMethod() {
-		return method;
 	}
 
 }

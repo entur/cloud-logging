@@ -43,7 +43,7 @@ public class PrettyPrintingLogLevelLogstashLogbackSink extends AbstractLogLevelL
         super(logConsumer, logLevelEnabled, validateRequestJsonBody, validateResponseJsonBody, maxBodySize, maxSize);
     }
 
-    protected Marker createRequestSingleFieldAppendingMarker(HttpRequest request) {
+    protected Marker createRequestMarker(HttpRequest request) {
         return new PrettyPrintingRequestSingleFieldAppendingMarker(request, validateRequestJsonBody, maxBodySize, maxSize);
     }
 

@@ -22,6 +22,8 @@ import static org.slf4j.event.EventConstants.INFO_INT;
 import static org.slf4j.event.EventConstants.TRACE_INT;
 import static org.slf4j.event.EventConstants.WARN_INT;
 
+/** Sink which effectively adjusts the formatting of the request-response to the current encoder scheme */
+
 public class CompositeSink implements Sink {
 
     public static Builder newBuilder() {

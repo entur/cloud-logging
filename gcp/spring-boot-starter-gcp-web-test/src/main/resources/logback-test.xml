@@ -3,7 +3,6 @@
     <include resource="logback/logback-spring-test.xml" />
 
     <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.logback.logstash.test.CompositeConsoleAsyncAppender">
-        <!-- https://logback.qos.ch/manual/appenders.html#AsyncAppender -->
         <discardingThreshold>0</discardingThreshold>
         <maxFlushTime>0</maxFlushTime>
         <appender-ref ref="STDOUT" />

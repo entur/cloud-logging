@@ -13,7 +13,8 @@ public class CompositeConsoleAsyncAppender extends AsyncAppender {
 
     @Override
     protected void append(ILoggingEvent eventObject) {
-        super.append(new DefaultCompositeConsoleOutputLoggingEvent(eventObject, CompositeConsoleOutputControl.getOutput()));
+        CompositeConsoleOutputType output = CompositeConsoleOutputControl.getOutput();
+        super.append(new DefaultCompositeConsoleOutputLoggingEvent(eventObject, output));
     }
 
 }

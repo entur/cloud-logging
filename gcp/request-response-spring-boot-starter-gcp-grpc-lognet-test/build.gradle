@@ -1,0 +1,22 @@
+
+dependencies {
+    api project(":gcp:spring-boot-gcp-test")
+    api project(':gcp:request-response-spring-boot-starter-gcp-grpc-lognet')
+
+    api ("com.github.skjolber.jackson:jackson-syntax-highlight:${jacksonSyntaxHighlightVersion}")
+    api ("com.github.skjolber.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
+
+    api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
+    api ("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
+
+    api("org.slf4j:slf4j-api")
+    api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
+    implementation project(path: ':request-response:server:netty-grpc-test')
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+
+}
+
+
+
+

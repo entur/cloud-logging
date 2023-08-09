@@ -10,7 +10,6 @@ dependencies {
     api("com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}")
     api("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
 
-
     api("io.grpc:grpc-netty:${grpcNettyVersion}")
     api("io.grpc:grpc-services:${grpcNettyVersion}")
     api("io.grpc:grpc-services:${grpcNettyVersion}")
@@ -25,7 +24,6 @@ dependencies {
     api("io.grpc:grpc-core:$grpcVersion")
     api("io.grpc:grpc-protobuf:$grpcVersion")
 
-    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     api("org.slf4j:slf4j-api:") {
         version {
             strictly slf4jVersion
@@ -55,6 +53,8 @@ sourceSets {
     test.java.srcDirs += "${protobuf.generatedFilesBaseDir}/test/java"
     test.java.srcDirs += "${protobuf.generatedFilesBaseDir}/test/grpc"
 }
+
+tasks.compileTestJava { dependsOn("generateTestProto") }
 
 protobuf {
   protoc {

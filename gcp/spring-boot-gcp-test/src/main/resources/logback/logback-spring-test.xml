@@ -12,7 +12,7 @@
 		</humanReadablePlainEncoder>
 		<humanReadableJsonEncoder class="no.entur.logging.cloud.gcp.logback.logstash.StackdriverLogstashEncoder">
 			<!-- remove unnecessary fields in testing -->
-			<!-- note: severity and severity severity is removed in code -->
+			<!-- note: severity and severity is removed in code -->
 			<fieldNames>
 				<version>[ignore]</version>
 			</fieldNames>

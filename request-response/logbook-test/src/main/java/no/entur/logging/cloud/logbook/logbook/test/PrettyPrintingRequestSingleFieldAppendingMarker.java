@@ -19,7 +19,6 @@ public class PrettyPrintingRequestSingleFieldAppendingMarker extends RequestSing
     @Override
     protected void writeApprovedBody(JsonGenerator generator, byte[] body) throws IOException {
         final PrettyPrinter prettyPrinter = generator.getPrettyPrinter();
-
         if (prettyPrinter == null) {
             generator.writeRawValue(new String(body, StandardCharsets.UTF_8));
         } else {

@@ -10,7 +10,7 @@ dependencies {
     api ("com.github.skjolber.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
 
     api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
-    api("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
+    api ("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
 
     api("org.apache.commons:commons-text:${commonsTextVersion}")
 }

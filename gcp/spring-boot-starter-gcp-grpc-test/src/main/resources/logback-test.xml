@@ -2,8 +2,7 @@
 
     <include resource="logback/logback-spring-test.xml" />
 
-    <appender name="STDOUT_JSON_ASYNC" class="no.entur.logging.cloud.gcp.spring.grpc.test.GrpcMdcContextCompositeConsoleAsyncAppender">
-        <!-- https://logback.qos.ch/manual/appenders.html#AsyncAppender -->
+    <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.gcp.spring.grpc.test.GrpcMdcContextCompositeConsoleAsyncAppender">
         <discardingThreshold>0</discardingThreshold>
         <maxFlushTime>0</maxFlushTime>
         <appender-ref ref="STDOUT" />
