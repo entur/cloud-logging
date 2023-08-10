@@ -23,4 +23,5 @@ public class GcpLoggingAutoConfiguration {
         return new no.entur.logging.cloud.micrometer.DevOpsLogbackMetrics();
     }
 
+
 }

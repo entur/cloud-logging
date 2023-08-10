@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
 
-@CaptureLogStatements
+@CaptureLogStatements({"no.entur", "org.entur"})
 public class ExampleTest {
 
 	private final static Logger classLogger = LoggerFactory.getLogger(ExampleTest.class);

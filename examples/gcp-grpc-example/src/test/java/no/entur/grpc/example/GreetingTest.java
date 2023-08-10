@@ -10,6 +10,7 @@ import no.entur.logging.cloud.grpc.trace.GrpcTraceMdcContext;
 import no.entur.logging.cloud.logback.logstash.test.junit.CaptureLogStatements;
 import no.entur.logging.cloud.logback.logstash.test.junit.LogStatement;
 import no.entur.logging.cloud.logback.logstash.test.junit.LogStatements;
+import no.entur.logging.cloud.rr.grpc.GrpcLoggingServerInterceptor;
 import org.entur.grpc.example.GreetingRequest;
 import org.entur.grpc.example.GreetingResponse;
 import org.entur.grpc.example.GreetingServiceGrpc;
@@ -117,9 +118,9 @@ public class GreetingTest extends AbstractGrpcTest {
 
 		LogStatements http = statements.forLogger("no.entur.logging.cloud");
 		LogStatement request = http.get(0);
-		request.assertThatMessage().matches("REQ #[0-9]* GET [/a-zA-Z\\.]+");
+		request.assertThatMessage().toString().matches("REQ #[0-9]* GET [/a-zA-Z\\.]+");
 		LogStatement response = http.get(http.size() - 1);
-		response.assertThatMessage().matches("RESP #[0-9]* 3 INVALID_ARGUMENT [/a-zA-Z\\.]+");
+		response.assertThatMessage().toString().matches("RESP #[0-9]* 3 INVALID_ARGUMENT [/a-zA-Z\\.]+");
 
 		response.assertThatHttpHeader("grpc-status").contains("3");
 
@@ -209,9 +210,9 @@ public class GreetingTest extends AbstractGrpcTest {
 
 		LogStatements http = statements.forLogger("no.entur.logging.cloud");
 		LogStatement request = http.get(0);
-		request.assertThatMessage().matches("REQ #[0-9]* GET [/a-zA-Z0-9\\.]+");
+		request.assertThatMessage().toString().matches("REQ #[0-9]* GET [/a-zA-Z0-9\\.]+");
 		LogStatement response = http.get(http.size() - 1);
-		response.assertThatMessage().matches("RESP #[0-9]* 3 INVALID_ARGUMENT [/a-zA-Z0-9\\.]+");
+		response.assertThatMessage().toString().matches("RESP #[0-9]* 3 INVALID_ARGUMENT [/a-zA-Z0-9\\.]+");
 
 		response.assertThatHttpHeader("grpc-status").contains("3");
 		response.assertThatHttpHeader("grpc-message").contains("My error message");
@@ -356,14 +357,12 @@ public class GreetingTest extends AbstractGrpcTest {
 
 		LogStatements grpcLoggerStatements = statements.forLogger("no.entur.logging.cloud");
 		for (LogStatement logStatement : grpcLoggerStatements) {
-			logStatement.assertThatHttpBody().matches("Unable to format message");
+			logStatement.assertThatHttpBody().toString().matches("Unable to format message");
 		}
 
-		/*
-		List<LogStatement> logStatements = statements.forLogger(GrpcMarkerFactory.class);
+		List<LogStatement> logStatements = statements.forLogger(GrpcLoggingServerInterceptor.class);
 		logStatements.get(0).assertThatField("severity").isEqualTo("INFO");
 		logStatements.get(1).assertThatField("severity").isEqualTo("WARNING");
-		 */
 	}
 
 }

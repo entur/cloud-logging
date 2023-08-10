@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import static com.google.common.truth.Truth.assertThat;
 
-@CaptureLogStatements()
+@CaptureLogStatements({"no.entur", "org.entur"})
 public class LogbackTestExtensionTest {
 
     private final static Logger classLogger = LoggerFactory.getLogger(LogbackTestExtensionTest.class);
