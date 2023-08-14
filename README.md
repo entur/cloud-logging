@@ -20,17 +20,19 @@ with
      * Human-readable JSON (i.e. pretty-printed + colored JSON)
      * Machine-readable JSON
  * Request-response-logging
-   * Logbook style output
-   * Additional test scope coloring
+     * Logbook style output
+     * Additional test scope coloring
  *  On-demand logging for failed request
-   * Caches logged events, then
-   * throws them away for success responses, or
-   * logs them for failure responses (i.e. HTTP status code >= 400)
+     * Caches logged events, then
+     * throws them away for success responses, or
+     * logs them for failure responses (i.e. HTTP status code >= 400)
  * Unit testing (assert against Machine-readable JSON 'under the hoood')
-   * JUnit 5
-   * Assertj (TODO)
-   * Truth (TODO)
+     * JUnit 5
+     * Assertj (TODO)
+     * Truth (TODO)
  * Correlation-id tracing
+ * Custom MDC
+     * gRPC
 
 Supported web technologies:
 
