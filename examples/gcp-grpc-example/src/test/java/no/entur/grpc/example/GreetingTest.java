@@ -16,6 +16,7 @@ import org.entur.grpc.example.GreetingResponse;
 import org.entur.grpc.example.GreetingServiceGrpc;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  */
 @SpringBootTest
+@DirtiesContext
 @CaptureLogStatements(level = DevOpsLevel.DEBUG, value = {"no.entur", "org.entur"})
 public class GreetingTest extends AbstractGrpcTest {
 
@@ -44,9 +46,13 @@ public class GreetingTest extends AbstractGrpcTest {
 	public void testBlockingRequestsOnSameStub() throws InterruptedException {
 		GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
 		// run a few times to see that no unintented state is kept around
-		for(int i = 0; i < 100; i++) {
-			GreetingResponse response = stub.greeting1(greetingRequest);
-			assertThat(response.getMessage()).isEqualTo("Hello");
+		try {
+			for (int i = 0; i < 100; i++) {
+				GreetingResponse response = stub.greeting1(greetingRequest);
+				assertThat(response.getMessage()).isEqualTo("Hello");
+			}
+		} finally {
+			shutdown(stub);
 		}
 	}
 
@@ -54,55 +60,63 @@ public class GreetingTest extends AbstractGrpcTest {
 	public void testBlockingRequestsOnNewStubs() throws InterruptedException {
 		for(int i = 0; i < 100; i++) {
 			GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
-			GreetingResponse response = stub.greeting1(greetingRequest);
-			assertThat(response.getMessage()).isEqualTo("Hello");
+			try {
+				GreetingResponse response = stub.greeting1(greetingRequest);
+				assertThat(response.getMessage()).isEqualTo("Hello");
+			} finally {
+				shutdown(stub);
+			}
 		}
-	}	
+	}
 	
 	@Test
 	public void testAsyncRequests(LogStatements statements) throws InterruptedException {
 		// note: so this increments the message counter in the interceptor 
 		GreetingServiceGrpc.GreetingServiceStub stub = async();
 
-		Semaphore semaphore = new Semaphore(1);
-		semaphore.acquire();
-		final List<String> responses = new ArrayList<String>();
-		stub.greeting3(greetingRequest, new StreamObserver<GreetingResponse>() {
-			@Override
-			public void onNext(GreetingResponse response) {
-				synchronized(responses) {
-					responses.add(response.getMessage());
+		try {
+			Semaphore semaphore = new Semaphore(1);
+			semaphore.acquire();
+			final List<String> responses = new ArrayList<String>();
+			stub.greeting3(greetingRequest, new StreamObserver<GreetingResponse>() {
+				@Override
+				public void onNext(GreetingResponse response) {
+					synchronized (responses) {
+						responses.add(response.getMessage());
+					}
 				}
+
+				@Override
+				public void onError(Throwable throwable) {
+					semaphore.release();
+				}
+
+				@Override
+				public void onCompleted() {
+					semaphore.release();
+				}
+			});
+			semaphore.acquireUninterruptibly();
+
+			assertThat(responses.size()).isEqualTo(100);
+			for (int i = 0; i < 100; i++) {
+				assertThat(responses.get(i)).isEqualTo("Hello " + i);
 			}
 
-			@Override
-			public void onError(Throwable throwable) {
-				semaphore.release();
+			LogStatements http = statements.forLogger("no.entur.logging.cloud");
+			LogStatement request = http.get(0);
+
+			String s = request.getMdc().get(GrpcTraceMdcContext.CORRELATION_ID_MDC_KEY);
+
+			for (LogStatement statement : statements) {
+
+				// check that correlation-id was set back as a header in both request and response
+				// and that it was logged
+				assertEquals(statement.getMdc().get(GrpcTraceMdcContext.CORRELATION_ID_MDC_KEY), s);
+				statement.assertThatHttpHeader(GrpcTraceMdcContext.CORRELATION_ID_HEADER.toLowerCase()).contains(s);
 			}
-
-			@Override
-			public void onCompleted() {
-				semaphore.release();
-			}
-		});
-		semaphore.acquireUninterruptibly();
-
-		assertThat(responses.size()).isEqualTo(100);
-		for (int i = 0; i < 100; i++) {
-			assertThat(responses.get(i)).isEqualTo("Hello " + i);
-		}
-
-		LogStatements http = statements.forLogger("no.entur.logging.cloud");
-		LogStatement request = http.get(0);
-
-		String s = request.getMdc().get(GrpcTraceMdcContext.CORRELATION_ID_MDC_KEY);
-
-		for (LogStatement statement : statements) {
-
-			// check that correlation-id was set back as a header in both request and response
-			// and that it was logged
-			assertEquals(statement.getMdc().get(GrpcTraceMdcContext.CORRELATION_ID_MDC_KEY), s);
-			statement.assertThatHttpHeader(GrpcTraceMdcContext.CORRELATION_ID_HEADER.toLowerCase()).contains(s);
+		} finally {
+			shutdown(stub);
 		}
 	}
 
@@ -111,7 +125,11 @@ public class GreetingTest extends AbstractGrpcTest {
 		Throwable exception = assertThrows(StatusRuntimeException.class,
 				() -> {
 					GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
-					GreetingResponse response = stub.exceptionLogging(greetingRequest);
+					try {
+						GreetingResponse response = stub.exceptionLogging(greetingRequest);
+					} finally {
+						shutdown(stub);
+					}
 				});
 
 		assertThat(exception).isInstanceOf(StatusRuntimeException.class);
@@ -133,15 +151,18 @@ public class GreetingTest extends AbstractGrpcTest {
 		int n = Math.min(4, Runtime.getRuntime().availableProcessors() * 2);
 
 		GreetingServiceGrpc.GreetingServiceFutureStub stub = futureStub();
-		
-		CountDownLatch countDownLatch = new CountDownLatch(n);
-		List<Thread> workers = Stream
-		  .generate(() -> new Thread(new Worker(stub, countDownLatch)))
-		  .limit(n)
-		  .collect(Collectors.toList());
-	 
-		  workers.forEach(Thread::start);
-		  assertTrue(countDownLatch.await(60, TimeUnit.SECONDS)); 
+		try {
+			CountDownLatch countDownLatch = new CountDownLatch(n);
+			List<Thread> workers = Stream
+					.generate(() -> new Thread(new Worker(stub, countDownLatch)))
+					.limit(n)
+					.collect(Collectors.toList());
+
+			workers.forEach(Thread::start);
+			assertTrue(countDownLatch.await(60, TimeUnit.SECONDS));
+		} finally {
+			shutdown(stub);
+		}
 	}
 	
 	@Test 
@@ -192,6 +213,11 @@ public class GreetingTest extends AbstractGrpcTest {
 
 			} finally {
 				countDownLatch.countDown();
+				try {
+					shutdown(stub);
+				} catch (InterruptedException e) {
+					// ignore
+				}
 			}
 
 		}
@@ -203,7 +229,11 @@ public class GreetingTest extends AbstractGrpcTest {
 		Throwable exception = assertThrows(StatusRuntimeException.class,
 				() -> {
 					GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
-					GreetingResponse response = stub.greeting4(greetingRequest);
+					try {
+						GreetingResponse response = stub.greeting4(greetingRequest);
+					} finally {
+						shutdown(stub);
+					}
 				});
 
 		assertThat(exception).isInstanceOf(StatusRuntimeException.class);
@@ -225,8 +255,12 @@ public class GreetingTest extends AbstractGrpcTest {
 	@Test
 	public void testFilteredPathWithNoLogging() throws InterruptedException {
 		GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
-		GreetingResponse response = stub.noLogging(greetingRequest);
-		assertThat(response.getMessage()).isEqualTo("Hello");
+		try {
+			GreetingResponse response = stub.noLogging(greetingRequest);
+			assertThat(response.getMessage()).isEqualTo("Hello");
+		} finally {
+			shutdown(stub);
+		}
 	}
 
 	@Test
@@ -234,8 +268,12 @@ public class GreetingTest extends AbstractGrpcTest {
 		GreetingRequest greetingRequest = GreetingRequest.newBuilder().build();
 
 		GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
-		GreetingResponse response = stub.fullLogging(greetingRequest);
-		assertThat(response.getMessage()).isEqualTo("Hello");
+		try {
+			GreetingResponse response = stub.fullLogging(greetingRequest);
+			assertThat(response.getMessage()).isEqualTo("Hello");
+		} finally {
+			shutdown(stub);
+		}
 	}
 
 	@Test
@@ -247,16 +285,20 @@ public class GreetingTest extends AbstractGrpcTest {
 		GreetingRequest greetingRequest = GreetingRequest.newBuilder().setMessage(builder.toString()).build();
 
 		GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
-		GreetingResponse r = stub.fullLogging(greetingRequest);
-		assertThat(r.getMessage()).isEqualTo("Hello");
+		try {
+			GreetingResponse r = stub.fullLogging(greetingRequest);
+			assertThat(r.getMessage()).isEqualTo("Hello");
 
-		LogStatements http = statements.forLogger("no.entur.logging.cloud");
-		LogStatement request = http.get(1);
-		request.assertThatHttpBody().toString().matches("Omitted binary message size [0-9]+");
+			LogStatements http = statements.forLogger("no.entur.logging.cloud");
+			LogStatement request = http.get(1);
+			request.assertThatHttpBody().toString().matches("Omitted binary message size [0-9]+");
 
-		// check that correlation-id was set back as a header in the response
-		LogStatement response = http.get(2);
-		response.assertThatHttpHeader(GrpcTraceMdcContext.CORRELATION_ID_HEADER.toLowerCase()).contains(response.getMdc().get(GrpcTraceMdcContext.CORRELATION_ID_MDC_KEY));
+			// check that correlation-id was set back as a header in the response
+			LogStatement response = http.get(2);
+			response.assertThatHttpHeader(GrpcTraceMdcContext.CORRELATION_ID_HEADER.toLowerCase()).contains(response.getMdc().get(GrpcTraceMdcContext.CORRELATION_ID_MDC_KEY));
+		} finally {
+			shutdown(stub);
+		}
 	}
 
 	@Test
@@ -264,12 +306,16 @@ public class GreetingTest extends AbstractGrpcTest {
 		GreetingRequest greetingRequest = GreetingRequest.newBuilder().setReturnMessageSize(maxOutboundMessageSize).build();
 
 		GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
-		GreetingResponse r = stub.fullLogging(greetingRequest);
-		assertThat(r.getMessage().length()).isAtLeast(maxOutboundMessageSize);
+		try {
+			GreetingResponse r = stub.fullLogging(greetingRequest);
+			assertThat(r.getMessage().length()).isAtLeast(maxOutboundMessageSize);
 
-		LogStatements http = statements.forLogger("no.entur.logging.cloud");
-		LogStatement response = http.get(http.size() - 2);
-		response.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+			LogStatements http = statements.forLogger("no.entur.logging.cloud");
+			LogStatement response = http.get(http.size() - 2);
+			response.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+		} finally {
+			shutdown(stub);
+		}
 	}
 
 	@Test
@@ -281,21 +327,29 @@ public class GreetingTest extends AbstractGrpcTest {
 		GreetingRequest greetingRequest = GreetingRequest.newBuilder().setReturnMessageSize(maxOutboundMessageSize).setMessage(builder.toString()).build();
 
 		GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
-		GreetingResponse r = stub.fullLogging(greetingRequest);
-		assertThat(r.getMessage().length()).isAtLeast(maxOutboundMessageSize);
+		try {
+			GreetingResponse r = stub.fullLogging(greetingRequest);
+			assertThat(r.getMessage().length()).isAtLeast(maxOutboundMessageSize);
 
-		LogStatements http = statements.forLogger("no.entur.logging.cloud");
-		LogStatement request = http.get(1);
-		request.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
-		LogStatement response = http.get(http.size() - 2);
-		response.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+			LogStatements http = statements.forLogger("no.entur.logging.cloud");
+			LogStatement request = http.get(1);
+			request.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+			LogStatement response = http.get(http.size() - 2);
+			response.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+		} finally {
+			shutdown(stub);
+		}
 	}
 
 	@Test
 	public void testFilteredPathWithSummaryLogging() throws InterruptedException {
 		GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
-		GreetingResponse response = stub.summaryLogging(greetingRequest);
-		assertThat(response.getMessage()).isEqualTo("Hello");
+		try {
+			GreetingResponse response = stub.summaryLogging(greetingRequest);
+			assertThat(response.getMessage()).isEqualTo("Hello");
+		} finally {
+			shutdown(stub);
+		}
 	}
 
 	@Test
@@ -307,12 +361,16 @@ public class GreetingTest extends AbstractGrpcTest {
 		GreetingRequest greetingRequest = GreetingRequest.newBuilder().setMessage(builder.toString()).build();
 
 		GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
-		GreetingResponse r = stub.greeting1(greetingRequest);
-		assertThat(r.getMessage()).isEqualTo("Hello");
+		try {
+			GreetingResponse r = stub.greeting1(greetingRequest);
+			assertThat(r.getMessage()).isEqualTo("Hello");
 
-		LogStatements http = statements.forLogger("no.entur.logging.cloud");
-		LogStatement request = http.get(0);
-		request.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+			LogStatements http = statements.forLogger("no.entur.logging.cloud");
+			LogStatement request = http.get(0);
+			request.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+		} finally {
+			shutdown(stub);
+		}
 	}
 
 	@Test
@@ -320,12 +378,16 @@ public class GreetingTest extends AbstractGrpcTest {
 		GreetingRequest greetingRequest = GreetingRequest.newBuilder().setReturnMessageSize(maxOutboundMessageSize).build();
 
 		GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
-		GreetingResponse r = stub.greeting1(greetingRequest);
-		assertThat(r.getMessage().length()).isAtLeast(maxOutboundMessageSize);
+		try {
+			GreetingResponse r = stub.greeting1(greetingRequest);
+			assertThat(r.getMessage().length()).isAtLeast(maxOutboundMessageSize);
 
-		LogStatements http = statements.forLogger("no.entur.logging.cloud");
-		LogStatement response = http.get(http.size() - 1);
-		response.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+			LogStatements http = statements.forLogger("no.entur.logging.cloud");
+			LogStatement response = http.get(http.size() - 1);
+			response.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+		} finally {
+			shutdown(stub);
+		}
 	}
 
 	@Test
@@ -337,14 +399,18 @@ public class GreetingTest extends AbstractGrpcTest {
 		GreetingRequest greetingRequest = GreetingRequest.newBuilder().setReturnMessageSize(maxOutboundMessageSize).setMessage(builder.toString()).build();
 
 		GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
-		GreetingResponse r = stub.greeting1(greetingRequest);
-		assertThat(r.getMessage().length()).isAtLeast(maxOutboundMessageSize);
+		try {
+			GreetingResponse r = stub.greeting1(greetingRequest);
+			assertThat(r.getMessage().length()).isAtLeast(maxOutboundMessageSize);
 
-		LogStatements http = statements.forLogger("no.entur.logging.cloud");
-		LogStatement request = http.get(0);
-		request.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
-		LogStatement response = http.get(http.size() - 1);
-		response.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+			LogStatements http = statements.forLogger("no.entur.logging.cloud");
+			LogStatement request = http.get(0);
+			request.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+			LogStatement response = http.get(http.size() - 1);
+			response.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+		} finally {
+			shutdown(stub);
+		}
 	}
 
 	@Test
@@ -352,17 +418,21 @@ public class GreetingTest extends AbstractGrpcTest {
 		GreetingRequest greetingRequest = GreetingRequest.newBuilder().setTimestamp(Timestamp.newBuilder().setNanos(Integer.MAX_VALUE).build()).build();
 
 		GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
-		GreetingResponse response = stub.greeting5(greetingRequest);
-		assertThat(response.getMessage()).isEqualTo("Hello");
+		try {
+			GreetingResponse response = stub.greeting5(greetingRequest);
+			assertThat(response.getMessage()).isEqualTo("Hello");
 
-		LogStatements grpcLoggerStatements = statements.forLogger("no.entur.logging.cloud");
-		for (LogStatement logStatement : grpcLoggerStatements) {
-			logStatement.assertThatHttpBody().toString().matches("Unable to format message");
+			LogStatements grpcLoggerStatements = statements.forLogger("no.entur.logging.cloud");
+			for (LogStatement logStatement : grpcLoggerStatements) {
+				logStatement.assertThatHttpBody().toString().matches("Unable to format message");
+			}
+
+			List<LogStatement> logStatements = statements.forLogger(GrpcLoggingServerInterceptor.class);
+			logStatements.get(0).assertThatField("severity").isEqualTo("INFO");
+			logStatements.get(1).assertThatField("severity").isEqualTo("WARNING");
+		} finally {
+			shutdown(stub);
 		}
-
-		List<LogStatement> logStatements = statements.forLogger(GrpcLoggingServerInterceptor.class);
-		logStatements.get(0).assertThatField("severity").isEqualTo("INFO");
-		logStatements.get(1).assertThatField("severity").isEqualTo("WARNING");
 	}
 
 }

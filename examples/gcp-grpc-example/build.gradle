@@ -1,7 +1,5 @@
 plugins {
-    id "org.springframework.boot" version "3.1.2"
-    id 'eclipse'
-    id 'idea'
+    id 'org.springframework.boot' version '3.1.2'
     id "com.google.protobuf" version "0.9.4"
 }
 
@@ -12,15 +10,16 @@ test {
 }
 
 dependencies {
-    implementation project(':gcp:spring-boot-starter-gcp-grpc-lognet');
-    implementation project(':gcp:request-response-spring-boot-starter-gcp-grpc-lognet');
+    implementation project(':gcp:spring-boot-starter-gcp-grpc-lognet')
+    implementation project(':gcp:request-response-spring-boot-starter-gcp-grpc-lognet')
 
     implementation project(':trace:mdc-context-grpc-netty')
 
     implementation("io.grpc:grpc-api:$grpcVersion")
     implementation("io.grpc:grpc-core:$grpcVersion")
+    implementation("org.springframework.boot:spring-boot-starter:${springBootVersion}")
 
-    testImplementation project(":gcp:spring-boot-starter-gcp-grpc-test");
+    testImplementation project(":gcp:spring-boot-starter-gcp-grpc-test")
     testImplementation project(':gcp:request-response-spring-boot-starter-gcp-grpc-lognet-test')
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 

@@ -33,7 +33,12 @@
 		</humanReadableJsonEncoder>
 		<machineReadableJsonEncoder class="no.entur.logging.cloud.gcp.logback.logstash.StackdriverLogstashEncoder">
 			<!-- note: this encoder will be used to evaluate assertions against log statements -->
+			<fieldNames>
+				<version>[ignore]</version>
+				<timestamp>[ignore]</timestamp>
+			</fieldNames>
 			<provider class="no.entur.logging.cloud.gcp.logback.logstash.StackdriverServiceContextJsonProvider"/>
+			<provider class="no.entur.logging.cloud.gcp.logback.logstash.StackdriverTimestampJsonProvider"/>
 		</machineReadableJsonEncoder>
 	</appender>
 

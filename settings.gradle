@@ -1,4 +1,11 @@
-include 'api'
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenLocal()
+    }
+}
+
+include 'api', 'appender'
 include 'test:test-logback', 'test:test-truth', 'test:test-assertj', 'test:test-logback-junit'
 include 'gcp:logback-logstash-encoder-gcp'
 include 'gcp:spring-boot-starter-gcp-web', 'gcp:spring-boot-starter-gcp-webflux', 'gcp:spring-boot-starter-gcp-grpc', 'gcp:spring-boot-starter-gcp-web-test', 'gcp:spring-boot-starter-gcp-webflux-test', 'gcp:spring-boot-starter-gcp-grpc-test', 'gcp:spring-boot-starter-gcp-grpc-lognet'

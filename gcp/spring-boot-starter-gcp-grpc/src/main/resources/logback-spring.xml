@@ -4,12 +4,26 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <include resource="logback/logback-default-server.xml" />
 
-    <!-- custom MDC handling for gRPC -->
-    <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.grpc.mdc.GrpcMdcContextAsyncAppender">
-        <discardingThreshold>0</discardingThreshold>
-        <maxFlushTime>0</maxFlushTime>
-        <appender-ref ref="STDOUT" />
-    </appender>
+    <springProperty name="entur.logging.grpc.ondemand.enabled" source="entur.logging.grpc.ondemand.enabled"/>
+    <if condition='isDefined("entur.logging.grpc.ondemand.enabled") &#038;&#038; property("entur.logging.grpc.ondemand.enabled").equals("true")'>
+        <then>
+            <!-- custom MDC handling for gRPC + scope based filter -->
+            <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.appender.scope.GrpcLoggingScopeMdcContextAsyncAppender">
+                <discardingThreshold>0</discardingThreshold>
+                <maxFlushTime>0</maxFlushTime>
+                <appender-ref ref="STDOUT" />
+                <loggingScopeFactory class="no.entur.logging.cloud.appender.scope.GrpcContextLoggingScopeFactory"/>
+            </appender>
+        </then>
+        <else>
+            <!-- custom MDC handling for gRPC -->
+            <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.grpc.mdc.GrpcMdcContextAsyncAppender">
+                <discardingThreshold>0</discardingThreshold>
+                <maxFlushTime>0</maxFlushTime>
+                <appender-ref ref="STDOUT" />
+            </appender>
+        </else>
+    </if>
 
     <root>
         <appender-ref ref="STDOUT_ASYNC" />

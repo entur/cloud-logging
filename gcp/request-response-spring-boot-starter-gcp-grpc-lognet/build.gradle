@@ -6,6 +6,7 @@ dependencies {
     api project(':request-response:server:netty-grpc')
 
     api ("org.slf4j:slf4j-api")
+    api ("org.springframework.boot:spring-boot-starter:${springBootVersion}")
     api ("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
     api ("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
 

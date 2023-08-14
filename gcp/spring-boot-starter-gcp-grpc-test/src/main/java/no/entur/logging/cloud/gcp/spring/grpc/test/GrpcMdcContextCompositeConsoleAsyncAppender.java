@@ -3,6 +3,7 @@ package no.entur.logging.cloud.gcp.spring.grpc.test;
 import ch.qos.logback.classic.AsyncAppender;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import no.entur.logging.cloud.grpc.mdc.GrpcMdcContext;
+import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleAsyncAppender;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputType;
 import no.entur.logging.cloud.logback.logstash.test.DefaultCompositeConsoleOutputLoggingEvent;
@@ -10,7 +11,7 @@ import no.entur.logging.cloud.logback.logstash.test.DefaultCompositeConsoleOutpu
 import java.util.HashMap;
 import java.util.Map;
 
-public class GrpcMdcContextCompositeConsoleAsyncAppender extends AsyncAppender {
+public class GrpcMdcContextCompositeConsoleAsyncAppender extends CompositeConsoleAsyncAppender {
 
     @Override
     protected void append(ILoggingEvent eventObject) {

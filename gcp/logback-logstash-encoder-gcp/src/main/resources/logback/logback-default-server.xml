@@ -1,8 +1,13 @@
 <included>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="no.entur.logging.cloud.gcp.logback.logstash.StackdriverLogstashEncoder">
+            <fieldNames>
+                <version>[ignore]</version>
+                <timestamp>[ignore]</timestamp>
+            </fieldNames>
             <provider class="no.entur.logging.cloud.gcp.logback.logstash.StackdriverServiceContextJsonProvider">
             </provider>
+            <provider class="no.entur.logging.cloud.gcp.logback.logstash.StackdriverTimestampJsonProvider"/>
         </encoder>
     </appender>
 </included>

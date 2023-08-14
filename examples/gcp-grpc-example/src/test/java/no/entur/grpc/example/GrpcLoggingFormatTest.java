@@ -6,17 +6,23 @@ import org.entur.grpc.example.GreetingResponse;
 import org.entur.grpc.example.GreetingServiceGrpc;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 
 import static com.google.common.truth.Truth.assertThat;
 
 @SpringBootTest
+@DirtiesContext
 public class GrpcLoggingFormatTest extends AbstractGrpcTest {
 
 	@Test
-	public void useHumanReadablePlainEncoderTest() {
+	public void useHumanReadablePlainEncoderTest() throws InterruptedException {
 		GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
-		GreetingResponse response = stub.greeting1(greetingRequest);
-		assertThat(response.getMessage()).isEqualTo("Hello");
+		try {
+			GreetingResponse response = stub.greeting1(greetingRequest);
+			assertThat(response.getMessage()).isEqualTo("Hello");
+		} finally {
+			shutdown(stub);
+		}
 	}
 
 	@Test 
@@ -25,6 +31,8 @@ public class GrpcLoggingFormatTest extends AbstractGrpcTest {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
 			GreetingResponse response = stub.greeting1(greetingRequest);
 			assertThat(response.getMessage()).isEqualTo("Hello");
+		} finally {
+			shutdown(stub);
 		}
 	}
 
@@ -34,6 +42,8 @@ public class GrpcLoggingFormatTest extends AbstractGrpcTest {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
 			GreetingResponse response = stub.greeting1(greetingRequest);
 			assertThat(response.getMessage()).isEqualTo("Hello");
+		} finally {
+			shutdown(stub);
 		}
 	}
 

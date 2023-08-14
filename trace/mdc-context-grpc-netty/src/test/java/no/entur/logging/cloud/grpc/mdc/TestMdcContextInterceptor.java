@@ -20,7 +20,7 @@ public class TestMdcContextInterceptor implements ServerInterceptor {
 	public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
 		GrpcMdcContext grpcMdcContext = GrpcMdcContext.get();
 		if (grpcMdcContext != null) {
-			grpcMdcContext.put("testKey", "testValueFromInterceptor");
+			grpcMdcContext.put("testMdcKey", "testMdcValueFromInterceptor");
 
 			ServerCall<ReqT, RespT> interceptCall = new ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
 				public void close(Status status, Metadata trailers) {

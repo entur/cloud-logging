@@ -4,12 +4,24 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <include resource="logback/logback-default-server.xml" />
 
-    <!-- TODO is there a way to support MDC in webflux? -->
-    <appender name="STDOUT_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
-        <discardingThreshold>0</discardingThreshold>
-        <maxFlushTime>0</maxFlushTime>
-        <appender-ref ref="STDOUT" />
-    </appender>
+    <springProperty name="entur.logging.http.ondemand.enabled" source="entur.logging.http.ondemand.enabled"/>
+    <if condition='isDefined("entur.logging.http.ondemand.enabled") &#038;&#038; property("entur.logging.http.ondemand.enabled").equals("true")'>
+        <then>
+            <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender">
+                <discardingThreshold>0</discardingThreshold>
+                <maxFlushTime>0</maxFlushTime>
+                <appender-ref ref="STDOUT" />
+                <loggingScopeFactory class="no.entur.logging.cloud.gcp.spring.web.scope.ThreadLocalLoggingScopeFactory"/>
+            </appender>
+        </then>
+        <else>
+            <appender name="STDOUT_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+                <discardingThreshold>0</discardingThreshold>
+                <maxFlushTime>0</maxFlushTime>
+                <appender-ref ref="STDOUT" />
+            </appender>
+        </else>
+    </if>
 
     <root>
         <appender-ref ref="STDOUT_ASYNC" />

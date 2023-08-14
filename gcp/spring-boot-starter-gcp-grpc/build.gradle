@@ -7,6 +7,7 @@ dependencies {
     api project(':trace:server:correlation-id-trace-grpc-netty')
 
     api("org.slf4j:slf4j-api")
+    api ("org.codehaus.janino:commons-compiler:${janinoVersion}")
     api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
     api("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
 

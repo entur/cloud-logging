@@ -94,12 +94,12 @@ configure(buildProjects()) {
 // projects which should be published
 configure(libraryProjects()) {
     apply plugin: 'maven-publish'
-    
+
     publishing {
         publications {
-            mavenJava(MavenPublication) {
-                groupId = "$groupId"
-                artifactId = "$artifactId"
+            maven(MavenPublication) {
+                groupId = "no.entur.logging.cloud"
+                artifactId = project.name
                 version = "$version"
 
                 from components.java
@@ -107,7 +107,7 @@ configure(libraryProjects()) {
         }
     }
 }
- 
+
 allprojects {
     apply plugin: 'eclipse'
     apply plugin: 'idea'

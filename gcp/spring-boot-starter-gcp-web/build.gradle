@@ -2,13 +2,16 @@
 dependencies {
     api project(':gcp:micrometer-gcp')
     api project(':micrometer')
+    api project(':appender')
 
     api project(':trace:server:correlation-id-trace-spring-boot-web')
 
     api("org.slf4j:slf4j-api")
+    api ("org.codehaus.janino:commons-compiler:${janinoVersion}")
     api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
     api("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
     api("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+    api group: 'org.codehaus.janino', name: 'janino', version: '3.1.10'
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 

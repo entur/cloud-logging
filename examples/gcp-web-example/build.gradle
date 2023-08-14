@@ -1,7 +1,5 @@
 plugins {
-    id "org.springframework.boot" version "3.1.2"
-    id 'eclipse'
-    id 'idea'
+    id 'org.springframework.boot' version '3.1.2'
 }
 
 test {

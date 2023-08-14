@@ -62,7 +62,7 @@ public class AbstractGrpcTest {
 		return GreetingServiceGrpc.newFutureStub(managedChannel);
 	}
 
-	protected void shutdown(GreetingServiceGrpc.GreetingServiceFutureStub stub) throws InterruptedException {
+	protected static void shutdown(GreetingServiceGrpc.GreetingServiceFutureStub stub) throws InterruptedException {
 		ManagedChannel m = (ManagedChannel)stub.getChannel();
 		m.shutdown();
 		m.awaitTermination(15, TimeUnit.SECONDS);

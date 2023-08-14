@@ -8,6 +8,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.encoder.Encoder;
+import ch.qos.logback.core.spi.AppenderAttachable;
 import net.logstash.logback.encoder.CompositeJsonEncoder;
 import no.entur.logging.cloud.api.DevOpsLevel;
 import no.entur.logging.cloud.api.DevOpsMarker;
@@ -362,10 +363,8 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 		Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders();
 		while (appenderIterator.hasNext()) {
 			Appender<ILoggingEvent> appender = appenderIterator.next();
-			if(appender instanceof AsyncAppender) {
-				AsyncAppender asyncAppender = (AsyncAppender)appender;
-
-				asyncAppender.iteratorForAppenders();
+			if(appender instanceof AppenderAttachable) {
+				AppenderAttachable asyncAppender = (AppenderAttachable)appender;
 
 				 compositeJsonEncoder = searchMachineReadableJsonEncoder(asyncAppender.iteratorForAppenders());
 				if(compositeJsonEncoder != null) {

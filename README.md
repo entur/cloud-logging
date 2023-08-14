@@ -20,7 +20,12 @@ with
      * Human-readable JSON (i.e. pretty-printed + colored JSON)
      * Machine-readable JSON
  * Request-response-logging
-   * Logbook style output with coloring
+   * Logbook style output
+   * Additional test scope coloring
+ *  On-demand logging for failed request
+   * Caches logged events, then
+   * throws them away for success responses, or
+   * logs them for failure responses (i.e. HTTP status code >= 400)
  * Unit testing (assert against Machine-readable JSON 'under the hoood')
    * JUnit 5
    * Assertj (TODO)
@@ -57,7 +62,7 @@ Obviously the operations teams can get hold of the devops team when necessary.
 Stackdriver 
 
  * JSON encoder
- * max log statement size
+ * Max log statement size
 
 ## Azure
 TODO
