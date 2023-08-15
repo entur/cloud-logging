@@ -1,24 +1,24 @@
 package no.entur.logging.cloud.gcp.spring.grpc.lognet.scope;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import io.grpc.Status;
 
-import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
-public class HttpLoggingScopeFilter {
+public class GrpcLoggingScopeFilter {
 
     private Predicate<ILoggingEvent> queuePredicate;
     private Predicate<ILoggingEvent> ignorePredicate;
 
     private Predicate<ILoggingEvent> logLevelFailurePredicate;
-    private IntPredicate httpStatusFailurePredicate;
+    private Predicate<Status> grpcStatusPredicate;
 
-    public IntPredicate getHttpStatusFailurePredicate() {
-        return httpStatusFailurePredicate;
+    public Predicate<Status> getGrpcStatusPredicate() {
+        return grpcStatusPredicate;
     }
 
-    public void setHttpStatusFailurePredicate(IntPredicate httpStatusFailurePredicate) {
-        this.httpStatusFailurePredicate = httpStatusFailurePredicate;
+    public void setGrpcStatusPredicate(Predicate<Status> grpcStatusPredicate) {
+        this.grpcStatusPredicate = grpcStatusPredicate;
     }
 
     public Predicate<ILoggingEvent> getQueuePredicate() {
