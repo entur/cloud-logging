@@ -38,7 +38,6 @@ public class OndemandWebLoggingFormatTest {
 			ResponseEntity<MyEntity> response = restTemplate.getForEntity("/document/some/error", MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 		}
-
 	}
 
 	@Test
@@ -47,9 +46,7 @@ public class OndemandWebLoggingFormatTest {
 			ResponseEntity<MyEntity> response = restTemplate.getForEntity("/document/some/error", MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 		}
-
 	}
-
 
 	@Test
 	public void useHumanReadablePlainEncoderExpectReducedLogging() {
@@ -71,7 +68,6 @@ public class OndemandWebLoggingFormatTest {
 			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/document/some/method", entity, MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		}
-
 	}
 
 	@Test
@@ -84,7 +80,6 @@ public class OndemandWebLoggingFormatTest {
 			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/document/some/method", entity, MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		}
-
 	}
 	
 	

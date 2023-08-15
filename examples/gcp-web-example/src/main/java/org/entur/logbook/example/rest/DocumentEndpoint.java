@@ -35,15 +35,16 @@ public class DocumentEndpoint {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response errorMethod() throws InterruptedException {
 		System.out.flush();
-		System.out.println("System out before logging");
+		System.out.println("System out before endpoint logging");
 
-		logger.trace("Pending error / trace");
-		logger.debug("Pending error / debug");
-		logger.info("Pending error / info");
-		logger.warn("Pending error  / warn");
+		logger.trace("This message should be ignored / trace");
+		logger.debug("This message should be ignored / debug");
+		logger.info("This message should be delayed");
+		logger.warn("This message should be logged / warn");
+		logger.error("This message should be logged / error");
 
 		Thread.sleep(1000);
-		System.out.println("System out after logging + 1000ms");
+		System.out.println("System out after endpoint logging + 1000ms");
 
 		return Response.serverError().build(); // translates to 404 because no /error resource
 	}

@@ -17,7 +17,7 @@ public class GrpcContextLoggingScopeFactory implements LoggingScopeFactory<Conte
     public Context openScope() {
         Context context = Context.current();
 
-        LoggingScope loggingScope = new LoggingScope(filter);
+        LoggingScope loggingScope = new LoggingScope(filter, ignoreFilter);
 
         return context.withValue(KEY_CONTEXT, loggingScope);
     }

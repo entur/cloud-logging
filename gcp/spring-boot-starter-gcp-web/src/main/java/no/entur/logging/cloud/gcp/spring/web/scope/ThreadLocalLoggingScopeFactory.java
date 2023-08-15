@@ -10,15 +10,9 @@ public class ThreadLocalLoggingScopeFactory implements LoggingScopeFactory {
 
     private final ThreadLocal<LoggingScope> queues = new ThreadLocal<>();
 
-    protected Predicate<ILoggingEvent> filter = (e) -> false;
-
-    public void setFilter(Predicate<ILoggingEvent> filter) {
-        this.filter = filter;
-    }
-
     @Override
-    public Object openScope() {
-        queues.set(new LoggingScope(filter));
+    public Object openScope(Predicate queuePredicate, Predicate ignorePredicate) {
+        queues.set(new LoggingScope(queuePredicate, ignorePredicate));
         return null;
     }
 

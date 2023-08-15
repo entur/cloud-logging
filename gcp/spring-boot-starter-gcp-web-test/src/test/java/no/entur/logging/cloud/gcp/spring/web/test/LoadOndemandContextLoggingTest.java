@@ -1,11 +1,14 @@
 package no.entur.logging.cloud.gcp.spring.web.test;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import no.entur.logging.cloud.api.DevOpsLogger;
 import no.entur.logging.cloud.api.DevOpsLoggerFactory;
 import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
+import no.entur.logging.cloud.appender.scope.LoggingScopeFactory;
+import no.entur.logging.cloud.appender.scope.predicate.LowerOrEqualToLogLevelPredicate;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +20,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.function.Predicate;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @DirtiesContext
@@ -46,17 +50,22 @@ public class LoadOndemandContextLoggingTest {
     public void testOndemandMachineReadableJson() throws IOException, InterruptedException {
         LoggingScopeAsyncAppender appender = getOndemandAsyncAppender();
 
-        appender.openScope();
+        LoggingScopeFactory loggingScopeFactory = appender.getLoggingScopeFactory();
 
-        LOGGER.trace("Test trace message");
-        LOGGER.debug("Test debug message");
-        LOGGER.info("Test info message");
-        LOGGER.warn("Test warn message");
-        LOGGER.error("Test error message");
+        Predicate<ILoggingEvent> queuePredicate = new LowerOrEqualToLogLevelPredicate(Level.INFO_INT);
+        Predicate<ILoggingEvent> ignorePredicate = new LowerOrEqualToLogLevelPredicate(Level.DEBUG_INT);
 
-        LOGGER.errorTellMeTomorrow("Test error tell me tomorrow message");
-        LOGGER.errorInterruptMyDinner("Test error interrupt my dinner message");
-        LOGGER.errorWakeMeUpRightNow("Test error wake me up right now message");
+        loggingScopeFactory.openScope(queuePredicate, ignorePredicate);
+
+        LOGGER.trace("Test trace message, this should be ignored");
+        LOGGER.debug("Test debug message, this should be ignored");
+        LOGGER.info("Test info message, this message should be delayed");
+        LOGGER.warn("Test warn message, this message should printet at once");
+        LOGGER.error("Test error message, this message should printet at once");
+
+        LOGGER.errorTellMeTomorrow("Test error tell me tomorrow message, this message should printet at once");
+        LOGGER.errorInterruptMyDinner("Test error interrupt my dinner message, this message should printet at once");
+        LOGGER.errorWakeMeUpRightNow("Test error wake me up right now message, this message should printet at once");
 
         Thread.sleep(1);
 
@@ -75,7 +84,6 @@ public class LoadOndemandContextLoggingTest {
         }
         while (appenderIterator.hasNext()) {
             Appender<ILoggingEvent> appender = appenderIterator.next();
-            System.out.println(appender);
             if(appender instanceof LoggingScopeAsyncAppender) {
                 return (LoggingScopeAsyncAppender) appender;
             }

@@ -11,12 +11,14 @@ import java.util.function.Predicate;
  */
 public class LoggingScope {
 
-    private final Predicate<ILoggingEvent> filter;
+    private final Predicate<ILoggingEvent> queuePredicate;
+    private final Predicate<ILoggingEvent> ignorePredicate;
 
     private ConcurrentLinkedQueue<ILoggingEvent> queue = new ConcurrentLinkedQueue<ILoggingEvent>();
 
-    public LoggingScope(Predicate<ILoggingEvent> filter) {
-        this.filter = filter;
+    public LoggingScope(Predicate<ILoggingEvent> queueFilter, Predicate<ILoggingEvent> ignorePredicate) {
+        this.queuePredicate = queueFilter;
+        this.ignorePredicate = ignorePredicate;
     }
 
     public ConcurrentLinkedQueue<ILoggingEvent> getEvents() {
@@ -24,7 +26,10 @@ public class LoggingScope {
     }
 
     public boolean append(ILoggingEvent eventObject) {
-        if(filter.test(eventObject)) {
+        if(ignorePredicate.test(eventObject)) {
+            return true;
+        }
+        if(queuePredicate.test(eventObject)) {
             queue.add(eventObject);
 
             return true;

@@ -4,6 +4,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import no.entur.logging.cloud.appender.AsyncAppender;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Predicate;
 
 public class LoggingScopeAsyncAppender extends AsyncAppender {
 
@@ -32,7 +33,6 @@ public class LoggingScopeAsyncAppender extends AsyncAppender {
 
     public void flushScope() {
         LoggingScope scope = loggingScopeFactory.getScope();
-
         if (scope != null) {
             ConcurrentLinkedQueue<ILoggingEvent> events = scope.getEvents();
             for (ILoggingEvent event : events) {
@@ -45,8 +45,7 @@ public class LoggingScopeAsyncAppender extends AsyncAppender {
         loggingScopeFactory.closeScope();
     }
 
-    public <T> T openScope() {
-        return (T) loggingScopeFactory.openScope();
+    public LoggingScopeFactory getLoggingScopeFactory() {
+        return loggingScopeFactory;
     }
-
 }

@@ -4,6 +4,7 @@ import io.grpc.Context;
 import io.grpc.Contexts;
 import io.grpc.ForwardingServerCall;
 import io.grpc.Metadata;
+import io.grpc.MethodDescriptor;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
@@ -61,6 +62,11 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor {
 
 	@Override
 	public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
+
+		MethodDescriptor<ReqT, RespT> methodDescriptor = call.getMethodDescriptor();
+		String serviceName = methodDescriptor.getServiceName();
+		String fullMethodName = methodDescriptor.getFullMethodName();
+
 		Context context = appender.openScope();
 
 		ServerCall<ReqT, RespT> interceptCall = new ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {

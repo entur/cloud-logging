@@ -8,6 +8,7 @@ import ch.qos.logback.core.Appender;
 import no.entur.logging.cloud.api.DevOpsLogger;
 import no.entur.logging.cloud.api.DevOpsLoggerFactory;
 import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
+import no.entur.logging.cloud.gcp.spring.grpc.lognet.properties.OndemandProperties;
 import no.entur.logging.cloud.grpc.mdc.GrpcMdcContextInterceptor;
 import no.entur.logging.cloud.grpc.mdc.scope.GrpcContextLoggingScopeFactory;
 import no.entur.logging.cloud.grpc.mdc.scope.GrpcLoggingScopeContextInterceptor;
