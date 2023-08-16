@@ -3,7 +3,7 @@ dependencies {
     api project(":gcp:spring-boot-gcp-test")
     api project(":gcp:spring-boot-starter-gcp-web")
 
-    api("org.slf4j:slf4j-api")
+    api("org.slf4j:slf4j-api:${slf4jVersion}")
     api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")

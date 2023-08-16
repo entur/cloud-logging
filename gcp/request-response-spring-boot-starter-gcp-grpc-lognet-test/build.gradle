@@ -9,7 +9,7 @@ dependencies {
     api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
     api ("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
 
-    api("org.slf4j:slf4j-api")
+    api("org.slf4j:slf4j-api:${slf4jVersion}")
     api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
     implementation project(path: ':request-response:server:netty-grpc-test')
 
