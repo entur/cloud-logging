@@ -53,10 +53,10 @@ configure(buildProjects()) {
         nettyTcnativeBoringsslStaticVersion = '2.0.61.Final'
         nettyVersion = '4.1.92.Final'
         micrometerVersion = '1.11.1'
-        springBootVersion = '3.1.0'
+        springBootVersion = '3.1.2' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
         janinoVersion = '3.1.9'
         servletVersion = '6.0.0' // jakarta
-        logbookVersion = '3.1.0'
+        logbookVersion = '3.3.0'
         jacksonSyntaxHighlightVersion = '1.0.7'
         logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.0.6'
         commonsIoVersion = '2.13.0'
