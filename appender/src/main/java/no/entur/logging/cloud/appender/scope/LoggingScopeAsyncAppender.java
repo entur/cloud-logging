@@ -45,7 +45,7 @@ public class LoggingScopeAsyncAppender extends AsyncAppender {
         loggingScopeFactory.closeScope();
     }
 
-    public LoggingScopeFactory getLoggingScopeFactory() {
+    public <T> LoggingScopeFactory<T> getLoggingScopeFactory() {
         return loggingScopeFactory;
     }
 }

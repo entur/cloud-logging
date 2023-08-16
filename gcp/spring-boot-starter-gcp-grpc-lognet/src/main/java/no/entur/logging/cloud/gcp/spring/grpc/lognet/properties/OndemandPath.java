@@ -6,7 +6,10 @@ import java.util.List;
 public class OndemandPath {
 
 	private boolean enabled = true;
-	private List<ServiceMatcherConfiguration> services = new ArrayList<>();
+
+	private String serviceName;
+
+	private List<String> methodNames = new ArrayList<>();
 
 	private OndemandSuccess success = new OndemandSuccess();
 	private OndemandFailure failure = new OndemandFailure();
@@ -17,14 +20,6 @@ public class OndemandPath {
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
-	}
-
-	public List<ServiceMatcherConfiguration> getServices() {
-		return services;
-	}
-
-	public void setServices(List<ServiceMatcherConfiguration> services) {
-		this.services = services;
 	}
 
 	public OndemandSuccess getSuccess() {
@@ -41,5 +36,21 @@ public class OndemandPath {
 
 	public void setFailure(OndemandFailure failure) {
 		this.failure = failure;
+	}
+
+	public String getServiceName() {
+		return serviceName;
+	}
+
+	public void setServiceName(String serviceName) {
+		this.serviceName = serviceName;
+	}
+
+	public List<String> getMethodNames() {
+		return methodNames;
+	}
+
+	public void setMethodNames(List<String> methodNames) {
+		this.methodNames = methodNames;
 	}
 }

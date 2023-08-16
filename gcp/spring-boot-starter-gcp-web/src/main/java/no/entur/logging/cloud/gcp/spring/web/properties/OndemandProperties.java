@@ -18,7 +18,7 @@ public class OndemandProperties {
 
     private String filterUrlPatterns = "/*";
 
-    private List<OndemandPath> matchers = new ArrayList<>();
+    private List<OndemandPath> paths = new ArrayList<>();
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
@@ -36,12 +36,12 @@ public class OndemandProperties {
         return filterOrder;
     }
 
-    public void setMatchers(List<OndemandPath> matchers) {
-        this.matchers = matchers;
+    public void setPaths(List<OndemandPath> paths) {
+        this.paths = paths;
     }
 
-    public List<OndemandPath> getMatchers() {
-        return matchers;
+    public List<OndemandPath> getPaths() {
+        return paths;
     }
 
     public OndemandSuccess getSuccess() {

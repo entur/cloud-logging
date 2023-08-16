@@ -1,41 +1,48 @@
 package no.entur.logging.cloud.gcp.spring.grpc.lognet.scope;
 
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.security.web.util.matcher.RequestMatcher;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GrpcLoggingScopeFilters {
 
-    private static class Filter {
-        private RequestMatcher requestMatcher;
-        private GrpcLoggingScopeFilter scope;
+    private Map<String, GrpcLoggingScopeFilter> services = new HashMap<>();
 
-        public Filter(RequestMatcher requestMatcher, GrpcLoggingScopeFilter scope) {
-            this.requestMatcher = requestMatcher;
-            this.scope = scope;
-        }
-    }
+    private Map<String, Map<String, GrpcLoggingScopeFilter>> methods = new HashMap<>();
 
     private GrpcLoggingScopeFilter defaultFilter;
 
-    private List<Filter> filters = new ArrayList<>();
+    public void addFilter(String serviceName, GrpcLoggingScopeFilter filter) {
+        services.put(serviceName, filter);
+    }
 
-    public void addFilter(RequestMatcher pathMatcher, GrpcLoggingScopeFilter filter) {
-        filters.add(new Filter(pathMatcher, filter));
+    public void addFilter(String serviceName, String methodName, GrpcLoggingScopeFilter filter) {
+        Map<String, GrpcLoggingScopeFilter> map = methods.get(serviceName);
+        if(map == null) {
+            map = new HashMap<>();
+            methods.put(serviceName, map);
+        }
+        map.put(methodName, filter);
     }
 
     public void setDefaultFilter(GrpcLoggingScopeFilter defaultFilter) {
         this.defaultFilter = defaultFilter;
     }
 
-    public GrpcLoggingScopeFilter getScope(HttpServletRequest httpServletRequest) {
-        for (Filter filter : filters) {
-            if(filter.requestMatcher.matches(httpServletRequest)) {
-                return filter.scope;
+    public GrpcLoggingScopeFilter getFilter(String serviceName, String methodName) {
+
+        GrpcLoggingScopeFilter grpcLoggingScopeFilter = services.get(serviceName);
+        if(grpcLoggingScopeFilter != null) {
+            return grpcLoggingScopeFilter;
+        }
+
+        Map<String, GrpcLoggingScopeFilter> serviceMethods = methods.get(serviceName);
+        if(serviceMethods != null) {
+            grpcLoggingScopeFilter = serviceMethods.get(methodName);
+            if(grpcLoggingScopeFilter != null) {
+                return grpcLoggingScopeFilter;
             }
         }
+
         return defaultFilter;
     }
 

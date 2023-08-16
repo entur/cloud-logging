@@ -39,7 +39,7 @@ public class DocumentEndpoint {
 
 		logger.trace("This message should be ignored / trace");
 		logger.debug("This message should be ignored / debug");
-		logger.info("This message should be delayed");
+		logger.info("This message should be delayed / info");
 		logger.warn("This message should be logged / warn");
 		logger.error("This message should be logged / error");
 

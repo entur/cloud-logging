@@ -1,10 +1,13 @@
 
 dependencies {
-    api project(':gcp:spring-boot-starter-gcp-grpc')
     api project(':trace:mdc-context-grpc-netty')
     api project(':trace:server:correlation-id-trace-grpc-netty')
 
+    api project(':gcp:micrometer-gcp')
+    api project(':micrometer')
+
     api("org.slf4j:slf4j-api:${slf4jVersion}")
+    api ("org.codehaus.janino:commons-compiler:${janinoVersion}")
     api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
     api("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
 

@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.grpc.mdc.scope;
+package no.entur.logging.cloud.gcp.spring.grpc.lognet.scope;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
@@ -25,7 +25,6 @@ public class GrpcLoggingScopeMdcContextAsyncAppender extends LoggingScopeAsyncAp
                 } finally {
                     MDC.clear();
                 }
-
             }
         } else {
             super.preprocess(eventObject);

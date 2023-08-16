@@ -74,13 +74,13 @@ public class GcpWebLoggingAutoConfiguration {
             HttpLoggingScopeFilter defaultFilter = toFilter(properties.getSuccess(), properties.getFailure());
             filters.setDefaultFilter(defaultFilter);
 
-            List<OndemandPath> matchers = properties.getMatchers();
-            for (OndemandPath matcher : matchers) {
-                if(!matcher.isEnabled()) {
+            List<OndemandPath> paths = properties.getPaths();
+            for (OndemandPath path : paths) {
+                if(!path.isEnabled()) {
                     continue;
                 }
-                HttpLoggingScopeFilter filter = toFilter(properties.getSuccess(), properties.getFailure());
-                RequestMatcher requestMatcher = AntPathRequestMatcher.antMatcher(matcher.getMatcher());
+                HttpLoggingScopeFilter filter = toFilter(path.getSuccess(), path.getFailure());
+                RequestMatcher requestMatcher = AntPathRequestMatcher.antMatcher(path.getMatcher());
                 filters.addFilter(requestMatcher, filter);
             }
 

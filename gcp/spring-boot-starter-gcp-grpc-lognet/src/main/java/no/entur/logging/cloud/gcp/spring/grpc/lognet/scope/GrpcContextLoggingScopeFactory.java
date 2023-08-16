@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.grpc.mdc.scope;
+package no.entur.logging.cloud.gcp.spring.grpc.lognet.scope;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import io.grpc.Context;
@@ -11,13 +11,11 @@ public class GrpcContextLoggingScopeFactory implements LoggingScopeFactory<Conte
 
     public static final Context.Key<LoggingScope> KEY_CONTEXT = Context.key("LOGGING_SCOPE_CONTEXT");
 
-    protected Predicate<ILoggingEvent> filter = (e) -> false;
-
     @Override
-    public Context openScope() {
+    public Context openScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate) {
         Context context = Context.current();
 
-        LoggingScope loggingScope = new LoggingScope(filter, ignoreFilter);
+        LoggingScope loggingScope = new LoggingScope(queuePredicate, ignorePredicate);
 
         return context.withValue(KEY_CONTEXT, loggingScope);
     }
@@ -32,7 +30,4 @@ public class GrpcContextLoggingScopeFactory implements LoggingScopeFactory<Conte
         // do nothing
     }
 
-    public void setFilter(Predicate<ILoggingEvent> filter) {
-        this.filter = filter;
-    }
 }

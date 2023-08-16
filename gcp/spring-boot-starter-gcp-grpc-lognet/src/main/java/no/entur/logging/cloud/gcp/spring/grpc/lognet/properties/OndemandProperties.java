@@ -3,6 +3,9 @@ package no.entur.logging.cloud.gcp.spring.grpc.lognet.properties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.Ordered;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @ConfigurationProperties(prefix = "no.entur.logging.grpc.ondemand")
 public class OndemandProperties {
 
@@ -10,6 +13,8 @@ public class OndemandProperties {
     private OndemandSuccess success = new OndemandSuccess();
 
     private OndemandFailure failure = new OndemandFailure();
+
+    private List<OndemandPath> paths = new ArrayList<>();
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
@@ -33,5 +38,13 @@ public class OndemandProperties {
 
     public void setFailure(OndemandFailure failure) {
         this.failure = failure;
+    }
+
+    public List<OndemandPath> getPaths() {
+        return paths;
+    }
+
+    public void setPaths(List<OndemandPath> paths) {
+        this.paths = paths;
     }
 }

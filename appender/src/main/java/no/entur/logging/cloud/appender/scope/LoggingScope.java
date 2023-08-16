@@ -16,8 +16,8 @@ public class LoggingScope {
 
     private ConcurrentLinkedQueue<ILoggingEvent> queue = new ConcurrentLinkedQueue<ILoggingEvent>();
 
-    public LoggingScope(Predicate<ILoggingEvent> queueFilter, Predicate<ILoggingEvent> ignorePredicate) {
-        this.queuePredicate = queueFilter;
+    public LoggingScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate) {
+        this.queuePredicate = queuePredicate;
         this.ignorePredicate = ignorePredicate;
     }
 

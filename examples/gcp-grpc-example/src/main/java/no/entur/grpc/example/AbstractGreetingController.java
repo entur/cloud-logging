@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class AbstractGreetingController extends GreetingServiceGrpc.GreetingServiceImplBase {
 
-	private static final Logger log = LoggerFactory.getLogger(AbstractGreetingController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGreetingController.class);
 
 	private final AtomicLong counter = new AtomicLong();
 
@@ -24,10 +24,10 @@ public class AbstractGreetingController extends GreetingServiceGrpc.GreetingServ
 
 		MDC.put("localKey", "value");
 		try {
-			log.trace("Hello greeting / trace");
-			log.debug("Hello greeting / debug");
-			log.info("Hello greeting / info");
-			log.warn("Hello greeting / warn");
+			LOGGER.trace("Hello greeting / trace");
+			LOGGER.debug("Hello greeting / debug");
+			LOGGER.info("Hello greeting / info");
+			LOGGER.warn("Hello greeting / warn");
 		} finally {
 			MDC.remove("localKey");
 		}
@@ -39,11 +39,23 @@ public class AbstractGreetingController extends GreetingServiceGrpc.GreetingServ
 	public void exceptionLogging(org.entur.grpc.example.GreetingRequest request, io.grpc.stub.StreamObserver<GreetingResponse> responseObserver) {
 		MDC.put("localKey", "value");
 		try {
-			log.trace("Hello error / trace");
-			log.debug("Hello error / debug");
-			log.info("Hello error / info");
-			log.warn("Hello error / warn");
-			log.error("Hello error / error");
+
+			System.out.flush();
+			System.out.println("System out before endpoint logging");
+
+			LOGGER.trace("This message should be ignored / trace");
+			LOGGER.debug("This message should be ignored / debug");
+			LOGGER.info("This message should be delayed / info");
+			LOGGER.warn("This message should be logged / warn");
+			LOGGER.error("This message should be logged / error");
+
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+			System.out.println("System out after endpoint logging + 1000ms");
+
 		} finally {
 			MDC.remove("localKey");
 		}
@@ -63,10 +75,10 @@ public class AbstractGreetingController extends GreetingServiceGrpc.GreetingServ
 		Metadata metadata = new Metadata();
 		metadata.put(Metadata.Key.of("x-correlation-id", Metadata.ASCII_STRING_MARSHALLER), traceId);
 
-		log.trace("Hello greeting 3 / trace");
-		log.debug("Hello greeting 3 / debug");
-		log.info("Hello greeting 3 / info");
-		log.warn("Hello greeting 3 / warn");
+		LOGGER.trace("Hello greeting 3 / trace");
+		LOGGER.debug("Hello greeting 3 / debug");
+		LOGGER.info("Hello greeting 3 / info");
+		LOGGER.warn("Hello greeting 3 / warn");
 		for (int i = 0; i < 100; i++) {
 			responseObserver.onNext(GreetingResponse.newBuilder().setMessage("Hello " + i).setStatus(counter.getAndIncrement()).build());
 		}
@@ -76,10 +88,10 @@ public class AbstractGreetingController extends GreetingServiceGrpc.GreetingServ
 	public void noLogging(org.entur.grpc.example.GreetingRequest request,
 						  io.grpc.stub.StreamObserver<GreetingResponse> responseObserver) {
 
-		log.trace("Hello no logging / trace");
-		log.debug("Hello no logging / debug");
-		log.info("Hello no logging / info");
-		log.warn("Hello no logging / warn");
+		LOGGER.trace("Hello no logging / trace");
+		LOGGER.debug("Hello no logging / debug");
+		LOGGER.info("Hello no logging / info");
+		LOGGER.warn("Hello no logging / warn");
 
 		responseObserver.onNext(createResponse(request));
 		responseObserver.onCompleted();
@@ -88,10 +100,10 @@ public class AbstractGreetingController extends GreetingServiceGrpc.GreetingServ
 	public void fullLogging(org.entur.grpc.example.GreetingRequest request,
 						  io.grpc.stub.StreamObserver<GreetingResponse> responseObserver) {
 
-		log.trace("Hello full logging");
-		log.debug("Hello full logging");
-		log.info("Hello full logging");
-		log.warn("Hello full logging");
+		LOGGER.trace("Hello full logging");
+		LOGGER.debug("Hello full logging");
+		LOGGER.info("Hello full logging");
+		LOGGER.warn("Hello full logging");
 
 		responseObserver.onNext(createResponse(request));
 		responseObserver.onCompleted();
@@ -100,10 +112,10 @@ public class AbstractGreetingController extends GreetingServiceGrpc.GreetingServ
 	public void summaryLogging(org.entur.grpc.example.GreetingRequest request,
 							io.grpc.stub.StreamObserver<GreetingResponse> responseObserver) {
 
-		log.trace("Hello summary logging");
-		log.debug("Hello summary logging");
-		log.info("Hello summary logging");
-		log.warn("Hello summary logging");
+		LOGGER.trace("Hello summary logging");
+		LOGGER.debug("Hello summary logging");
+		LOGGER.info("Hello summary logging");
+		LOGGER.warn("Hello summary logging");
 
 		responseObserver.onNext(createResponse(request));
 		responseObserver.onCompleted();
@@ -128,11 +140,11 @@ public class AbstractGreetingController extends GreetingServiceGrpc.GreetingServ
 
 		MDC.put("localKey", "value");
 		try {
-			log.trace("Hello error / trace");
-			log.debug("Hello error / debug");
-			log.info("Hello error / info");
-			log.warn("Hello error / warn");
-			log.error("Hello error / error");
+			LOGGER.trace("Hello error / trace");
+			LOGGER.debug("Hello error / debug");
+			LOGGER.info("Hello error / info");
+			LOGGER.warn("Hello error / warn");
+			LOGGER.error("Hello error / error");
 		} finally {
 			MDC.remove("localKey");
 		}
@@ -145,10 +157,10 @@ public class AbstractGreetingController extends GreetingServiceGrpc.GreetingServ
 
 		MDC.put("localKey", "value");
 		try {
-			log.trace("Hello greeting 5");
-			log.debug("Hello greeting 5");
-			log.info("Hello greeting 5");
-			log.warn("Hello greeting 5");
+			LOGGER.trace("Hello greeting 5");
+			LOGGER.debug("Hello greeting 5");
+			LOGGER.info("Hello greeting 5");
+			LOGGER.warn("Hello greeting 5");
 		} finally {
 			MDC.remove("localKey");
 		}
