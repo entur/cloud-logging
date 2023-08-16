@@ -8,7 +8,7 @@ dependencies {
 
     api "org.zalando:logbook-spring-boot-starter:${logbookVersion}"
 
-    api ("org.slf4j:slf4j-api")
+    api ("org.slf4j:slf4j-api:${slf4jVersion}")
     api ("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
     api ("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
 

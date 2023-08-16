@@ -6,7 +6,7 @@ dependencies {
 
     api project(":test:test-logback")
 
-    api ("org.slf4j:slf4j-api")
+    api ("org.slf4j:slf4j-api:${slf4jVersion}")
     api ("org.codehaus.janino:commons-compiler:${janinoVersion}")
     api ("org.codehaus.janino:janino:${janinoVersion}")
 
