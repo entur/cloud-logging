@@ -79,6 +79,10 @@ configure(buildProjects()) {
         }
     }
 
+    java {
+        withSourcesJar()
+    }
+
     dependencies {
         // JUnit Jupiter API and TestEngine implementation
         testImplementation("org.junit.jupiter:junit-jupiter:${junitJupiterVersion}")
