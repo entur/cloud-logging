@@ -50,15 +50,9 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
         private GrpcServerLoggingFilters filters;
 
         private GrpcSink sink;
-        private boolean client;
 
         public Builder withFilters(GrpcServerLoggingFilters filters) {
             this.filters = filters;
-            return this;
-        }
-
-        public Builder withClient(boolean client) {
-            this.client = client;
             return this;
         }
 
@@ -91,7 +85,7 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
                 throw new IllegalStateException();
             }
 
-            return new GrpcLoggingServerInterceptor(sink, filters, metadataJsonMapper, payloadJsonMapper, client);
+            return new GrpcLoggingServerInterceptor(sink, filters, metadataJsonMapper, payloadJsonMapper);
         }
 
 
@@ -103,14 +97,11 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
     protected final GrpcPayloadJsonMapper payloadJsonMapper;
     protected final GrpcSink sink;
 
-    protected final boolean client;
-
-    public GrpcLoggingServerInterceptor(GrpcSink sink, GrpcServerLoggingFilters filters, GrpcMetadataJsonMapper metadataJsonMapper, GrpcPayloadJsonMapper payloadJsonMapper, boolean client) {
+    public GrpcLoggingServerInterceptor(GrpcSink sink, GrpcServerLoggingFilters filters, GrpcMetadataJsonMapper metadataJsonMapper, GrpcPayloadJsonMapper payloadJsonMapper) {
         this.sink = sink;
         this.filters = filters;
         this.metadataJsonMapper = metadataJsonMapper;
         this.payloadJsonMapper = payloadJsonMapper;
-        this.client = client;
     }
 
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, final Metadata headers, ServerCallHandler<ReqT, RespT> next) {
@@ -136,7 +127,7 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
 
         GrpcConnect connectMessage;
         if (filter.isConnect()) {
-            connectMessage = new GrpcConnect(requestHeaders, remoteAddress, path, client ? "local" : "remote");
+            connectMessage = new GrpcConnect(requestHeaders, remoteAddress, path, "remote");
             sink.connectMessage(connectMessage);
         } else {
             connectMessage = null;
@@ -186,16 +177,11 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
                         try {
                             body = payloadJsonMapper.map(m, filter.getResponseBodyFilter());
                         } catch (Throwable e) {
-                            if (client) {
-                                // came from someone else
-                                log.info("Cannot format protobuf client response message {}", e.toString());
-                            } else {
-                                // came from us
-                                log.warn("Cannot format protobuf response message", e);
-                            }
+                            // came from us, log as warn
+                            log.warn("Cannot format protobuf response message", e);
                         }
 
-                        GrpcResponse responseMessage = new GrpcResponse(responseHeaders, remoteAddress, path, body, client ? "remote" : "local", count, Status.Code.OK);
+                        GrpcResponse responseMessage = new GrpcResponse(responseHeaders, remoteAddress, path, body, "local", count, Status.Code.OK);
 
                         sink.responseMessage(responseMessage);
                     } else if (filter.isDisconnect()) {
@@ -226,7 +212,7 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
                             Map<String, Object> headers = toHeaders(status, trailers, filter.getResponseMetadataFilter());
                             int count = responseCounter.incrementAndGet();
 
-                            GrpcResponse responseMessage = new GrpcResponse(headers, remoteAddress, path, null, client ? "remote" : "local", count, status.getCode());
+                            GrpcResponse responseMessage = new GrpcResponse(headers, remoteAddress, path, null, "local", count, status.getCode());
 
                             sink.responseMessage(responseMessage);
                         }
@@ -241,7 +227,7 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
                             }
                             long duration = System.currentTimeMillis() - timestamp;
 
-                            GrpcDisconnect disconnectMessage = new GrpcDisconnect(headers, remoteAddress, path,  client ? "remote" : "local", requestCounter.get(), responseCounter.get(), messageSize.get(), duration);
+                            GrpcDisconnect disconnectMessage = new GrpcDisconnect(headers, remoteAddress, path,  "local", requestCounter.get(), responseCounter.get(), messageSize.get(), duration);
 
                             sink.disconnectMessage(connectMessage, disconnectMessage);
                         }
@@ -270,16 +256,11 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
                         try {
                             body = payloadJsonMapper.map(m, filter.getRequestBodyFilter());
                         } catch (Throwable e) {
-                            if (client) {
-                                // came from us
-                                log.warn("Cannot format protobuf client request message", e);
-                            } else {
-                                // came from someone else
-                                log.info("Cannot format protobuf request message {}", e.toString());
-                            }
+                            // came from someone else, so log as info
+                            log.info("Cannot format protobuf request message", e);
                         }
 
-                        GrpcRequest requestMessage = new GrpcRequest(requestHeaders, remoteAddress, path, body, client ? "local" : "remote", count);
+                        GrpcRequest requestMessage = new GrpcRequest(requestHeaders, remoteAddress, path, body, "remote", count);
 
                         sink.requestMessage(requestMessage);
                     } else if (filter.isDisconnect()) {

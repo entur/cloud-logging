@@ -1,4 +1,4 @@
-# minimal configuration
+# spring web example
 The fastest way to set up your project.
 
 # Setup

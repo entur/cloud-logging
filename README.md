@@ -31,6 +31,7 @@ with
        * failed responses (i.e. HTTP status code >= 400) and/or
        * log events of a certain level (i.e. warning or error) was made
      * since timestamps are preserved, log accumulation tools present the results in chronological order (i.e. this feature is best for deployments)
+     * TODO lazy request-response logging
  * Unit testing
    * Always assert against machine-readable JSON 'under the hood', regardless what is printed to console during local development
    * Supported frameworks
