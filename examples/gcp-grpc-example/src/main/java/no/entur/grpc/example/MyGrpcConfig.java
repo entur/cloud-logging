@@ -22,16 +22,13 @@ public class MyGrpcConfig {
 
     @Bean
     public GrpcServerLoggingFilters grpcServerLoggingFilters() {
-
-        String serviceName = "/" + GreetingServiceGrpc.SERVICE_NAME;
-
         return GrpcServerLoggingFilters
                 .newBuilder()
                 .classicDefaultLogging()
-                .fullLoggingForPrefix(serviceName + "/greeting3")
-                .fullLoggingForPrefix(serviceName + "/fullLogging")
-                .summaryLoggingForPrefix(serviceName + "/summaryLogging")
-                .noLoggingForPrefix(serviceName + "/noLogging")
+                .fullLoggingForService(GreetingServiceGrpc.SERVICE_NAME, GreetingServiceGrpc.getGreeting3Method()) //  /greeting3
+                .fullLoggingForService(GreetingServiceGrpc.SERVICE_NAME, GreetingServiceGrpc.getFullLoggingMethod()) //  /fullLogging
+                .summaryLoggingForService(GreetingServiceGrpc.SERVICE_NAME, GreetingServiceGrpc.getSummaryLoggingMethod()) // /summaryLogging
+                .noLoggingForService(GreetingServiceGrpc.SERVICE_NAME, GreetingServiceGrpc.getNoLoggingMethod()) // /noLogging
                 .build();
     }
 

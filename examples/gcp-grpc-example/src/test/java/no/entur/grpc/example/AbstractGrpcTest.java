@@ -2,22 +2,10 @@ package no.entur.grpc.example;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
-import io.grpc.util.TransmitStatusRuntimeExceptionInterceptor;
 
-import no.entur.logging.cloud.grpc.mdc.GrpcMdcContextInterceptor;
-import no.entur.logging.cloud.grpc.trace.GrpcAddMdcTraceToResponseInterceptor;
-import no.entur.logging.cloud.grpc.trace.GrpcTraceMdcContextInterceptor;
-import no.entur.logging.cloud.rr.grpc.GrpcLoggingServerInterceptor;
-import no.entur.logging.cloud.rr.grpc.filter.GrpcServerLoggingFilters;
 import org.entur.grpc.example.GreetingRequest;
 import org.entur.grpc.example.GreetingServiceGrpc;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.lognet.springboot.grpc.context.LocalRunningGrpcPort;
-import org.slf4j.LoggerFactory;
-import org.slf4j.event.Level;
 
 import java.util.concurrent.TimeUnit;
 
@@ -31,7 +19,6 @@ public class AbstractGrpcTest {
 
 	@LocalRunningGrpcPort
 	protected int port;
-
 
 	protected final int maxOutboundMessageSize;
 	protected final int maxInboundMessageSize;

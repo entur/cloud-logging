@@ -1,27 +1,9 @@
 package no.entur.logging.cloud.gcp.spring.gcp.grpc.lognet;
 
-import com.google.protobuf.util.JsonFormat;
-import no.entur.logging.cloud.rr.grpc.GrpcLoggingServerInterceptor;
-import no.entur.logging.cloud.rr.grpc.GrpcSink;
 import no.entur.logging.cloud.rr.grpc.LogbackLogstashGrpcSink;
-import no.entur.logging.cloud.rr.grpc.filter.GrpcServerLoggingFilters;
-import no.entur.logging.cloud.rr.grpc.mapper.DefaultGrpcPayloadJsonMapper;
-import no.entur.logging.cloud.rr.grpc.mapper.DefaultMetadataJsonMapper;
-import no.entur.logging.cloud.rr.grpc.mapper.GrpcMetadataJsonMapper;
-import no.entur.logging.cloud.rr.grpc.mapper.GrpcPayloadJsonMapper;
-import no.entur.logging.cloud.rr.grpc.mapper.GrpcStatusMapper;
-import no.entur.logging.cloud.rr.grpc.mapper.JsonPrinterFactory;
-import no.entur.logging.cloud.rr.grpc.mapper.JsonPrinterStatusMapper;
-import no.entur.logging.cloud.rr.grpc.mapper.TypeRegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-
-import java.util.HashMap;
 
 
 public abstract class AbstractRequestResponseGcpGrpcLognetAutoConfiguration {

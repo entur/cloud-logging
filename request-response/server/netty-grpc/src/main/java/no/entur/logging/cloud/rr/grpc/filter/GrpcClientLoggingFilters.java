@@ -8,18 +8,18 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class GrpcServerLoggingFilters {
+public class GrpcClientLoggingFilters {
 
 	public static Builder newBuilder() {
 		return new Builder();
 	}
 
-	public static GrpcServerLoggingFilters full() {
-		return new GrpcServerLoggingFilters.Builder().fullDefaultLogging().build();
+	public static GrpcClientLoggingFilters full() {
+		return new Builder().fullDefaultLogging().build();
 	}
 
-	public static GrpcServerLoggingFilters classic() {
-		return new GrpcServerLoggingFilters.Builder().classicDefaultLogging().build();
+	public static GrpcClientLoggingFilters classic() {
+		return new Builder().classicDefaultLogging().build();
 	}
 
 	public static class Builder {
@@ -124,7 +124,7 @@ public class GrpcServerLoggingFilters {
 			return objects;
 		}
 
-		public GrpcServerLoggingFilters build() {
+		public GrpcClientLoggingFilters build() {
 			if(defaultFilter == null) {
 				throw new IllegalStateException("Expected default behaviour");
 			}
@@ -141,9 +141,10 @@ public class GrpcServerLoggingFilters {
 				serviceFilter.setMethodFilters(entry.getValue());
 			}
 
-			return new GrpcServerLoggingFilters(results, defaultFilter);
+			return new GrpcClientLoggingFilters(results, defaultFilter);
 		}
 	}
+
 
 	private static class ServiceFilter {
 
@@ -172,24 +173,21 @@ public class GrpcServerLoggingFilters {
 	protected final Map<String, ServiceFilter> serviceFilters;
 	protected final GrpcLogFilter defaultFilter;
 
-	protected GrpcServerLoggingFilters(Map<String, ServiceFilter> serviceFilters, GrpcLogFilter defaultFilter) {
+	protected GrpcClientLoggingFilters(Map<String, ServiceFilter> serviceFilters, GrpcLogFilter defaultFilter) {
 		this.serviceFilters = serviceFilters;
 		this.defaultFilter = defaultFilter;
 	}
 
 
 	public GrpcLogFilter getFilter(String serviceName, String serviceMethod) {
-
 		ServiceFilter serviceFilter = serviceFilters.get(serviceName);
 		if(serviceFilter == null) {
 			return defaultFilter;
 		}
-
 		GrpcLogFilter filter = serviceFilter.getFilter(serviceMethod);
 		if(filter != null) {
 			return filter;
 		}
-
 		return defaultFilter;
 	}
 

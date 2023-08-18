@@ -15,7 +15,6 @@ public class GrpcResponseMarker extends GrpcConnectionMarker<GrpcResponse> {
 
 	@Override
 	protected void writeFields(JsonGenerator generator) throws IOException {
-
 		generator.writeFieldName("status");
 		generator.writeNumber(message.getStatusCode().value());
 

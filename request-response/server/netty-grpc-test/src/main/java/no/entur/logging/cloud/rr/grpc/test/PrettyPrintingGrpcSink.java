@@ -77,8 +77,7 @@ public class PrettyPrintingGrpcSink extends LogbackLogstashGrpcSink {
     public void connectMessage(GrpcConnect connect) {
         final StringBuilder messageBuilder = new StringBuilder(2048);
 
-        connectMessage(connect, messageBuilder);
-        messageBuilder.append('\n');
+       connectMessage(connect, messageBuilder);
 
         logConsumer.accept(createConnectMarker(connect), messageBuilder.toString());
     }
@@ -86,9 +85,9 @@ public class PrettyPrintingGrpcSink extends LogbackLogstashGrpcSink {
     @Override
     protected void connectMessage(GrpcConnect connect, StringBuilder messageBuilder) {
         super.connectMessage(connect, messageBuilder);
-        messageBuilder.append('\n');
         Map<String, ?> headers = connect.getHeaders();
-        if(headers != null) {
+        if(headers != null && !headers.isEmpty()) {
+            messageBuilder.append('\n');
             writeHeaders(headers, messageBuilder);
         }
     }
@@ -108,10 +107,9 @@ public class PrettyPrintingGrpcSink extends LogbackLogstashGrpcSink {
         super.requestMessage(request, messageBuilder);
 
         String body = request.getBody();
-        messageBuilder.append('\n');
-
         Map<String, ?> headers = request.getHeaders();
-        if(headers != null) {
+        if(headers != null && !headers.isEmpty()) {
+            messageBuilder.append('\n');
             writeHeaders(headers, messageBuilder);
         }
 
@@ -124,9 +122,9 @@ public class PrettyPrintingGrpcSink extends LogbackLogstashGrpcSink {
     protected void responseMessage(GrpcResponse response, StringBuilder messageBuilder) {
         super.responseMessage(response, messageBuilder);
 
-        messageBuilder.append('\n');
         Map<String, ?> headers = response.getHeaders();
-        if(headers != null) {
+        if(headers != null && !headers.isEmpty()) {
+            messageBuilder.append('\n');
             writeHeaders(headers, messageBuilder);
         }
 
@@ -140,10 +138,9 @@ public class PrettyPrintingGrpcSink extends LogbackLogstashGrpcSink {
     protected void disconnectMessage(GrpcConnect connectMessage, GrpcDisconnect disconnectMessage, StringBuilder messageBuilder) {
         super.disconnectMessage(connectMessage, disconnectMessage, messageBuilder);
 
-        messageBuilder.append('\n');
-
         Map<String, ?> headers = disconnectMessage.getHeaders();
-        if(headers != null) {
+        if(headers != null && !headers.isEmpty()) {
+            messageBuilder.append('\n');
             writeHeaders(headers, messageBuilder);
         }
     }
@@ -167,6 +164,7 @@ public class PrettyPrintingGrpcSink extends LogbackLogstashGrpcSink {
             output.append(value);
             output.append('\n');
         }
+        output.setLength(output.length() - 1);
     }
 
     private void writeBody(final String body, final StringBuilder output) {

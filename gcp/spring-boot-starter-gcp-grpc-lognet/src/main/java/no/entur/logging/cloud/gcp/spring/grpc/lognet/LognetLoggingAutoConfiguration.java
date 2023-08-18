@@ -63,7 +63,6 @@ public class LognetLoggingAutoConfiguration {
         return GrpcMdcContextInterceptor.newBuilder().build();
     }
 
-
     @Configuration
     @ConditionalOnProperty(name = {"entur.logging.grpc.ondemand.enabled"}, havingValue = "true", matchIfMissing = false)
     public static class OndemandConfiguration {

@@ -15,9 +15,6 @@ public class GrpcRequestMarker extends GrpcConnectionMarker<GrpcRequest> {
 
 	@Override
 	protected void writeFields(JsonGenerator generator) throws IOException {
-//		generator.writeFieldName("method");
-//		generator.writeString(message.getMethod());
-		
 		super.writeFields(generator);
 
 		String body = message.getBody();

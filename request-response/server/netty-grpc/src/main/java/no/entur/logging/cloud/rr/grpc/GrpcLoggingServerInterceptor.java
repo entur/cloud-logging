@@ -6,6 +6,7 @@ import io.grpc.ForwardingServerCall;
 import io.grpc.ForwardingServerCallListener;
 import io.grpc.Grpc;
 import io.grpc.Metadata;
+import io.grpc.MethodDescriptor;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
@@ -110,9 +111,11 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
         }
         long timestamp = System.currentTimeMillis();
 
-        String path = '/' + call.getMethodDescriptor().getFullMethodName();
+        MethodDescriptor<ReqT, RespT> methodDescriptor = call.getMethodDescriptor();
 
-        GrpcLogFilter filter = filters.getFilter(path);
+        String path = '/' + methodDescriptor.getFullMethodName();
+
+        GrpcLogFilter filter = filters.getFilter(methodDescriptor.getServiceName(), methodDescriptor.getBareMethodName());
 
         if(!filter.isLogging()) {
             return next.startCall(call, headers);

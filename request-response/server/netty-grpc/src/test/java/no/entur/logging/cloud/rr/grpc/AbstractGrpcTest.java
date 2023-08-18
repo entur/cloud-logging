@@ -73,10 +73,10 @@ public class AbstractGrpcTest {
 				.withFilters(GrpcServerLoggingFilters
 						.newBuilder()
 						.classicDefaultLogging()
-						.fullLoggingForPrefix("/org.entur.oidc.grpc.test.GreetingService/greeting3")
-						.fullLoggingForPrefix("/org.entur.oidc.grpc.test.GreetingService/fullLogging")
-						.summaryLoggingForPrefix("/org.entur.oidc.grpc.test.GreetingService/summaryLogging")
-						.noLoggingForPrefix("/org.entur.oidc.grpc.test.GreetingService/noLogging")
+						.fullLoggingForService(GreetingServiceGrpc.SERVICE_NAME, GreetingServiceGrpc.getGreeting3Method())
+						.fullLoggingForService(GreetingServiceGrpc.SERVICE_NAME, GreetingServiceGrpc.getFullLoggingMethod())
+						.summaryLoggingForService(GreetingServiceGrpc.SERVICE_NAME, GreetingServiceGrpc.getSummaryLoggingMethod())
+						.noLoggingForService(GreetingServiceGrpc.SERVICE_NAME, GreetingServiceGrpc.getNoLoggingMethod())
 						.build())
 				.build();
 

@@ -1,8 +1,10 @@
 package no.entur.logging.cloud.gcp.spring.gcp.grpc.lognet;
 
 import com.google.protobuf.util.JsonFormat;
+import no.entur.logging.cloud.rr.grpc.GrpcLoggingClientInterceptor;
 import no.entur.logging.cloud.rr.grpc.GrpcLoggingServerInterceptor;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;
+import no.entur.logging.cloud.rr.grpc.filter.GrpcClientLoggingFilters;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcServerLoggingFilters;
 import no.entur.logging.cloud.rr.grpc.mapper.DefaultGrpcPayloadJsonMapper;
 import no.entur.logging.cloud.rr.grpc.mapper.DefaultMetadataJsonMapper;
@@ -16,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,13 +63,8 @@ public class RequestResponseGcpGrpcLognetAutoConfiguration extends AbstractReque
     }
 
     @Bean
-    @ConditionalOnMissingBean(GrpcServerLoggingFilters.class)
-    public GrpcServerLoggingFilters grpcServerLoggingFilters() {
-        return GrpcServerLoggingFilters.newBuilder().classicDefaultLogging().build();
-    }
-
-    @Bean
     @ConditionalOnMissingBean(GrpcLoggingServerInterceptor.class)
+    @ConditionalOnBean(GrpcServerLoggingFilters.class)
     public GrpcLoggingServerInterceptor grpcLoggingServerInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcServerLoggingFilters grpcServerLoggingFilters) {
         return GrpcLoggingServerInterceptor
                 .newBuilder()
@@ -74,6 +72,19 @@ public class RequestResponseGcpGrpcLognetAutoConfiguration extends AbstractReque
                 .withMetadataJsonMapper(grpcMetadataJsonMapper)
                 .withSink(grpcSink)
                 .withFilters(grpcServerLoggingFilters)
+                .build();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(GrpcLoggingServerInterceptor.class)
+    @ConditionalOnBean(GrpcClientLoggingFilters.class)
+    public GrpcLoggingClientInterceptor grpcLoggingClientInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcClientLoggingFilters grpcServiceLoggingFilters) {
+        return GrpcLoggingClientInterceptor
+                .newBuilder()
+                .withPayloadJsonMapper(grpcPayloadJsonMapper)
+                .withMetadataJsonMapper(grpcMetadataJsonMapper)
+                .withSink(grpcSink)
+                .withFilters(grpcServiceLoggingFilters)
                 .build();
     }
 
