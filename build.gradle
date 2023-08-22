@@ -142,7 +142,8 @@ configure(libraryProjects()) {
                     username = "${project.properties['entur_artifactory_user'] ?: System.env.ARTIFACTORY_USER}"
                     password = "${project.properties['entur_artifactory_password'] ?: System.env.ARTIFACTORY_PASSWORD}"
                 }
-                url = "${project.properties['entur_artifactory_contextUrl'] ?: System.env.ARTIFACTORY_URL}/entur-snapshot-local"
+
+                url = "${project.properties['entur_artifactory_contextUrl'] ?: System.env.ARTIFACTORY_URL}/${version.endsWith('SNAPSHOT') ? 'entur-snapshot-standard' : 'entur-release-standard'}"
             }
         }
     }
