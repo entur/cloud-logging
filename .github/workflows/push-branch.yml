@@ -1,4 +1,4 @@
-name: Run build on PRs
+name: Run build on branch push
 on: 
   push:
     branches-ignore:
