@@ -87,7 +87,7 @@ public class RequestResponseGcpGrpcLognetAutoConfiguration extends AbstractReque
     }
 
     @Bean
-    @ConditionalOnMissingBean(GrpcLoggingServerInterceptor.class)
+    @ConditionalOnMissingBean(GrpcLoggingClientInterceptor.class)
     public GrpcLoggingClientInterceptor grpcLoggingClientInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcClientLoggingFilters grpcServiceLoggingFilters) {
         return GrpcLoggingClientInterceptor
                 .newBuilder()
