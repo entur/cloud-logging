@@ -62,10 +62,10 @@ configure(buildProjects()) {
         commonsIoVersion = '2.13.0'
         commonsTextVersion = '1.10.0'
 
-        grpcNettyVersion = '1.55.1'
-        grpcVersion = '1.55.1'
-        grpcCommonsVersion = '2.17.0'
-        grpcProtobufVersion = '3.22.4'
+        grpcNettyVersion = '1.57.2'
+        grpcVersion = '1.57.2'
+        grpcCommonsVersion = '2.23.0'
+        grpcProtobufVersion = '3.24.1'
         jsonAssertVersion = '0.6.2'
         jsonPathVersion = '2.8.0'
         jsonSmartVersion = '2.4.11'
@@ -100,6 +100,7 @@ configure(libraryProjects()) {
     apply plugin: 'maven-publish'
 
     publishing {
+
         publications {
             maven(MavenPublication) {
                 groupId = "no.entur.logging.cloud"
@@ -107,6 +108,41 @@ configure(libraryProjects()) {
                 version = "$version"
 
                 from components.java
+
+                pom {
+                    name = project.name
+                    url = 'https://github.com/entur/cloud-logging'
+                    packaging = 'jar'
+                    inceptionYear = '2023'
+                    licenses {
+                        license {
+                            name = 'European Union Public Licence v1.2'
+                            url = 'https://www.eupl.eu/'
+                            distribution = 'repo'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = "skjolber"
+                            name = "Thomas Skjølberg"
+                            email = "thomas.rorvik.skjolberg@entur.org"
+                        }
+                    }
+                    scm {
+                        url = 'https://github.com/entur/cloud-logging'
+                        connection = 'git@github.com:entur/cloud-logging.git'
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                credentials {
+                    username = "${project.properties['entur_artifactory_user'] ?: System.env.ARTIFACTORY_USER}"
+                    password = "${project.properties['entur_artifactory_password'] ?: System.env.ARTIFACTORY_PASSWORD}"
+                }
+                url = "${project.properties['entur_artifactory_contextUrl'] ?: System.env.ARTIFACTORY_URL}/partner-snapshot-local"
             }
         }
     }

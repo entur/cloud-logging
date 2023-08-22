@@ -63,8 +63,19 @@ public class RequestResponseGcpGrpcLognetAutoConfiguration extends AbstractReque
     }
 
     @Bean
+    @ConditionalOnMissingBean(GrpcClientLoggingFilters.class)
+    public GrpcClientLoggingFilters grpcClientLoggingFilters() {
+        return GrpcClientLoggingFilters.newBuilder().classicDefaultLogging().build();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(GrpcServerLoggingFilters.class)
+    public GrpcServerLoggingFilters grpcServerLoggingFilters() {
+        return GrpcServerLoggingFilters.newBuilder().classicDefaultLogging().build();
+    }
+
+    @Bean
     @ConditionalOnMissingBean(GrpcLoggingServerInterceptor.class)
-    @ConditionalOnBean(GrpcServerLoggingFilters.class)
     public GrpcLoggingServerInterceptor grpcLoggingServerInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcServerLoggingFilters grpcServerLoggingFilters) {
         return GrpcLoggingServerInterceptor
                 .newBuilder()
@@ -77,7 +88,6 @@ public class RequestResponseGcpGrpcLognetAutoConfiguration extends AbstractReque
 
     @Bean
     @ConditionalOnMissingBean(GrpcLoggingServerInterceptor.class)
-    @ConditionalOnBean(GrpcClientLoggingFilters.class)
     public GrpcLoggingClientInterceptor grpcLoggingClientInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcClientLoggingFilters grpcServiceLoggingFilters) {
         return GrpcLoggingClientInterceptor
                 .newBuilder()
