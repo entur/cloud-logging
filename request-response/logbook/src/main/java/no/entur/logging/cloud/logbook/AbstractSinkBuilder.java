@@ -6,7 +6,6 @@ import org.slf4j.event.Level;
 
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 
 import static org.slf4j.event.EventConstants.DEBUG_INT;
 import static org.slf4j.event.EventConstants.ERROR_INT;
@@ -20,8 +19,8 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
 
     protected Level level;
 
-    protected boolean validateRequestJsonBody;
-    protected boolean validateResponseJsonBody;
+    protected BooleanSupplier requestBodyWellformedDecisionSupplier;
+    protected BooleanSupplier responseBodyWellformedDecisionSupplier;
 
     protected int maxSize = -1;
     protected int maxBodySize = -1;
@@ -32,14 +31,14 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
     }
 
     @SuppressWarnings("unchecked")
-    public B withValidateRequestJsonBody(boolean validateRequestJsonBody) {
-        this.validateRequestJsonBody = validateRequestJsonBody;
+    public B withValidateRequestJsonBodyWellformed(BooleanSupplier validateRequestJsonBodyWellformed) {
+        this.requestBodyWellformedDecisionSupplier = validateRequestJsonBodyWellformed;
         return (B) this;
     }
 
     @SuppressWarnings("unchecked")
-    public B withValidateResponseJsonBody(boolean validateResponseJsonBody) {
-        this.validateResponseJsonBody = validateResponseJsonBody;
+    public B withValidateResponseJsonBodyWellformed(BooleanSupplier validateResponseJsonBodyWellformed) {
+        this.responseBodyWellformedDecisionSupplier = validateResponseJsonBodyWellformed;
         return (B) this;
     }
 

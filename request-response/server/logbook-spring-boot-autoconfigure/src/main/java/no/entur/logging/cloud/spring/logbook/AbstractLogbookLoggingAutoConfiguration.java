@@ -2,15 +2,10 @@ package no.entur.logging.cloud.spring.logbook;
 
 import no.entur.logging.cloud.logbook.LogLevelLogstashLogbackSink;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.zalando.logbook.Sink;
-import org.zalando.logbook.autoconfigure.LogbookAutoConfiguration;
+
+import java.util.function.BooleanSupplier;
 
 public class AbstractLogbookLoggingAutoConfiguration {
 
@@ -26,14 +21,16 @@ public class AbstractLogbookLoggingAutoConfiguration {
     @Value("${entur.logging.request-response.max-body-size}")
     protected int maxBodySize;
 
-    protected LogLevelLogstashLogbackSink createMachineReadbleSink(Logger logger, Level level) {
+    // TODO parameter for sync vs async validation of JSON body wellformedness
+
+    protected LogLevelLogstashLogbackSink createMachineReadbleSink(Logger logger, Level level, BooleanSupplier validateRequestJsonBodyWellformed, BooleanSupplier validateResponseJsonBodyWellformed) {
         return LogLevelLogstashLogbackSink.newBuilder()
                 .withLogger(logger)
                 .withLogLevel(level)
                 .withMaxBodySize(maxBodySize)
                 .withMaxSize(maxSize)
-                .withValidateRequestJsonBody(true)
-                .withValidateResponseJsonBody(false)
+                .withValidateRequestJsonBodyWellformed(validateRequestJsonBodyWellformed)
+                .withValidateResponseJsonBodyWellformed(validateResponseJsonBodyWellformed)
                 .build();
     }
 

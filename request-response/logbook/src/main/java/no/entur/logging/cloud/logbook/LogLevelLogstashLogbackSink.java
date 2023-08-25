@@ -1,8 +1,6 @@
 package no.entur.logging.cloud.logbook;
 
-import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
-import org.slf4j.event.Level;
 import org.zalando.logbook.*;
 
 import java.util.function.BiConsumer;
@@ -29,20 +27,20 @@ public class LogLevelLogstashLogbackSink extends AbstractLogLevelLogstashLogback
             if(level == null) {
                 throw new IllegalStateException("Expected log level");
             }
-            return new LogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), validateRequestJsonBody, validateResponseJsonBody, maxBodySize, maxSize);
+            return new LogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), requestBodyWellformedDecisionSupplier, responseBodyWellformedDecisionSupplier, maxBodySize, maxSize);
         }
     }
 
-    public LogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, boolean validateRequestJsonBody, boolean validateResponseJsonBody, int maxBodySize, int maxSize) {
-        super(logConsumer, logLevelEnabled, validateRequestJsonBody, validateResponseJsonBody, maxBodySize, maxSize);
+    public LogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, BooleanSupplier requestBodyWellformedDecisionSupplier, BooleanSupplier responseBodyWellformedDecisionSupplier, int maxBodySize, int maxSize) {
+        super(logConsumer, logLevelEnabled, requestBodyWellformedDecisionSupplier, responseBodyWellformedDecisionSupplier, maxBodySize, maxSize);
     }
 
     public Marker createRequestMarker(HttpRequest request) {
-        return new RequestSingleFieldAppendingMarker(request, validateRequestJsonBody, maxBodySize, maxSize);
+        return new RequestSingleFieldAppendingMarker(request, requestBodyWellformedDecisionSupplier.getAsBoolean(), maxBodySize, maxSize);
     }
 
     public Marker createResponseMarker(Correlation correlation, HttpResponse response) {
-        return new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), validateRequestJsonBody, maxBodySize, maxSize);
+        return new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), requestBodyWellformedDecisionSupplier.getAsBoolean(), maxBodySize, maxSize);
     }
 
 }

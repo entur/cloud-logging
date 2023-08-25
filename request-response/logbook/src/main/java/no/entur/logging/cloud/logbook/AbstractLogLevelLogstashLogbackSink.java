@@ -12,16 +12,16 @@ import java.util.function.BooleanSupplier;
 
 public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLevelSink {
 
-    protected final boolean validateRequestJsonBody;
-    protected final boolean validateResponseJsonBody;
+    protected final BooleanSupplier requestBodyWellformedDecisionSupplier;
+    protected final BooleanSupplier responseBodyWellformedDecisionSupplier;
 
     protected final int maxBodySize;
     protected final int maxSize;
 
-    public AbstractLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, boolean validateRequestJsonBody, boolean validateResponseJsonBody, int maxBodySize, int maxSize) {
+    public AbstractLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, BooleanSupplier requestBodyWellformedDecisionSupplier, BooleanSupplier responseBodyWellformedDecisionSupplier, int maxBodySize, int maxSize) {
         super(logLevelEnabled, logConsumer);
-        this.validateRequestJsonBody = validateRequestJsonBody;
-        this.validateResponseJsonBody = validateResponseJsonBody;
+        this.requestBodyWellformedDecisionSupplier = requestBodyWellformedDecisionSupplier;
+        this.responseBodyWellformedDecisionSupplier = responseBodyWellformedDecisionSupplier;
         this.maxBodySize = maxBodySize;
         this.maxSize = maxSize;
     }

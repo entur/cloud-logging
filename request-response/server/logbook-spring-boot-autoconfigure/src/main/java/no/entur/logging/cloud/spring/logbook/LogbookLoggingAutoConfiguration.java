@@ -1,6 +1,5 @@
 package no.entur.logging.cloud.spring.logbook;
 
-import no.entur.logging.cloud.logbook.LogLevelLogstashLogbackSink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -18,16 +17,29 @@ import org.zalando.logbook.autoconfigure.LogbookAutoConfiguration;
 @Configuration
 public class LogbookLoggingAutoConfiguration extends AbstractLogbookLoggingAutoConfiguration {
 
+    @Bean
+    @ConditionalOnMissingBean(RequestBodyWellformedDecisionSupplier.class)
+    public RequestBodyWellformedDecisionSupplier requestBodyWellformedDecisionSupplier() {
+        return () -> true;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ResponseBodyWellformedDecisionSupplier.class)
+    public ResponseBodyWellformedDecisionSupplier responseBodyWellformedDecisionSupplier() {
+        // assume we always output valid JSON
+        return () -> false;
+    }
+
     // ignore HttpLogFormatter and HttpLogWriter
     @Bean
     @ConditionalOnMissingBean(Sink.class)
-    public Sink sink() {
+    public Sink sink(RequestBodyWellformedDecisionSupplier requestBodyWellformedDecisionSupplier, ResponseBodyWellformedDecisionSupplier responseBodyWellformedDecisionSupplier) {
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = parseLevel(loggerLevel);
 
-        // TODO externalize decision on whether to trust incoming JSON is well-formed
-        // for example an authorized client would be trusted
+        // externalized decision on whether to trust incoming JSON is well-formed
+        // for example an authorized client could be trusted
 
-        return createMachineReadbleSink(logger, level);
+        return createMachineReadbleSink(logger, level, requestBodyWellformedDecisionSupplier, responseBodyWellformedDecisionSupplier);
     }
 }
