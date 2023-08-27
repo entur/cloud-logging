@@ -4,13 +4,14 @@ public class OndemandHttpTrigger {
 
     private boolean enabled = true;
 
-    private OndemandHttpStatusCode statusCode = new OndemandHttpStatusCode();
+    private OndemandHttpStatus statusCode = new OndemandHttpStatus();
 
-    public void setStatusCode(OndemandHttpStatusCode statusCode) {
+
+    public void setStatusCode(OndemandHttpStatus statusCode) {
         this.statusCode = statusCode;
     }
 
-    public OndemandHttpStatusCode getStatusCode() {
+    public OndemandHttpStatus getStatusCode() {
         return statusCode;
     }
 
@@ -21,4 +22,5 @@ public class OndemandHttpTrigger {
     public boolean isEnabled() {
         return enabled;
     }
+
 }

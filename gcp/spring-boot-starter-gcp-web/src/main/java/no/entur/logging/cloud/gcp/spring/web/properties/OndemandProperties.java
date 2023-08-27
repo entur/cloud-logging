@@ -6,13 +6,18 @@ import org.springframework.core.Ordered;
 import java.util.ArrayList;
 import java.util.List;
 
-@ConfigurationProperties(prefix = "no.entur.logging.http.ondemand")
+@ConfigurationProperties(prefix = "entur.logging.http.ondemand")
 public class OndemandProperties {
 
     private boolean enabled;
     private OndemandSuccess success = new OndemandSuccess();
 
     private OndemandFailure failure = new OndemandFailure();
+
+    public OndemandProperties() {
+        // set default value
+        failure.getHttp().getStatusCode().setEqualOrHigherThan(400);
+    }
 
     private int filterOrder = Ordered.HIGHEST_PRECEDENCE;
 
