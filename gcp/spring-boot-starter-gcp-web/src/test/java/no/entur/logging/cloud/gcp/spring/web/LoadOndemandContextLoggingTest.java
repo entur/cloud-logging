@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @EnableAutoConfiguration
 @TestPropertySource(properties = {
         "entur.logging.http.ondemand.enabled=true",
+        "entur.logging.http.ondemand.failure.http.statusCode.equalOrHigherThan=400",
 
 })
 public class LoadOndemandContextLoggingTest {

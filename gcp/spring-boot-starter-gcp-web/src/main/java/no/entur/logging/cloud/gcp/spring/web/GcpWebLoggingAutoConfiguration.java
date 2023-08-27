@@ -13,16 +13,18 @@ import no.entur.logging.cloud.appender.scope.predicate.HigherOrEqualToLogLevelPr
 import no.entur.logging.cloud.appender.scope.predicate.LoggerNamePrefixHigherOrEqualToLogLevelPredicate;
 import no.entur.logging.cloud.gcp.micrometer.StackdriverLogbackMetrics;
 import no.entur.logging.cloud.gcp.spring.web.properties.OndemandFailure;
-import no.entur.logging.cloud.gcp.spring.web.properties.OndemandHttpStatusCode;
+import no.entur.logging.cloud.gcp.spring.web.properties.OndemandHttpStatus;
 import no.entur.logging.cloud.gcp.spring.web.properties.OndemandHttpTrigger;
 import no.entur.logging.cloud.gcp.spring.web.properties.OndemandLogLevelTrigger;
 import no.entur.logging.cloud.gcp.spring.web.properties.OndemandPath;
 import no.entur.logging.cloud.gcp.spring.web.properties.OndemandProperties;
 import no.entur.logging.cloud.gcp.spring.web.properties.OndemandSuccess;
-import no.entur.logging.cloud.gcp.spring.web.scope.HttpStatusAtLeastOrExcludePredicate;
+import no.entur.logging.cloud.gcp.spring.web.scope.HttpStatusAtLeastOrNotPredicate;
 import no.entur.logging.cloud.gcp.spring.web.scope.HttpStatusAtLeastPredicate;
 import no.entur.logging.cloud.gcp.spring.web.scope.HttpLoggingScopeFilter;
 import no.entur.logging.cloud.gcp.spring.web.scope.HttpLoggingScopeFilters;
+import no.entur.logging.cloud.gcp.spring.web.scope.HttpStatusEqualToPredicate;
+import no.entur.logging.cloud.gcp.spring.web.scope.HttpStatusNotEqualToPredicate;
 import no.entur.logging.cloud.gcp.spring.web.scope.ThreadLocalLoggingScopeFactory;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -34,7 +36,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -71,7 +72,7 @@ public class GcpWebLoggingAutoConfiguration {
 
             HttpLoggingScopeFilters filters = new HttpLoggingScopeFilters();
             
-            HttpLoggingScopeFilter defaultFilter = toFilter(properties.getSuccess(), properties.getFailure());
+            HttpLoggingScopeFilter defaultFilter = toFilter(null, properties.getSuccess(), properties.getFailure());
             filters.setDefaultFilter(defaultFilter);
 
             List<OndemandPath> paths = properties.getPaths();
@@ -79,7 +80,7 @@ public class GcpWebLoggingAutoConfiguration {
                 if(!path.isEnabled()) {
                     continue;
                 }
-                HttpLoggingScopeFilter filter = toFilter(path.getSuccess(), path.getFailure());
+                HttpLoggingScopeFilter filter = toFilter(path.getMatcher(), path.getSuccess(), path.getFailure());
                 RequestMatcher requestMatcher = AntPathRequestMatcher.antMatcher(path.getMatcher());
                 filters.addFilter(requestMatcher, filter);
             }
@@ -114,7 +115,7 @@ public class GcpWebLoggingAutoConfiguration {
             throw new IllegalStateException("Expected appender type " + LoggingScopeAsyncAppender.class.getName());
         }
 
-        public HttpLoggingScopeFilter toFilter(OndemandSuccess success, OndemandFailure failure) {
+        public HttpLoggingScopeFilter toFilter(String matcher, OndemandSuccess success, OndemandFailure failure) {
             HttpLoggingScopeFilter filter = new HttpLoggingScopeFilter();
 
             Level alwaysLogLevel = toLevel(success.getLevel());
@@ -125,13 +126,52 @@ public class GcpWebLoggingAutoConfiguration {
 
             OndemandHttpTrigger httpStatusCodeTrigger = failure.getHttp();
             if(httpStatusCodeTrigger.isEnabled()) {
-                OndemandHttpStatusCode statusCode = httpStatusCodeTrigger.getStatusCode();
+                OndemandHttpStatus statusCode = httpStatusCodeTrigger.getStatusCode();
 
-                List<Integer> except = statusCode.getExcept();
-                if(except.isEmpty()) {
-                    filter.setHttpStatusFailurePredicate(new HttpStatusAtLeastPredicate(statusCode.getEqualOrHigherThan()));
+                int equalOrHigherThan = statusCode.getEqualOrHigherThan();
+                List<Integer> notEqualTo = statusCode.getNotEqualTo();
+                List<Integer> equalTo = statusCode.getEqualTo();
+
+                if(!notEqualTo.isEmpty() && !equalTo.isEmpty()) {
+                    throw new IllegalStateException("Status code equal-to cannot be combined with not-equal-to");
+                }
+
+                // if equal-or-higher-to is configured, both equal-to and not-equal-to applies to the
+                // low or high range of the equal-or-higher-to limit
+
+                if(equalOrHigherThan == -1 && notEqualTo.isEmpty() && !equalTo.isEmpty()) {
+                    // only equal to
+                    filter.setHttpStatusFailurePredicate(new HttpStatusEqualToPredicate(equalTo));
+
+                    LOGGER.info("Configure {} on-demand logging for status codes equal to " + equalTo, matcher == null ? "default" : matcher);
+                } else if(equalOrHigherThan == -1 && equalTo.isEmpty() && !notEqualTo.isEmpty()) {
+                    // only not equal to
+                    LOGGER.info("Configure {} on-demand logging for status codes not equal to " + notEqualTo, matcher == null ? "default" : matcher);
+                    filter.setHttpStatusFailurePredicate(new HttpStatusNotEqualToPredicate(notEqualTo));
+                } else if(equalOrHigherThan != -1 && equalTo.isEmpty() && notEqualTo.isEmpty()) {
+                    // only higher than
+                    LOGGER.info("Configure {} on-demand logging for status codes at least " + equalOrHigherThan, matcher == null ? "default" : matcher);
+
+                    filter.setHttpStatusFailurePredicate(new HttpStatusAtLeastPredicate(equalOrHigherThan));
+                } else if(equalOrHigherThan != -1) {
+
+                    for (Integer integer : notEqualTo) {
+                        if(integer < equalOrHigherThan) {
+                            throw new IllegalStateException("Not-equal-to " + integer + " is already included in higher-or-equal-to " + equalOrHigherThan);
+                        }
+                    }
+
+                    for (Integer integer : equalTo) {
+                        if(integer >= equalOrHigherThan) {
+                            throw new IllegalStateException("Equal-to " + integer + " is already included in higher-or-equal-to " + equalOrHigherThan);
+                        }
+                    }
+
+                    LOGGER.info("Configure {} on-demand logging for status codes at least " + equalOrHigherThan + ", excluding " + notEqualTo + " or including " + equalTo + ")", matcher == null ? "default" : matcher);
+
+                    filter.setHttpStatusFailurePredicate(new HttpStatusAtLeastOrNotPredicate(statusCode.getEqualOrHigherThan(), equalTo, notEqualTo));
                 } else {
-                    filter.setHttpStatusFailurePredicate(new HttpStatusAtLeastOrExcludePredicate(statusCode.getEqualOrHigherThan(), new HashSet<>(except)));
+                    filter.setHttpStatusFailurePredicate((e) -> false);
                 }
             } else {
                 filter.setHttpStatusFailurePredicate((e) -> false);
