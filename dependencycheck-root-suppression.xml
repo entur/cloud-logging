@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+
+    <suppress>
+        <!-- snakeyaml -->
+        <cve>CVE-2022-1471</cve>
+    </suppress>
+    <suppress>
+        <packageUrl regex="true">^pkg:maven/logging\-new\.trace\.server/correlation\-id\-trace\-grpc\-netty@.*$</packageUrl>
+        <cpe>cpe:/a:grpc:grpc</cpe>
+    </suppress>
+    <suppress>
+        <packageUrl regex="true">^pkg:maven/logging\-new\.trace/mdc\-context\-grpc\-netty@.*$</packageUrl>
+        <cpe>cpe:/a:grpc:grpc</cpe>
+    </suppress>
+    <suppress>
+        <packageUrl regex="true">^pkg:maven/logging\-new\.request\-response\.server/netty\-grpc@.*$</packageUrl>
+        <cpe>cpe:/a:grpc:grpc</cpe>
+    </suppress>
+    <suppress>
+       <packageUrl regex="true">^pkg:maven/logging\-new\.gcp/request\-response\-spring\-boot\-starter\-gcp\-grpc\-lognet@.*$</packageUrl>
+       <cpe>cpe:/a:grpc:grpc</cpe>
+    </suppress>
+    <suppress>
+       <packageUrl regex="true">^pkg:maven/logging\-new\.gcp/spring\-boot\-starter\-gcp\-grpc\-lognet@.*$</packageUrl>
+       <cpe>cpe:/a:grpc:grpc</cpe>
+    </suppress>
+    <suppress>
+        <packageUrl regex="true">^pkg:maven/logging\-new\.request\-response\.server/netty\-grpc\-test@.*$</packageUrl>
+        <cpe>cpe:/a:grpc:grpc</cpe>
+    </suppress>    
+</suppressions>

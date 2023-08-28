@@ -106,7 +106,7 @@ public class CompositeConsoleAppender<E extends ILoggingEvent> extends ch.qos.lo
         if (byteArray == null || byteArray.length == 0)
             return;
 
-        lock.lock();
+        streamWriteLock.lock();
         try {
             OutputStream outputStream = getOutputStream();
             outputStream.write(byteArray);
@@ -114,7 +114,7 @@ public class CompositeConsoleAppender<E extends ILoggingEvent> extends ch.qos.lo
                 outputStream.flush();
             }
         } finally {
-            lock.unlock();
+            streamWriteLock.unlock();
         }
     }
 
