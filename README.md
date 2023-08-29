@@ -1,4 +1,3 @@
-
 # cloud-logging
 Entur cloud logging libraries. Mostly based on
 
