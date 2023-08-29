@@ -203,8 +203,26 @@ testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-
 
 </details>
 
-
 # See also
+
+## OWASP Dependency check supressions
+Avoid [OWASP dependency supressions](dependencycheck-root-suppression.xml) flagging our dependencies as dependencies.
+
+<details>
+  <summary>OWASP dependency check</summary>
+    <suppress>
+        <packageUrl regex="true">^pkg:maven/no\.entur\.logging\.cloud\/[a-z\.\-]*@.*$</packageUrl>
+        <cpe>cpe:/a:grpc:grpc</cpe>
+    </suppress>
+    <suppress>
+        <packageUrl regex="true">^pkg:maven/no\.entur\.abt\/[a-z\.\-]*@.*$</packageUrl>
+        <cpe>cpe:/a:grpc:grpc</cpe>
+    </suppress>
+    <suppress>
+        <cpe>cpe:/a:utils_project:utils</cpe>
+    </suppress>
+</details>
+
 
 ## Testing
 See [test-logback-junit](../test/test-logback-junit) for basic JUnit test support.
