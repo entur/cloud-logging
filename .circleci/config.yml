@@ -101,6 +101,7 @@ jobs:
     executor: java_17
     steps:
       - checkout
+      - configure_git_for_commit
       - with_cache:
           steps:
             - run:
