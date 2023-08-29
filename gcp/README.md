@@ -40,6 +40,71 @@ Logbook request-response-logging for Stackdriver.
 ## request-response-spring-boot-starter-gcp-web-test
 Logbook request-response-logging for local development.
 
+## Spring Web artifact coordinates
+Import the below artifacts:
+
+<details>
+  <summary>Maven coordinates</summary>
+
+Add
+
+```xml
+<cloud-logging.version>1.0.x</cloud-logging>
+```
+
+and
+
+```xml
+<dependency>
+    <groupId>no.entur.logging.cloud</groupId>
+    <artifactId>spring-boot-starter-gcp-web</artifactId>
+    <version>${cloud-logging.version}</version>
+</dependency>
+<dependency>
+    <groupId>no.entur.logging.cloud</groupId>
+    <artifactId>request-response-spring-boot-starter-gcp-web</artifactId>
+    <version>${cloud-logging.version}</version>
+</dependency>
+<dependency>
+    <groupId>no.entur.logging.cloud</groupId>
+    <artifactId>spring-boot-starter-gcp-web-test</artifactId>
+    <version>${cloud-logging.version}</version>
+    <scope>test</scope>
+</dependency>
+<dependency>
+  <groupId>no.entur.logging.cloud</groupId>
+  <artifactId>request-response-spring-boot-starter-gcp-web-test</artifactId>
+  <version>${cloud-logging.version}</version>
+  <scope>test</scope>
+</dependency>
+```
+
+</details>
+
+or
+
+<details>
+  <summary>Gradle coordinates</summary>
+
+For
+
+```groovy
+ext {
+   cloudLoggingVersion = '1.0.x'
+}
+```
+
+add
+
+```groovy
+implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web:${cloudLoggingVersion}")
+implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web:${cloudLoggingVersion}")
+testImplementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test:${cloudLoggingVersion}")
+testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test:${cloudLoggingVersion}")
+```
+
+</details>
+
 # gRPC support
 
 ## spring-boot-starter-gcp-grpc-lognet
@@ -71,6 +136,73 @@ gRPC request-response-logging for Stackdriver.
 
 ## request-response-spring-boot-starter-gcp-grpc-lognet-test
 gRPC request-response-logging for local development.
+
+
+## gRPC artifact coordinates
+Import the below artifacts:
+
+<details>
+  <summary>Maven coordinates</summary>
+
+Add
+
+```xml
+<cloud-logging.version>1.0.x</cloud-logging>
+```
+
+and
+
+```xml
+<dependency>
+    <groupId>no.entur.logging.cloud</groupId>
+    <artifactId>spring-boot-starter-gcp-grpc-lognet</artifactId>
+    <version>${cloud-logging.version}</version>
+</dependency>
+<dependency>
+    <groupId>no.entur.logging.cloud</groupId>
+    <artifactId>request-response-spring-boot-starter-gcp-grpc-lognet</artifactId>
+    <version>${cloud-logging.version}</version>
+</dependency>
+<dependency>
+    <groupId>no.entur.logging.cloud</groupId>
+    <artifactId>spring-boot-starter-gcp-gcp-grpc-lognet-test</artifactId>
+    <version>${cloud-logging.version}</version>
+    <scope>test</scope>
+</dependency>
+<dependency>
+  <groupId>no.entur.logging.cloud</groupId>
+  <artifactId>request-response-spring-boot-starter-gcp-grpc-lognet-test</artifactId>
+  <version>${cloud-logging.version}</version>
+  <scope>test</scope>
+</dependency>
+```
+
+</details>
+
+or
+
+<details>
+  <summary>Gradle coordinates</summary>
+
+For
+
+```groovy
+ext {
+   cloudLoggingVersion = '3.0.8'
+}
+```
+
+add
+
+```groovy
+implementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-lognet:${cloudLoggingVersion}")
+implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-lognet:${cloudLoggingVersion}")
+testImplementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-lognet-test:${cloudLoggingVersion}")
+testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-lognet-test:${cloudLoggingVersion}")
+```
+
+</details>
+
 
 # See also
 
