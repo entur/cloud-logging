@@ -107,8 +107,6 @@ jobs:
                 name: Create release tag (without pushing)
                 command: |
                   ./gradlew -b version.gradle toReleaseVersion --info --stacktrace
-                  # burn current version into java lib
-                  ./gradlew copyVersion
                   git add .
                   git commit -m "Perform release [ci skip]"
                   GRADLE_VERSION=$(cat ./gradle.properties | grep "version=" | cut -d'=' -f2)
@@ -117,8 +115,6 @@ jobs:
                 name: Prepare for next development version (without pushing)
                 command: |
                   ./gradlew -b version.gradle nextPatchSnapshotVersion --info --stacktrace
-                  # burn current version into java lib
-                  ./gradlew copyVersion
                   git add .
                   git commit -m "Prepare next development version [ci skip]"
             - run:
