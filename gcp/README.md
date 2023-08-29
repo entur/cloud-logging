@@ -206,7 +206,7 @@ testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-
 # See also
 
 ## OWASP Dependency check supressions
-Avoid [OWASP dependency supressions](dependencycheck-root-suppression.xml) flagging our dependencies as dependencies.
+Avoid [OWASP dependency supressions](dependencycheck-root-suppression.xml) flagging our dependencies as other people's dependencies.
 
 <details>
   <summary>Suppress</summary>
