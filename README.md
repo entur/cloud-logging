@@ -72,6 +72,8 @@ Stackdriver
  * JSON encoder
  * Max size (for request-response log statements)
 
+See [GCP](gcp) for further details.
+
 ## Azure
 TODO
 
