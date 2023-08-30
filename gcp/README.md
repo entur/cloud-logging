@@ -165,7 +165,7 @@ and
 </dependency>
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>spring-boot-starter-gcp-gcp-grpc-lognet-test</artifactId>
+    <artifactId>spring-boot-starter-gcp-grpc-lognet-test</artifactId>
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
