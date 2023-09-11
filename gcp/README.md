@@ -29,7 +29,7 @@ The logger assumes an ANSI-capable console / terminal during testing / building.
 Toggle between modes using the `CompositeConsoleOutputControl` singleton:
 
 ```
-try (CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
+try (Closable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
 
 }
 ```
@@ -126,7 +126,7 @@ The logger assumes an ANSI-capable console / terminal during testing / building.
 Toggle between modes using the `CompositeConsoleOutputControl` singleton:
 
 ```
-try (CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
+try (Closable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
 
 }
 ```
