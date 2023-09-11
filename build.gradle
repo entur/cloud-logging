@@ -145,7 +145,11 @@ configure(libraryProjects()) {
                     password = "${project.properties['entur_artifactory_password'] ?: System.env.ARTIFACTORY_PASSWORD}"
                 }
 
-                url = "${project.properties['entur_artifactory_contextUrl'] ?: System.env.ARTIFACTORY_URL}/${version.endsWith('SNAPSHOT') ? 'entur-snapshot-standard' : 'entur-release-standard'}"
+                if (project.hasProperty("publishTarget") && project.getProperty("publishTarget").equals("partner")) {
+                    url = "${project.properties['entur_artifactory_contextUrl'] ?: System.env.ARTIFACTORY_URL}/${version.endsWith('SNAPSHOT') ? 'partner-snapshot' : 'partner-release'}"
+                } else {
+                    url = "${project.properties['entur_artifactory_contextUrl'] ?: System.env.ARTIFACTORY_URL}/${version.endsWith('SNAPSHOT') ? 'entur-snapshot-standard' : 'entur-release-standard'}"
+                }
             }
         }
     }
