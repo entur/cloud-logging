@@ -8,11 +8,11 @@
     <if condition='isDefined("entur.logging.grpc.ondemand.enabled") &#038;&#038; property("entur.logging.grpc.ondemand.enabled").equals("true")'>
         <then>
             <!-- custom MDC handling for gRPC + scope based filter -->
-            <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.appender.scope.GrpcLoggingScopeMdcContextAsyncAppender">
+            <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.gcp.spring.grpc.lognet.scope.GrpcLoggingScopeMdcContextAsyncAppender">
                 <discardingThreshold>0</discardingThreshold>
                 <maxFlushTime>0</maxFlushTime>
                 <appender-ref ref="STDOUT" />
-                <loggingScopeFactory class="no.entur.logging.cloud.appender.scope.GrpcContextLoggingScopeFactory"/>
+                <loggingScopeFactory class="no.entur.logging.cloud.gcp.spring.grpc.lognet.scope.GrpcContextLoggingScopeFactory"/>
             </appender>
         </then>
         <else>

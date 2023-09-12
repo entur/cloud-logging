@@ -8,6 +8,8 @@ dependencies {
 
     api("org.slf4j:slf4j-api:${slf4jVersion}")
     api ("org.codehaus.janino:commons-compiler:${janinoVersion}")
+    api ("org.codehaus.janino:commons-compiler-jdk:${janinoVersion}")
+    api ("org.codehaus.janino:janino:${janinoVersion}")
     api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
     api("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
     api("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
