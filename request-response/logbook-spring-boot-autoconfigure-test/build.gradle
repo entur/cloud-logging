@@ -3,7 +3,7 @@ dependencies {
     api project(":request-response:logbook")
     api project(":request-response:logbook-test")
     api project(":test:test-logback")
-    api project(":request-response:server:logbook-spring-boot-autoconfigure")
+    api project(":request-response:logbook-spring-boot-autoconfigure")
 
     api("org.zalando:logbook-api:${logbookVersion}")
     api("org.zalando:logbook-core:${logbookVersion}")

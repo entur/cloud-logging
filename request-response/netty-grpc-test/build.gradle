@@ -1,6 +1,6 @@
 
 dependencies {
-    api project(':request-response:server:netty-grpc')
+    api project(':request-response:netty-grpc')
     api project(":test:test-logback")
 
     api ("com.github.skjolber.jackson:jackson-syntax-highlight:${jacksonSyntaxHighlightVersion}")

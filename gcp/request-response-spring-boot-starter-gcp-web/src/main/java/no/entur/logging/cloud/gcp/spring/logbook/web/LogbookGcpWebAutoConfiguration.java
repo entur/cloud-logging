@@ -16,13 +16,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Configuration
 @AutoConfigureBefore(LogbookLoggingAutoConfiguration.class)
-@PropertySource(value = "classpath:logbook.gcp.properties", ignoreResourceNotFound = false)
+@PropertySource(value = "classpath:logbook.gcp.web.properties", ignoreResourceNotFound = false)
 public class LogbookGcpWebAutoConfiguration {
 
     /**
      *
      * Make it so that request which contain well-formed JSON does not trigger a
-     * validation of wellformed JSON when creation of the log statement.
+     * validation of wellformed JSON on creation of the log statement.
      *
      * This is a considerable reduction in the work on the logger thread.
      *
