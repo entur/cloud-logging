@@ -3,8 +3,8 @@ package no.entur.logging.cloud.spring.logbook.test;
 
 import com.github.skjolber.jackson.jsh.AnsiSyntaxHighlight;
 import com.github.skjolber.jackson.jsh.DefaultSyntaxHighlighter;
-import no.entur.logging.cloud.logbook.ValidateWellformedRequestBodyDecisionSupplier;
-import no.entur.logging.cloud.logbook.ValidateWellformedResponseBodyDecisionSupplier;
+import no.entur.logging.cloud.logbook.WellformedRequestBodyDecisionSupplier;
+import no.entur.logging.cloud.logbook.WellformedResponseBodyDecisionSupplier;
 import no.entur.logging.cloud.logbook.logbook.test.CompositeSink;
 import no.entur.logging.cloud.logbook.logbook.test.PrettyPrintingLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.logbook.test.PrettyPrintingSink;
@@ -30,11 +30,11 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
 
     @Bean
     @ConditionalOnMissingBean(Sink.class)
-    public Sink sink(ValidateWellformedRequestBodyDecisionSupplier validateWellformedRequestBodyDecisionSupplier, ValidateWellformedResponseBodyDecisionSupplier validateWellformedResponseBodyDecisionSupplier) {
+    public Sink sink(WellformedRequestBodyDecisionSupplier wellformedRequestBodyDecisionSupplier, WellformedResponseBodyDecisionSupplier wellformedResponseBodyDecisionSupplier) {
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
 
-        Sink machineReadableSink = createMachineReadbleSink(logger, level, validateWellformedRequestBodyDecisionSupplier, validateWellformedResponseBodyDecisionSupplier);
+        Sink machineReadableSink = createMachineReadbleSink(logger, level, wellformedRequestBodyDecisionSupplier, wellformedResponseBodyDecisionSupplier);
 
         // emulate default intellij color scheme
         DefaultSyntaxHighlighter highlighter = DefaultSyntaxHighlighter.newBuilder()
@@ -49,8 +49,8 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
                 .withLogLevel(level)
                 .withMaxBodySize(maxBodySize)
                 .withMaxSize(maxSize)
-                .withValidateRequestJsonBodyWellformed(validateWellformedRequestBodyDecisionSupplier)
-                .withValidateResponseJsonBodyWellformed(validateWellformedResponseBodyDecisionSupplier)
+                .withValidateRequestJsonBodyWellformed(wellformedRequestBodyDecisionSupplier)
+                .withValidateResponseJsonBodyWellformed(wellformedResponseBodyDecisionSupplier)
                 .withSyntaxHighlighter(highlighter)
                 .build();
 
@@ -59,8 +59,8 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
                 .withLogLevel(level)
                 .withMaxBodySize(maxBodySize)
                 .withMaxSize(maxSize)
-                .withValidateRequestJsonBodyWellformed(validateWellformedRequestBodyDecisionSupplier)
-                .withValidateResponseJsonBodyWellformed(validateWellformedResponseBodyDecisionSupplier)
+                .withValidateRequestJsonBodyWellformed(wellformedRequestBodyDecisionSupplier)
+                .withValidateResponseJsonBodyWellformed(wellformedResponseBodyDecisionSupplier)
                 .build();
 
         return CompositeSink.newBuilder()

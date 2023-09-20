@@ -1,7 +1,7 @@
 package no.entur.logging.cloud.spring.logbook;
 
-import no.entur.logging.cloud.logbook.ValidateWellformedRequestBodyDecisionSupplier;
-import no.entur.logging.cloud.logbook.ValidateWellformedResponseBodyDecisionSupplier;
+import no.entur.logging.cloud.logbook.WellformedRequestBodyDecisionSupplier;
+import no.entur.logging.cloud.logbook.WellformedResponseBodyDecisionSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -20,14 +20,14 @@ import org.zalando.logbook.autoconfigure.LogbookAutoConfiguration;
 public class LogbookLoggingAutoConfiguration extends AbstractLogbookLoggingAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(ValidateWellformedRequestBodyDecisionSupplier.class)
-    public ValidateWellformedRequestBodyDecisionSupplier validateWellformedRequestBodyDecisionSupplier() {
+    @ConditionalOnMissingBean(WellformedRequestBodyDecisionSupplier.class)
+    public WellformedRequestBodyDecisionSupplier validateWellformedRequestBodyDecisionSupplier() {
         return () -> () -> false;
     }
 
     @Bean
-    @ConditionalOnMissingBean(ValidateWellformedResponseBodyDecisionSupplier.class)
-    public ValidateWellformedResponseBodyDecisionSupplier validateWellformedResponseBodyDecisionSupplier() {
+    @ConditionalOnMissingBean(WellformedResponseBodyDecisionSupplier.class)
+    public WellformedResponseBodyDecisionSupplier validateWellformedResponseBodyDecisionSupplier() {
         // assume we always output valid JSON
         return () -> () -> true;
     }
@@ -35,13 +35,13 @@ public class LogbookLoggingAutoConfiguration extends AbstractLogbookLoggingAutoC
     // ignore HttpLogFormatter and HttpLogWriter
     @Bean
     @ConditionalOnMissingBean(Sink.class)
-    public Sink sink(ValidateWellformedRequestBodyDecisionSupplier validateWellformedRequestBodyDecisionSupplier, ValidateWellformedResponseBodyDecisionSupplier validateWellformedResponseBodyDecisionSupplier) {
+    public Sink sink(WellformedRequestBodyDecisionSupplier wellformedRequestBodyDecisionSupplier, WellformedResponseBodyDecisionSupplier wellformedResponseBodyDecisionSupplier) {
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = parseLevel(loggerLevel);
 
         // externalized decision on whether to trust incoming JSON is well-formed
         // for example an authorized client could be trusted
 
-        return createMachineReadbleSink(logger, level, validateWellformedRequestBodyDecisionSupplier, validateWellformedResponseBodyDecisionSupplier);
+        return createMachineReadbleSink(logger, level, wellformedRequestBodyDecisionSupplier, wellformedResponseBodyDecisionSupplier);
     }
 }

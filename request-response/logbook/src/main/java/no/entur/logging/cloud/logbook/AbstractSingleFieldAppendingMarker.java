@@ -65,11 +65,11 @@ public abstract class AbstractSingleFieldAppendingMarker<T extends HttpMessage> 
             int max = Math.min(maxSize, maxBodySize);
 
             try {
-                boolean validateJsonBody = !this.wellformed.getAsBoolean();
+                boolean confirmedWellformedJsonBody = this.wellformed.getAsBoolean();
 
                 JsonFactory factory = generator.getCodec().getFactory();
                 if(body.length < max) {
-                    boolean escape = validateJsonBody && !isWellformedJson(body, factory);
+                    boolean escape = !confirmedWellformedJsonBody && !isWellformedJson(body, factory);
 
                     if (escape) {
                         // escape body as string for debugging

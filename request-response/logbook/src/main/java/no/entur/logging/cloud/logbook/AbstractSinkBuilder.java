@@ -19,8 +19,8 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
 
     protected Level level;
 
-    protected ValidateWellformedRequestBodyDecisionSupplier requestBodyWellformedDecisionSupplier;
-    protected ValidateWellformedResponseBodyDecisionSupplier responseBodyWellformedDecisionSupplier;
+    protected WellformedRequestBodyDecisionSupplier requestBodyWellformedDecisionSupplier;
+    protected WellformedResponseBodyDecisionSupplier responseBodyWellformedDecisionSupplier;
 
     protected int maxSize = -1;
     protected int maxBodySize = -1;
@@ -31,13 +31,13 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
     }
 
     @SuppressWarnings("unchecked")
-    public B withValidateRequestJsonBodyWellformed(ValidateWellformedRequestBodyDecisionSupplier validateRequestJsonBodyWellformed) {
+    public B withValidateRequestJsonBodyWellformed(WellformedRequestBodyDecisionSupplier validateRequestJsonBodyWellformed) {
         this.requestBodyWellformedDecisionSupplier = validateRequestJsonBodyWellformed;
         return (B) this;
     }
 
     @SuppressWarnings("unchecked")
-    public B withValidateResponseJsonBodyWellformed(ValidateWellformedResponseBodyDecisionSupplier validateResponseJsonBodyWellformed) {
+    public B withValidateResponseJsonBodyWellformed(WellformedResponseBodyDecisionSupplier validateResponseJsonBodyWellformed) {
         this.responseBodyWellformedDecisionSupplier = validateResponseJsonBodyWellformed;
         return (B) this;
     }

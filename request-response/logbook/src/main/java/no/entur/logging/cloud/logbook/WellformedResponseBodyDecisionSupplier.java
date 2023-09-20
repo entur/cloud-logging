@@ -7,7 +7,7 @@ import java.util.function.BooleanSupplier;
  */
 
 @FunctionalInterface
-public interface ValidateWellformedResponseBodyDecisionSupplier {
+public interface WellformedResponseBodyDecisionSupplier {
 
     BooleanSupplier get();
 }

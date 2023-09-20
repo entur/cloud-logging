@@ -9,7 +9,7 @@ import java.util.function.BooleanSupplier;
  * or if a previous body filter always outputs valid JSON (without newlines), the request always contains wellformed JSON.
  */
 @FunctionalInterface
-public interface ValidateWellformedRequestBodyDecisionSupplier {
+public interface WellformedRequestBodyDecisionSupplier {
 
     BooleanSupplier get();
 }

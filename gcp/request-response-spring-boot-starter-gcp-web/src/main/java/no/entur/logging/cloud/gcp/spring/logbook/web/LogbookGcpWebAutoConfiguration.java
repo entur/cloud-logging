@@ -1,10 +1,8 @@
 package no.entur.logging.cloud.gcp.spring.logbook.web;
 
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
-import no.entur.logging.cloud.gcp.spring.web.GcpWebLoggingAutoConfiguration;
 import no.entur.logging.cloud.gcp.spring.web.OndemandFilter;
-import no.entur.logging.cloud.logbook.ValidateWellformedRequestBodyDecisionSupplier;
+import no.entur.logging.cloud.logbook.WellformedRequestBodyDecisionSupplier;
 import no.entur.logging.cloud.spring.logbook.LogbookLoggingAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -13,7 +11,6 @@ import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.web.servlet.support.RequestContext;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -37,8 +34,8 @@ public class LogbookGcpWebAutoConfiguration {
     public static class OndemandConfiguration {
 
         @Bean
-        @ConditionalOnMissingBean(ValidateWellformedRequestBodyDecisionSupplier.class)
-        public ValidateWellformedRequestBodyDecisionSupplier requestBodyWellformedDecisionSupplier(HttpServletRequest context) {
+        @ConditionalOnMissingBean(WellformedRequestBodyDecisionSupplier.class)
+        public WellformedRequestBodyDecisionSupplier requestBodyWellformedDecisionSupplier(HttpServletRequest context) {
 
             return () -> {
                 // note: we are now within the request context, but the returned BooleanSupplier will probably be
