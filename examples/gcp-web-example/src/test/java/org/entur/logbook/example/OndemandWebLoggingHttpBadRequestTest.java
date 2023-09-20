@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class OndemandWebLoggingHttpBadRequestTest {
 
 	@LocalServerPort
-    private int randomServerPort;
+	private int randomServerPort;
 	
 	@Autowired
 	private TestRestTemplate restTemplate;

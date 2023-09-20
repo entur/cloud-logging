@@ -36,7 +36,6 @@ public class LogbookGcpWebAutoConfiguration {
     @ConditionalOnProperty(name = {"entur.logging.http.ondemand.enabled"}, havingValue = "true", matchIfMissing = false)
     public static class OndemandConfiguration {
 
-
         @Bean
         @ConditionalOnMissingBean(ValidateWellformedRequestBodyDecisionSupplier.class)
         public ValidateWellformedRequestBodyDecisionSupplier requestBodyWellformedDecisionSupplier(HttpServletRequest context) {
