@@ -6,23 +6,21 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonStreamContext;
 import com.fasterxml.jackson.core.JsonToken;
 import net.logstash.logback.marker.SingleFieldAppendingMarker;
-import net.logstash.logback.util.ProxyOutputStream;
-import org.apache.commons.io.output.StringBuilderWriter;
 import org.zalando.logbook.ContentType;
 import org.zalando.logbook.HttpMessage;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 import java.util.function.LongSupplier;
 
 public abstract class AbstractSingleFieldAppendingMarker<T extends HttpMessage> extends SingleFieldAppendingMarker {
 
-    protected final boolean validateJsonBody;
+    protected final BooleanSupplier wellformed;
 
     protected final int maxBodySize;
     protected final int maxSize;
@@ -31,9 +29,9 @@ public abstract class AbstractSingleFieldAppendingMarker<T extends HttpMessage> 
     protected Map<String, List<String>> headers;
     protected byte[] body;
 
-    public AbstractSingleFieldAppendingMarker(String markerName, boolean validateJsonBody, T message, int maxBodySize, int maxSize) {
+    public AbstractSingleFieldAppendingMarker(String markerName, BooleanSupplier wellformed, T message, int maxBodySize, int maxSize) {
         super(markerName, "http");
-        this.validateJsonBody = validateJsonBody;
+        this.wellformed = wellformed;
         this.maxBodySize = maxBodySize;
         this.maxSize = maxSize;
 
@@ -67,6 +65,8 @@ public abstract class AbstractSingleFieldAppendingMarker<T extends HttpMessage> 
             int max = Math.min(maxSize, maxBodySize);
 
             try {
+                boolean validateJsonBody = !this.wellformed.getAsBoolean();
+
                 JsonFactory factory = generator.getCodec().getFactory();
                 if(body.length < max) {
                     boolean escape = validateJsonBody && !isWellformedJson(body, factory);

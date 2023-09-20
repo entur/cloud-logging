@@ -31,16 +31,16 @@ public class LogLevelLogstashLogbackSink extends AbstractLogLevelLogstashLogback
         }
     }
 
-    public LogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, BooleanSupplier requestBodyWellformedDecisionSupplier, BooleanSupplier responseBodyWellformedDecisionSupplier, int maxBodySize, int maxSize) {
+    public LogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, ValidateWellformedRequestBodyDecisionSupplier requestBodyWellformedDecisionSupplier, ValidateWellformedResponseBodyDecisionSupplier responseBodyWellformedDecisionSupplier, int maxBodySize, int maxSize) {
         super(logConsumer, logLevelEnabled, requestBodyWellformedDecisionSupplier, responseBodyWellformedDecisionSupplier, maxBodySize, maxSize);
     }
 
     public Marker createRequestMarker(HttpRequest request) {
-        return new RequestSingleFieldAppendingMarker(request, requestBodyWellformedDecisionSupplier.getAsBoolean(), maxBodySize, maxSize);
+        return new RequestSingleFieldAppendingMarker(request, requestBodyWellformedDecisionSupplier.get(), maxBodySize, maxSize);
     }
 
     public Marker createResponseMarker(Correlation correlation, HttpResponse response) {
-        return new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), requestBodyWellformedDecisionSupplier.getAsBoolean(), maxBodySize, maxSize);
+        return new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), responseBodyWellformedDecisionSupplier.get(), maxBodySize, maxSize);
     }
 
 }

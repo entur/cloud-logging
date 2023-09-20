@@ -1,6 +1,8 @@
 package no.entur.logging.cloud.spring.logbook;
 
 import no.entur.logging.cloud.logbook.LogLevelLogstashLogbackSink;
+import no.entur.logging.cloud.logbook.ValidateWellformedRequestBodyDecisionSupplier;
+import no.entur.logging.cloud.logbook.ValidateWellformedResponseBodyDecisionSupplier;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +25,7 @@ public class AbstractLogbookLoggingAutoConfiguration {
 
     // TODO parameter for sync vs async validation of JSON body wellformedness
 
-    protected LogLevelLogstashLogbackSink createMachineReadbleSink(Logger logger, Level level, BooleanSupplier validateRequestJsonBodyWellformed, BooleanSupplier validateResponseJsonBodyWellformed) {
+    protected LogLevelLogstashLogbackSink createMachineReadbleSink(Logger logger, Level level, ValidateWellformedRequestBodyDecisionSupplier validateRequestJsonBodyWellformed, ValidateWellformedResponseBodyDecisionSupplier validateResponseJsonBodyWellformed) {
         return LogLevelLogstashLogbackSink.newBuilder()
                 .withLogger(logger)
                 .withLogLevel(level)

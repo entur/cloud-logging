@@ -3,6 +3,8 @@ package no.entur.logging.cloud.logbook.logbook.test;
 import no.entur.logging.cloud.logbook.AbstractLogLevelLogstashLogbackSink;
 
 import no.entur.logging.cloud.logbook.AbstractSinkBuilder;
+import no.entur.logging.cloud.logbook.ValidateWellformedRequestBodyDecisionSupplier;
+import no.entur.logging.cloud.logbook.ValidateWellformedResponseBodyDecisionSupplier;
 import org.slf4j.Marker;
 import org.zalando.logbook.Correlation;
 import org.zalando.logbook.HttpRequest;
@@ -39,16 +41,16 @@ public class PrettyPrintingLogLevelLogstashLogbackSink extends AbstractLogLevelL
 
     }
 
-    public PrettyPrintingLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, BooleanSupplier requestBodyWellformedDecisionSupplier, BooleanSupplier responseBodyWellformedDecisionSupplier, int maxBodySize, int maxSize) {
+    public PrettyPrintingLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, ValidateWellformedRequestBodyDecisionSupplier requestBodyWellformedDecisionSupplier, ValidateWellformedResponseBodyDecisionSupplier responseBodyWellformedDecisionSupplier, int maxBodySize, int maxSize) {
         super(logConsumer, logLevelEnabled, requestBodyWellformedDecisionSupplier, responseBodyWellformedDecisionSupplier, maxBodySize, maxSize);
     }
 
     protected Marker createRequestMarker(HttpRequest request) {
-        return new PrettyPrintingRequestSingleFieldAppendingMarker(request, requestBodyWellformedDecisionSupplier.getAsBoolean(), maxBodySize, maxSize);
+        return new PrettyPrintingRequestSingleFieldAppendingMarker(request, requestBodyWellformedDecisionSupplier.get(), maxBodySize, maxSize);
     }
 
     protected Marker createResponseMarker(Correlation correlation, HttpResponse response) {
-        return new PrettyPrintingResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), requestBodyWellformedDecisionSupplier.getAsBoolean(), maxBodySize, maxSize);
+        return new PrettyPrintingResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), responseBodyWellformedDecisionSupplier.get(), maxBodySize, maxSize);
     }
 
 }

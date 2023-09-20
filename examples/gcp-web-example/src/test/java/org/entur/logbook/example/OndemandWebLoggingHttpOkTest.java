@@ -1,7 +1,5 @@
 package org.entur.logbook.example;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControlClosable;
 import org.entur.logbook.example.rest.MyEntity;
@@ -15,8 +13,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class WebLoggingFormatTest {
+
+@TestPropertySource(properties = {"entur.logging.http.ondemand.enabled=true", "entur.logging.http.ondemand.failure.http.statusCode.equalOrHigherThan=400"})
+public class OndemandWebLoggingHttpOkTest {
 
 	@LocalServerPort
     private int randomServerPort;
@@ -25,7 +27,7 @@ public class WebLoggingFormatTest {
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void useHumanReadablePlainEncoderTest() {
+	public void useHumanReadablePlainEncoderExpectReducedLogging() {
 		MyEntity entity = new MyEntity();
 		entity.setName("Entur");
 		entity.setSecret("mySecret");
@@ -34,8 +36,8 @@ public class WebLoggingFormatTest {
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
-	@Test 
-	public void useHumanReadableJsonEncoderTest() throws InterruptedException {
+	@Test
+	public void useHumanReadableJsonEncoderExpectReducedLogging() throws InterruptedException {
 		MyEntity entity = new MyEntity();
 		entity.setName("Entur");
 		entity.setSecret("mySecret");
@@ -44,11 +46,10 @@ public class WebLoggingFormatTest {
 			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method", entity, MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		}
-
 	}
 
 	@Test
-	public void useMachineReadableJsonEncoder() throws InterruptedException {
+	public void useMachineReadableJsonEncoderExpectReducedLogging() throws InterruptedException {
 		MyEntity entity = new MyEntity();
 		entity.setName("Entur");
 		entity.setSecret("mySecret");
@@ -58,5 +59,6 @@ public class WebLoggingFormatTest {
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		}
 	}
+
 
 }

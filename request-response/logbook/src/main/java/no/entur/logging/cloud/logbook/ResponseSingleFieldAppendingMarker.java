@@ -6,6 +6,7 @@ import org.zalando.logbook.HttpResponse;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.function.BooleanSupplier;
 
 public class ResponseSingleFieldAppendingMarker extends AbstractSingleFieldAppendingMarker<HttpResponse> {
 
@@ -16,8 +17,8 @@ public class ResponseSingleFieldAppendingMarker extends AbstractSingleFieldAppen
     private String protocol;
     private int status;
 
-    public ResponseSingleFieldAppendingMarker(HttpResponse response, long duration, boolean validateJsonBody, int maxBodySize, int maxSize) {
-        super(MARKER_NAME, validateJsonBody, response, maxBodySize, maxSize);
+    public ResponseSingleFieldAppendingMarker(HttpResponse response, long duration, BooleanSupplier wellformed, int maxBodySize, int maxSize) {
+        super(MARKER_NAME, wellformed, response, maxBodySize, maxSize);
         this.duration = duration;
     }
 
