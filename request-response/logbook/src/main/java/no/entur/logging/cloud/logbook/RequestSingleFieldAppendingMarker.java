@@ -7,6 +7,7 @@ import org.zalando.logbook.HttpRequest;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 
 public class RequestSingleFieldAppendingMarker extends AbstractSingleFieldAppendingMarker<HttpRequest> {
 
@@ -22,8 +23,8 @@ public class RequestSingleFieldAppendingMarker extends AbstractSingleFieldAppend
     protected String scheme;
     protected Optional<Integer> port;
 
-    public RequestSingleFieldAppendingMarker(HttpRequest request, boolean validateJsonBody, int maxBodySize, int maxSize) {
-        super(MARKER_NAME, validateJsonBody, request, maxBodySize, maxSize);
+    public RequestSingleFieldAppendingMarker(HttpRequest request, BooleanSupplier wellformed, int maxBodySize, int maxSize) {
+        super(MARKER_NAME, wellformed, request, maxBodySize, maxSize);
     }
 
     @Override

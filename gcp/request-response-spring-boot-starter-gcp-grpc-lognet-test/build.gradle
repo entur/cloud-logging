@@ -11,7 +11,7 @@ dependencies {
 
     api("org.slf4j:slf4j-api:${slf4jVersion}")
     api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
-    implementation project(path: ':request-response:server:netty-grpc-test')
+    implementation project(path: ':request-response:netty-grpc-test')
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 

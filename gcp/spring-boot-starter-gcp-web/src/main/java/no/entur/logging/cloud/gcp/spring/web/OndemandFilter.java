@@ -17,9 +17,12 @@ import no.entur.logging.cloud.gcp.spring.web.scope.HttpLoggingScopeFilters;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 public class OndemandFilter implements Filter {
+
+	public static final String WELLFORMED_INDICATOR = OndemandFilter.class.getName()+":WELLFORMED";
 
 	private final LoggingScopeAsyncAppender appender;
 	private final HttpLoggingScopeFilters filters;
@@ -35,6 +38,8 @@ public class OndemandFilter implements Filter {
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 		if(servletRequest instanceof HttpServletRequest) {
 			HttpLoggingScopeFilter filter = filters.getScope((HttpServletRequest) servletRequest);
+
+			servletRequest.setAttribute(WELLFORMED_INDICATOR, new AtomicBoolean(false));
 
 			LoggingScopeFactory loggingScopeFactory = appender.getLoggingScopeFactory();
 			try {
