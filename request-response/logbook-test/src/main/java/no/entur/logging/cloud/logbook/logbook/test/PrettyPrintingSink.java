@@ -8,6 +8,8 @@ import com.github.skjolber.jackson.jsh.SyntaxHighlighter;
 import com.github.skjolber.jackson.jsh.SyntaxHighlightingJsonGenerator;
 import no.entur.logging.cloud.logbook.AbstractSinkBuilder;
 import no.entur.logging.cloud.logbook.LogLevelLogstashLogbackSink;
+import no.entur.logging.cloud.logbook.WellformedRequestBodyDecisionSupplier;
+import no.entur.logging.cloud.logbook.WellformedResponseBodyDecisionSupplier;
 import org.slf4j.Marker;
 import org.zalando.logbook.ContentType;
 import org.zalando.logbook.Correlation;
@@ -59,7 +61,7 @@ public class PrettyPrintingSink extends LogLevelLogstashLogbackSink {
 
     protected final SyntaxHighlighter syntaxHighlighter;
 
-    public PrettyPrintingSink(BooleanSupplier logLevelEnabled, BiConsumer<Marker, String> logConsumer, BooleanSupplier validateRequestJsonBody, BooleanSupplier validateResponseJsonBody, int maxBodySize, int maxSize, JsonFactory jsonFactory, SyntaxHighlighter syntaxHighlighter) {
+    public PrettyPrintingSink(BooleanSupplier logLevelEnabled, BiConsumer<Marker, String> logConsumer, WellformedRequestBodyDecisionSupplier validateRequestJsonBody, WellformedResponseBodyDecisionSupplier validateResponseJsonBody, int maxBodySize, int maxSize, JsonFactory jsonFactory, SyntaxHighlighter syntaxHighlighter) {
         super(logConsumer, logLevelEnabled, validateRequestJsonBody, validateResponseJsonBody, maxBodySize, maxSize);
         this.jsonFactory = jsonFactory;
         this.syntaxHighlighter = syntaxHighlighter;

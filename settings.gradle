@@ -17,15 +17,7 @@ include 'micrometer', 'gcp:micrometer-gcp'
 
 include 'trace:mdc-context-grpc-netty', 'trace:server:correlation-id-trace-spring-boot-web', 'trace:server:correlation-id-trace-grpc-netty'
 
-include 'request-response:server:netty-grpc', 'request-response:server:netty-grpc-test'
-include 'request-response:logbook', 'request-response:logbook-test', 'request-response:server:logbook-spring-boot-autoconfigure', 'request-response:server:logbook-spring-boot-autoconfigure-test'
+include 'request-response:netty-grpc', 'request-response:netty-grpc-test'
+include 'request-response:logbook', 'request-response:logbook-test', 'request-response:logbook-spring-boot-autoconfigure', 'request-response:logbook-spring-boot-autoconfigure-test', 'gcp:logbook-spring-boot-autoconfigure-gcp'
 
 include 'examples:gcp-web-example', 'examples:gcp-grpc-example'
-
-// do not publish unfinished projects
-if(version.endsWith('-SNAPSHOT')) {
-    include 'test:test-truth', 'test:test-assertj'
-    include 'gcp:request-response-spring-boot-starter-gcp-webflux', 'gcp:request-response-spring-boot-starter-gcp-webflux-test'
-    include 'trace:server:correlation-id-trace-spring-boot-webflux'
-    include 'gcp:spring-boot-starter-gcp-webflux', 'gcp:spring-boot-starter-gcp-webflux-test'
-}

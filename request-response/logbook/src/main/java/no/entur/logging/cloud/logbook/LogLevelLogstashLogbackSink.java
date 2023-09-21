@@ -31,16 +31,33 @@ public class LogLevelLogstashLogbackSink extends AbstractLogLevelLogstashLogback
         }
     }
 
-    public LogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, BooleanSupplier requestBodyWellformedDecisionSupplier, BooleanSupplier responseBodyWellformedDecisionSupplier, int maxBodySize, int maxSize) {
+    public LogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, WellformedRequestBodyDecisionSupplier requestBodyWellformedDecisionSupplier, WellformedResponseBodyDecisionSupplier responseBodyWellformedDecisionSupplier, int maxBodySize, int maxSize) {
         super(logConsumer, logLevelEnabled, requestBodyWellformedDecisionSupplier, responseBodyWellformedDecisionSupplier, maxBodySize, maxSize);
     }
 
     public Marker createRequestMarker(HttpRequest request) {
-        return new RequestSingleFieldAppendingMarker(request, requestBodyWellformedDecisionSupplier.getAsBoolean(), maxBodySize, maxSize);
+
+        // trust our own data
+        BooleanSupplier wellformed;
+        if(request.getOrigin().equals("local")) {
+            wellformed = () -> true;
+        } else {
+            wellformed = requestBodyWellformedDecisionSupplier.get();
+        }
+
+        return new RequestSingleFieldAppendingMarker(request, wellformed, maxBodySize, maxSize);
     }
 
     public Marker createResponseMarker(Correlation correlation, HttpResponse response) {
-        return new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), requestBodyWellformedDecisionSupplier.getAsBoolean(), maxBodySize, maxSize);
+        // trust our own data
+        BooleanSupplier wellformed;
+        if(response.getOrigin().equals("local")) {
+            wellformed = () -> true;
+        } else {
+            wellformed = responseBodyWellformedDecisionSupplier.get();
+        }
+
+        return new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), wellformed, maxBodySize, maxSize);
     }
 
 }

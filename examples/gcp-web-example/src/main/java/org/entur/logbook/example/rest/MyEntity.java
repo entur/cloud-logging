@@ -1,8 +1,13 @@
 package org.entur.logbook.example.rest;
 
+import org.codehaus.commons.nullanalysis.NotNull;
+
 public class MyEntity {
-	
+
+	@NotNull
 	private String secret;
+
+	@NotNull
 	private String name;
 	
 	public String getSecret() {

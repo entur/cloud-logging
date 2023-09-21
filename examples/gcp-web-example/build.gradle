@@ -13,7 +13,7 @@ dependencies {
     implementation project(":gcp:request-response-spring-boot-starter-gcp-web");
 
     implementation("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
-    implementation("org.springframework.boot:spring-boot-starter-jersey:${springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
 
     testImplementation project(":gcp:spring-boot-starter-gcp-web-test");
     testImplementation project(":gcp:request-response-spring-boot-starter-gcp-web-test");

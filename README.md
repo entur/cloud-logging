@@ -10,7 +10,6 @@ with
 
  * Cloud-specific log encoders
    * GCP (Stackdriver)
-   * Azure (TODO)
  * `DevOpsLogger` extension for additional error levels 
    * Improve interaction with operations
  * Friendly logging scheme
@@ -30,13 +29,10 @@ with
        * failed responses (i.e. HTTP status code >= 400) and/or
        * log events of a certain level (i.e. warning or error) was made
      * since timestamps are preserved, log accumulation tools present the results in chronological order (i.e. this feature is best for deployments)
-     * TODO lazy request-response logging
  * Unit testing
    * Always assert against machine-readable JSON 'under the hood', regardless what is printed to console during local development
    * Supported frameworks
      * JUnit 5
-     * Assertj (TODO)
-     * Truth (TODO)
  * Correlation-id tracing
  * Custom MDC
      * gRPC
@@ -47,7 +43,11 @@ Supported web technologies:
  * Spring + gRPC via Lognet
    * custom MDC support 
  * Micrometer
- * Spring webflux (TODO)
+
+# License
+[European Union Public Licence v1.2](https://eupl.eu/).
+
+# Usage
 
 ## Additional error levels
 Most cloud logging backends support more error levels than SFL4J. 
@@ -73,6 +73,5 @@ Stackdriver
 
 See [GCP](gcp) for further details.
 
-## Azure
-TODO
-
+# Known issues
+Hosting gRPC and web services (i.e. REST services other than actuator) in the same app is not supported. 

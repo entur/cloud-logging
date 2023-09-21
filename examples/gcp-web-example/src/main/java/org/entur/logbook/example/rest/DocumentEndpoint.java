@@ -1,26 +1,25 @@
 package org.entur.logbook.example.rest;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-
-import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
-@Component
-@Path("/document")
+@RestController
+@RequestMapping("/api/document")
 public class DocumentEndpoint {
 
     private final static Logger logger = LoggerFactory.getLogger(DocumentEndpoint.class);
 
-	@POST
-    @Path("/some/method")
-	@Produces(MediaType.APPLICATION_JSON)
-	public MyEntity someMessage(MyEntity entity) {
+	@PostMapping("/some/method")
+	public MyEntity someMessage(@RequestBody MyEntity entity) {
 		logger.trace("Hello entity with secret / trace");
 		logger.debug("Hello entity with secret / debug");
 		logger.info("Hello entity with secret / info");
@@ -30,10 +29,8 @@ public class DocumentEndpoint {
 		return entity;
 	}
 
-	@GET
-	@Path("/some/error")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response errorMethod() throws InterruptedException {
+	@PostMapping("/some/error")
+	public ResponseEntity errorMethod(@RequestBody MyEntity entity) throws InterruptedException {
 		System.out.flush();
 		System.out.println("System out before endpoint logging");
 
@@ -46,7 +43,8 @@ public class DocumentEndpoint {
 		Thread.sleep(1000);
 		System.out.println("System out after endpoint logging + 1000ms");
 
-		return Response.serverError().build(); // translates to 404 because no /error resource
+
+		return new ResponseEntity(HttpStatus.NOT_FOUND);
 	}
 
 

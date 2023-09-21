@@ -29,7 +29,7 @@ The logger assumes an ANSI-capable console / terminal during testing / building.
 Toggle between modes using the `CompositeConsoleOutputControl` singleton:
 
 ```
-try (CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
+try (Closable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
 
 }
 ```
@@ -126,7 +126,7 @@ The logger assumes an ANSI-capable console / terminal during testing / building.
 Toggle between modes using the `CompositeConsoleOutputControl` singleton:
 
 ```
-try (CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
+try (Closable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
 
 }
 ```
@@ -165,7 +165,7 @@ and
 </dependency>
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>spring-boot-starter-gcp-gcp-grpc-lognet-test</artifactId>
+    <artifactId>spring-boot-starter-gcp-grpc-lognet-test</artifactId>
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
@@ -203,8 +203,30 @@ testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-
 
 </details>
 
-
 # See also
+
+## OWASP Dependency check supressions
+Avoid [OWASP dependency supressions](dependencycheck-root-suppression.xml) flagging our dependencies as other people's dependencies.
+
+<details>
+  <summary>Suppress</summary>
+  
+```xml
+ 
+    <suppress>
+        <packageUrl regex="true">^pkg:maven/no\.entur\.logging\.cloud\/[a-z\.\-]*@.*$</packageUrl>
+        <cpe>cpe:/a:grpc:grpc</cpe>
+    </suppress>
+    <suppress>
+        <packageUrl regex="true">^pkg:maven/no\.entur\.abt\/[a-z\.\-]*@.*$</packageUrl>
+        <cpe>cpe:/a:grpc:grpc</cpe>
+    </suppress>
+    <suppress>
+        <cpe>cpe:/a:utils_project:utils</cpe>
+    </suppress>
+```
+
+</details>
 
 ## Testing
 See [test-logback-junit](../test/test-logback-junit) for basic JUnit test support.

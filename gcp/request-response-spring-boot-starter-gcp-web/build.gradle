@@ -4,7 +4,7 @@ dependencies {
     api project(':api')
     api project(':gcp:logback-logstash-encoder-gcp')
     api project(':gcp:spring-boot-starter-gcp-web')
-    api project(":request-response:server:logbook-spring-boot-autoconfigure")
+    api project(":gcp:logbook-spring-boot-autoconfigure-gcp")
 
     api "org.zalando:logbook-spring-boot-starter:${logbookVersion}"
 

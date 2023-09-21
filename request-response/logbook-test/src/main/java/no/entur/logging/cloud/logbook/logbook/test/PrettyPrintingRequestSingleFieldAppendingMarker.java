@@ -9,10 +9,11 @@ import org.zalando.logbook.HttpRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.function.BooleanSupplier;
 
 public class PrettyPrintingRequestSingleFieldAppendingMarker extends RequestSingleFieldAppendingMarker {
 
-    public PrettyPrintingRequestSingleFieldAppendingMarker(HttpRequest request, boolean validateJsonBody, int maxBodySize, int maxSize) {
+    public PrettyPrintingRequestSingleFieldAppendingMarker(HttpRequest request, BooleanSupplier validateJsonBody, int maxBodySize, int maxSize) {
         super(request, validateJsonBody, maxBodySize, maxSize);
     }
 
