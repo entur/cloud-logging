@@ -1,6 +1,4 @@
-package no.entur.logging.cloud.logbook;
-
-import java.util.function.BooleanSupplier;
+package no.entur.logging.cloud.logbook.async.state;
 
 /**
  * Allow the request-response logger to trust the incoming JSON as well-formed in certain cases.
@@ -9,7 +7,7 @@ import java.util.function.BooleanSupplier;
  * or if a previous body filter always outputs valid JSON (without newlines), the request always contains wellformed JSON.
  */
 @FunctionalInterface
-public interface WellformedRequestBodyDecisionSupplier {
+public interface RequestHttpMessageStateSupplierSource {
 
-    BooleanSupplier get();
+    HttpMessageStateSupplier get();
 }

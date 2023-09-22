@@ -1,5 +1,6 @@
 package no.entur.logging.cloud.logbook;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 import org.slf4j.event.Level;
@@ -7,11 +8,7 @@ import org.slf4j.event.Level;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
-import static org.slf4j.event.EventConstants.DEBUG_INT;
-import static org.slf4j.event.EventConstants.ERROR_INT;
-import static org.slf4j.event.EventConstants.INFO_INT;
-import static org.slf4j.event.EventConstants.TRACE_INT;
-import static org.slf4j.event.EventConstants.WARN_INT;
+import static org.slf4j.event.EventConstants.*;
 
 public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>> {
 
@@ -19,8 +16,7 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
 
     protected Level level;
 
-    protected WellformedRequestBodyDecisionSupplier requestBodyWellformedDecisionSupplier;
-    protected WellformedResponseBodyDecisionSupplier responseBodyWellformedDecisionSupplier;
+    protected JsonFactory jsonFactory;
 
     protected int maxSize = -1;
     protected int maxBodySize = -1;
@@ -30,15 +26,8 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
         return (B) this;
     }
 
-    @SuppressWarnings("unchecked")
-    public B withValidateRequestJsonBodyWellformed(WellformedRequestBodyDecisionSupplier validateRequestJsonBodyWellformed) {
-        this.requestBodyWellformedDecisionSupplier = validateRequestJsonBodyWellformed;
-        return (B) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public B withValidateResponseJsonBodyWellformed(WellformedResponseBodyDecisionSupplier validateResponseJsonBodyWellformed) {
-        this.responseBodyWellformedDecisionSupplier = validateResponseJsonBodyWellformed;
+    public B withJsonFactory(JsonFactory jsonFactory) {
+        this.jsonFactory = jsonFactory;
         return (B) this;
     }
 

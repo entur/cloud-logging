@@ -1,27 +1,23 @@
-package no.entur.logging.cloud.logbook;
+package no.entur.logging.cloud.logbook.async;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import net.logstash.logback.marker.SingleFieldAppendingMarker;
-import no.entur.logging.cloud.logbook.async.HttpMessageBodyWriter;
 import org.zalando.logbook.ContentType;
 import org.zalando.logbook.HttpMessage;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractSingleFieldAppendingMarker<T extends HttpMessage> extends SingleFieldAppendingMarker {
+public abstract class AbstractAsyncSingleFieldAppendingMarker<T extends HttpMessage> extends SingleFieldAppendingMarker {
 
     protected String contentType;
     protected Map<String, List<String>> headers;
-    protected String body;
-    protected boolean wellformed;
+    protected HttpMessageBodyWriter httpMessageBodyWriter;
 
-    public AbstractSingleFieldAppendingMarker(String markerName, T message, String body, boolean wellformed) {
+    public AbstractAsyncSingleFieldAppendingMarker(String markerName, T message, HttpMessageBodyWriter httpMessageBodyWriter) {
         super(markerName, "http");
-        this.body = body;
-        this.wellformed = wellformed;
+        this.httpMessageBodyWriter = httpMessageBodyWriter;
 
         prepareForDeferredProcessing(message);
     }
@@ -35,24 +31,29 @@ public abstract class AbstractSingleFieldAppendingMarker<T extends HttpMessage> 
         headers = message.getHeaders();
     }
 
+    public void prepareWriteBody() {
+        httpMessageBodyWriter.prepareWriteBody();
+    }
+
     protected void writeBody(JsonGenerator generator) {
-        if(body != null && ContentType.isJsonMediaType(contentType)) {
+        if(httpMessageBodyWriter != null && ContentType.isJsonMediaType(contentType)) {
+            // check that body is well-formed and within size
+
+            // TODO get the generator.getOutputTarget() and calculate the size allocated to
+            // fixed fields and headers
+            // using generator.getOutputBuffered() + output.length()
+            // while there technically can be multiple markers involved here,
+            // this is not the case for these logbook-related statements
+
             try {
-                if(wellformed) {
-                    writeWellformedBody(generator);
-                } else {
-                    generator.writeStringField("body", body);
-                }
+                httpMessageBodyWriter.writeBody(generator);
             } catch(Exception e) {
                 // should never happen, this is probably going to blow up somewhere else
             }
         }
+        // omit writing body
     }
 
-    protected void writeWellformedBody(JsonGenerator generator) throws IOException {
-        generator.writeFieldName("body");
-        generator.writeRawValue(body);
-    }
 
     protected void writeHeaders(JsonGenerator generator) throws IOException {
         generator.writeFieldName("headers");

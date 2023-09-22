@@ -47,13 +47,13 @@ public class FilterUtils {
 	/**
 	 * Converts an input byte array to a hex encoded String.
 	 *
-	 * @param input
+	 * @param bytes
 	 *			Byte array to hex encode
 	 * @return Hex encoded String of the input byte array
 	 */
-	private static String byteArray2Hex(final byte[] hash) {
+	private static String byteArray2Hex(final byte[] bytes) {
 		try (Formatter formatter = new Formatter();) {
-			for (byte b : hash) {
+			for (byte b : bytes) {
 				formatter.format("%02x", b);
 			}
 			String hex = formatter.toString();

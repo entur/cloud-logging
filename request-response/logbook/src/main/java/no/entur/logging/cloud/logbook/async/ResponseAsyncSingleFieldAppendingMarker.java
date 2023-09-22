@@ -1,25 +1,23 @@
-package no.entur.logging.cloud.logbook;
+package no.entur.logging.cloud.logbook.async;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import net.logstash.logback.marker.SingleFieldAppendingMarker;
-import no.entur.logging.cloud.logbook.async.AbstractAsyncSingleFieldAppendingMarker;
-import no.entur.logging.cloud.logbook.async.HttpMessageBodyWriter;
 import org.zalando.logbook.HttpResponse;
 
 import java.io.IOException;
 import java.util.Locale;
 
-public class ResponseSingleFieldAppendingMarker extends AbstractSingleFieldAppendingMarker<HttpResponse> {
+public class ResponseAsyncSingleFieldAppendingMarker extends AbstractAsyncSingleFieldAppendingMarker<HttpResponse> {
 
-    public static final String MARKER_NAME = ResponseSingleFieldAppendingMarker.MARKER_NAME_PREFIX + "RESPONSE";
+    public static final String MARKER_NAME = SingleFieldAppendingMarker.MARKER_NAME_PREFIX + "RESPONSE";
 
     private final long duration;
     private String origin;
     private String protocol;
     private int status;
 
-    public ResponseSingleFieldAppendingMarker(HttpResponse response, long duration, String body, boolean wellformed) {
-        super(MARKER_NAME, response, body, wellformed);
+    public ResponseAsyncSingleFieldAppendingMarker(HttpResponse response, long duration, HttpMessageBodyWriter httpMessageBodyWriter) {
+        super(MARKER_NAME, response, httpMessageBodyWriter);
         this.duration = duration;
     }
 

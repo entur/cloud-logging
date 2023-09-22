@@ -1,8 +1,9 @@
 package no.entur.logging.cloud.spring.logbook;
 
+import no.entur.logging.cloud.logbook.async.AsyncLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.LogLevelLogstashLogbackSink;
-import no.entur.logging.cloud.logbook.WellformedRequestBodyDecisionSupplier;
-import no.entur.logging.cloud.logbook.WellformedResponseBodyDecisionSupplier;
+import no.entur.logging.cloud.logbook.async.state.RequestHttpMessageStateSupplierSource;
+import no.entur.logging.cloud.logbook.async.state.ResponseHttpMessageStateSupplierSource;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,8 +24,17 @@ public class AbstractLogbookLoggingAutoConfiguration {
 
     // TODO parameter for sync vs async validation of JSON body wellformedness
 
-    protected LogLevelLogstashLogbackSink createMachineReadbleSink(Logger logger, Level level, WellformedRequestBodyDecisionSupplier validateRequestJsonBodyWellformed, WellformedResponseBodyDecisionSupplier validateResponseJsonBodyWellformed) {
+    protected LogLevelLogstashLogbackSink createMachineReadbleSink(Logger logger, Level level) {
         return LogLevelLogstashLogbackSink.newBuilder()
+                .withLogger(logger)
+                .withLogLevel(level)
+                .withMaxBodySize(maxBodySize)
+                .withMaxSize(maxSize)
+                .build();
+    }
+
+    protected AsyncLogLevelLogstashLogbackSink createAsyncMachineReadbleSink(Logger logger, Level level, RequestHttpMessageStateSupplierSource validateRequestJsonBodyWellformed, ResponseHttpMessageStateSupplierSource validateResponseJsonBodyWellformed) {
+        return AsyncLogLevelLogstashLogbackSink.newBuilder()
                 .withLogger(logger)
                 .withLogLevel(level)
                 .withMaxBodySize(maxBodySize)

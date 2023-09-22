@@ -1,48 +1,140 @@
 package no.entur.logging.cloud.logbook;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import no.entur.logging.cloud.logbook.util.JsonValidator;
+import no.entur.logging.cloud.logbook.util.MaxSizeJsonFilter;
 import org.slf4j.Marker;
+import org.zalando.logbook.ContentType;
 import org.zalando.logbook.Correlation;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
-import org.zalando.logbook.Precorrelation;
 
-import java.io.IOException;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
 public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLevelSink {
+    
+    protected final MaxSizeJsonFilter maxSizeJsonFilter;
+    protected final JsonValidator jsonValidator;
 
-    protected final WellformedRequestBodyDecisionSupplier requestBodyWellformedDecisionSupplier;
-    protected final WellformedResponseBodyDecisionSupplier responseBodyWellformedDecisionSupplier;
-
-    protected final int maxBodySize;
     protected final int maxSize;
 
-    public AbstractLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, WellformedRequestBodyDecisionSupplier requestBodyWellformedDecisionSupplier, WellformedResponseBodyDecisionSupplier responseBodyWellformedDecisionSupplier, int maxBodySize, int maxSize) {
+    public AbstractLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, JsonFactory jsonFactory, int maxSize) {
         super(logLevelEnabled, logConsumer);
-        this.requestBodyWellformedDecisionSupplier = requestBodyWellformedDecisionSupplier;
-        this.responseBodyWellformedDecisionSupplier = responseBodyWellformedDecisionSupplier;
-        this.maxBodySize = maxBodySize;
+
         this.maxSize = maxSize;
+        this.maxSizeJsonFilter = new MaxSizeJsonFilter(maxSize, jsonFactory);
+        this.jsonValidator = new JsonValidator(jsonFactory);
     }
 
-    @Override
-    public void write(final Precorrelation precorrelation, final HttpRequest request) throws IOException {
-        Marker marker = createRequestMarker(request);
-        StringBuilder stringBuilder = new StringBuilder(256);
-        requestMessage(request, stringBuilder);
-        logConsumer.accept (marker, stringBuilder.toString());
+    public Marker createRequestMarker(HttpRequest request) {
+
+        if(!ContentType.isJsonMediaType(request.getContentType())) {
+            return newRequestSingleFieldAppendingMarker(request, null, false);
+        }
+
+        String bodyAsString;
+        try {
+            bodyAsString = request.getBodyAsString();
+        } catch(Exception e){
+            return new RequestSingleFieldAppendingMarker(request, null, false);
+        }
+
+        if(bodyAsString == null || bodyAsString.length() == 0) {
+            return newRequestSingleFieldAppendingMarker(request, null, false);
+        }
+
+        String body = null;
+        boolean wellformed;
+
+        if (request.getOrigin().equals("local")) {
+            // trust data from ourselves to be wellformed
+            if(body.length() > maxSize) {
+                try {
+                    body = maxSizeJsonFilter.transform(bodyAsString);
+                    wellformed = true;
+                } catch(Exception e) {
+                    // unexpectedly not valid
+                    body = bodyAsString.substring(0, maxSize);
+                    wellformed = false;
+                }
+            } else {
+                body = bodyAsString;
+                wellformed = true;
+            }
+        } else{
+            // do not trust data from others to be wellformed
+            if(body.length() > maxSize) {
+                try {
+                    body = maxSizeJsonFilter.transform(bodyAsString);
+                    wellformed = true;
+                } catch(Exception e) {
+                    // unexpectedly not valid
+                    body = bodyAsString.substring(0, maxSize);
+                    wellformed = false;
+                }
+            } else {
+                body = bodyAsString;
+                wellformed = jsonValidator.isWellformedJson(bodyAsString);
+            }
+        }
+        return newRequestSingleFieldAppendingMarker(request, body, wellformed);
     }
 
-    public void write(Correlation correlation, final HttpRequest request, HttpResponse response) throws IOException {
-        Marker marker = createResponseMarker(correlation, response);
-        StringBuilder stringBuilder = new StringBuilder(256);
-        responseMessage(correlation, request, response, stringBuilder);
-        logConsumer.accept(marker, stringBuilder.toString());
+    protected abstract Marker newRequestSingleFieldAppendingMarker(HttpRequest request, String body, boolean wellformed);
+
+    public Marker createResponseMarker(Correlation correlation, HttpResponse response) {
+        if(!ContentType.isJsonMediaType(response.getContentType())) {
+            new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), null, false);
+        }
+
+        String bodyAsString;
+        try {
+            bodyAsString = response.getBodyAsString();
+        } catch(Exception e){
+            return newResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), null, false);
+        }
+
+        if(bodyAsString == null || bodyAsString.length() == 0) {
+            return newResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), null, false);
+        }
+
+        String body = null;
+        boolean wellformed;
+
+        if (response.getOrigin().equals("local")) {
+            // trust data from ourselves to be wellformed
+            if(body.length() > maxSize) {
+                try {
+                    body = maxSizeJsonFilter.transform(bodyAsString);
+                    wellformed = true;
+                } catch(Exception e) {
+                    // unexpectedly not valid
+                    body = bodyAsString.substring(0, maxSize);
+                    wellformed = false;
+                }
+            } else {
+                body = bodyAsString;
+                wellformed = true;
+            }
+        } else{
+            // do not trust data from others to be wellformed
+            if(body.length() > maxSize) {
+                try {
+                    body = maxSizeJsonFilter.transform(bodyAsString);
+                    wellformed = true;
+                } catch(Exception e) {
+                    // unexpectedly not valid
+                    body = bodyAsString.substring(0, maxSize);
+                    wellformed = false;
+                }
+            } else {
+                body = bodyAsString;
+                wellformed = jsonValidator.isWellformedJson(bodyAsString);
+            }
+        }
+        return newResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), body, wellformed);
     }
 
-    protected abstract Marker createResponseMarker(Correlation correlation, HttpResponse response);
-
-    protected abstract Marker createRequestMarker(HttpRequest request);
-
+    protected abstract Marker newResponseSingleFieldAppendingMarker(HttpResponse response, long millis, String body, boolean wellformed);
 }
