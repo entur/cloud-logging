@@ -1,7 +1,7 @@
 package no.entur.logging.cloud.gcp.spring.logbook.web;
 
 import jakarta.servlet.*;
-import no.entur.logging.cloud.logbook.async.state.DefaultHttpMessageStateSupplier;
+import no.entur.logging.cloud.logbook.ondemand.state.DefaultHttpMessageStateSupplier;
 
 import java.io.IOException;
 

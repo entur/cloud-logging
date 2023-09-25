@@ -19,12 +19,16 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
 
     protected final int maxSize;
 
-    public AbstractLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, JsonFactory jsonFactory, int maxSize) {
+    protected final RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier;
+
+    public AbstractLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, JsonFactory jsonFactory, int maxSize, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
         super(logLevelEnabled, logConsumer);
 
         this.maxSize = maxSize;
         this.maxSizeJsonFilter = new MaxSizeJsonFilter(maxSize, jsonFactory);
         this.jsonValidator = new JsonValidator(jsonFactory);
+
+        this.remoteHttpMessageContextSupplier = remoteHttpMessageContextSupplier;
     }
 
     public Marker createRequestMarker(HttpRequest request) {
@@ -49,7 +53,7 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
 
         if (request.getOrigin().equals("local")) {
             // trust data from ourselves to be wellformed
-            if(body.length() > maxSize) {
+            if(bodyAsString.length() > maxSize) {
                 try {
                     body = maxSizeJsonFilter.transform(bodyAsString);
                     wellformed = true;
@@ -64,7 +68,7 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
             }
         } else{
             // do not trust data from others to be wellformed
-            if(body.length() > maxSize) {
+            if(bodyAsString.length() > maxSize) {
                 try {
                     body = maxSizeJsonFilter.transform(bodyAsString);
                     wellformed = true;
@@ -75,7 +79,12 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
                 }
             } else {
                 body = bodyAsString;
-                wellformed = jsonValidator.isWellformedJson(bodyAsString);
+                boolean verify = remoteHttpMessageContextSupplier.verifyJsonSyntax(request);
+                if(verify) {
+                    wellformed = jsonValidator.isWellformedJson(bodyAsString);
+                } else {
+                    wellformed = true;
+                }
             }
         }
         return newRequestSingleFieldAppendingMarker(request, body, wellformed);
@@ -104,7 +113,7 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
 
         if (response.getOrigin().equals("local")) {
             // trust data from ourselves to be wellformed
-            if(body.length() > maxSize) {
+            if(bodyAsString.length() > maxSize) {
                 try {
                     body = maxSizeJsonFilter.transform(bodyAsString);
                     wellformed = true;
@@ -119,7 +128,7 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
             }
         } else{
             // do not trust data from others to be wellformed
-            if(body.length() > maxSize) {
+            if(bodyAsString.length() > maxSize) {
                 try {
                     body = maxSizeJsonFilter.transform(bodyAsString);
                     wellformed = true;
@@ -130,7 +139,12 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
                 }
             } else {
                 body = bodyAsString;
-                wellformed = jsonValidator.isWellformedJson(bodyAsString);
+                boolean verify = remoteHttpMessageContextSupplier.verifyJsonSyntax(response);
+                if(verify) {
+                    wellformed = jsonValidator.isWellformedJson(bodyAsString);
+                } else {
+                    wellformed = true;
+                }
             }
         }
         return newResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), body, wellformed);

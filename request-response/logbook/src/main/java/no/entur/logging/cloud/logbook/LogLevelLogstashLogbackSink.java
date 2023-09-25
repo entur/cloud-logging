@@ -1,11 +1,7 @@
 package no.entur.logging.cloud.logbook;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import no.entur.logging.cloud.logbook.util.JsonValidator;
-import no.entur.logging.cloud.logbook.util.MaxSizeJsonFilter;
 import org.slf4j.Marker;
-import org.zalando.logbook.ContentType;
-import org.zalando.logbook.Correlation;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
 
@@ -20,8 +16,8 @@ import java.util.function.BooleanSupplier;
 
 public class LogLevelLogstashLogbackSink extends AbstractLogLevelLogstashLogbackSink {
 
-    public LogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, JsonFactory jsonFactory, int maxSize) {
-        super(logConsumer, logLevelEnabled, jsonFactory, maxSize);
+    public LogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, JsonFactory jsonFactory, int maxSize, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
+        super(logConsumer, logLevelEnabled, jsonFactory, maxSize, remoteHttpMessageContextSupplier);
     }
 
     public static Builder newBuilder() {
@@ -46,7 +42,10 @@ public class LogLevelLogstashLogbackSink extends AbstractLogLevelLogstashLogback
             if(jsonFactory == null) {
                 jsonFactory = new JsonFactory();
             }
-            return new LogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), jsonFactory, Math.min(maxBodySize, maxSize));
+            if(remoteHttpMessageContextSupplier == null) {
+                remoteHttpMessageContextSupplier = new DefaultRemoteHttpMessageContextSupplier();
+            }
+            return new LogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), jsonFactory, Math.min(maxBodySize, maxSize), remoteHttpMessageContextSupplier);
         }
     }
 

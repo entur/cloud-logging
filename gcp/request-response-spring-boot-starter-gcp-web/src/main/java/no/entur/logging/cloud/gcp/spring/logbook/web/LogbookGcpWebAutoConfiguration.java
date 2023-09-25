@@ -3,10 +3,10 @@ package no.entur.logging.cloud.gcp.spring.logbook.web;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import no.entur.logging.cloud.gcp.spring.web.properties.OndemandProperties;
-import no.entur.logging.cloud.logbook.async.state.HttpMessageState;
-import no.entur.logging.cloud.logbook.async.state.HttpMessageStateSupplier;
-import no.entur.logging.cloud.logbook.async.state.RequestHttpMessageStateSupplierSource;
-import no.entur.logging.cloud.logbook.async.state.ResponseHttpMessageStateSupplierSource;
+import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageState;
+import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateSupplier;
+import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupplierSource;
+import no.entur.logging.cloud.logbook.ondemand.state.ResponseHttpMessageStateSupplierSource;
 import no.entur.logging.cloud.spring.logbook.LogbookLoggingAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -58,10 +58,7 @@ public class LogbookGcpWebAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean(ResponseHttpMessageStateSupplierSource.class)
         public ResponseHttpMessageStateSupplierSource responseHttpMessageStateSupplierSource(HttpServletResponse context) {
-
-            return () -> {
-                return () -> HttpMessageState.UNKNOWN;
-            };
+            return () -> () -> HttpMessageState.UNKNOWN;
         }
 
         @Bean

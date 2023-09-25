@@ -39,7 +39,7 @@ public class OndemandWebLoggingHttpBadRequestTest {
 	public void useHumanReadablePlainEncoderExpectFullLoggingWithoutWellformedBody() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		HttpEntity<String> request = new HttpEntity<>("{invalid json}", headers);
+		HttpEntity<String> request = new HttpEntity<>("{invalid json which does not break the log statement syntax}", headers);
 
 		ResponseEntity<MyEntity> response = restTemplate.exchange("/api/document/some/error", HttpMethod.POST, request, MyEntity.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -50,7 +50,7 @@ public class OndemandWebLoggingHttpBadRequestTest {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
-			HttpEntity<String> request = new HttpEntity<>("{invalid json}", headers);
+			HttpEntity<String> request = new HttpEntity<>("{invalid json which does not break the log statement syntax}", headers);
 
 			ResponseEntity<MyEntity> response = restTemplate.exchange("/api/document/some/error", HttpMethod.POST, request, MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -63,7 +63,7 @@ public class OndemandWebLoggingHttpBadRequestTest {
 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
-			HttpEntity<String> request = new HttpEntity<>("{invalid json}", headers);
+			HttpEntity<String> request = new HttpEntity<>("{invalid json which does not break the log statement syntax}", headers);
 
 			ResponseEntity<MyEntity> response = restTemplate.exchange("/api/document/some/error", HttpMethod.POST, request, MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);

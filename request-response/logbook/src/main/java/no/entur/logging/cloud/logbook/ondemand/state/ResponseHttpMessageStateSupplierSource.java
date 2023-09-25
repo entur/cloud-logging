@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.logbook.async.state;
+package no.entur.logging.cloud.logbook.ondemand.state;
 
 /**
  * Allow the request-response logger to trust the outgoing JSON in certain cases.

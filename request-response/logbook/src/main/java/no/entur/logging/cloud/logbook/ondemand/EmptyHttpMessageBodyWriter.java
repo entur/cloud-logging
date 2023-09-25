@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.logbook.async;
+package no.entur.logging.cloud.logbook.ondemand;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 
@@ -9,7 +9,7 @@ public class EmptyHttpMessageBodyWriter implements HttpMessageBodyWriter {
     public static final EmptyHttpMessageBodyWriter INSTANCE = new EmptyHttpMessageBodyWriter();
 
     @Override
-    public void prepareWriteBody() {
+    public void prepareResult() {
         // do nothing
     }
 

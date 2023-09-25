@@ -1,9 +1,6 @@
 package no.entur.logging.cloud.logbook;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import net.logstash.logback.marker.SingleFieldAppendingMarker;
-import no.entur.logging.cloud.logbook.async.AbstractAsyncSingleFieldAppendingMarker;
-import no.entur.logging.cloud.logbook.async.HttpMessageBodyWriter;
 import org.zalando.logbook.HttpResponse;
 
 import java.io.IOException;

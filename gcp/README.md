@@ -1,5 +1,5 @@
 # GCP support
-Stackdriver logging support (via console). 
+Stackdriver logging support (via console).  
 
 ## micrometer-gcp
 Log severity metrics for Stackdriver.
@@ -36,6 +36,8 @@ try (Closable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
 
 ## request-response-spring-boot-starter-gcp-web
 Logbook request-response-logging for Stackdriver.
+
+Note that remote JSON payloads are syntax validated and thus can be directly inlined in JSON log statements. 
 
 ## request-response-spring-boot-starter-gcp-web-test
 Logbook request-response-logging for local development.

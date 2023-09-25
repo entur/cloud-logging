@@ -1,20 +1,20 @@
-package no.entur.logging.cloud.logbook.async;
+package no.entur.logging.cloud.logbook.ondemand;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class DefaultHttpMessageBodyWriter implements HttpMessageBodyWriter {
+public class LocalHttpMessageBodyWriter implements HttpMessageBodyWriter {
 
     protected final byte[] input;
 
-    public DefaultHttpMessageBodyWriter(byte[] input) {
+    public LocalHttpMessageBodyWriter(byte[] input) {
         this.input = input;
     }
 
     @Override
-    public void prepareWriteBody() {
+    public void prepareResult() {
         // do nothing
     }
 

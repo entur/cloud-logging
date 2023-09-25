@@ -1,56 +1,56 @@
-package no.entur.logging.cloud.logbook.async;
+package no.entur.logging.cloud.logbook.ondemand;
 
 import com.fasterxml.jackson.core.*;
-import no.entur.logging.cloud.logbook.async.state.HttpMessageStateOutput;
+import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateResult;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.function.LongSupplier;
 
-public class MaxSizeHttpMessageBodyWriter implements HttpMessageBodyWriter {
+public class MaxSizeLocalHttpMessageBodyWriter implements HttpMessageBodyWriter {
 
     protected final byte[] input;
     protected final int maxSize;
     protected final JsonFactory jsonFactory;
 
-    protected HttpMessageStateOutput output;
+    protected HttpMessageStateResult output;
 
-    public MaxSizeHttpMessageBodyWriter(JsonFactory jsonFactory, byte[] input, int maxSize) {
+    public MaxSizeLocalHttpMessageBodyWriter(JsonFactory jsonFactory, byte[] input, int maxSize) {
         this.jsonFactory = jsonFactory;
         this.input = input;
         this.maxSize = maxSize;
     }
 
-    public void prepareWriteBody() {
+    public void prepareResult() {
         output = createOutput();
     }
 
-    protected HttpMessageStateOutput createOutput() {
+    protected HttpMessageStateResult createOutput() {
         // do nothing
         // must parse body regardless, so do filtering and well-formed validation in a single operation
         String wellformed = filterMaxSize(input, maxSize);
 
         if (wellformed != null) {
-            return new HttpMessageStateOutput(true, wellformed);
+            return new HttpMessageStateResult(true, wellformed);
         } else {
-            String result = new String(input, 0, maxSize, StandardCharsets.UTF_8);
-            return new HttpMessageStateOutput(false, result);
+            String result = new String(input, 0, Math.min(maxSize, input.length), StandardCharsets.UTF_8);
+            return new HttpMessageStateResult(false, result);
         }
     }
 
     @Override
     public void writeBody(JsonGenerator generator) throws IOException {
         if(output == null) {
-            prepareWriteBody();
+            prepareResult();
         }
-        HttpMessageStateOutput output = this.output;
+        HttpMessageStateResult output = this.output;
 
         if(output.isWellformed()) {
             generator.writeFieldName("body");
-            generator.writeRawValue(output.getOutput());
+            generator.writeRawValue(output.getBody());
         } else {
-            generator.writeStringField("body", output.getOutput());
+            generator.writeStringField("body", output.getBody());
         }
     }
 

@@ -2,7 +2,9 @@ package no.entur.logging.cloud.appender.scope;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import no.entur.logging.cloud.appender.AsyncAppender;
+import org.slf4j.Marker;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Predicate;
 
@@ -27,6 +29,7 @@ public class LoggingScopeAsyncAppender extends AsyncAppender {
 
         LoggingScope scope = loggingScopeFactory.getScope();
         if(scope == null || !scope.append(eventObject)) {
+            postProcess(eventObject);
             put(eventObject);
         }
     }
@@ -35,9 +38,22 @@ public class LoggingScopeAsyncAppender extends AsyncAppender {
         LoggingScope scope = loggingScopeFactory.getScope();
         if (scope != null) {
             ConcurrentLinkedQueue<ILoggingEvent> events = scope.getEvents();
-            for (ILoggingEvent event : events) {
-                put(event);
+            for (ILoggingEvent eventObject : events) {
+                postProcess(eventObject);
+                put(eventObject);
             }
+        }
+    }
+
+    private void postProcess(ILoggingEvent eventObject) {
+        List<Marker> markerList = eventObject.getMarkerList();
+        if(markerList != null && !markerList.isEmpty()) {
+            for (Marker marker : markerList) {
+                if(marker instanceof LoggingScopePostProcessing postProcessing) {
+                    postProcessing.performPostProcessing();
+                }
+            }
+
         }
     }
 

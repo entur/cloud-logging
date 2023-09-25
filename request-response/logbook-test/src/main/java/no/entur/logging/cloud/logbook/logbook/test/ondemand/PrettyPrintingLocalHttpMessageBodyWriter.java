@@ -1,24 +1,24 @@
-package no.entur.logging.cloud.logbook.logbook.test.async;
+package no.entur.logging.cloud.logbook.logbook.test.ondemand;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.PrettyPrinter;
-import no.entur.logging.cloud.logbook.async.HttpMessageBodyWriter;
+import no.entur.logging.cloud.logbook.ondemand.HttpMessageBodyWriter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class PrettyPrintingHttpMessageBodyWriter implements HttpMessageBodyWriter {
+public class PrettyPrintingLocalHttpMessageBodyWriter implements HttpMessageBodyWriter {
 
     protected final byte[] input;
 
-    public PrettyPrintingHttpMessageBodyWriter(byte[] input) {
+    public PrettyPrintingLocalHttpMessageBodyWriter(byte[] input) {
         this.input = input;
     }
 
     @Override
-    public void prepareWriteBody() {
+    public void prepareResult() {
         // do nothing
     }
 

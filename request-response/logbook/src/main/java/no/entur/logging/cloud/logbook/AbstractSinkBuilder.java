@@ -21,6 +21,8 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
     protected int maxSize = -1;
     protected int maxBodySize = -1;
 
+    protected RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier;
+
     public B withLogger(Logger logger) {
         this.logger = logger;
         return (B) this;
@@ -28,6 +30,11 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
 
     public B withJsonFactory(JsonFactory jsonFactory) {
         this.jsonFactory = jsonFactory;
+        return (B) this;
+    }
+
+    public B withRemoteHttpMessageContextSupplier(RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
+        this.remoteHttpMessageContextSupplier = remoteHttpMessageContextSupplier;
         return (B) this;
     }
 

@@ -3,6 +3,8 @@ package no.entur.logging.cloud.logbook.logbook.test;
 import com.fasterxml.jackson.core.JsonFactory;
 import no.entur.logging.cloud.logbook.AbstractLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.AbstractSinkBuilder;
+import no.entur.logging.cloud.logbook.DefaultRemoteHttpMessageContextSupplier;
+import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
 import org.slf4j.Marker;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
@@ -34,12 +36,15 @@ public class PrettyPrintingLogLevelLogstashLogbackSink extends AbstractLogLevelL
             if(jsonFactory == null) {
                 jsonFactory = new JsonFactory();
             }
-            return new PrettyPrintingLogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), jsonFactory, Math.min(maxBodySize, maxSize));
+            if(remoteHttpMessageContextSupplier == null) {
+                remoteHttpMessageContextSupplier = new DefaultRemoteHttpMessageContextSupplier();
+            }
+            return new PrettyPrintingLogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), jsonFactory, Math.min(maxBodySize, maxSize), remoteHttpMessageContextSupplier);
         }
     }
 
-    public PrettyPrintingLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, JsonFactory jsonFactory, int maxSize) {
-        super(logConsumer, logLevelEnabled, jsonFactory, maxSize);
+    public PrettyPrintingLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, JsonFactory jsonFactory, int maxSize, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
+        super(logConsumer, logLevelEnabled, jsonFactory, maxSize, remoteHttpMessageContextSupplier);
     }
 
     @Override

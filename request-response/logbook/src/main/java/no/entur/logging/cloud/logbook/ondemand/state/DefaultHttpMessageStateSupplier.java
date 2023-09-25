@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.logbook.async.state;
+package no.entur.logging.cloud.logbook.ondemand.state;
 
 public class DefaultHttpMessageStateSupplier implements HttpMessageStateSupplier {
 

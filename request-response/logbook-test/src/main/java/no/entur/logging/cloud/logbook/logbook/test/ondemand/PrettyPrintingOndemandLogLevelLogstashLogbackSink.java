@@ -1,10 +1,12 @@
-package no.entur.logging.cloud.logbook.logbook.test.async;
+package no.entur.logging.cloud.logbook.logbook.test.ondemand;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import no.entur.logging.cloud.logbook.async.*;
-import no.entur.logging.cloud.logbook.async.state.HttpMessageStateSupplier;
-import no.entur.logging.cloud.logbook.async.state.RequestHttpMessageStateSupplierSource;
-import no.entur.logging.cloud.logbook.async.state.ResponseHttpMessageStateSupplierSource;
+import no.entur.logging.cloud.logbook.DefaultRemoteHttpMessageContextSupplier;
+import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
+import no.entur.logging.cloud.logbook.ondemand.*;
+import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateSupplier;
+import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupplierSource;
+import no.entur.logging.cloud.logbook.ondemand.state.ResponseHttpMessageStateSupplierSource;
 import org.slf4j.Marker;
 import org.zalando.logbook.ContentType;
 import org.zalando.logbook.Correlation;
@@ -22,15 +24,15 @@ import java.util.function.BooleanSupplier;
  */
 
 
-public class PrettyPrintingAsyncLogLevelLogstashLogbackSink extends AbstractAsyncLogLevelLogstashLogbackSink {
+public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLevelLogstashLogbackSink {
 
     public static BuilderAsync newBuilder() {
         return new BuilderAsync();
     }
 
-    public static class BuilderAsync extends AbstractAsyncSinkBuilder<BuilderAsync, BuilderAsync> {
+    public static class BuilderAsync extends AbstractOndemandSinkBuilder<BuilderAsync, BuilderAsync> {
 
-        public PrettyPrintingAsyncLogLevelLogstashLogbackSink build() {
+        public PrettyPrintingOndemandLogLevelLogstashLogbackSink build() {
             if(maxBodySize == -1) {
                 throw new IllegalStateException("Expected max body size");
             }
@@ -46,12 +48,15 @@ public class PrettyPrintingAsyncLogLevelLogstashLogbackSink extends AbstractAsyn
             if(jsonFactory == null) {
                 jsonFactory = new JsonFactory();
             }
-            return new PrettyPrintingAsyncLogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), jsonFactory, requestBodyWellformedDecisionSupplier, responseBodyWellformedDecisionSupplier, maxBodySize, maxSize);
+            if(remoteHttpMessageContextSupplier == null) {
+                remoteHttpMessageContextSupplier = new DefaultRemoteHttpMessageContextSupplier();
+            }
+            return new PrettyPrintingOndemandLogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), jsonFactory, requestBodyWellformedDecisionSupplier, responseBodyWellformedDecisionSupplier, maxBodySize, maxSize, remoteHttpMessageContextSupplier);
         }
     }
 
-    public PrettyPrintingAsyncLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, JsonFactory jsonFactory, RequestHttpMessageStateSupplierSource requestHttpMessageStateSupplierSource, ResponseHttpMessageStateSupplierSource responseHttpMessageStateSupplierSource, int maxBodySize, int maxSize) {
-        super(logConsumer, logLevelEnabled, jsonFactory, requestHttpMessageStateSupplierSource, responseHttpMessageStateSupplierSource, maxBodySize, maxSize);
+    public PrettyPrintingOndemandLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, JsonFactory jsonFactory, RequestHttpMessageStateSupplierSource requestHttpMessageStateSupplierSource, ResponseHttpMessageStateSupplierSource responseHttpMessageStateSupplierSource, int maxBodySize, int maxSize, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
+        super(logConsumer, logLevelEnabled, jsonFactory, requestHttpMessageStateSupplierSource, responseHttpMessageStateSupplierSource, maxBodySize, maxSize, remoteHttpMessageContextSupplier);
     }
 
     public Marker createRequestMarker(HttpRequest request) {
@@ -64,16 +69,16 @@ public class PrettyPrintingAsyncLogLevelLogstashLogbackSink extends AbstractAsyn
                     if (request.getOrigin().equals("local")) {
                         // trust our own data to be wellformed
                         if (body.length > maxBodySize) {
-                            writer = new PrettyPrintingHttpMessageBodyWriter(body);
+                            writer = new PrettyPrintingLocalHttpMessageBodyWriter(body);
                         } else {
-                            writer = new PrettyPrintingMaxSizeHttpMessageBodyWriter(jsonFactory, body, maxBodySize);
+                            writer = new PrettyPrintingLocalMaxSizeHttpMessageBodyWriter(jsonFactory, body, maxBodySize);
                         }
                     } else {
                         HttpMessageStateSupplier httpMessageStateSupplier = requestHttpMessageStateSupplierSource.get();
                         if (body.length > maxBodySize) {
-                            writer = new PrettyPrintingAsyncHttpMessageBodyWriter(jsonFactory, body, httpMessageStateSupplier);
+                            writer = new PrettyPrintingRemoteHttpMessageBodyWriter(jsonFactory, body, httpMessageStateSupplier);
                         } else {
-                            writer = new PrettyPrintingAsyncMaxSizeHttpMessageBodyWriter(jsonFactory, body, maxSize, httpMessageStateSupplier);
+                            writer = new PrettyPrintingRemoteMaxSizeHttpMessageBodyWriter(jsonFactory, body, maxSize, httpMessageStateSupplier);
                         }
                     }
                 }
@@ -82,7 +87,7 @@ public class PrettyPrintingAsyncLogLevelLogstashLogbackSink extends AbstractAsyn
             }
         }
 
-        return new RequestAsyncSingleFieldAppendingMarker(request, writer);
+        return new RequestOndemandSingleFieldAppendingMarker(request, writer);
     }
 
     public Marker createResponseMarker(Correlation correlation, HttpResponse response) {
@@ -96,16 +101,16 @@ public class PrettyPrintingAsyncLogLevelLogstashLogbackSink extends AbstractAsyn
                     if (response.getOrigin().equals("local")) {
                         // trust our own data to be wellformed
                         if (body.length > maxBodySize) {
-                            writer = new PrettyPrintingHttpMessageBodyWriter(body);
+                            writer = new PrettyPrintingLocalHttpMessageBodyWriter(body);
                         } else {
-                            writer = new PrettyPrintingMaxSizeHttpMessageBodyWriter(jsonFactory, body, maxBodySize);
+                            writer = new PrettyPrintingLocalMaxSizeHttpMessageBodyWriter(jsonFactory, body, maxBodySize);
                         }
                     } else {
                         HttpMessageStateSupplier httpMessageStateSupplier = responseHttpMessageStateSupplierSource.get();
                         if (body.length > maxBodySize) {
-                            writer = new PrettyPrintingAsyncHttpMessageBodyWriter(jsonFactory, body, httpMessageStateSupplier);
+                            writer = new PrettyPrintingRemoteHttpMessageBodyWriter(jsonFactory, body, httpMessageStateSupplier);
                         } else {
-                            writer = new PrettyPrintingAsyncMaxSizeHttpMessageBodyWriter(jsonFactory, body, maxSize, httpMessageStateSupplier);
+                            writer = new PrettyPrintingRemoteMaxSizeHttpMessageBodyWriter(jsonFactory, body, maxSize, httpMessageStateSupplier);
                         }
                     }
                 }
@@ -114,7 +119,7 @@ public class PrettyPrintingAsyncLogLevelLogstashLogbackSink extends AbstractAsyn
             }
         }
 
-        return new ResponseAsyncSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), writer);
+        return new ResponseOndemandSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), writer);
     }
 
 }

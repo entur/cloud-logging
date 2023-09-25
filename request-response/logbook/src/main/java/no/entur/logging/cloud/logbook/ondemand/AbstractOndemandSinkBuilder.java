@@ -1,10 +1,10 @@
-package no.entur.logging.cloud.logbook.async;
+package no.entur.logging.cloud.logbook.ondemand;
 
 import no.entur.logging.cloud.logbook.AbstractSinkBuilder;
-import no.entur.logging.cloud.logbook.async.state.RequestHttpMessageStateSupplierSource;
-import no.entur.logging.cloud.logbook.async.state.ResponseHttpMessageStateSupplierSource;
+import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupplierSource;
+import no.entur.logging.cloud.logbook.ondemand.state.ResponseHttpMessageStateSupplierSource;
 
-public abstract class AbstractAsyncSinkBuilder<B, E extends AbstractAsyncSinkBuilder<B, E>> extends AbstractSinkBuilder<B, E> {
+public abstract class AbstractOndemandSinkBuilder<B, E extends AbstractOndemandSinkBuilder<B, E>> extends AbstractSinkBuilder<B, E> {
 
     protected RequestHttpMessageStateSupplierSource requestBodyWellformedDecisionSupplier;
     protected ResponseHttpMessageStateSupplierSource responseBodyWellformedDecisionSupplier;

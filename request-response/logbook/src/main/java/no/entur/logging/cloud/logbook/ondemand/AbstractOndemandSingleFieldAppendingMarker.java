@@ -1,7 +1,8 @@
-package no.entur.logging.cloud.logbook.async;
+package no.entur.logging.cloud.logbook.ondemand;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import net.logstash.logback.marker.SingleFieldAppendingMarker;
+import no.entur.logging.cloud.appender.scope.LoggingScopePostProcessing;
 import org.zalando.logbook.ContentType;
 import org.zalando.logbook.HttpMessage;
 
@@ -9,13 +10,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractAsyncSingleFieldAppendingMarker<T extends HttpMessage> extends SingleFieldAppendingMarker {
+public abstract class AbstractOndemandSingleFieldAppendingMarker<T extends HttpMessage> extends SingleFieldAppendingMarker implements LoggingScopePostProcessing {
 
     protected String contentType;
     protected Map<String, List<String>> headers;
     protected HttpMessageBodyWriter httpMessageBodyWriter;
 
-    public AbstractAsyncSingleFieldAppendingMarker(String markerName, T message, HttpMessageBodyWriter httpMessageBodyWriter) {
+    public AbstractOndemandSingleFieldAppendingMarker(String markerName, T message, HttpMessageBodyWriter httpMessageBodyWriter) {
         super(markerName, "http");
         this.httpMessageBodyWriter = httpMessageBodyWriter;
 
@@ -31,8 +32,8 @@ public abstract class AbstractAsyncSingleFieldAppendingMarker<T extends HttpMess
         headers = message.getHeaders();
     }
 
-    public void prepareWriteBody() {
-        httpMessageBodyWriter.prepareWriteBody();
+    public void performPostProcessing() {
+        httpMessageBodyWriter.prepareResult();
     }
 
     protected void writeBody(JsonGenerator generator) {

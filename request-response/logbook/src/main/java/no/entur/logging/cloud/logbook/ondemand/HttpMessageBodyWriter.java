@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.logbook.async;
+package no.entur.logging.cloud.logbook.ondemand;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 
@@ -17,7 +17,7 @@ import java.io.IOException;
 
 public interface HttpMessageBodyWriter {
 
-    void prepareWriteBody();
+    void prepareResult();
 
     void writeBody(JsonGenerator generator) throws IOException;
 

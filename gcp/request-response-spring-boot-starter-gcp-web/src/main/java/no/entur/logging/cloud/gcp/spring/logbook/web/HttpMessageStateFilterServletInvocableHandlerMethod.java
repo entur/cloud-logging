@@ -1,7 +1,7 @@
 package no.entur.logging.cloud.gcp.spring.logbook.web;
 
-import no.entur.logging.cloud.logbook.async.state.DefaultHttpMessageStateSupplier;
-import no.entur.logging.cloud.logbook.async.state.HttpMessageState;
+import no.entur.logging.cloud.logbook.ondemand.state.DefaultHttpMessageStateSupplier;
+import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageState;
 import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
