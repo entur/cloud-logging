@@ -86,7 +86,7 @@ jobs:
                 command: |
                   ./gradlew build                
 
-  publish:
+  publish-team:
     executor: java_17
     steps:
       - checkout
@@ -96,6 +96,18 @@ jobs:
                 name: Build
                 command: |
                   ./gradlew -x test build publish
+
+  publish-partner:
+    executor: java_17
+    steps:
+      - checkout
+      - with_cache:
+          steps:
+            - run:
+                name: Build
+                command: |
+                  ./gradlew -PpublishTarget=partner -x test build publish
+
 
   create-git-release:
     executor: java_17
@@ -145,8 +157,15 @@ workflows:
       - build:
           name: Build with Gradle
           filters: *filters
-      - publish:
-          name: Publish
+      - publish_team:
+          context: global
+          name: Publish team scope release
+          filters: *filters
+          requires:
+            - Build with Gradle
+      - publish_partner:
+          context: partner
+          name: Publish partner scope release
           filters: *filters
           requires:
             - Build with Gradle
@@ -158,8 +177,26 @@ workflows:
           name: Build with Gradle
           filters:
             branches:
-              ignore:
-                - master
+              only:
+                - develop
+      - publish_team:
+          context: global
+          name: Publish team scope snapshot
+          filters:
+            branches:
+              only:
+                - develop
+          requires:
+            - Build with Gradle
+      - publish_partner:
+          context: partner
+          name: Publish partner scope snapshot
+          filters:
+            branches:
+              only:
+                - develop
+          requires:
+            - Build with Gradle
 
   # DEVELOP BRANCH FLOW
   'owasp-flow':
