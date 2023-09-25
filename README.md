@@ -22,15 +22,8 @@ with
  * Request-response-logging
      * Logbook style output
      * Additional ANSI coloring for test scope
- * On-demand logging for unexpected web server behaviour
-     * Caches log statements for each request in memory, then
-     * throws them away for successful responses, or
-     * logs them in case of 
-       * failed responses (i.e. HTTP status code >= 400) and/or
-       * log events of a certain level (i.e. warning or error) was made
-     * since timestamps are preserved, log accumulation tools present the results in chronological order (i.e. this feature is best for deployments)
-     * this reduces the necessary amount of work compared to the traditional approach
-       * skip JSON syntax check for throw-away log statements
+ * Selective 'on-demand' logging for unexpected web server behaviour
+     * Reduce logging cost considerably while still capturing logs for problematic requests 
  * Unit testing
    * Always assert against machine-readable JSON 'under the hood', regardless what is printed to console during local development
    * Supported frameworks
@@ -64,6 +57,18 @@ This library lets developers add some more details about the seriousness of the 
 * Wake me up right now
     * Handled by devops team if within work hours, otherwise
     * Handled by operations team during wake or sleep hours
+
+## On-demand logging
+Enabled "on-demand" logging for unexpected web server behaviour.
+
+  * Caches log statements for each request in memory, then
+  * throws them away for successful responses, or
+  * logs them in case of
+      * failed responses (i.e. HTTP status code >= 400) and/or
+      * log events of a certain level (i.e. warning or error) was made
+  * since timestamps are preserved, log accumulation tools present the results in chronological order (i.e. this feature is best for deployments)
+  * reduces the necessary amount of work necessary to guarantee wellformed JSON log statements for request-response logging
+      * skips JSON syntax check for throw-away request-response log statements
 
 # Cloud adaptations
 
