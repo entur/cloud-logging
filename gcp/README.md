@@ -38,6 +38,8 @@ try (Closable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
 Logbook request-response-logging for Stackdriver.
 
 Note that remote JSON payloads are syntax validated and thus can be directly inlined in JSON log statements. 
+Local JSON payloads are not syntax validated as the framework expect that we produce only valid JSON ourselves.
+Use `RemoteHttpMessageContextSupplier` to skip syntax validation if remote JSON payloads are known to contain only valid JSON.
 
 ## request-response-spring-boot-starter-gcp-web-test
 Logbook request-response-logging for local development.
