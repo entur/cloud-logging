@@ -1,14 +1,11 @@
 package no.entur.logging.cloud.logbook.logbook.test;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import no.entur.logging.cloud.logbook.AbstractLogLevelLogstashLogbackSink;
-
 import no.entur.logging.cloud.logbook.AbstractSinkBuilder;
-import no.entur.logging.cloud.logbook.RequestSingleFieldAppendingMarker;
-import no.entur.logging.cloud.logbook.ResponseSingleFieldAppendingMarker;
-import no.entur.logging.cloud.logbook.WellformedRequestBodyDecisionSupplier;
-import no.entur.logging.cloud.logbook.WellformedResponseBodyDecisionSupplier;
+import no.entur.logging.cloud.logbook.DefaultRemoteHttpMessageContextSupplier;
+import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
 import org.slf4j.Marker;
-import org.zalando.logbook.Correlation;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
 
@@ -16,7 +13,6 @@ import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
 public class PrettyPrintingLogLevelLogstashLogbackSink extends AbstractLogLevelLogstashLogbackSink {
-
 
     public static Builder newBuilder() {
         return new Builder();
@@ -37,40 +33,28 @@ public class PrettyPrintingLogLevelLogstashLogbackSink extends AbstractLogLevelL
             if(level == null) {
                 throw new IllegalStateException("Expected log level");
             }
-
-            return new PrettyPrintingLogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), requestBodyWellformedDecisionSupplier, responseBodyWellformedDecisionSupplier, maxBodySize, maxSize);
+            if(jsonFactory == null) {
+                jsonFactory = new JsonFactory();
+            }
+            if(remoteHttpMessageContextSupplier == null) {
+                remoteHttpMessageContextSupplier = new DefaultRemoteHttpMessageContextSupplier();
+            }
+            return new PrettyPrintingLogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), jsonFactory, Math.min(maxBodySize, maxSize), remoteHttpMessageContextSupplier);
         }
-
     }
 
-    public PrettyPrintingLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, WellformedRequestBodyDecisionSupplier requestBodyWellformedDecisionSupplier, WellformedResponseBodyDecisionSupplier responseBodyWellformedDecisionSupplier, int maxBodySize, int maxSize) {
-        super(logConsumer, logLevelEnabled, requestBodyWellformedDecisionSupplier, responseBodyWellformedDecisionSupplier, maxBodySize, maxSize);
+    public PrettyPrintingLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, JsonFactory jsonFactory, int maxSize, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
+        super(logConsumer, logLevelEnabled, jsonFactory, maxSize, remoteHttpMessageContextSupplier);
     }
 
-    protected Marker createRequestMarker(HttpRequest request) {
-
-        // trust our own data
-        BooleanSupplier wellformed;
-        if(request.getOrigin().equals("local")) {
-            wellformed = () -> true;
-        } else {
-            wellformed = requestBodyWellformedDecisionSupplier.get();
-        }
-
-
-        return new PrettyPrintingRequestSingleFieldAppendingMarker(request, wellformed, maxBodySize, maxSize);
+    @Override
+    protected Marker newRequestSingleFieldAppendingMarker(HttpRequest request, String body, boolean wellformed) {
+        return new PrettyPrintingRequestSingleFieldAppendingMarker(request, body, wellformed);
     }
 
-    protected Marker createResponseMarker(Correlation correlation, HttpResponse response) {
-        // trust our own data
-        BooleanSupplier wellformed;
-        if(response.getOrigin().equals("local")) {
-            wellformed = () -> true;
-        } else {
-            wellformed = responseBodyWellformedDecisionSupplier.get();
-        }
-
-        return new PrettyPrintingResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), wellformed, maxBodySize, maxSize);
+    @Override
+    protected Marker newResponseSingleFieldAppendingMarker(HttpResponse response, long millis, String body, boolean wellformed) {
+        return new PrettyPrintingResponseSingleFieldAppendingMarker(response, millis, body, wellformed);
     }
 
 

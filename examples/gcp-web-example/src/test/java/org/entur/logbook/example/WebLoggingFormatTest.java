@@ -44,7 +44,6 @@ public class WebLoggingFormatTest {
 			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method", entity, MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		}
-
 	}
 
 	@Test

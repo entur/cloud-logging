@@ -1,10 +1,7 @@
 package no.entur.logging.cloud.logbook;
 
 import org.slf4j.Marker;
-import org.zalando.logbook.Correlation;
-import org.zalando.logbook.HttpRequest;
-import org.zalando.logbook.HttpResponse;
-import org.zalando.logbook.Sink;
+import org.zalando.logbook.*;
 
 import java.io.IOException;
 import java.util.function.BiConsumer;
@@ -45,6 +42,29 @@ public abstract class AbstractLogLevelSink implements Sink {
         messageBuilder.append(" (in ");
         messageBuilder.append(correlation.getDuration().toMillis());
         messageBuilder.append(" ms)");
+    }
+
+    @Override
+    public void write(final Precorrelation precorrelation, final HttpRequest request) throws IOException {
+        Marker marker = createRequestMarker(request);
+        StringBuilder stringBuilder = new StringBuilder(256);
+        requestMessage(request, stringBuilder);
+        logConsumer.accept (marker, stringBuilder.toString());
+    }
+
+    public void write(Correlation correlation, final HttpRequest request, HttpResponse response) throws IOException {
+        Marker marker = createResponseMarker(correlation, response);
+        StringBuilder stringBuilder = new StringBuilder(256);
+        responseMessage(correlation, request, response, stringBuilder);
+        logConsumer.accept(marker, stringBuilder.toString());
+    }
+
+    protected Marker createResponseMarker(Correlation correlation, HttpResponse response) {
+        return null;
+    }
+
+    protected Marker createRequestMarker(HttpRequest request) {
+        return null;
     }
 
 }

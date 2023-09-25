@@ -1,8 +1,10 @@
 package no.entur.logging.cloud.spring.logbook;
 
+import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
+import no.entur.logging.cloud.logbook.ondemand.OndemandLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.LogLevelLogstashLogbackSink;
-import no.entur.logging.cloud.logbook.WellformedRequestBodyDecisionSupplier;
-import no.entur.logging.cloud.logbook.WellformedResponseBodyDecisionSupplier;
+import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupplierSource;
+import no.entur.logging.cloud.logbook.ondemand.state.ResponseHttpMessageStateSupplierSource;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,14 +25,25 @@ public class AbstractLogbookLoggingAutoConfiguration {
 
     // TODO parameter for sync vs async validation of JSON body wellformedness
 
-    protected LogLevelLogstashLogbackSink createMachineReadbleSink(Logger logger, Level level, WellformedRequestBodyDecisionSupplier validateRequestJsonBodyWellformed, WellformedResponseBodyDecisionSupplier validateResponseJsonBodyWellformed) {
+    protected LogLevelLogstashLogbackSink createMachineReadbleSink(Logger logger, Level level, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
         return LogLevelLogstashLogbackSink.newBuilder()
+                .withLogger(logger)
+                .withLogLevel(level)
+                .withMaxBodySize(maxBodySize)
+                .withMaxSize(maxSize)
+                .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
+                .build();
+    }
+
+    protected OndemandLogLevelLogstashLogbackSink createAsyncMachineReadbleSink(Logger logger, Level level, RequestHttpMessageStateSupplierSource validateRequestJsonBodyWellformed, ResponseHttpMessageStateSupplierSource validateResponseJsonBodyWellformed, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
+        return OndemandLogLevelLogstashLogbackSink.newBuilder()
                 .withLogger(logger)
                 .withLogLevel(level)
                 .withMaxBodySize(maxBodySize)
                 .withMaxSize(maxSize)
                 .withValidateRequestJsonBodyWellformed(validateRequestJsonBodyWellformed)
                 .withValidateResponseJsonBodyWellformed(validateResponseJsonBodyWellformed)
+                .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
                 .build();
     }
 

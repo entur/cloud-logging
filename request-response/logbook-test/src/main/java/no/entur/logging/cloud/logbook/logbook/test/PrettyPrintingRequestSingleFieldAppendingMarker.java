@@ -13,15 +13,16 @@ import java.util.function.BooleanSupplier;
 
 public class PrettyPrintingRequestSingleFieldAppendingMarker extends RequestSingleFieldAppendingMarker {
 
-    public PrettyPrintingRequestSingleFieldAppendingMarker(HttpRequest request, BooleanSupplier validateJsonBody, int maxBodySize, int maxSize) {
-        super(request, validateJsonBody, maxBodySize, maxSize);
+    public PrettyPrintingRequestSingleFieldAppendingMarker(HttpRequest request, String body, boolean wellformed) {
+        super(request, body, wellformed);
     }
 
     @Override
-    protected void writeApprovedBody(JsonGenerator generator, byte[] body) throws IOException {
+    protected void writeWellformedBody(JsonGenerator generator) throws IOException {
         final PrettyPrinter prettyPrinter = generator.getPrettyPrinter();
+        generator.writeFieldName("body");
         if (prettyPrinter == null) {
-            generator.writeRawValue(new String(body, StandardCharsets.UTF_8));
+            generator.writeRawValue(body);
         } else {
             final JsonFactory factory = generator.getCodec().getFactory();
 
@@ -32,7 +33,6 @@ public class PrettyPrintingRequestSingleFieldAppendingMarker extends RequestSing
                 }
             }
         }
-
     }
 
 }

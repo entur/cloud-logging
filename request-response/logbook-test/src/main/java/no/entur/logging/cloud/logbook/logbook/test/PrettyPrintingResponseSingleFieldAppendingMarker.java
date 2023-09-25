@@ -8,20 +8,20 @@ import no.entur.logging.cloud.logbook.ResponseSingleFieldAppendingMarker;
 import org.zalando.logbook.HttpResponse;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.function.BooleanSupplier;
 
 public class PrettyPrintingResponseSingleFieldAppendingMarker extends ResponseSingleFieldAppendingMarker {
 
-    public PrettyPrintingResponseSingleFieldAppendingMarker(HttpResponse response, long duration, BooleanSupplier validateJsonBody, int maxBodySize, int maxSize) {
-        super(response, duration, validateJsonBody, maxBodySize, maxSize);
+
+    public PrettyPrintingResponseSingleFieldAppendingMarker(HttpResponse response, long duration, String body, boolean wellformed) {
+        super(response, duration, body, wellformed);
     }
 
     @Override
-    protected void writeApprovedBody(JsonGenerator generator, byte[] bodyAsString) throws IOException {
+    protected void writeWellformedBody(JsonGenerator generator) throws IOException {
         final PrettyPrinter prettyPrinter = generator.getPrettyPrinter();
+        generator.writeFieldName("body");
         if (prettyPrinter == null) {
-            generator.writeRawValue(new String(body, StandardCharsets.UTF_8));
+            generator.writeRawValue(body);
         } else {
             final JsonFactory factory = generator.getCodec().getFactory();
 
@@ -33,5 +33,6 @@ public class PrettyPrintingResponseSingleFieldAppendingMarker extends ResponseSi
             }
         }
     }
+
 
 }

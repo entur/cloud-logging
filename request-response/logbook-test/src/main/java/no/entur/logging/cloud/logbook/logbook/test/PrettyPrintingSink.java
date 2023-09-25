@@ -6,10 +6,8 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.github.skjolber.jackson.jsh.AnsiSyntaxHighlight;
 import com.github.skjolber.jackson.jsh.SyntaxHighlighter;
 import com.github.skjolber.jackson.jsh.SyntaxHighlightingJsonGenerator;
+import no.entur.logging.cloud.logbook.AbstractLogLevelSink;
 import no.entur.logging.cloud.logbook.AbstractSinkBuilder;
-import no.entur.logging.cloud.logbook.LogLevelLogstashLogbackSink;
-import no.entur.logging.cloud.logbook.WellformedRequestBodyDecisionSupplier;
-import no.entur.logging.cloud.logbook.WellformedResponseBodyDecisionSupplier;
 import org.slf4j.Marker;
 import org.zalando.logbook.ContentType;
 import org.zalando.logbook.Correlation;
@@ -25,7 +23,7 @@ import java.util.function.BooleanSupplier;
 
 /** Pretty printing + coloring of request-response logging */
 
-public class PrettyPrintingSink extends LogLevelLogstashLogbackSink {
+public class PrettyPrintingSink extends AbstractLogLevelSink {
 
     public static class Builder extends AbstractSinkBuilder<Builder, Builder> {
 
@@ -37,12 +35,6 @@ public class PrettyPrintingSink extends LogLevelLogstashLogbackSink {
         }
 
         public PrettyPrintingSink build() {
-            if(maxBodySize == -1) {
-                throw new IllegalStateException("Expected max body size");
-            }
-            if(maxSize == -1) {
-                throw new IllegalStateException("Expected max size");
-            }
             if(logger == null) {
                 throw new IllegalStateException("Expected logger");
             }
@@ -52,8 +44,11 @@ public class PrettyPrintingSink extends LogLevelLogstashLogbackSink {
             if(syntaxHighlighter == null) {
                 throw new IllegalStateException("Expected Json syntax highlighter level");
             }
+            if(jsonFactory == null) {
+                jsonFactory = new JsonFactory();
+            }
 
-            return new PrettyPrintingSink(logEnabledToBooleanSupplier(), loggerToBiConsumer(), requestBodyWellformedDecisionSupplier, responseBodyWellformedDecisionSupplier, maxBodySize, maxSize, new JsonFactory(), syntaxHighlighter);
+            return new PrettyPrintingSink(logEnabledToBooleanSupplier(), loggerToBiConsumer(), jsonFactory, syntaxHighlighter);
         }
 
     }
@@ -61,8 +56,8 @@ public class PrettyPrintingSink extends LogLevelLogstashLogbackSink {
 
     protected final SyntaxHighlighter syntaxHighlighter;
 
-    public PrettyPrintingSink(BooleanSupplier logLevelEnabled, BiConsumer<Marker, String> logConsumer, WellformedRequestBodyDecisionSupplier validateRequestJsonBody, WellformedResponseBodyDecisionSupplier validateResponseJsonBody, int maxBodySize, int maxSize, JsonFactory jsonFactory, SyntaxHighlighter syntaxHighlighter) {
-        super(logConsumer, logLevelEnabled, validateRequestJsonBody, validateResponseJsonBody, maxBodySize, maxSize);
+    public PrettyPrintingSink(BooleanSupplier logLevelEnabled, BiConsumer<Marker, String> logConsumer, JsonFactory jsonFactory, SyntaxHighlighter syntaxHighlighter) {
+        super(logLevelEnabled, logConsumer);
         this.jsonFactory = jsonFactory;
         this.syntaxHighlighter = syntaxHighlighter;
     }
@@ -91,6 +86,7 @@ public class PrettyPrintingSink extends LogLevelLogstashLogbackSink {
         }
 
     }
+
 
     private void writeHeaders(final Map<String, List<String>> headers, final StringBuilder output) {
         if (headers.isEmpty()) {
