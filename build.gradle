@@ -141,8 +141,13 @@ configure(libraryProjects()) {
         repositories {
             maven {
                 credentials {
-                    username = "${project.properties['entur_artifactory_user'] ?: System.env.ARTIFACTORY_USER}"
-                    password = "${project.properties['entur_artifactory_password'] ?: System.env.ARTIFACTORY_PASSWORD}"
+                    if (project.hasProperty("publishTarget") && project.getProperty("publishTarget").equals("partner")) {
+                        username = "${project.properties['entur_artifactory_user'] ?: System.env.PARTNER_ARTIFACTORY_USER}"
+                        password = "${project.properties['entur_artifactory_password'] ?: System.env.PARTNER_ARTIFACTORY_APIKEY}"
+                    } else {
+                        username = "${project.properties['entur_artifactory_user'] ?: System.env.ARTIFACTORY_USER}"
+                        password = "${project.properties['entur_artifactory_password'] ?: System.env.ARTIFACTORY_PASSWORD}"
+                    }
                 }
 
                 if (project.hasProperty("publishTarget") && project.getProperty("publishTarget").equals("partner")) {
