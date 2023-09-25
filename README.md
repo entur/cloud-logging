@@ -11,7 +11,7 @@ with
  * Cloud-specific log encoders
    * GCP (Stackdriver)
  * `DevOpsLogger` extension for additional error levels 
-   * Improve interaction with operations
+   * Improve interaction with operations team
  * Friendly logging scheme
    * Main scope (intended for deployments):
      * Machine-readable JSON 
@@ -59,7 +59,7 @@ This library lets developers add some more details about the seriousness of the 
     * Handled by operations team during wake or sleep hours
 
 ## On-demand logging
-Enabled "on-demand" logging for unexpected web server behaviour.
+Enable "on-demand" logging for unexpected web server behaviour:
 
   * Caches log statements for each request in memory, then
   * throws them away for successful responses, or
@@ -67,8 +67,9 @@ Enabled "on-demand" logging for unexpected web server behaviour.
       * failed responses (i.e. HTTP status code >= 400) and/or
       * log events of a certain level (i.e. warning or error) was made
   * since timestamps are preserved, log accumulation tools present the results in chronological order (i.e. this feature is best for deployments)
-  * reduces the necessary amount of work necessary to guarantee wellformed JSON log statements for request-response logging
+  * reduces the amount of work necessary to guarantee wellformed JSON log statements for request-response logging
       * skips JSON syntax check for throw-away request-response log statements
+      * piggybacks on Spring REST framework databinding JSON syntax check
 
 # Cloud adaptations
 
@@ -76,7 +77,7 @@ Enabled "on-demand" logging for unexpected web server behaviour.
 Stackdriver 
 
  * JSON encoder
- * Max size (for request-response log statements)
+ * Max log statement size (for request-response log statements)
 
 See [GCP](gcp) for further details.
 
