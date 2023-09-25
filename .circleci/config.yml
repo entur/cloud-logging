@@ -86,7 +86,7 @@ jobs:
                 command: |
                   ./gradlew build                
 
-  publish-team:
+  publish_team:
     executor: java_17
     steps:
       - checkout
@@ -97,7 +97,7 @@ jobs:
                 command: |
                   ./gradlew -x test build publish
 
-  publish-partner:
+  publish_partner:
     executor: java_17
     steps:
       - checkout
