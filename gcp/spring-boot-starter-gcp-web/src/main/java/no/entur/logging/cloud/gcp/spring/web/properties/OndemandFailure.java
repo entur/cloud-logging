@@ -4,7 +4,7 @@ public class OndemandFailure {
 
     private String level = "info";
 
-    private OndemandHttpTrigger http = new OndemandHttpTrigger();
+    private OndemandHttpResponseTrigger http = new OndemandHttpResponseTrigger();
     private OndemandLogLevelTrigger logger = new OndemandLogLevelTrigger();
 
     public void setLevel(String level) {
@@ -15,11 +15,11 @@ public class OndemandFailure {
         return level;
     }
 
-    public OndemandHttpTrigger getHttp() {
+    public OndemandHttpResponseTrigger getHttp() {
         return http;
     }
 
-    public void setHttp(OndemandHttpTrigger http) {
+    public void setHttp(OndemandHttpResponseTrigger http) {
         this.http = http;
     }
 

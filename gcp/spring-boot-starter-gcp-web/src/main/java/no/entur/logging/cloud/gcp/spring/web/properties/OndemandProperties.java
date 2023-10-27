@@ -14,6 +14,8 @@ public class OndemandProperties {
 
     private OndemandFailure failure = new OndemandFailure();
 
+    private OndemandTroubleshoot troubleshoot = new OndemandTroubleshoot();
+
     public OndemandProperties() {
         // set default value
         failure.getHttp().getStatusCode().setEqualOrHigherThan(400);
@@ -71,5 +73,13 @@ public class OndemandProperties {
 
     public String getFilterUrlPatterns() {
         return filterUrlPatterns;
+    }
+
+    public OndemandTroubleshoot getTroubleshoot() {
+        return troubleshoot;
+    }
+
+    public void setTroubleshoot(OndemandTroubleshoot troubleshoot) {
+        this.troubleshoot = troubleshoot;
     }
 }

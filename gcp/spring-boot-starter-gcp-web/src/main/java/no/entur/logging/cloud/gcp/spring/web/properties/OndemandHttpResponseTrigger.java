@@ -1,11 +1,13 @@
 package no.entur.logging.cloud.gcp.spring.web.properties;
 
-public class OndemandHttpTrigger {
+import java.util.ArrayList;
+import java.util.List;
+
+public class OndemandHttpResponseTrigger {
 
     private boolean enabled = true;
 
     private OndemandHttpStatus statusCode = new OndemandHttpStatus();
-
 
     public void setStatusCode(OndemandHttpStatus statusCode) {
         this.statusCode = statusCode;

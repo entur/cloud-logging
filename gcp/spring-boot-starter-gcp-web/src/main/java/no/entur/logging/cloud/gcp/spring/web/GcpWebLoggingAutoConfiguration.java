@@ -12,20 +12,8 @@ import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import no.entur.logging.cloud.appender.scope.predicate.HigherOrEqualToLogLevelPredicate;
 import no.entur.logging.cloud.appender.scope.predicate.LoggerNamePrefixHigherOrEqualToLogLevelPredicate;
 import no.entur.logging.cloud.gcp.micrometer.StackdriverLogbackMetrics;
-import no.entur.logging.cloud.gcp.spring.web.properties.OndemandFailure;
-import no.entur.logging.cloud.gcp.spring.web.properties.OndemandHttpStatus;
-import no.entur.logging.cloud.gcp.spring.web.properties.OndemandHttpTrigger;
-import no.entur.logging.cloud.gcp.spring.web.properties.OndemandLogLevelTrigger;
-import no.entur.logging.cloud.gcp.spring.web.properties.OndemandPath;
-import no.entur.logging.cloud.gcp.spring.web.properties.OndemandProperties;
-import no.entur.logging.cloud.gcp.spring.web.properties.OndemandSuccess;
-import no.entur.logging.cloud.gcp.spring.web.scope.HttpStatusAtLeastOrNotPredicate;
-import no.entur.logging.cloud.gcp.spring.web.scope.HttpStatusAtLeastPredicate;
-import no.entur.logging.cloud.gcp.spring.web.scope.HttpLoggingScopeFilter;
-import no.entur.logging.cloud.gcp.spring.web.scope.HttpLoggingScopeFilters;
-import no.entur.logging.cloud.gcp.spring.web.scope.HttpStatusEqualToPredicate;
-import no.entur.logging.cloud.gcp.spring.web.scope.HttpStatusNotEqualToPredicate;
-import no.entur.logging.cloud.gcp.spring.web.scope.ThreadLocalLoggingScopeFactory;
+import no.entur.logging.cloud.gcp.spring.web.properties.*;
+import no.entur.logging.cloud.gcp.spring.web.scope.*;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -36,8 +24,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import static jakarta.servlet.DispatcherType.ERROR;
 import static jakarta.servlet.DispatcherType.REQUEST;
@@ -72,7 +62,7 @@ public class GcpWebLoggingAutoConfiguration {
 
             HttpLoggingScopeFilters filters = new HttpLoggingScopeFilters();
             
-            HttpLoggingScopeFilter defaultFilter = toFilter(null, properties.getSuccess(), properties.getFailure());
+            HttpLoggingScopeFilter defaultFilter = toFilter(null, properties.getSuccess(), properties.getFailure(), properties.getTroubleshoot());
             filters.setDefaultFilter(defaultFilter);
 
             List<OndemandPath> paths = properties.getPaths();
@@ -80,7 +70,7 @@ public class GcpWebLoggingAutoConfiguration {
                 if(!path.isEnabled()) {
                     continue;
                 }
-                HttpLoggingScopeFilter filter = toFilter(path.getMatcher(), path.getSuccess(), path.getFailure());
+                HttpLoggingScopeFilter filter = toFilter(path.getMatcher(), path.getSuccess(), path.getFailure(), path.getTroubleshoot());
                 RequestMatcher requestMatcher = AntPathRequestMatcher.antMatcher(path.getMatcher());
                 filters.addFilter(requestMatcher, filter);
             }
@@ -115,8 +105,25 @@ public class GcpWebLoggingAutoConfiguration {
             throw new IllegalStateException("Expected appender type " + LoggingScopeAsyncAppender.class.getName());
         }
 
-        public HttpLoggingScopeFilter toFilter(String matcher, OndemandSuccess success, OndemandFailure failure) {
+        public HttpLoggingScopeFilter toFilter(String matcher, OndemandSuccess success, OndemandFailure failure, OndemandTroubleshoot troubleshoot) {
             HttpLoggingScopeFilter filter = new HttpLoggingScopeFilter();
+
+            List<OndemandHttpHeader> headers = troubleshoot.getHttp().getHeaders();
+            if(headers != null) {
+                Set<String> headerNames = new HashSet<>(); // thread safe for reading
+                for (OndemandHttpHeader header : headers) {
+                    if(header.isEnabled()) {
+                        headerNames.add(header.getName().toLowerCase());
+                    }
+                }
+                if(!headerNames.isEmpty()) {
+                    filter.setHttpHeaderPresentPredicate(new HttpHeaderPresentPredicate(headerNames));
+                } else {
+                    filter.setHttpHeaderPresentPredicate((e) -> false);
+                }
+            } else {
+                filter.setHttpHeaderPresentPredicate((e) -> false);
+            }
 
             Level alwaysLogLevel = toLevel(success.getLevel());
             filter.setQueuePredicate( (e) -> e.getLevel().toInt() < alwaysLogLevel.toInt());
@@ -124,7 +131,24 @@ public class GcpWebLoggingAutoConfiguration {
             Level optionallyLogLevel = toLevel(failure.getLevel());
             filter.setIgnorePredicate( (e) -> e.getLevel().toInt() < optionallyLogLevel.toInt());
 
-            OndemandHttpTrigger httpStatusCodeTrigger = failure.getHttp();
+            // troubleshooting: to take effect, the troubleshooting must be
+            //  - lower than success, and/or
+            //  - lower than failure
+            Level troubleShootAlwaysLogLevel = toLevel(troubleshoot.getLevel());
+            if(troubleShootAlwaysLogLevel.toInt() > alwaysLogLevel.toInt()) {
+                filter.setTroubleshootQueuePredicate( (e) -> e.getLevel().toInt() < alwaysLogLevel.toInt());
+            } else {
+                filter.setTroubleshootQueuePredicate( (e) -> e.getLevel().toInt() < troubleShootAlwaysLogLevel.toInt());
+            }
+
+            Level troubleShootOptionallyLogLevel = troubleShootAlwaysLogLevel;
+            if( troubleShootOptionallyLogLevel.toInt() > optionallyLogLevel.toInt()) {
+                filter.setTroubleshootIgnorePredicate( (e) -> e.getLevel().toInt() < optionallyLogLevel.toInt());
+            } else {
+                filter.setTroubleshootIgnorePredicate( (e) -> e.getLevel().toInt() < troubleShootOptionallyLogLevel.toInt());
+            }
+
+            OndemandHttpResponseTrigger httpStatusCodeTrigger = failure.getHttp();
             if(httpStatusCodeTrigger.isEnabled()) {
                 OndemandHttpStatus statusCode = httpStatusCodeTrigger.getStatusCode();
 

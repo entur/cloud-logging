@@ -16,8 +16,8 @@ import no.entur.logging.cloud.gcp.spring.web.scope.HttpLoggingScopeFilter;
 import no.entur.logging.cloud.gcp.spring.web.scope.HttpLoggingScopeFilters;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 public class OndemandFilter implements Filter {
@@ -35,13 +35,24 @@ public class OndemandFilter implements Filter {
 
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 		if(servletRequest instanceof HttpServletRequest) {
-			HttpLoggingScopeFilter filter = filters.getScope((HttpServletRequest) servletRequest);
+			HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
+
+			HttpLoggingScopeFilter filter = filters.getScope(httpServletRequest);
+
+			Predicate<ILoggingEvent> queuePredicate = filter.getQueuePredicate();
+			Predicate<ILoggingEvent> ignorePredicate = filter.getIgnorePredicate();
+
+			Predicate<Enumeration<String>> httpHeaderPresentPredicate = filter.getHttpHeaderPresentPredicate();
+			if(httpHeaderPresentPredicate.test(httpServletRequest.getHeaderNames())) {
+				queuePredicate = filter.getTroubleshootQueuePredicate();
+				ignorePredicate = filter.getTroubleshootIgnorePredicate();
+			}
 
 			LoggingScopeFactory loggingScopeFactory = appender.getLoggingScopeFactory();
 			try {
-				loggingScopeFactory.openScope(filter.getQueuePredicate(), filter.getIgnorePredicate());
+				loggingScopeFactory.openScope(queuePredicate, ignorePredicate);
 
-				filterChain.doFilter(servletRequest, servletResponse);
+				filterChain.doFilter(httpServletRequest, servletResponse);
 			} finally {
 				LoggingScope scope = loggingScopeFactory.getScope();
 				if(scope != null) {
