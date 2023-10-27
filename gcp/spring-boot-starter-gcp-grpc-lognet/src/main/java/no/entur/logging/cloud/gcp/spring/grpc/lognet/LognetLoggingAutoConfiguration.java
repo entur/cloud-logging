@@ -11,17 +11,8 @@ import no.entur.logging.cloud.api.DevOpsLoggerFactory;
 import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import no.entur.logging.cloud.appender.scope.predicate.HigherOrEqualToLogLevelPredicate;
 import no.entur.logging.cloud.appender.scope.predicate.LoggerNamePrefixHigherOrEqualToLogLevelPredicate;
-import no.entur.logging.cloud.gcp.spring.grpc.lognet.properties.OndemandFailure;
-import no.entur.logging.cloud.gcp.spring.grpc.lognet.properties.OndemandGrpcTrigger;
-import no.entur.logging.cloud.gcp.spring.grpc.lognet.properties.OndemandLogLevelTrigger;
-import no.entur.logging.cloud.gcp.spring.grpc.lognet.properties.OndemandPath;
-import no.entur.logging.cloud.gcp.spring.grpc.lognet.properties.OndemandProperties;
-import no.entur.logging.cloud.gcp.spring.grpc.lognet.properties.OndemandSuccess;
-import no.entur.logging.cloud.gcp.spring.grpc.lognet.properties.ServiceMatcherConfiguration;
-import no.entur.logging.cloud.gcp.spring.grpc.lognet.scope.GrpcContextLoggingScopeFactory;
-import no.entur.logging.cloud.gcp.spring.grpc.lognet.scope.GrpcLoggingScopeContextInterceptor;
-import no.entur.logging.cloud.gcp.spring.grpc.lognet.scope.GrpcLoggingScopeFilter;
-import no.entur.logging.cloud.gcp.spring.grpc.lognet.scope.GrpcLoggingScopeFilters;
+import no.entur.logging.cloud.gcp.spring.grpc.lognet.properties.*;
+import no.entur.logging.cloud.gcp.spring.grpc.lognet.scope.*;
 import no.entur.logging.cloud.grpc.mdc.GrpcMdcContextInterceptor;
 import no.entur.logging.cloud.grpc.trace.GrpcAddMdcTraceToResponseInterceptor;
 import no.entur.logging.cloud.grpc.trace.GrpcTraceMdcContextInterceptor;
@@ -36,7 +27,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -76,7 +66,7 @@ public class LognetLoggingAutoConfiguration {
 
             GrpcLoggingScopeFilters filters = new GrpcLoggingScopeFilters();
 
-            GrpcLoggingScopeFilter defaultFilter = toFilter(properties.getSuccess(), properties.getFailure());
+            GrpcLoggingScopeFilter defaultFilter = toFilter(properties.getSuccess(), properties.getFailure(), properties.getTroubleshoot());
             filters.setDefaultFilter(defaultFilter);
 
             List<OndemandPath> paths = properties.getPaths();
@@ -84,7 +74,7 @@ public class LognetLoggingAutoConfiguration {
                 if(!matcher.isEnabled()) {
                     continue;
                 }
-                GrpcLoggingScopeFilter filter = toFilter(matcher.getSuccess(), matcher.getFailure());
+                GrpcLoggingScopeFilter filter = toFilter(matcher.getSuccess(), matcher.getFailure(), matcher.getTroubleshoot());
 
                 String serviceName = matcher.getServiceName();
                 List<String> methodNames = matcher.getMethodNames();
@@ -143,8 +133,25 @@ public class LognetLoggingAutoConfiguration {
         }
 
 
-        public GrpcLoggingScopeFilter toFilter(OndemandSuccess success, OndemandFailure failure) {
+        public GrpcLoggingScopeFilter toFilter(OndemandSuccess success, OndemandFailure failure, OndemandTroubleshoot troubleshoot) {
             GrpcLoggingScopeFilter filter = new GrpcLoggingScopeFilter();
+
+            List<OndemandGrpcHeader> headers = troubleshoot.getGrpc().getHeaders();
+            if(headers != null) {
+                Set<String> headerNames = new HashSet<>(); // thread safe for reading
+                for (OndemandGrpcHeader header : headers) {
+                    if(header.isEnabled()) {
+                        headerNames.add(header.getName().toLowerCase());
+                    }
+                }
+                if(!headerNames.isEmpty()) {
+                    filter.setGrpcHeaderPresentPredicate(new GrpcHeaderPresentPredicate(headerNames));
+                } else {
+                    filter.setGrpcHeaderPresentPredicate((e) -> false);
+                }
+            } else {
+                filter.setGrpcHeaderPresentPredicate((e) -> false);
+            }
 
             Level alwaysLogLevel = toLevel(success.getLevel());
             filter.setQueuePredicate( (e) -> e.getLevel().toInt() < alwaysLogLevel.toInt());
@@ -152,7 +159,24 @@ public class LognetLoggingAutoConfiguration {
             Level optionallyLogLevel = toLevel(failure.getLevel());
             filter.setIgnorePredicate( (e) -> e.getLevel().toInt() < optionallyLogLevel.toInt());
 
-            OndemandGrpcTrigger httpStatusCodeTrigger = failure.getGrpc();
+            // troubleshooting: to take effect, the troubleshooting must be
+            //  - lower than success, and/or
+            //  - lower than failure
+            Level troubleShootAlwaysLogLevel = toLevel(troubleshoot.getLevel());
+            if(troubleShootAlwaysLogLevel.toInt() > alwaysLogLevel.toInt()) {
+                filter.setTroubleshootQueuePredicate( (e) -> e.getLevel().toInt() < alwaysLogLevel.toInt());
+            } else {
+                filter.setTroubleshootQueuePredicate( (e) -> e.getLevel().toInt() < troubleShootAlwaysLogLevel.toInt());
+            }
+
+            Level troubleShootOptionallyLogLevel = troubleShootAlwaysLogLevel;
+            if( troubleShootOptionallyLogLevel.toInt() > optionallyLogLevel.toInt()) {
+                filter.setTroubleshootIgnorePredicate( (e) -> e.getLevel().toInt() < optionallyLogLevel.toInt());
+            } else {
+                filter.setTroubleshootIgnorePredicate( (e) -> e.getLevel().toInt() < troubleShootOptionallyLogLevel.toInt());
+            }
+
+            OndemandGrpcResponseTrigger httpStatusCodeTrigger = failure.getGrpc();
             if(httpStatusCodeTrigger.isEnabled()) {
                 Set<String> status = httpStatusCodeTrigger.getStatus().stream().map( (s) -> s.toUpperCase()).collect(Collectors.toSet());
 

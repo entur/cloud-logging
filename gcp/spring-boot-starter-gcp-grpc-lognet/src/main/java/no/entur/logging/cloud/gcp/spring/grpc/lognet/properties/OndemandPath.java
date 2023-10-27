@@ -14,6 +14,8 @@ public class OndemandPath {
 	private OndemandSuccess success = new OndemandSuccess();
 	private OndemandFailure failure = new OndemandFailure();
 
+	private OndemandTroubleshoot troubleshoot = new OndemandTroubleshoot();
+
 	public boolean isEnabled() {
 		return enabled;
 	}
@@ -52,5 +54,13 @@ public class OndemandPath {
 
 	public void setMethodNames(List<String> methodNames) {
 		this.methodNames = methodNames;
+	}
+
+	public OndemandTroubleshoot getTroubleshoot() {
+		return troubleshoot;
+	}
+
+	public void setTroubleshoot(OndemandTroubleshoot troubleshoot) {
+		this.troubleshoot = troubleshoot;
 	}
 }

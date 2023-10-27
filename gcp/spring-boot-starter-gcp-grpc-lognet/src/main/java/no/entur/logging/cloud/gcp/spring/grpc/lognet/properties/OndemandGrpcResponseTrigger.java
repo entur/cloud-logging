@@ -5,7 +5,7 @@ import io.grpc.Status;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OndemandGrpcTrigger {
+public class OndemandGrpcResponseTrigger {
 
     private static List<String> allStatusCodesExceptOk() {
         ArrayList list = new ArrayList();

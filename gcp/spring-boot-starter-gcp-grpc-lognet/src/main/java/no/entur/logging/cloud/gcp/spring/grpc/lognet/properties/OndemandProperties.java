@@ -14,6 +14,8 @@ public class OndemandProperties {
 
     private OndemandFailure failure = new OndemandFailure();
 
+    private OndemandTroubleshoot troubleshoot = new OndemandTroubleshoot();
+
     private List<OndemandPath> paths = new ArrayList<>();
 
     public void setEnabled(boolean enabled) {
@@ -46,5 +48,13 @@ public class OndemandProperties {
 
     public void setPaths(List<OndemandPath> paths) {
         this.paths = paths;
+    }
+
+    public OndemandTroubleshoot getTroubleshoot() {
+        return troubleshoot;
+    }
+
+    public void setTroubleshoot(OndemandTroubleshoot troubleshoot) {
+        this.troubleshoot = troubleshoot;
     }
 }

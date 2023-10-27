@@ -14,6 +14,7 @@ import no.entur.logging.cloud.appender.scope.LoggingScope;
 import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import no.entur.logging.cloud.appender.scope.LoggingScopeFactory;
 
+import java.util.Enumeration;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Predicate;
 
@@ -74,7 +75,16 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor {
 
 		LoggingScopeFactory<Context> loggingScopeFactory = appender.getLoggingScopeFactory();
 
-		Context context = loggingScopeFactory.openScope(filter.getQueuePredicate(), filter.getIgnorePredicate());
+		Predicate<ILoggingEvent> queuePredicate = filter.getQueuePredicate();
+		Predicate<ILoggingEvent> ignorePredicate = filter.getIgnorePredicate();
+
+		Predicate<Metadata> httpHeaderPresentPredicate = filter.getGrpcHeaderPresentPredicate();
+		if(httpHeaderPresentPredicate.test(headers)) {
+			queuePredicate = filter.getTroubleshootQueuePredicate();
+			ignorePredicate = filter.getTroubleshootIgnorePredicate();
+		}
+
+		Context context = loggingScopeFactory.openScope(queuePredicate, ignorePredicate);
 
 		ServerCall<ReqT, RespT> interceptCall = new ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
 			public void close(Status status, Metadata trailers) {

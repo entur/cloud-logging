@@ -4,7 +4,7 @@ public class OndemandFailure {
 
     private String level = "info";
 
-    private OndemandGrpcTrigger grpc = new OndemandGrpcTrigger();
+    private OndemandGrpcResponseTrigger grpc = new OndemandGrpcResponseTrigger();
     private OndemandLogLevelTrigger logger = new OndemandLogLevelTrigger();
 
     public void setLevel(String level) {
@@ -15,11 +15,11 @@ public class OndemandFailure {
         return level;
     }
 
-    public OndemandGrpcTrigger getGrpc() {
+    public OndemandGrpcResponseTrigger getGrpc() {
         return grpc;
     }
 
-    public void setGrpc(OndemandGrpcTrigger grpc) {
+    public void setGrpc(OndemandGrpcResponseTrigger grpc) {
         this.grpc = grpc;
     }
 

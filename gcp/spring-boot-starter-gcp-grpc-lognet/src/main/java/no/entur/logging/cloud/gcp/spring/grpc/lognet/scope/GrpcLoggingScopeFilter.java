@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.gcp.spring.grpc.lognet.scope;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import io.grpc.Metadata;
 import io.grpc.Status;
 
 import java.util.function.Predicate;
@@ -12,6 +13,12 @@ public class GrpcLoggingScopeFilter {
 
     private Predicate<ILoggingEvent> logLevelFailurePredicate;
     private Predicate<Status> grpcStatusPredicate;
+
+    private Predicate<ILoggingEvent> troubleshootQueuePredicate;
+
+    private Predicate<ILoggingEvent> troubleshootIgnorePredicate;
+
+    private Predicate<Metadata> grpcHeaderPresentPredicate;
 
     public Predicate<Status> getGrpcStatusPredicate() {
         return grpcStatusPredicate;
@@ -44,4 +51,30 @@ public class GrpcLoggingScopeFilter {
     public void setLogLevelFailurePredicate(Predicate<ILoggingEvent> logLevelFailurePredicate) {
         this.logLevelFailurePredicate = logLevelFailurePredicate;
     }
+
+    public Predicate<ILoggingEvent> getTroubleshootIgnorePredicate() {
+        return troubleshootIgnorePredicate;
+    }
+
+    public Predicate<ILoggingEvent> getTroubleshootQueuePredicate() {
+        return troubleshootQueuePredicate;
+    }
+
+    public void setTroubleshootIgnorePredicate(Predicate<ILoggingEvent> troubleshootIgnorePredicate) {
+        this.troubleshootIgnorePredicate = troubleshootIgnorePredicate;
+    }
+
+    public void setTroubleshootQueuePredicate(Predicate<ILoggingEvent> troubleshootQueuePredicate) {
+        this.troubleshootQueuePredicate = troubleshootQueuePredicate;
+    }
+
+    public Predicate<Metadata> getGrpcHeaderPresentPredicate() {
+        return grpcHeaderPresentPredicate;
+    }
+
+    public void setGrpcHeaderPresentPredicate(Predicate<Metadata> grpcHeaderPresentPredicate) {
+        this.grpcHeaderPresentPredicate = grpcHeaderPresentPredicate;
+    }
+
+
 }
