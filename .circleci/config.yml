@@ -13,7 +13,7 @@ aliases:
   - &cache_key cache_key
 
 orbs:
-  owasp: entur/owasp@0.0.18
+  owasp: entur/owasp@0.0.19
   gradle: entur/gradle-orb@0.0.9
 
 executors:

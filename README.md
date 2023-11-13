@@ -90,4 +90,5 @@ Stackdriver
 See [GCP](gcp) for further details.
 
 # Known issues
-Hosting gRPC and web services (i.e. REST services other than actuator) in the same app is not supported. 
+Hosting gRPC and web services (i.e. REST services other than actuator) in the same app is not supported.
+

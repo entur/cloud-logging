@@ -28,5 +28,29 @@
     <suppress>
         <packageUrl regex="true">^pkg:maven/logging\-new\.request\-response\.server/netty\-grpc\-test@.*$</packageUrl>
         <cpe>cpe:/a:grpc:grpc</cpe>
-    </suppress>    
+    </suppress>
+    <suppress>
+        <packageUrl regex="true">^pkg:maven/cloud\-logging\.trace/mdc\-context\-grpc\-netty@.*$</packageUrl>
+        <cpe>cpe:/a:grpc:grpc</cpe>
+    </suppress>
+    <suppress>
+        <packageUrl regex="true">^pkg:maven/cloud\-logging\.request\-response/netty\-grpc@.*$</packageUrl>
+        <cpe>cpe:/a:grpc:grpc</cpe>
+    </suppress>
+    <suppress>
+        <packageUrl regex="true">^pkg:maven/cloud\-logging\.gcp/request\-response\-spring\-boot\-starter\-gcp\-grpc\-lognet@.*$</packageUrl>
+        <cpe>cpe:/a:grpc:grpc</cpe>
+    </suppress>
+    <suppress>
+        <packageUrl regex="true">^pkg:maven/cloud\-logging\.gcp/spring\-boot\-starter\-gcp\-grpc\-lognet@.*$</packageUrl>
+        <cpe>cpe:/a:grpc:grpc</cpe>
+    </suppress>
+    <suppress>
+        <packageUrl regex="true">^pkg:maven/cloud\-logging\.trace\.server/correlation\-id\-trace\-grpc\-netty@.*$</packageUrl>
+        <cpe>cpe:/a:grpc:grpc</cpe>
+    </suppress>
+    <suppress>
+        <!-- netty http client -->
+        <cve>CVE-2023-4586</cve>
+    </suppress>
 </suppressions>
