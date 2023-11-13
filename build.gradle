@@ -42,35 +42,36 @@ configure(buildProjects()) {
     targetCompatibility = JavaVersion.VERSION_17
     
     ext {
-        junitJupiterVersion = '5.9.3'
-        mockitoVersion = '5.3.1'
+        junitJupiterVersion = '5.10.1'
+        mockitoVersion = '5.7.0'
         logbackLogstashVersion = '7.4'
-        slf4jVersion = '2.0.7'
+        slf4jVersion = '2.0.9'
         googleTruthVersion = '1.1.5'
         logbackVersion = '1.4.11'
-        jacksonVersion = '2.15.2'
-        jacksonDatabindVersion = '2.15.2'
-        nettyTcnativeBoringsslStaticVersion = '2.0.61.Final'
-        nettyVersion = '4.1.92.Final'
+        jacksonVersion = '2.15.3'
+        jacksonDatabindVersion = '2.15.3'
+        nettyTcnativeBoringsslStaticVersion = '2.0.62.Final'
+        nettyVersion = '4.1.100.Final'
         micrometerVersion = '1.11.4'
-        springBootVersion = '3.1.4' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
+        springBootVersion = '3.1.5' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
         janinoVersion = '3.1.10'
         servletVersion = '6.0.0' // jakarta
-        logbookVersion = '3.4.0'
+        logbookVersion = '3.6.0'
         jacksonSyntaxHighlightVersion = '1.0.8'
         logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.0.7'
-        commonsIoVersion = '2.13.0'
-        commonsTextVersion = '1.10.0'
+        commonsIoVersion = '2.15.0'
+        commonsTextVersion = '1.11.0'
 
-        grpcNettyVersion = '1.57.2'
-        grpcVersion = '1.57.2'
-        grpcCommonsVersion = '2.23.0'
-        grpcProtobufVersion = '3.24.1'
+        grpcNettyVersion = '1.58.0'
+        grpcVersion = '1.58.0'
+        grpcCommonsVersion = '2.28.0'
+        grpcProtobufVersion = '3.25.0'
+
         jsonAssertVersion = '0.6.2'
         jsonPathVersion = '2.8.0'
-        jsonSmartVersion = '2.4.11'
+        jsonSmartVersion = '2.5.0'
 
-        lognetVersion = '5.1.4'
+        lognetVersion = '5.1.5'
     }
 
     test {
