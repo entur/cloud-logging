@@ -1,5 +1,5 @@
 # cloud-logging
-Entur cloud logging libraries for JVM applications. Goals
+Log libraries for JVM applications running the could. Goals
 
  * make developers more productive when developing and maintaining applications
  * keep cloud logging costs within reason
