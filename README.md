@@ -1,5 +1,5 @@
 # cloud-logging
-Log libraries for JVM applications running the could. Goals
+Log libraries for JVM applications running in the cloud. Goals
 
  * make developers more productive when developing and maintaining applications
  * keep cloud logging costs within reason
