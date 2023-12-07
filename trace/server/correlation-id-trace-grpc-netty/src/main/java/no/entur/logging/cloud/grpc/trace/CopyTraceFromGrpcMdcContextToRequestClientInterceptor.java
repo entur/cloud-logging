@@ -32,9 +32,9 @@ import org.slf4j.LoggerFactory;
  * Interceptor which copies tracing headers from the current Context.
  */
 
-public class GrpcTraceMdcContextClientInterceptor implements ClientInterceptor {
+public class CopyTraceFromGrpcMdcContextToRequestClientInterceptor implements ClientInterceptor {
 
-	private static final Logger log = LoggerFactory.getLogger(GrpcTraceMdcContextClientInterceptor.class);
+	private static final Logger log = LoggerFactory.getLogger(CopyTraceFromGrpcMdcContextToRequestClientInterceptor.class);
 
 	@Override
 	public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(MethodDescriptor<ReqT, RespT> method, CallOptions callOptions, Channel next) {

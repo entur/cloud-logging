@@ -3,8 +3,8 @@ package no.entur.grpc.example;
 
 import io.grpc.util.TransmitStatusRuntimeExceptionInterceptor;
 import no.entur.logging.cloud.gcp.spring.grpc.lognet.scope.GrpcLoggingScopeContextInterceptor;
-import no.entur.logging.cloud.grpc.mdc.GrpcMdcContextInterceptor;
-import no.entur.logging.cloud.grpc.trace.GrpcTraceMdcContextInterceptor;
+import no.entur.logging.cloud.grpc.mdc.InitializeGrpcMdcContextServerInterceptor;
+import no.entur.logging.cloud.grpc.trace.CopyTraceFromRequestToGrpcGrpcMdcContextServerServerInterceptor;
 import no.entur.logging.cloud.rr.grpc.GrpcLoggingServerInterceptor;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.context.annotation.Profile;
@@ -18,9 +18,9 @@ import org.springframework.context.annotation.Profile;
 		// logging
 		GrpcLoggingServerInterceptor.class,
 		// Trace
-		GrpcTraceMdcContextInterceptor.class, // add trace headers (correlation-id and such)
+		CopyTraceFromRequestToGrpcGrpcMdcContextServerServerInterceptor.class, // add trace headers (correlation-id and such)
 		// MDC
-		GrpcMdcContextInterceptor.class, // init context-aware MDC
+		InitializeGrpcMdcContextServerInterceptor.class, // init context-aware MDC
 
 		GrpcLoggingScopeContextInterceptor.class
 })

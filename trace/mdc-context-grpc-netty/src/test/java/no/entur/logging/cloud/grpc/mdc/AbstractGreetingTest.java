@@ -49,7 +49,7 @@ public class AbstractGreetingTest {
 				// the status runtime exception interceptor should be the closest to the actual controller
 				.intercept(TransmitStatusRuntimeExceptionInterceptor.instance())
 				.intercept(new TestMdcContextInterceptor())
-				.intercept(GrpcMdcContextInterceptor.newBuilder().build())
+				.intercept(InitializeGrpcMdcContextServerInterceptor.newBuilder().build())
 
 		  .build();
  

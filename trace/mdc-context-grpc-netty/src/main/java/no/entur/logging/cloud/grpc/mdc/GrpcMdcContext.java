@@ -5,7 +5,6 @@ import io.grpc.Context;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 /**
  * Utility class for use holding MDC fields.<br>
@@ -16,66 +15,21 @@ import java.util.concurrent.Callable;
 
 public class GrpcMdcContext {
 
-	public static ContextWrapper newContext() {
-		return new ContextWrapper();
-	}
-
-	public static class ContextWrapper {
-
-		private Map<String, String> fields;
-
-		public ContextWrapper() {
-			GrpcMdcContext grpcMdcContext = GrpcMdcContext.KEY_CONTEXT.get();
-			if (grpcMdcContext != null) {
-				// already within a context
-				this.fields = new HashMap<>(grpcMdcContext.getContext());
-			} else {
-				this.fields = new HashMap<>();
-			}
-		}
-
-		public ContextWrapper withFields(Map<String, String> fields) {
-			this.fields.putAll(fields);
-			return this;
-		}
-
-		public ContextWrapper withField(String key, String value) {
-			this.fields.put(key, value);
-			return this;
-		}
-
-		public void run(Runnable r) {
-			// so run in a new context even if there is an existing context, so that the original context object is not touched
-			runInNewContext(fields, r);
-		}
-
-		public <T> T call(Callable<T> r) throws Exception {
-			// so run in a new context even if there is an existing context,
-			// so that the original context object is not touched
-			return callInNewContext(fields, r);
-		}
-	}
-
-
 	public static final Context.Key<GrpcMdcContext> KEY_CONTEXT = Context.key("MDC_CONTEXT");
-
-	public static <T> T callInNewContext(Map<String, String> mdc, Callable<T> c) throws Exception {
-		Context fork = Context.current().withValue(GrpcMdcContext.KEY_CONTEXT, new GrpcMdcContext(mdc));
-
-		return fork.call(c);
-	}
-
-	public static void runInNewContext(Map<String, String> mdc, Runnable r) {
-		Context fork = Context.current().withValue(GrpcMdcContext.KEY_CONTEXT, new GrpcMdcContext(mdc));
-
-		fork.run(r);
-	}
-
-	protected Map<String, String> context;
 
 	public static boolean isWithinContext() {
 		return get() != null;
 	}
+
+	public static GrpcMdcContextRunner newContext() {
+		return new GrpcMdcContextRunner();
+	}
+
+	public static GrpcMdcContextRunner newEmptyContext() {
+		return new GrpcMdcContextRunner(new HashMap<>());
+	}
+
+	protected Map<String, String> context;
 
 	public static GrpcMdcContext get() {
 		return KEY_CONTEXT.get();
@@ -87,6 +41,14 @@ public class GrpcMdcContext {
 		}
 		this.context = context;
 	}
+
+	public GrpcMdcContext(GrpcMdcContext parent) {
+		if (parent == null) {
+			throw new IllegalArgumentException();
+		}
+		this.context = parent.getContext();
+	}
+
 
 	public GrpcMdcContext() {
 		this(new HashMap<>());

@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.grpc.trace;
 
 import io.grpc.Metadata;
+import no.entur.logging.cloud.grpc.mdc.GrpcMdcContextRunner;
 import org.slf4j.MDC;
 
 import java.io.UnsupportedEncodingException;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 /**
  * Utility class for tracing fields going into the MDC.
@@ -102,7 +104,6 @@ public class GrpcTraceMdcContext implements AutoCloseable {
 	}
 
 	public static String sanitize(String inputValue) {
-		// https://en.wikipedia.org/wiki/HTTP_response_splitting
 		if (!containsNumbersLowercaseLettersAndDashes(inputValue)) {
 			try {
 				return URLEncoder.encode(inputValue, "UTF-8");
@@ -150,4 +151,10 @@ public class GrpcTraceMdcContext implements AutoCloseable {
 	public void close() throws Exception {
 		clear();
 	}
+
+	public <T> T call(Callable<T> r) throws Exception {
+		return GrpcMdcContextRunner.callInNewContext(this.context, r);
+	}
+
+
 }

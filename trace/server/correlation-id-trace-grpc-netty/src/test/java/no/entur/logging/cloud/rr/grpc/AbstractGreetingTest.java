@@ -5,9 +5,9 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.util.TransmitStatusRuntimeExceptionInterceptor;
-import no.entur.logging.cloud.grpc.mdc.GrpcMdcContextInterceptor;
-import no.entur.logging.cloud.grpc.trace.GrpcAddMdcTraceToResponseInterceptor;
-import no.entur.logging.cloud.grpc.trace.GrpcTraceMdcContextInterceptor;
+import no.entur.logging.cloud.grpc.mdc.InitializeGrpcMdcContextServerInterceptor;
+import no.entur.logging.cloud.grpc.trace.CopyTraceFromGrpcMdcContextToResponseServerInterceptor;
+import no.entur.logging.cloud.grpc.trace.CopyTraceFromRequestToGrpcGrpcMdcContextServerServerInterceptor;
 import no.entur.logging.cloud.grpc.trace.test.GreetingRequest;
 import no.entur.logging.cloud.grpc.trace.test.GreetingServiceGrpc;
 import org.junit.jupiter.api.AfterAll;
@@ -48,9 +48,9 @@ public class AbstractGreetingTest {
 				// reverse order;
 				// the status runtime exception interceptor should be the closest to the actual controller
 				.intercept(TransmitStatusRuntimeExceptionInterceptor.instance())
-				.intercept(new GrpcAddMdcTraceToResponseInterceptor())
-				.intercept(GrpcTraceMdcContextInterceptor.newBuilder().build())
-				.intercept(GrpcMdcContextInterceptor.newBuilder().build())
+				.intercept(new CopyTraceFromGrpcMdcContextToResponseServerInterceptor())
+				.intercept(CopyTraceFromRequestToGrpcGrpcMdcContextServerServerInterceptor.newBuilder().build())
+				.intercept(InitializeGrpcMdcContextServerInterceptor.newBuilder().build())
 
 		  .build();
  
