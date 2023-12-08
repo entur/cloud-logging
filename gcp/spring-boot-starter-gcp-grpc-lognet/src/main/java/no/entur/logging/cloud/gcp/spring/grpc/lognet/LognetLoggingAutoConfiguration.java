@@ -14,8 +14,8 @@ import no.entur.logging.cloud.appender.scope.predicate.LoggerNamePrefixHigherOrE
 import no.entur.logging.cloud.gcp.spring.grpc.lognet.properties.*;
 import no.entur.logging.cloud.gcp.spring.grpc.lognet.scope.*;
 import no.entur.logging.cloud.grpc.mdc.InitializeGrpcMdcContextServerInterceptor;
-import no.entur.logging.cloud.grpc.trace.CopyTraceFromGrpcMdcContextToResponseServerInterceptor;
-import no.entur.logging.cloud.grpc.trace.CopyTraceFromRequestToGrpcGrpcMdcContextServerServerInterceptor;
+import no.entur.logging.cloud.grpc.trace.CopyCorrelationIdFromGrpcMdcContextToResponseServerInterceptor;
+import no.entur.logging.cloud.grpc.trace.CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -36,15 +36,15 @@ public class LognetLoggingAutoConfiguration {
     private static final DevOpsLogger LOGGER = DevOpsLoggerFactory.getLogger(LognetLoggingAutoConfiguration.class);
 
     @Bean
-    @ConditionalOnMissingBean(CopyTraceFromRequestToGrpcGrpcMdcContextServerServerInterceptor.class)
-    public CopyTraceFromRequestToGrpcGrpcMdcContextServerServerInterceptor grpcTraceMdcContextInterceptor() {
-        return CopyTraceFromRequestToGrpcGrpcMdcContextServerServerInterceptor.newBuilder().build();
+    @ConditionalOnMissingBean(CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor.class)
+    public CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor grpcTraceMdcContextInterceptor() {
+        return CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor.newBuilder().build();
     }
 
     @Bean
-    @ConditionalOnMissingBean(CopyTraceFromGrpcMdcContextToResponseServerInterceptor.class)
-    public CopyTraceFromGrpcMdcContextToResponseServerInterceptor grpcAddMdcTraceToResponseInterceptor() {
-        return new CopyTraceFromGrpcMdcContextToResponseServerInterceptor();
+    @ConditionalOnMissingBean(CopyCorrelationIdFromGrpcMdcContextToResponseServerInterceptor.class)
+    public CopyCorrelationIdFromGrpcMdcContextToResponseServerInterceptor grpcAddMdcTraceToResponseInterceptor() {
+        return new CopyCorrelationIdFromGrpcMdcContextToResponseServerInterceptor();
     }
 
     @Bean
