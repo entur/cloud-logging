@@ -71,6 +71,12 @@ public class AbstractGreetingTest {
 		GreetingServiceGrpc.GreetingServiceBlockingStub greetingService = GreetingServiceGrpc.newBlockingStub(managedChannel).withInterceptors(new AddNewCorrelationIdToRequestClientInterceptor());
 		return greetingService;
 	}
+
+	protected GreetingServiceGrpc.GreetingServiceBlockingStub stubWithoutCorrelationId() {
+		ManagedChannel managedChannel = ManagedChannelBuilder.forAddress("localhost", port).usePlaintext().build();
+		GreetingServiceGrpc.GreetingServiceBlockingStub greetingService = GreetingServiceGrpc.newBlockingStub(managedChannel);
+		return greetingService;
+	}
 	
 	protected void shutdown(GreetingServiceGrpc.GreetingServiceBlockingStub stub) throws InterruptedException {
 		ManagedChannel m = (ManagedChannel)stub.getChannel();
