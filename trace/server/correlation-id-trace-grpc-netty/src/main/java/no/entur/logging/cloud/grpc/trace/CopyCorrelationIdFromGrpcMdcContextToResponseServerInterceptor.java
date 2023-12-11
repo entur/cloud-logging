@@ -32,9 +32,9 @@ public class CopyCorrelationIdFromGrpcMdcContextToResponseServerInterceptor impl
 				// does not make much sense to create this value if it is not already present
 				// however it should always be present
 				if (context != null) {
-					String correlationId = context.get(GrpcTraceMdcContext.CORRELATION_ID_MDC_KEY);
+					String correlationId = context.get(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY);
 					if (correlationId != null) {
-						metadata.put(GrpcTraceMdcContext.CORRELATION_ID_HEADER_KEY, correlationId);
+						metadata.put(CorrelationIdGrpcMdcContext.CORRELATION_ID_HEADER_KEY, correlationId);
 					}
 				}
 			} finally {
@@ -56,9 +56,9 @@ public class CopyCorrelationIdFromGrpcMdcContextToResponseServerInterceptor impl
 				// does not make much sense to create this value if it is not already present
 				// however it should always be present
 				if (context != null) {
-					String correlationId = context.get(GrpcTraceMdcContext.CORRELATION_ID_MDC_KEY);
+					String correlationId = context.get(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY);
 					if (correlationId != null) {
-						metadata.put(GrpcTraceMdcContext.CORRELATION_ID_HEADER_KEY, correlationId);
+						metadata.put(CorrelationIdGrpcMdcContext.CORRELATION_ID_HEADER_KEY, correlationId);
 					}
 				}
 			} finally {

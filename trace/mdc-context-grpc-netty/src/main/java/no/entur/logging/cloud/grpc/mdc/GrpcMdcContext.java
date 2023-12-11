@@ -5,6 +5,7 @@ import io.grpc.Context;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 /**
  * Utility class for use holding MDC fields.<br>
@@ -15,18 +16,30 @@ import java.util.Map;
 
 public class GrpcMdcContext {
 
+	public static <T> T callInNewContext(GrpcMdcContext mdc, Callable<T> c) throws Exception {
+		Context fork = Context.current().withValue(GrpcMdcContext.KEY_CONTEXT, mdc);
+
+		return fork.call(c);
+	}
+
+	public static void runInNewContext(GrpcMdcContext mdc, Runnable r) {
+		Context fork = Context.current().withValue(GrpcMdcContext.KEY_CONTEXT, mdc);
+
+		fork.run(r);
+	}
+
 	public static final Context.Key<GrpcMdcContext> KEY_CONTEXT = Context.key("MDC_CONTEXT");
 
 	public static boolean isWithinContext() {
 		return get() != null;
 	}
 
-	public static GrpcMdcContextRunner newContext() {
-		return new GrpcMdcContextRunner();
+	public static GrpcMdcContextBuilder newContext() {
+		return new GrpcMdcContextBuilder();
 	}
 
-	public static GrpcMdcContextRunner newEmptyContext() {
-		return new GrpcMdcContextRunner(new HashMap<>());
+	public static GrpcMdcContextBuilder newEmptyContext() {
+		return new GrpcMdcContextBuilder(new HashMap<>());
 	}
 
 	protected Map<String, String> context;
@@ -97,6 +110,28 @@ public class GrpcMdcContext {
 
 	public void clear() {
 		context.clear();
+	}
+
+	public void run(Runnable r) {
+		// so run in a new context even if there is an existing context, so that the original context object is not touched
+		runInNewContext(this, r);
+	}
+
+	public <T> T call(Callable<T> r) throws Exception {
+		// so run in a new context even if there is an existing context,
+		// so that the original context object is not touched
+		return callInNewContext(this, r);
+	}
+
+	public Runnable wrap(Runnable r) {
+		// so run in a new context even if there is an existing context, so that the original context object is not touched
+		return () -> runInNewContext(this, r);
+	}
+
+	public <T> Callable<T> wrap(Callable<T> r) throws Exception {
+		// so run in a new context even if there is an existing context,
+		// so that the original context object is not touched
+		return () -> callInNewContext(this, r);
 	}
 
 

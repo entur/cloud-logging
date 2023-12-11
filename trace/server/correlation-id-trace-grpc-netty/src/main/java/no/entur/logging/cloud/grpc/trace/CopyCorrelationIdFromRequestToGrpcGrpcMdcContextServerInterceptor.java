@@ -3,7 +3,6 @@ package no.entur.logging.cloud.grpc.trace;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
 import io.grpc.*;
-import io.grpc.protobuf.StatusProto;
 import io.grpc.protobuf.lite.ProtoLiteUtils;
 import no.entur.logging.cloud.grpc.mdc.GrpcMdcContext;
 import org.slf4j.Logger;
@@ -88,18 +87,18 @@ public class CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor i
 			grpcMdcContext = new GrpcMdcContext();
 
 			if(correlationId != null) {
-				grpcMdcContext.put(GrpcTraceMdcContext.CORRELATION_ID_MDC_KEY, correlationId);
+				grpcMdcContext.put(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY, correlationId);
 			}
-			grpcMdcContext.put(GrpcTraceMdcContext.REQUEST_ID_MDC_KEY, UUID.randomUUID().toString());
+			grpcMdcContext.put(CorrelationIdGrpcMdcContext.REQUEST_ID_MDC_KEY, UUID.randomUUID().toString());
 
 			Context context = Context.current().withValue(GrpcMdcContext.KEY_CONTEXT, grpcMdcContext);
 			return Contexts.interceptCall(context, call, m, next);
 		}
 
 		if(correlationId != null) {
-			grpcMdcContext.put(GrpcTraceMdcContext.CORRELATION_ID_MDC_KEY, correlationId);
+			grpcMdcContext.put(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY, correlationId);
 		}
-		grpcMdcContext.put(GrpcTraceMdcContext.REQUEST_ID_MDC_KEY, UUID.randomUUID().toString());
+		grpcMdcContext.put(CorrelationIdGrpcMdcContext.REQUEST_ID_MDC_KEY, UUID.randomUUID().toString());
 
 		// no new context necessary
 		return next.startCall(call, m);
@@ -107,7 +106,7 @@ public class CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor i
 	}
 
 	private String getCorrelationId(Metadata m) {
-		String header = m.get(GrpcTraceMdcContext.CORRELATION_ID_HEADER_KEY);
+		String header = m.get(CorrelationIdGrpcMdcContext.CORRELATION_ID_HEADER_KEY);
 		if (header != null && !header.isBlank()) {
 			return sanitize(header);
 		}

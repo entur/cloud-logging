@@ -43,13 +43,13 @@ public class CopyCorrelationIdFromGrpcMdcContextToRequestClientInterceptor imple
 		// does not make much sense to create this value if it is not already present
 		// however it should always be present
 		if (context != null) {
-			String correlationId = context.get(GrpcTraceMdcContext.CORRELATION_ID_MDC_KEY);
+			String correlationId = context.get(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY);
 			if (correlationId != null) {
 				return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(next.newCall(method, callOptions)) {
 
 					@Override
 					public void start(Listener<RespT> responseListener, Metadata metadata) {
-						metadata.put(GrpcTraceMdcContext.CORRELATION_ID_HEADER_KEY, correlationId);
+						metadata.put(CorrelationIdGrpcMdcContext.CORRELATION_ID_HEADER_KEY, correlationId);
 						super.start(responseListener, metadata);
 					}
 				};

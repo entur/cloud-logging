@@ -24,7 +24,7 @@ package no.entur.logging.cloud.rr.grpc;
  */
 
 import io.grpc.*;
-import no.entur.logging.cloud.grpc.trace.GrpcTraceMdcContext;
+import no.entur.logging.cloud.grpc.trace.CorrelationIdGrpcMdcContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,7 @@ public class AddNewCorrelationIdToRequestClientInterceptor implements ClientInte
 
 			@Override
 			public void start(Listener<RespT> responseListener, Metadata metadata) {
-				metadata.put(GrpcTraceMdcContext.CORRELATION_ID_HEADER_KEY, correlationId);
+				metadata.put(CorrelationIdGrpcMdcContext.CORRELATION_ID_HEADER_KEY, correlationId);
 				super.start(responseListener, metadata);
 			}
 		};
