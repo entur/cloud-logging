@@ -112,9 +112,10 @@ public class GrpcMdcContext {
 		context.clear();
 	}
 
-	public void run(Runnable r) {
+	public Runnable run(Runnable r) {
 		// so run in a new context even if there is an existing context, so that the original context object is not touched
 		runInNewContext(this, r);
+		return r;
 	}
 
 	public <T> T call(Callable<T> r) throws Exception {
