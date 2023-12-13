@@ -6,7 +6,7 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.util.TransmitStatusRuntimeExceptionInterceptor;
 import no.entur.logging.cloud.grpc.trace.CorrelationIdGrpcMdcContextServerInterceptor;
-import no.entur.logging.cloud.grpc.trace.CorrelationIdValidationServerInterceptor;
+import no.entur.logging.cloud.grpc.trace.CorrelationIdRequiredServerInterceptor;
 import no.entur.logging.cloud.grpc.trace.test.GreetingRequest;
 import no.entur.logging.cloud.grpc.trace.test.GreetingServiceGrpc;
 import org.junit.jupiter.api.AfterAll;
@@ -47,7 +47,7 @@ public class AbstractGreetingTest {
 				// reverse order;
 				// the status runtime exception interceptor should be the closest to the actual controller
 				.intercept(TransmitStatusRuntimeExceptionInterceptor.instance())
-				.intercept(new CorrelationIdValidationServerInterceptor(true))
+				.intercept(new CorrelationIdRequiredServerInterceptor(true))
 				.intercept(CorrelationIdGrpcMdcContextServerInterceptor.newBuilder().build())
 
 		  .build();

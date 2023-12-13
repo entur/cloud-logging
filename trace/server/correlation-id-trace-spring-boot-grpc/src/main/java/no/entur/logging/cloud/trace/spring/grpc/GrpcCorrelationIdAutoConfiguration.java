@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.trace.spring.grpc;
 
 import no.entur.logging.cloud.grpc.mdc.InitializeGrpcMdcContextServerInterceptor;
+import no.entur.logging.cloud.grpc.trace.CorrelationIdRequiredServerInterceptor;
 import no.entur.logging.cloud.trace.spring.grpc.interceptor.OrderedCorrelationIdGrpcMdcContextServerInterceptor;
 import no.entur.logging.cloud.trace.spring.grpc.properties.GrpcMdcProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -17,7 +18,7 @@ public class GrpcCorrelationIdAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(OrderedCorrelationIdGrpcMdcContextServerInterceptor.class)
     public OrderedCorrelationIdGrpcMdcContextServerInterceptor orderedCorrelationIdGrpcMdcContextServerInterceptor(GrpcMdcProperties properties) {
-        return new OrderedCorrelationIdGrpcMdcContextServerInterceptor(properties.isRequired(), properties.isResponse(), properties.getInterceptorOrder());
+        return new OrderedCorrelationIdGrpcMdcContextServerInterceptor(false, properties.isResponse(), properties.getInterceptorOrder());
     }
 
 }

@@ -10,19 +10,19 @@ import io.grpc.protobuf.lite.ProtoLiteUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CorrelationIdValidationServerInterceptor implements ServerInterceptor {
-	private static Logger logger = LoggerFactory.getLogger(CorrelationIdValidationServerInterceptor.class);
+public class CorrelationIdRequiredServerInterceptor implements ServerInterceptor {
+	private static Logger logger = LoggerFactory.getLogger(CorrelationIdRequiredServerInterceptor.class);
 	public static final Metadata.Key<String> X_CORRELATION_ID_HEADER_KEY = Metadata.Key.of("x-correlation-id", Metadata.ASCII_STRING_MARSHALLER);
 
 	private static final Metadata.Key<Status> STATUS_DETAILS_KEY = Metadata.Key.of("grpc-status-details-bin", ProtoLiteUtils.metadataMarshaller(Status.getDefaultInstance()));
 
 	private boolean enabled;
 
-	public CorrelationIdValidationServerInterceptor() {
+	public CorrelationIdRequiredServerInterceptor() {
 		this(true);
 	}
 
-	public CorrelationIdValidationServerInterceptor(boolean enabled) {
+	public CorrelationIdRequiredServerInterceptor(boolean enabled) {
 		this.enabled = enabled;
 	}
 
