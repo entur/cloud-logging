@@ -13,9 +13,6 @@ import no.entur.logging.cloud.appender.scope.predicate.HigherOrEqualToLogLevelPr
 import no.entur.logging.cloud.appender.scope.predicate.LoggerNamePrefixHigherOrEqualToLogLevelPredicate;
 import no.entur.logging.cloud.gcp.spring.grpc.lognet.properties.*;
 import no.entur.logging.cloud.gcp.spring.grpc.lognet.scope.*;
-import no.entur.logging.cloud.grpc.mdc.InitializeGrpcMdcContextServerInterceptor;
-import no.entur.logging.cloud.grpc.trace.CopyCorrelationIdFromGrpcMdcContextToResponseServerInterceptor;
-import no.entur.logging.cloud.grpc.trace.CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,24 +31,6 @@ import java.util.stream.Collectors;
 public class LognetLoggingAutoConfiguration {
 
     private static final DevOpsLogger LOGGER = DevOpsLoggerFactory.getLogger(LognetLoggingAutoConfiguration.class);
-
-    @Bean
-    @ConditionalOnMissingBean(CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor.class)
-    public CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor grpcTraceMdcContextInterceptor() {
-        return CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor.newBuilder().build();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(CopyCorrelationIdFromGrpcMdcContextToResponseServerInterceptor.class)
-    public CopyCorrelationIdFromGrpcMdcContextToResponseServerInterceptor grpcAddMdcTraceToResponseInterceptor() {
-        return new CopyCorrelationIdFromGrpcMdcContextToResponseServerInterceptor();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(InitializeGrpcMdcContextServerInterceptor.class)
-    public InitializeGrpcMdcContextServerInterceptor grpcMdcContextInterceptor() {
-        return InitializeGrpcMdcContextServerInterceptor.newBuilder().build();
-    }
 
     @Configuration
     @ConditionalOnProperty(name = {"entur.logging.grpc.ondemand.enabled"}, havingValue = "true", matchIfMissing = false)
@@ -95,6 +74,7 @@ public class LognetLoggingAutoConfiguration {
                     .newBuilder()
                     .withAppender(appender)
                     .withFilters(filters)
+                    .withOrder(properties.getInterceptorOrder())
                     .build();
 
             return interceptor;

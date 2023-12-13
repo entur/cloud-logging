@@ -18,7 +18,7 @@ public class InitializeGrpcMdcContextServerInterceptor implements ServerIntercep
 		}
 	}
 
-	protected InitializeGrpcMdcContextServerInterceptor() {
+	public InitializeGrpcMdcContextServerInterceptor() {
 		// prefer to use builder
 	}
 

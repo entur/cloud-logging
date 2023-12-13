@@ -5,9 +5,7 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.util.TransmitStatusRuntimeExceptionInterceptor;
-import no.entur.logging.cloud.grpc.mdc.InitializeGrpcMdcContextServerInterceptor;
-import no.entur.logging.cloud.grpc.trace.CopyCorrelationIdFromGrpcMdcContextToResponseServerInterceptor;
-import no.entur.logging.cloud.grpc.trace.CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor;
+import no.entur.logging.cloud.grpc.trace.CorrelationIdGrpcMdcContextServerInterceptor;
 import no.entur.logging.cloud.grpc.trace.CorrelationIdValidationServerInterceptor;
 import no.entur.logging.cloud.grpc.trace.test.GreetingRequest;
 import no.entur.logging.cloud.grpc.trace.test.GreetingServiceGrpc;
@@ -50,8 +48,7 @@ public class AbstractGreetingTest {
 				// the status runtime exception interceptor should be the closest to the actual controller
 				.intercept(TransmitStatusRuntimeExceptionInterceptor.instance())
 				.intercept(new CorrelationIdValidationServerInterceptor(true))
-				.intercept(new CopyCorrelationIdFromGrpcMdcContextToResponseServerInterceptor())
-				.intercept(CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor.newBuilder().build())
+				.intercept(CorrelationIdGrpcMdcContextServerInterceptor.newBuilder().build())
 
 		  .build();
  

@@ -18,11 +18,11 @@ import java.util.UUID;
  *
  */
 
-public class CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor implements ServerInterceptor {
+public class CorrelationIdGrpcMdcContextServerInterceptor implements ServerInterceptor {
 
 	private static final Metadata.Key<Status> STATUS_DETAILS_KEY = Metadata.Key.of("grpc-status-details-bin", ProtoLiteUtils.metadataMarshaller(Status.getDefaultInstance()));
 
-	private static final Logger log = LoggerFactory.getLogger(CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor.class);
+	private static final Logger log = LoggerFactory.getLogger(CorrelationIdGrpcMdcContextServerInterceptor.class);
 
 	public static Builder newBuilder() {
 		return new Builder();
@@ -31,33 +31,33 @@ public class CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor i
 	public static class Builder {
 		private boolean required = false;
 
-		private boolean create = true;
+		private boolean response = true;
+
+		public Builder withResponse(boolean response) {
+			this.response = response;
+			return this;
+		}
 
 		public Builder withRequired(boolean required) {
 			this.required = required;
 			return this;
 		}
 
-		public Builder withCreate(boolean create) {
-			this.create = create;
-			return this;
-		}
-
-		public CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor build() {
-			return new CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor(required, create);
+		public CorrelationIdGrpcMdcContextServerInterceptor build() {
+			return new CorrelationIdGrpcMdcContextServerInterceptor(required, response);
 		}
 
 	}
 
 	private boolean required;
-	private boolean create;
+	private boolean response;
 
-	public CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor(boolean required, boolean create) {
+	public CorrelationIdGrpcMdcContextServerInterceptor(boolean required, boolean response) {
 		this.required = required;
-		this.create = create;
+		this.response = response;
 	}
 
-	protected CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor() {
+	public CorrelationIdGrpcMdcContextServerInterceptor() {
 		this(false, true);
 	}
 
@@ -77,7 +77,7 @@ public class CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor i
 			return new ServerCall.Listener<ReqT>() {};
 		}
 
-		if(correlationId == null && create) {
+		if(correlationId == null) {
 			correlationId = UUID.randomUUID().toString();
 		}
 
@@ -92,6 +92,11 @@ public class CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor i
 			grpcMdcContext.put(CorrelationIdGrpcMdcContext.REQUEST_ID_MDC_KEY, UUID.randomUUID().toString());
 
 			Context context = Context.current().withValue(GrpcMdcContext.KEY_CONTEXT, grpcMdcContext);
+
+			if(response) {
+				call = new AddCorrelationIdToResponseServerCall<>(call, correlationId);
+			}
+
 			return Contexts.interceptCall(context, call, m, next);
 		}
 
@@ -100,9 +105,11 @@ public class CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor i
 		}
 		grpcMdcContext.put(CorrelationIdGrpcMdcContext.REQUEST_ID_MDC_KEY, UUID.randomUUID().toString());
 
+		if(response) {
+			call = new AddCorrelationIdToResponseServerCall<>(call, correlationId);
+		}
 		// no new context necessary
 		return next.startCall(call, m);
-
 	}
 
 	private String getCorrelationId(Metadata m) {
@@ -133,4 +140,28 @@ public class CopyCorrelationIdFromRequestToGrpcGrpcMdcContextServerInterceptor i
 		}
 		return true;
 	}
+
+
+	private static class AddCorrelationIdToResponseServerCall<ReqT, RespT> extends ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT> {
+		private final String correlationId;
+
+		public AddCorrelationIdToResponseServerCall(ServerCall<ReqT, RespT> delegate, String correlationId) {
+			super(delegate);
+			this.correlationId = correlationId;
+		}
+
+		@Override
+		public void sendHeaders(Metadata metadata) {
+			// this happens before all the responses
+			metadata.put(CorrelationIdGrpcMdcContext.CORRELATION_ID_HEADER_KEY, correlationId);
+			super.sendHeaders(metadata);
+		}
+
+		@Override
+		public void close(io.grpc.Status status, Metadata trailers) {
+			trailers.put(CorrelationIdGrpcMdcContext.CORRELATION_ID_HEADER_KEY, correlationId);
+			super.close(status, trailers);
+		}
+
+    }
 }

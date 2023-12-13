@@ -13,6 +13,7 @@ import io.grpc.Status;
 import no.entur.logging.cloud.appender.scope.LoggingScope;
 import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import no.entur.logging.cloud.appender.scope.LoggingScopeFactory;
+import org.springframework.core.Ordered;
 
 import java.util.Enumeration;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -22,7 +23,7 @@ import java.util.function.Predicate;
  * Interceptor for adding MDC for a gRPC {@linkplain Context}.
  */
 
-public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor {
+public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor, Ordered {
 
 	public static Builder newBuilder() {
 		return new Builder();
@@ -30,6 +31,7 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor {
 
 	public static class Builder {
 
+		private int order = Ordered.HIGHEST_PRECEDENCE;
 		private LoggingScopeAsyncAppender appender;
 
 		private GrpcLoggingScopeFilters filters;
@@ -44,6 +46,11 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor {
 			return this;
 		}
 
+		public Builder withOrder(int order) {
+			this.order = order;
+			return this;
+		}
+
 		public GrpcLoggingScopeContextInterceptor build() {
 			if(appender == null) {
 				throw new IllegalStateException();
@@ -51,7 +58,7 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor {
 			if(filters == null) {
 				throw new IllegalStateException();
 			}
-			return new GrpcLoggingScopeContextInterceptor(appender, filters);
+			return new GrpcLoggingScopeContextInterceptor(appender, filters, order);
 		}
 	}
 
@@ -59,10 +66,13 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor {
 
 	private final GrpcLoggingScopeFilters filters;
 
-	protected GrpcLoggingScopeContextInterceptor(LoggingScopeAsyncAppender appender, GrpcLoggingScopeFilters filters) {
+	private final int order;
+
+	protected GrpcLoggingScopeContextInterceptor(LoggingScopeAsyncAppender appender, GrpcLoggingScopeFilters filters, int order) {
 		// prefer to use builder
 		this.appender = appender;
 		this.filters = filters;
+		this.order = order;
 	}
 
 	@Override
@@ -117,6 +127,11 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor {
 		};
 
 		return Contexts.interceptCall(context, interceptCall, headers, next);
+	}
+
+	@Override
+	public int getOrder() {
+		return order;
 	}
 
 }
