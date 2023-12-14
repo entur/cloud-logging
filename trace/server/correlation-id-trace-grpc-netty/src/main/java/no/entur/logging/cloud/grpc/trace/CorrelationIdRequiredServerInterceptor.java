@@ -63,8 +63,8 @@ public class CorrelationIdRequiredServerInterceptor implements ServerInterceptor
 
 	@Override
 	public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
-		if (!headers.containsKey(X_CORRELATION_ID_HEADER_KEY)) {
-			if(required) {
+		if(required) {
+			if (!headers.containsKey(X_CORRELATION_ID_HEADER_KEY)) {
 				return handleMissingCorrelationId(call, headers);
 			}
 		}
