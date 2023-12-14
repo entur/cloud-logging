@@ -47,8 +47,7 @@ public class AbstractGreetingTest {
 				// reverse order;
 				// the status runtime exception interceptor should be the closest to the actual controller
 				.intercept(TransmitStatusRuntimeExceptionInterceptor.instance())
-				.intercept(new CorrelationIdRequiredServerInterceptor(true))
-				.intercept(CorrelationIdGrpcMdcContextServerInterceptor.newBuilder().build())
+				.intercept(CorrelationIdGrpcMdcContextServerInterceptor.newBuilder().withResponse(true).withRequired(true).build())
 
 		  .build();
  

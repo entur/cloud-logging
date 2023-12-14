@@ -1,12 +1,7 @@
 package no.entur.logging.cloud.grpc.trace;
 
-import com.google.rpc.Code;
-import com.google.rpc.Status;
 import io.grpc.*;
-import io.grpc.protobuf.lite.ProtoLiteUtils;
 import no.entur.logging.cloud.grpc.mdc.GrpcMdcContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -18,20 +13,24 @@ import java.util.UUID;
  *
  */
 
-public class CorrelationIdGrpcMdcContextServerInterceptor implements ServerInterceptor {
-
-	private static final Metadata.Key<Status> STATUS_DETAILS_KEY = Metadata.Key.of("grpc-status-details-bin", ProtoLiteUtils.metadataMarshaller(Status.getDefaultInstance()));
-
-	private static final Logger log = LoggerFactory.getLogger(CorrelationIdGrpcMdcContextServerInterceptor.class);
+public class CorrelationIdGrpcMdcContextServerInterceptor extends CorrelationIdRequiredServerInterceptor {
 
 	public static Builder newBuilder() {
 		return new Builder();
 	}
 
+	/**
+	 *
+	 * Simple interface to facilitate logging; extracting one or more parameters to identity the request source.
+	 *
+	 */
+
 	public static class Builder {
 		private boolean required = false;
 
 		private boolean response = true;
+
+		private CorrelationIdListener correlationIdListener;
 
 		public Builder withResponse(boolean response) {
 			this.response = response;
@@ -43,22 +42,29 @@ public class CorrelationIdGrpcMdcContextServerInterceptor implements ServerInter
 			return this;
 		}
 
+		public Builder withCorrelationIdListener(CorrelationIdListener correlationIdListener) {
+			this.correlationIdListener = correlationIdListener;
+			return this;
+		}
+
 		public CorrelationIdGrpcMdcContextServerInterceptor build() {
-			return new CorrelationIdGrpcMdcContextServerInterceptor(required, response);
+			if(required && correlationIdListener == null) {
+				correlationIdListener = new DefaultCorrelationIdListener();
+			}
+			return new CorrelationIdGrpcMdcContextServerInterceptor(required, response, correlationIdListener);
 		}
 
 	}
 
-	private boolean required;
-	private boolean response;
+	protected final boolean response;
 
-	public CorrelationIdGrpcMdcContextServerInterceptor(boolean required, boolean response) {
-		this.required = required;
+	public CorrelationIdGrpcMdcContextServerInterceptor(boolean required, boolean response, CorrelationIdListener correlationIdListener) {
+		super(required, correlationIdListener);
 		this.response = response;
-	}
+    }
 
 	public CorrelationIdGrpcMdcContextServerInterceptor() {
-		this(false, true);
+		this(false, true, null);
 	}
 
 	@Override
@@ -67,14 +73,7 @@ public class CorrelationIdGrpcMdcContextServerInterceptor implements ServerInter
 		String correlationId = getCorrelationId(m);
 
 		if (correlationId == null && required) {
-			// https://stackoverflow.com/questions/73954274/what-is-the-proper-way-to-return-an-error-from-grpc-serverinterceptor
-			Status statusProto = Status.newBuilder().setCode(Code.INVALID_ARGUMENT_VALUE).setMessage("x-correlation-id header is invalid").build();
-
-			Metadata metadata = new Metadata();
-			metadata.put(STATUS_DETAILS_KEY, statusProto);
-
-			call.close(io.grpc.Status.INVALID_ARGUMENT, metadata);
-			return new ServerCall.Listener<ReqT>() {};
+			return handleMissingCorrelationId(call, m);
 		}
 
 		if(correlationId == null) {
@@ -83,21 +82,7 @@ public class CorrelationIdGrpcMdcContextServerInterceptor implements ServerInter
 
 		GrpcMdcContext grpcMdcContext = GrpcMdcContext.get();
 		if(grpcMdcContext == null) {
-			// create new context
-			grpcMdcContext = new GrpcMdcContext();
-
-			if(correlationId != null) {
-				grpcMdcContext.put(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY, correlationId);
-			}
-			grpcMdcContext.put(CorrelationIdGrpcMdcContext.REQUEST_ID_MDC_KEY, UUID.randomUUID().toString());
-
-			Context context = Context.current().withValue(GrpcMdcContext.KEY_CONTEXT, grpcMdcContext);
-
-			if(response) {
-				call = new AddCorrelationIdToResponseServerCall<>(call, correlationId);
-			}
-
-			return Contexts.interceptCall(context, call, m, next);
+			return startCallInNewGrpcMdcContext(call, m, next, correlationId);
 		}
 
 		if(correlationId != null) {
@@ -111,6 +96,25 @@ public class CorrelationIdGrpcMdcContextServerInterceptor implements ServerInter
 		// no new context necessary
 		return next.startCall(call, m);
 	}
+
+	protected <ReqT, RespT> ServerCall.Listener<ReqT> startCallInNewGrpcMdcContext(ServerCall<ReqT, RespT> call, Metadata m, ServerCallHandler<ReqT, RespT> next, String correlationId) {
+		// create new context
+		GrpcMdcContext grpcMdcContext = new GrpcMdcContext();
+
+		if(correlationId != null) {
+			grpcMdcContext.put(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY, correlationId);
+		}
+		grpcMdcContext.put(CorrelationIdGrpcMdcContext.REQUEST_ID_MDC_KEY, UUID.randomUUID().toString());
+
+		Context context = Context.current().withValue(GrpcMdcContext.KEY_CONTEXT, grpcMdcContext);
+
+		if(response) {
+			call = new AddCorrelationIdToResponseServerCall<>(call, correlationId);
+		}
+
+		return Contexts.interceptCall(context, call, m, next);
+	}
+
 
 	private String getCorrelationId(Metadata m) {
 		String header = m.get(CorrelationIdGrpcMdcContext.CORRELATION_ID_HEADER_KEY);

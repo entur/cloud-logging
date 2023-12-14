@@ -10,39 +10,79 @@ import io.grpc.protobuf.lite.ProtoLiteUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ *
+ * Interceptor for checking that the correlation-id is present in the incoming request.
+ *
+ */
+
 public class CorrelationIdRequiredServerInterceptor implements ServerInterceptor {
-	private static Logger logger = LoggerFactory.getLogger(CorrelationIdRequiredServerInterceptor.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(CorrelationIdRequiredServerInterceptor.class);
 	public static final Metadata.Key<String> X_CORRELATION_ID_HEADER_KEY = Metadata.Key.of("x-correlation-id", Metadata.ASCII_STRING_MARSHALLER);
+
+	private static final Metadata.Key<String> USER_AGENT_KEY = Metadata.Key.of("user-agent", Metadata.ASCII_STRING_MARSHALLER);
 
 	private static final Metadata.Key<Status> STATUS_DETAILS_KEY = Metadata.Key.of("grpc-status-details-bin", ProtoLiteUtils.metadataMarshaller(Status.getDefaultInstance()));
 
-	private boolean enabled;
+	/**
+	 *
+	 * Interface for customization of logging in case of a missing correlation id
+	 *
+	 */
+
+	public static interface CorrelationIdListener {
+
+		<ReqT, RespT> void onCorrelationIdMissing(ServerCall<ReqT, RespT> call, Metadata m);
+	}
+
+	public static class DefaultCorrelationIdListener implements CorrelationIdListener {
+
+		@Override
+		public <ReqT, RespT> void onCorrelationIdMissing(ServerCall<ReqT, RespT> call, Metadata m) {
+			String userAgent = m.get(USER_AGENT_KEY);
+			if(userAgent != null) {
+				LOGGER.warn("No correlation-id header in call from user-agent " + userAgent + ", returning status " + Code.INVALID_ARGUMENT_VALUE);
+			} else {
+				LOGGER.warn("No correlation-id header in call from unknown user-agent, returning status " + Code.INVALID_ARGUMENT_VALUE);
+			}
+		}
+	}
+
+	protected boolean required;
+
+	protected final CorrelationIdListener correlationIdListener;
 
 	public CorrelationIdRequiredServerInterceptor() {
-		this(true);
+		this(true, new DefaultCorrelationIdListener());
 	}
 
-	public CorrelationIdRequiredServerInterceptor(boolean enabled) {
-		this.enabled = enabled;
-	}
+	public CorrelationIdRequiredServerInterceptor(boolean required, CorrelationIdListener correlationIdListener) {
+		this.required = required;
+        this.correlationIdListener = correlationIdListener;
+    }
 
 	@Override
 	public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
 		if (!headers.containsKey(X_CORRELATION_ID_HEADER_KEY)) {
-			if(enabled) {
-				// https://stackoverflow.com/questions/73954274/what-is-the-proper-way-to-return-an-error-from-grpc-serverinterceptor
-				Status statusProto = Status.newBuilder().setCode(Code.INVALID_ARGUMENT_VALUE).setMessage("x-correlation-id header is invalid").build();
-
-				Metadata metadata = new Metadata();
-				metadata.put(STATUS_DETAILS_KEY, statusProto);
-
-				call.close(io.grpc.Status.INVALID_ARGUMENT, metadata);
-				return new ServerCall.Listener<ReqT>() {
-				};
+			if(required) {
+				return handleMissingCorrelationId(call, headers);
 			}
-			logger.info("Request is missing x-correlation-id header");
 		}
 		return next.startCall(call, headers);
 	}
 
+
+	protected <ReqT, RespT> ServerCall.Listener<ReqT> handleMissingCorrelationId(ServerCall<ReqT, RespT> call, Metadata m) {
+		// log some message
+		correlationIdListener.onCorrelationIdMissing(call, m);
+
+		// https://stackoverflow.com/questions/73954274/what-is-the-proper-way-to-return-an-error-from-grpc-serverinterceptor
+		Status statusProto = Status.newBuilder().setCode(Code.INVALID_ARGUMENT_VALUE).setMessage("x-correlation-id header is invalid").build();
+
+		Metadata metadata = new Metadata();
+		metadata.put(STATUS_DETAILS_KEY, statusProto);
+
+		call.close(io.grpc.Status.INVALID_ARGUMENT, metadata);
+		return new ServerCall.Listener<ReqT>() {};
+	}
 }
