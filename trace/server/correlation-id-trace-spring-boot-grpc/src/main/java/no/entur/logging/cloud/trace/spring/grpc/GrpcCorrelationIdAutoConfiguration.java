@@ -12,13 +12,13 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableConfigurationProperties(value = {GrpcMdcProperties.class})
-@ConditionalOnProperty(name = {"no.entur.logging.grpc.trace.mdc.enabled"}, havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = {"entur.logging.grpc.trace.mdc.enabled"}, havingValue = "true", matchIfMissing = true)
 public class GrpcCorrelationIdAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(OrderedCorrelationIdGrpcMdcContextServerInterceptor.class)
     public OrderedCorrelationIdGrpcMdcContextServerInterceptor orderedCorrelationIdGrpcMdcContextServerInterceptor(GrpcMdcProperties properties) {
-        return new OrderedCorrelationIdGrpcMdcContextServerInterceptor(false, properties.isResponse(), new CorrelationIdRequiredServerInterceptor.DefaultCorrelationIdListener(), properties.getInterceptorOrder());
+        return new OrderedCorrelationIdGrpcMdcContextServerInterceptor(properties.isRequired(), properties.isResponse(), new CorrelationIdRequiredServerInterceptor.DefaultCorrelationIdListener(), properties.getInterceptorOrder());
     }
 
 }

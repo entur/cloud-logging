@@ -2,7 +2,7 @@ package no.entur.logging.cloud.trace.spring.grpc.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "no.entur.logging.grpc.trace.mdc")
+@ConfigurationProperties(prefix = "entur.logging.grpc.trace.mdc")
 public class GrpcMdcProperties {
 
     private boolean enabled = true;
