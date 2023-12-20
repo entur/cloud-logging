@@ -36,6 +36,12 @@ public class RequestResponseGcpGrpcLognetAutoConfiguration extends AbstractReque
     @Value("${entur.logging.request-response.max-body-size}")
     protected int maxBodySize;
 
+    @Value("${entur.logging.request-response.grpc.server.interceptor-order:0}")
+    private int serverInterceptorOrder;
+
+    @Value("${entur.logging.request-response.grpc.client.interceptor-order:0}")
+    private int clientInterceptorOrder;
+
     @Bean
     @ConditionalOnMissingBean(JsonFormat.TypeRegistry.class)
     public JsonFormat.TypeRegistry jsonFormatTypeRegistry() {
@@ -75,27 +81,15 @@ public class RequestResponseGcpGrpcLognetAutoConfiguration extends AbstractReque
     }
 
     @Bean
-    @ConditionalOnMissingBean(GrpcLoggingServerInterceptor.class)
-    public GrpcLoggingServerInterceptor grpcLoggingServerInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcServerLoggingFilters grpcServerLoggingFilters) {
-        return GrpcLoggingServerInterceptor
-                .newBuilder()
-                .withPayloadJsonMapper(grpcPayloadJsonMapper)
-                .withMetadataJsonMapper(grpcMetadataJsonMapper)
-                .withSink(grpcSink)
-                .withFilters(grpcServerLoggingFilters)
-                .build();
+    @ConditionalOnMissingBean(OrderedGrpcLoggingServerInterceptor.class)
+    public OrderedGrpcLoggingServerInterceptor orderedGrpcLoggingServerInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcServerLoggingFilters grpcServerLoggingFilters) {
+        return new OrderedGrpcLoggingServerInterceptor(grpcSink, grpcServerLoggingFilters, grpcMetadataJsonMapper, grpcPayloadJsonMapper, serverInterceptorOrder);
     }
 
     @Bean
-    @ConditionalOnMissingBean(GrpcLoggingClientInterceptor.class)
-    public GrpcLoggingClientInterceptor grpcLoggingClientInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcClientLoggingFilters grpcServiceLoggingFilters) {
-        return GrpcLoggingClientInterceptor
-                .newBuilder()
-                .withPayloadJsonMapper(grpcPayloadJsonMapper)
-                .withMetadataJsonMapper(grpcMetadataJsonMapper)
-                .withSink(grpcSink)
-                .withFilters(grpcServiceLoggingFilters)
-                .build();
+    @ConditionalOnMissingBean(OrderedGrpcLoggingClientInterceptor.class)
+    public OrderedGrpcLoggingClientInterceptor orderedGrpcLoggingClientInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcClientLoggingFilters grpcServiceLoggingFilters) {
+        return new OrderedGrpcLoggingClientInterceptor(grpcSink, grpcServiceLoggingFilters, grpcMetadataJsonMapper, grpcPayloadJsonMapper, clientInterceptorOrder);
     }
 
     @Bean
