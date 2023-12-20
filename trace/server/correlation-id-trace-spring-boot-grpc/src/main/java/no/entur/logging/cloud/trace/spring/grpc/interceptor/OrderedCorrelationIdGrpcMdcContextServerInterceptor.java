@@ -7,8 +7,8 @@ public class OrderedCorrelationIdGrpcMdcContextServerInterceptor extends Correla
 
     private int order;
 
-    public OrderedCorrelationIdGrpcMdcContextServerInterceptor(boolean required, boolean response, int order) {
-        super(required, response);
+    public OrderedCorrelationIdGrpcMdcContextServerInterceptor(boolean required, boolean response, CorrelationIdListener correlationIdListener, int order) {
+        super(required, response, correlationIdListener);
         this.order = order;
     }
 

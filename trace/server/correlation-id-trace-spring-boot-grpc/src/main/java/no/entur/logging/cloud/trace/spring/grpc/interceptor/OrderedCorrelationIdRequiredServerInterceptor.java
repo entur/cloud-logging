@@ -8,11 +8,11 @@ public class OrderedCorrelationIdRequiredServerInterceptor extends CorrelationId
     private final int order;
 
     public OrderedCorrelationIdRequiredServerInterceptor(int order) {
-        this(true, order);
+        this(true, new DefaultCorrelationIdListener(), order);
     }
 
-    public OrderedCorrelationIdRequiredServerInterceptor(boolean enabled, int order) {
-        super(enabled);
+    public OrderedCorrelationIdRequiredServerInterceptor(boolean enabled, CorrelationIdListener correlationIdListener, int order) {
+        super(enabled, correlationIdListener);
         this.order = order;
     }
 

@@ -18,7 +18,7 @@ public class GrpcCorrelationIdAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(OrderedCorrelationIdGrpcMdcContextServerInterceptor.class)
     public OrderedCorrelationIdGrpcMdcContextServerInterceptor orderedCorrelationIdGrpcMdcContextServerInterceptor(GrpcMdcProperties properties) {
-        return new OrderedCorrelationIdGrpcMdcContextServerInterceptor(false, properties.isResponse(), properties.getInterceptorOrder());
+        return new OrderedCorrelationIdGrpcMdcContextServerInterceptor(false, properties.isResponse(), new CorrelationIdRequiredServerInterceptor.DefaultCorrelationIdListener(), properties.getInterceptorOrder());
     }
 
 }
