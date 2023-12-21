@@ -1,8 +1,8 @@
 package no.entur.logging.cloud.gcp.spring.gcp.grpc.lognet;
 
 import com.google.protobuf.util.JsonFormat;
-import no.entur.logging.cloud.rr.grpc.GrpcLoggingClientInterceptor;
-import no.entur.logging.cloud.rr.grpc.GrpcLoggingServerInterceptor;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcClientLoggingFilters;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcServerLoggingFilters;
@@ -14,20 +14,32 @@ import no.entur.logging.cloud.rr.grpc.mapper.GrpcStatusMapper;
 import no.entur.logging.cloud.rr.grpc.mapper.JsonPrinterFactory;
 import no.entur.logging.cloud.rr.grpc.mapper.JsonPrinterStatusMapper;
 import no.entur.logging.cloud.rr.grpc.mapper.TypeRegistryFactory;
+import org.lognet.springboot.grpc.FailureHandlingSupport;
+import org.lognet.springboot.grpc.GRpcErrorHandler;
+import org.lognet.springboot.grpc.autoconfigure.ConditionalOnMissingErrorHandler;
+import org.lognet.springboot.grpc.autoconfigure.GRpcAutoConfiguration;
+import org.lognet.springboot.grpc.autoconfigure.GRpcServerProperties;
+import org.lognet.springboot.grpc.recovery.*;
+import org.lognet.springboot.grpc.security.GrpcSecurityConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 @Configuration
 @PropertySource(value = "classpath:request-response.gcp.properties", ignoreResourceNotFound = false)
+@AutoConfigureAfter(GRpcAutoConfiguration.class)
 public class RequestResponseGcpGrpcLognetAutoConfiguration extends AbstractRequestResponseGcpGrpcLognetAutoConfiguration {
 
     @Value("${entur.logging.request-response.max-size}")
@@ -35,6 +47,15 @@ public class RequestResponseGcpGrpcLognetAutoConfiguration extends AbstractReque
 
     @Value("${entur.logging.request-response.max-body-size}")
     protected int maxBodySize;
+
+    @Value("${entur.logging.request-response.grpc.server.interceptor-order:0}")
+    private int serverInterceptorOrder;
+
+    @Value("${entur.logging.request-response.grpc.client.interceptor-order:0}")
+    private int clientInterceptorOrder;
+
+    @Value("${entur.logging.request-response.grpc.server.exception-handler.interceptor-order:0}")
+    private int exceptionInterceptorOrder;
 
     @Bean
     @ConditionalOnMissingBean(JsonFormat.TypeRegistry.class)
@@ -75,27 +96,15 @@ public class RequestResponseGcpGrpcLognetAutoConfiguration extends AbstractReque
     }
 
     @Bean
-    @ConditionalOnMissingBean(GrpcLoggingServerInterceptor.class)
-    public GrpcLoggingServerInterceptor grpcLoggingServerInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcServerLoggingFilters grpcServerLoggingFilters) {
-        return GrpcLoggingServerInterceptor
-                .newBuilder()
-                .withPayloadJsonMapper(grpcPayloadJsonMapper)
-                .withMetadataJsonMapper(grpcMetadataJsonMapper)
-                .withSink(grpcSink)
-                .withFilters(grpcServerLoggingFilters)
-                .build();
+    @ConditionalOnMissingBean(OrderedGrpcLoggingServerInterceptor.class)
+    public OrderedGrpcLoggingServerInterceptor orderedGrpcLoggingServerInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcServerLoggingFilters grpcServerLoggingFilters) {
+        return new OrderedGrpcLoggingServerInterceptor(grpcSink, grpcServerLoggingFilters, grpcMetadataJsonMapper, grpcPayloadJsonMapper, serverInterceptorOrder);
     }
 
     @Bean
-    @ConditionalOnMissingBean(GrpcLoggingClientInterceptor.class)
-    public GrpcLoggingClientInterceptor grpcLoggingClientInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcClientLoggingFilters grpcServiceLoggingFilters) {
-        return GrpcLoggingClientInterceptor
-                .newBuilder()
-                .withPayloadJsonMapper(grpcPayloadJsonMapper)
-                .withMetadataJsonMapper(grpcMetadataJsonMapper)
-                .withSink(grpcSink)
-                .withFilters(grpcServiceLoggingFilters)
-                .build();
+    @ConditionalOnMissingBean(OrderedGrpcLoggingClientInterceptor.class)
+    public OrderedGrpcLoggingClientInterceptor orderedGrpcLoggingClientInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcClientLoggingFilters grpcServiceLoggingFilters) {
+        return new OrderedGrpcLoggingClientInterceptor(grpcSink, grpcServiceLoggingFilters, grpcMetadataJsonMapper, grpcPayloadJsonMapper, clientInterceptorOrder);
     }
 
     @Bean
@@ -107,4 +116,31 @@ public class RequestResponseGcpGrpcLognetAutoConfiguration extends AbstractReque
         return createMachineReadbleSink(logger, level);
     }
 
+    @Bean
+    @ConditionalOnBean({FailureHandlingSupport.class, GRpcExceptionHandlerMethodResolver.class})
+    @ConditionalOnProperty(name = {"entur.logging.request-response.grpc.server.exception-handler.enabled"}, havingValue = "true", matchIfMissing = true)
+    @Primary
+    public RequestResponseGRpcExceptionHandlerInterceptor requestResponseGRpcExceptionHandlerInterceptor(GRpcExceptionHandlerInterceptor interceptor) {
+        return new RequestResponseGRpcExceptionHandlerInterceptor(interceptor, exceptionInterceptorOrder);
+    }
+
+    /**
+     *
+     * Without any exception handlers, the exception handler does not handle status runtime exceptions either
+     *
+     */
+
+    @ConditionalOnMissingErrorHandler(StatusRuntimeException.class)
+    @Configuration
+    static class DefaultStatusRuntimeExceptionErrorHandlerConfig {
+
+        @GRpcServiceAdvice
+        public static class StatusRuntimeExceptionGRpcServiceAdvice {
+            @java.lang.SuppressWarnings("all")
+            @GRpcExceptionHandler
+            public Status handle(StatusRuntimeException e, GRpcExceptionScope scope) {
+                return e.getStatus();
+            }
+        }
+    }
 }

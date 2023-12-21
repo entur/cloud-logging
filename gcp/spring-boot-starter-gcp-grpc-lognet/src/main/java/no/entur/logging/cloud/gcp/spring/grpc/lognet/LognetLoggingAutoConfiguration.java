@@ -13,9 +13,6 @@ import no.entur.logging.cloud.appender.scope.predicate.HigherOrEqualToLogLevelPr
 import no.entur.logging.cloud.appender.scope.predicate.LoggerNamePrefixHigherOrEqualToLogLevelPredicate;
 import no.entur.logging.cloud.gcp.spring.grpc.lognet.properties.*;
 import no.entur.logging.cloud.gcp.spring.grpc.lognet.scope.*;
-import no.entur.logging.cloud.grpc.mdc.GrpcMdcContextInterceptor;
-import no.entur.logging.cloud.grpc.trace.GrpcAddMdcTraceToResponseInterceptor;
-import no.entur.logging.cloud.grpc.trace.GrpcTraceMdcContextInterceptor;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,24 +31,6 @@ import java.util.stream.Collectors;
 public class LognetLoggingAutoConfiguration {
 
     private static final DevOpsLogger LOGGER = DevOpsLoggerFactory.getLogger(LognetLoggingAutoConfiguration.class);
-
-    @Bean
-    @ConditionalOnMissingBean(GrpcTraceMdcContextInterceptor.class)
-    public GrpcTraceMdcContextInterceptor grpcTraceMdcContextInterceptor() {
-        return GrpcTraceMdcContextInterceptor.newBuilder().build();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(GrpcAddMdcTraceToResponseInterceptor.class)
-    public GrpcAddMdcTraceToResponseInterceptor grpcAddMdcTraceToResponseInterceptor() {
-        return new GrpcAddMdcTraceToResponseInterceptor();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(GrpcMdcContextInterceptor.class)
-    public GrpcMdcContextInterceptor grpcMdcContextInterceptor() {
-        return GrpcMdcContextInterceptor.newBuilder().build();
-    }
 
     @Configuration
     @ConditionalOnProperty(name = {"entur.logging.grpc.ondemand.enabled"}, havingValue = "true", matchIfMissing = false)
@@ -95,6 +74,7 @@ public class LognetLoggingAutoConfiguration {
                     .newBuilder()
                     .withAppender(appender)
                     .withFilters(filters)
+                    .withOrder(properties.getInterceptorOrder())
                     .build();
 
             return interceptor;

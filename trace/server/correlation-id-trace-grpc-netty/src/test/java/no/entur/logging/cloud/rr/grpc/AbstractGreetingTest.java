@@ -5,9 +5,8 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.util.TransmitStatusRuntimeExceptionInterceptor;
-import no.entur.logging.cloud.grpc.mdc.GrpcMdcContextInterceptor;
-import no.entur.logging.cloud.grpc.trace.GrpcAddMdcTraceToResponseInterceptor;
-import no.entur.logging.cloud.grpc.trace.GrpcTraceMdcContextInterceptor;
+import no.entur.logging.cloud.grpc.trace.CorrelationIdGrpcMdcContextServerInterceptor;
+import no.entur.logging.cloud.grpc.trace.CorrelationIdRequiredServerInterceptor;
 import no.entur.logging.cloud.grpc.trace.test.GreetingRequest;
 import no.entur.logging.cloud.grpc.trace.test.GreetingServiceGrpc;
 import org.junit.jupiter.api.AfterAll;
@@ -48,9 +47,7 @@ public class AbstractGreetingTest {
 				// reverse order;
 				// the status runtime exception interceptor should be the closest to the actual controller
 				.intercept(TransmitStatusRuntimeExceptionInterceptor.instance())
-				.intercept(new GrpcAddMdcTraceToResponseInterceptor())
-				.intercept(GrpcTraceMdcContextInterceptor.newBuilder().build())
-				.intercept(GrpcMdcContextInterceptor.newBuilder().build())
+				.intercept(CorrelationIdGrpcMdcContextServerInterceptor.newBuilder().withResponse(true).withRequired(true).build())
 
 		  .build();
  
@@ -66,6 +63,12 @@ public class AbstractGreetingTest {
 	}
 
 	protected GreetingServiceGrpc.GreetingServiceBlockingStub stub() {
+		ManagedChannel managedChannel = ManagedChannelBuilder.forAddress("localhost", port).usePlaintext().build();
+		GreetingServiceGrpc.GreetingServiceBlockingStub greetingService = GreetingServiceGrpc.newBlockingStub(managedChannel).withInterceptors(new AddNewCorrelationIdToRequestClientInterceptor());
+		return greetingService;
+	}
+
+	protected GreetingServiceGrpc.GreetingServiceBlockingStub stubWithoutCorrelationId() {
 		ManagedChannel managedChannel = ManagedChannelBuilder.forAddress("localhost", port).usePlaintext().build();
 		GreetingServiceGrpc.GreetingServiceBlockingStub greetingService = GreetingServiceGrpc.newBlockingStub(managedChannel);
 		return greetingService;
@@ -100,6 +103,7 @@ public class AbstractGreetingTest {
 		GreetingServiceGrpc.GreetingServiceStub greetingService = GreetingServiceGrpc.newStub(managedChannel)
 				.withMaxInboundMessageSize(maxInboundMessageSize)
 				.withMaxOutboundMessageSize(maxOutboundMessageSize)
+				.withInterceptors(new AddNewCorrelationIdToRequestClientInterceptor())
 				;
 		return greetingService;
 	}

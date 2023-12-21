@@ -6,19 +6,19 @@ import io.grpc.*;
  * Interceptor for adding MDC for a gRPC {@linkplain Context}.
  */
 
-public class GrpcMdcContextInterceptor implements ServerInterceptor {
+public class InitializeGrpcMdcContextServerInterceptor implements ServerInterceptor {
 
 	public static Builder newBuilder() {
 		return new Builder();
 	}
 
 	public static class Builder {
-		public GrpcMdcContextInterceptor build() {
-			return new GrpcMdcContextInterceptor();
+		public InitializeGrpcMdcContextServerInterceptor build() {
+			return new InitializeGrpcMdcContextServerInterceptor();
 		}
 	}
 
-	protected GrpcMdcContextInterceptor() {
+	public InitializeGrpcMdcContextServerInterceptor() {
 		// prefer to use builder
 	}
 

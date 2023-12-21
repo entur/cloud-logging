@@ -1,11 +1,8 @@
 package no.entur.grpc.example;
 
 import io.grpc.StatusRuntimeException;
-import no.entur.logging.cloud.grpc.trace.GrpcTraceMdcContext;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControlClosable;
-import no.entur.logging.cloud.logback.logstash.test.junit.LogStatement;
-import no.entur.logging.cloud.logback.logstash.test.junit.LogStatements;
 import org.entur.grpc.example.GreetingResponse;
 import org.entur.grpc.example.GreetingServiceGrpc;
 import org.junit.jupiter.api.Test;
@@ -19,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @ActiveProfiles("ondemand")
-@TestPropertySource(properties = "entur.logging.grpc.ondemand.enabled=true")
+@TestPropertySource(properties = {"entur.logging.grpc.ondemand.enabled=true"})
 @DirtiesContext
 public class OndemandGrpcLoggingFormatTest extends AbstractGrpcTest {
 

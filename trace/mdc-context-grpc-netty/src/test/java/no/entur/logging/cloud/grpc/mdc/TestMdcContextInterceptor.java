@@ -34,7 +34,7 @@ public class TestMdcContextInterceptor implements ServerInterceptor {
 			return next.startCall(interceptCall, headers);
 		} else {
 			// ignore
-			log.warn("Unable to set trace MDC context, please add " + GrpcMdcContextInterceptor.class.getName() + " before this interceptor");
+			log.warn("Unable to set trace MDC context, please add " + InitializeGrpcMdcContextServerInterceptor.class.getName() + " before this interceptor");
 			return next.startCall(call, headers);
 		}
 	}
