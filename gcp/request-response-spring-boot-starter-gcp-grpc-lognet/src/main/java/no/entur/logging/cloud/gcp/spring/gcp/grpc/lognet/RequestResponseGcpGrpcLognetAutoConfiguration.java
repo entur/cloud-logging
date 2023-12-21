@@ -15,6 +15,7 @@ import no.entur.logging.cloud.rr.grpc.mapper.TypeRegistryFactory;
 import org.lognet.springboot.grpc.FailureHandlingSupport;
 import org.lognet.springboot.grpc.autoconfigure.GRpcAutoConfiguration;
 import org.lognet.springboot.grpc.autoconfigure.GRpcServerProperties;
+import org.lognet.springboot.grpc.recovery.GRpcExceptionHandlerInterceptor;
 import org.lognet.springboot.grpc.recovery.GRpcExceptionHandlerMethodResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 
 import java.util.HashMap;
@@ -112,17 +114,9 @@ public class RequestResponseGcpGrpcLognetAutoConfiguration extends AbstractReque
     @Bean
     @ConditionalOnBean({FailureHandlingSupport.class, GRpcExceptionHandlerMethodResolver.class})
     @ConditionalOnProperty(name = {"entur.logging.request-response.grpc.server.exception-handler.enabled"}, havingValue = "true", matchIfMissing = true)
-    public RequestResponseGRpcExceptionHandlerInterceptor requestResponseGRpcExceptionHandlerInterceptor(
-            FailureHandlingSupport failureHandlingSupport,
-            GRpcExceptionHandlerMethodResolver methodResolver) {
-
-        GRpcServerProperties p = new GRpcServerProperties();
-        GRpcServerProperties.RecoveryProperties recoveryProperties = new GRpcServerProperties.RecoveryProperties();
-        recoveryProperties.setInterceptorOrder(exceptionInterceptorOrder);
-
-        p.setRecovery(recoveryProperties);
-
-        return new RequestResponseGRpcExceptionHandlerInterceptor(methodResolver, failureHandlingSupport, p);
+    @Primary
+    public RequestResponseGRpcExceptionHandlerInterceptor requestResponseGRpcExceptionHandlerInterceptor(GRpcExceptionHandlerInterceptor interceptor) {
+        return new RequestResponseGRpcExceptionHandlerInterceptor(interceptor, exceptionInterceptorOrder);
     }
 
 }

@@ -9,16 +9,14 @@ import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.context.annotation.Profile;
 
 @GRpcService(applyGlobalInterceptors = false, interceptors = {
-
-		TransmitStatusRuntimeExceptionInterceptor.class,
 		// Validation
 		MyValidationServerInterceptor.class,
 		// logging
 		GrpcLoggingServerInterceptor.class,
 		// Trace
 		CorrelationIdGrpcMdcContextServerInterceptor.class, // add trace headers (correlation-id and such)
-		// MDC
-		InitializeGrpcMdcContextServerInterceptor.class // init context-aware MDC
+
+
 })
 @Profile("!ondemand")
 public class GreetingController extends AbstractGreetingController {
