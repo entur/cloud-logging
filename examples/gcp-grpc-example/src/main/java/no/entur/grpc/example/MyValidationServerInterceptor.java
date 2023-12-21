@@ -11,12 +11,19 @@ import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import io.grpc.StatusException;
 import io.grpc.protobuf.StatusProto;
+import org.springframework.core.Ordered;
 
 // https://github.com/envoyproxy/protoc-gen-validate/blob/master/java/pgv-java-grpc/src/main/java/io/envoyproxy/pgv/grpc/ValidatingServerInterceptor.java
 
-public class MyValidationServerInterceptor implements ServerInterceptor {
+public class MyValidationServerInterceptor implements ServerInterceptor, Ordered {
 
-	@Override
+	protected final int order;
+
+    public MyValidationServerInterceptor(int order) {
+        this.order = order;
+    }
+
+    @Override
 	public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
 		return new ForwardingServerCallListener.SimpleForwardingServerCallListener<ReqT>(next.startCall(call, headers)) {
 			private boolean aborted = false;
@@ -57,5 +64,9 @@ public class MyValidationServerInterceptor implements ServerInterceptor {
 		return Any.pack(BadRequest.newBuilder()
 				.addFieldViolations(BadRequest.FieldViolation.newBuilder().setField("*").setDescription("Invalid message").build())
 				.build());
-	}	
+	}
+
+	public int getOrder() {
+		return this.order;
+	}
 }

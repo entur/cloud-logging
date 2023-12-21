@@ -1,6 +1,8 @@
 package no.entur.logging.cloud.gcp.spring.gcp.grpc.lognet;
 
 import com.google.protobuf.util.JsonFormat;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcClientLoggingFilters;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcServerLoggingFilters;
@@ -13,10 +15,12 @@ import no.entur.logging.cloud.rr.grpc.mapper.JsonPrinterFactory;
 import no.entur.logging.cloud.rr.grpc.mapper.JsonPrinterStatusMapper;
 import no.entur.logging.cloud.rr.grpc.mapper.TypeRegistryFactory;
 import org.lognet.springboot.grpc.FailureHandlingSupport;
+import org.lognet.springboot.grpc.GRpcErrorHandler;
+import org.lognet.springboot.grpc.autoconfigure.ConditionalOnMissingErrorHandler;
 import org.lognet.springboot.grpc.autoconfigure.GRpcAutoConfiguration;
 import org.lognet.springboot.grpc.autoconfigure.GRpcServerProperties;
-import org.lognet.springboot.grpc.recovery.GRpcExceptionHandlerInterceptor;
-import org.lognet.springboot.grpc.recovery.GRpcExceptionHandlerMethodResolver;
+import org.lognet.springboot.grpc.recovery.*;
+import org.lognet.springboot.grpc.security.GrpcSecurityConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -31,6 +35,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 @Configuration
 @PropertySource(value = "classpath:request-response.gcp.properties", ignoreResourceNotFound = false)
@@ -119,4 +124,23 @@ public class RequestResponseGcpGrpcLognetAutoConfiguration extends AbstractReque
         return new RequestResponseGRpcExceptionHandlerInterceptor(interceptor, exceptionInterceptorOrder);
     }
 
+    /**
+     *
+     * Without any exception handlers, the exception handler does not handle status runtime exceptions either
+     *
+     */
+
+    @ConditionalOnMissingErrorHandler(StatusRuntimeException.class)
+    @Configuration
+    static class DefaultStatusRuntimeExceptionErrorHandlerConfig {
+
+        @GRpcServiceAdvice
+        public static class StatusRuntimeExceptionGRpcServiceAdvice {
+            @java.lang.SuppressWarnings("all")
+            @GRpcExceptionHandler
+            public Status handle(StatusRuntimeException e, GRpcExceptionScope scope) {
+                return e.getStatus();
+            }
+        }
+    }
 }

@@ -12,6 +12,7 @@ test {
 dependencies {
     implementation project(':gcp:spring-boot-starter-gcp-grpc-lognet')
     implementation project(':gcp:request-response-spring-boot-starter-gcp-grpc-lognet')
+    implementation project(':trace:server:correlation-id-trace-grpc-netty')
 
     implementation project(':trace:mdc-context-grpc-netty')
 
