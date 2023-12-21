@@ -1,8 +1,6 @@
 package no.entur.logging.cloud.gcp.spring.gcp.grpc.lognet;
 
 import com.google.protobuf.util.JsonFormat;
-import no.entur.logging.cloud.rr.grpc.GrpcLoggingClientInterceptor;
-import no.entur.logging.cloud.rr.grpc.GrpcLoggingServerInterceptor;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcClientLoggingFilters;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcServerLoggingFilters;
@@ -14,12 +12,18 @@ import no.entur.logging.cloud.rr.grpc.mapper.GrpcStatusMapper;
 import no.entur.logging.cloud.rr.grpc.mapper.JsonPrinterFactory;
 import no.entur.logging.cloud.rr.grpc.mapper.JsonPrinterStatusMapper;
 import no.entur.logging.cloud.rr.grpc.mapper.TypeRegistryFactory;
+import org.lognet.springboot.grpc.FailureHandlingSupport;
+import org.lognet.springboot.grpc.autoconfigure.GRpcAutoConfiguration;
+import org.lognet.springboot.grpc.autoconfigure.GRpcServerProperties;
+import org.lognet.springboot.grpc.recovery.GRpcExceptionHandlerMethodResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -28,6 +32,7 @@ import java.util.HashMap;
 
 @Configuration
 @PropertySource(value = "classpath:request-response.gcp.properties", ignoreResourceNotFound = false)
+@AutoConfigureAfter(GRpcAutoConfiguration.class)
 public class RequestResponseGcpGrpcLognetAutoConfiguration extends AbstractRequestResponseGcpGrpcLognetAutoConfiguration {
 
     @Value("${entur.logging.request-response.max-size}")
@@ -41,6 +46,9 @@ public class RequestResponseGcpGrpcLognetAutoConfiguration extends AbstractReque
 
     @Value("${entur.logging.request-response.grpc.client.interceptor-order:0}")
     private int clientInterceptorOrder;
+
+    @Value("${entur.logging.request-response.grpc.server.exception-handler.interceptor-order:0}")
+    private int exceptionInterceptorOrder;
 
     @Bean
     @ConditionalOnMissingBean(JsonFormat.TypeRegistry.class)
@@ -99,6 +107,22 @@ public class RequestResponseGcpGrpcLognetAutoConfiguration extends AbstractReque
         Level level = parseLevel(loggerLevel);
 
         return createMachineReadbleSink(logger, level);
+    }
+
+    @Bean
+    @ConditionalOnBean({FailureHandlingSupport.class, GRpcExceptionHandlerMethodResolver.class})
+    @ConditionalOnProperty(name = {"entur.logging.request-response.grpc.server.exception-handler.enabled"}, havingValue = "true", matchIfMissing = true)
+    public RequestResponseGRpcExceptionHandlerInterceptor requestResponseGRpcExceptionHandlerInterceptor(
+            FailureHandlingSupport failureHandlingSupport,
+            GRpcExceptionHandlerMethodResolver methodResolver) {
+
+        GRpcServerProperties p = new GRpcServerProperties();
+        GRpcServerProperties.RecoveryProperties recoveryProperties = new GRpcServerProperties.RecoveryProperties();
+        recoveryProperties.setInterceptorOrder(exceptionInterceptorOrder);
+
+        p.setRecovery(recoveryProperties);
+
+        return new RequestResponseGRpcExceptionHandlerInterceptor(methodResolver, failureHandlingSupport, p);
     }
 
 }

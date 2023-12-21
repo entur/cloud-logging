@@ -56,7 +56,7 @@ configure(buildProjects()) {
         springBootVersion = '3.2.0' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
         janinoVersion = '3.1.10'
         servletVersion = '6.0.0' // jakarta
-        logbookVersion = '3.6.0'
+        logbookVersion = '3.7.2'
         jacksonSyntaxHighlightVersion = '1.0.8'
         logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.0.7'
         commonsIoVersion = '2.15.1'
