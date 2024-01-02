@@ -86,7 +86,7 @@ jobs:
                 command: |
                   ./gradlew build                
 
-  publish_team:
+  publish_maven_central:
     executor: java_17
     steps:
       - checkout
@@ -95,18 +95,8 @@ jobs:
             - run:
                 name: Build
                 command: |
+                  # TODO add signing key and password
                   ./gradlew -x test build publish
-
-  publish_partner:
-    executor: java_17
-    steps:
-      - checkout
-      - with_cache:
-          steps:
-            - run:
-                name: Build
-                command: |
-                  ./gradlew -PpublishTarget=partner -x test build publish
 
 
   create-git-release:
@@ -157,15 +147,9 @@ workflows:
       - build:
           name: Build with Gradle
           filters: *filters
-      - publish_team:
+      - publish_maven_central:
           context: global
-          name: Publish team scope release
-          filters: *filters
-          requires:
-            - Build with Gradle
-      - publish_partner:
-          context: partner
-          name: Publish partner scope release
+          name: Publish to Maven central
           filters: *filters
           requires:
             - Build with Gradle
