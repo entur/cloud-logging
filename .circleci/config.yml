@@ -149,7 +149,7 @@ workflows:
           filters: *filters
       - publish_maven_central:
           context: global
-          name: Publish to Maven central
+          name: Publish release to Maven central
           filters: *filters
           requires:
             - Build with Gradle
@@ -159,22 +159,9 @@ workflows:
     jobs:
       - build:
           name: Build with Gradle
-          filters:
-            branches:
-              only:
-                - develop
-      - publish_team:
+      - publish_maven_central:
           context: global
-          name: Publish team scope snapshot
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - Build with Gradle
-      - publish_partner:
-          context: partner
-          name: Publish partner scope snapshot
+          name: Publish snapshot to Maven Central
           filters:
             branches:
               only:
