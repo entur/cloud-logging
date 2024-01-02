@@ -242,7 +242,6 @@ public class LogStatements implements List<LogStatement> {
 	/**
 	 * Get request-/response-logger.
 	 *
-	 * @return log statements
 	 */
 
 	protected void waitForFlushAndRefresh() {

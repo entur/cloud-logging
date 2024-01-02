@@ -81,10 +81,6 @@ configure(buildProjects()) {
         }
     }
 
-    java {
-        withSourcesJar()
-    }
-
     dependencies {
         components.all(LogbackAlignmentRule)
         components.all(GrpcAlignmentRule)
@@ -105,13 +101,9 @@ configure(libraryProjects()) {
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
 
-    task sourceJar(type: Jar) {
-        from sourceSets.main.allJava
-        archiveClassifier = "sources"
-    }
-
-    afterEvaluate {
-        generateMetadataFileForMavenPublication.dependsOn sourceJar
+    java {
+        withSourcesJar()
+        withJavadocJar()
     }
 
     publishing {
@@ -129,6 +121,8 @@ configure(libraryProjects()) {
                     url = 'https://github.com/entur/cloud-logging'
                     packaging = 'jar'
                     inceptionYear = '2023'
+                    description = project.name
+
                     licenses {
                         license {
                             name = 'European Union Public Licence v1.2'
