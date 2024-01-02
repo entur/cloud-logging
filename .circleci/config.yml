@@ -159,10 +159,6 @@ workflows:
     jobs:
       - build:
           name: Build with Gradle
-          filters:
-            branches:
-              only:
-                - develop
       - publish_maven_central:
           context: global
           name: Publish snapshot to Maven Central
