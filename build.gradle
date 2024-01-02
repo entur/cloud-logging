@@ -159,6 +159,8 @@ configure(libraryProjects()) {
                 // signing.gnupg.keyName=xxx
                 // signing.gnupg.passphrase=yyy
                 // via command line or global gradle properties
+                // then run
+                // w17 build publishToSonatype --info --stacktrace
 
                 sign(publishing.publications)
             }
