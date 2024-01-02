@@ -26,22 +26,6 @@ executors:
     resource_class: xlarge
 
 commands:
-  build:
-    parameters:
-      publish:
-        description: Publish artifacts
-        type: boolean
-        default: false  
-    steps:
-      - run:
-          name: 'Run Gradle build'
-          command: |
-            ./gradlew build
-      - when:
-          condition: << parameters.publish >>
-          steps:
-            - publish
-
   with_cache:
     parameters:
       steps:
@@ -86,7 +70,7 @@ jobs:
                 command: |
                   ./gradlew build                
 
-  publish_maven_central:
+  publish_maven_central_release:
     executor: java_17
     steps:
       - checkout
@@ -96,8 +80,22 @@ jobs:
                 name: Build
                 command: |
                   # TODO add signing key and password
-                  ./gradlew -x test build publish
+                  echo $SONATYPE_GPG_KEY_BASE64 | base64 --decode | gpg --batch --no-tty --import --yes
+                  ./gradlew build publishToSonatype closeAndReleaseSonatypeStagingRepository -x test -Psigning.gnupg.passphrase=$SONATYPE_GPG_KEY_PASSWORD -Psigning.gnupg.keyName=$SONATYPE_GPG_KEY_NAME
+                  
 
+  publish_maven_central_snapshot:
+    executor: java_17
+    steps:
+      - checkout
+      - with_cache:
+          steps:
+            - run:
+                name: Build
+                command: |
+                  # TODO add signing key and password
+                  echo $SONATYPE_GPG_KEY_BASE64 | base64 --decode | gpg --batch --no-tty --import --yes
+                  ./gradlew build publishToSonatype -x test -Psigning.gnupg.passphrase=$SONATYPE_GPG_KEY_PASSWORD -Psigning.gnupg.keyName=$SONATYPE_GPG_KEY_NAME
 
   create-git-release:
     executor: java_17
@@ -147,7 +145,7 @@ workflows:
       - build:
           name: Build with Gradle
           filters: *filters
-      - publish_maven_central:
+      - publish_maven_central_release:
           context: global
           name: Publish release to Maven central
           filters: *filters
@@ -159,7 +157,7 @@ workflows:
     jobs:
       - build:
           name: Build with Gradle
-      - publish_maven_central:
+      - publish_maven_central_snapshot:
           context: global
           name: Publish snapshot to Maven Central
           filters:
