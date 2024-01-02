@@ -160,10 +160,10 @@ workflows:
       - publish_maven_central_snapshot:
           context: global
           name: Publish snapshot to Maven Central
-          filters:
-            branches:
-              only:
-                - develop
+#          filters:
+#            branches:
+#              only:
+#                - develop
           requires:
             - Build with Gradle
 
