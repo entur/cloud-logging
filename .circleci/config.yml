@@ -95,7 +95,6 @@ jobs:
                 command: |
                   # TODO add signing key and password
                   echo $SONATYPE_GPG_KEY_BASE64 | base64 --decode | gpg --batch --no-tty --import --yes
-                  
                   ./gradlew build publishToSonatype -x test -Psigning.gnupg.passphrase=$SONATYPE_GPG_KEY_PASSWORD -Psigning.gnupg.keyName=$SONATYPE_GPG_KEY_NAME -PsonatypeUsername=$SONATYPE_USERNAME -PsonatypePassword=$SONATYPE_PASSWORD
 
   create-git-release:
@@ -161,10 +160,10 @@ workflows:
       - publish_maven_central_snapshot:
           context: global
           name: Publish snapshot to Maven Central
-#          filters:
-#            branches:
-#              only:
-#                - develop
+          filters:
+            branches:
+              only:
+                - develop
           requires:
             - Build with Gradle
 
