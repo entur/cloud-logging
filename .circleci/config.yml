@@ -26,22 +26,6 @@ executors:
     resource_class: xlarge
 
 commands:
-  build:
-    parameters:
-      publish:
-        description: Publish artifacts
-        type: boolean
-        default: false  
-    steps:
-      - run:
-          name: 'Run Gradle build'
-          command: |
-            ./gradlew build
-      - when:
-          condition: << parameters.publish >>
-          steps:
-            - publish
-
   with_cache:
     parameters:
       steps:
@@ -86,7 +70,7 @@ jobs:
                 command: |
                   ./gradlew build                
 
-  publish_team:
+  publish_maven_central_release:
     executor: java_17
     steps:
       - checkout
@@ -95,9 +79,12 @@ jobs:
             - run:
                 name: Build
                 command: |
-                  ./gradlew -x test build publish
+                  # TODO add signing key and password
+                  echo $SONATYPE_GPG_KEY_BASE64 | base64 --decode | gpg --batch --no-tty --import --yes
+                  ./gradlew build publishToSonatype closeAndReleaseSonatypeStagingRepository -x test -Psigning.gnupg.passphrase=$SONATYPE_GPG_KEY_PASSWORD -Psigning.gnupg.keyName=$SONATYPE_GPG_KEY_NAME -PsonatypeUsername=$SONATYPE_USERNAME -PsonatypePassword=$SONATYPE_PASSWORD
+                  
 
-  publish_partner:
+  publish_maven_central_snapshot:
     executor: java_17
     steps:
       - checkout
@@ -106,8 +93,9 @@ jobs:
             - run:
                 name: Build
                 command: |
-                  ./gradlew -PpublishTarget=partner -x test build publish
-
+                  # TODO add signing key and password
+                  echo $SONATYPE_GPG_KEY_BASE64 | base64 --decode | gpg --batch --no-tty --import --yes
+                  ./gradlew build publishToSonatype -x test -Psigning.gnupg.passphrase=$SONATYPE_GPG_KEY_PASSWORD -Psigning.gnupg.keyName=$SONATYPE_GPG_KEY_NAME -PsonatypeUsername=$SONATYPE_USERNAME -PsonatypePassword=$SONATYPE_PASSWORD
 
   create-git-release:
     executor: java_17
@@ -157,15 +145,9 @@ workflows:
       - build:
           name: Build with Gradle
           filters: *filters
-      - publish_team:
+      - publish_maven_central_release:
           context: global
-          name: Publish team scope release
-          filters: *filters
-          requires:
-            - Build with Gradle
-      - publish_partner:
-          context: partner
-          name: Publish partner scope release
+          name: Publish release to Maven central
           filters: *filters
           requires:
             - Build with Gradle
@@ -175,22 +157,9 @@ workflows:
     jobs:
       - build:
           name: Build with Gradle
-          filters:
-            branches:
-              only:
-                - develop
-      - publish_team:
+      - publish_maven_central_snapshot:
           context: global
-          name: Publish team scope snapshot
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - Build with Gradle
-      - publish_partner:
-          context: partner
-          name: Publish partner scope snapshot
+          name: Publish snapshot to Maven Central
           filters:
             branches:
               only:

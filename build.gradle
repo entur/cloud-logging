@@ -3,6 +3,7 @@ plugins {
     id 'com.github.ben-manes.versions' version '0.49.0' apply false
     id 'org.owasp.dependencycheck' version '9.0.7' apply false
     id "org.sonarqube" version "4.0.0.2929"
+    id('io.github.gradle-nexus.publish-plugin') version '1.3.0'
 }
 
 // Split projects into buildable: examples and libraries. 
@@ -43,18 +44,18 @@ configure(buildProjects()) {
     
     ext {
         junitJupiterVersion = '5.10.1'
-        mockitoVersion = '5.7.0'
+        mockitoVersion = '5.8.0'
         logbackLogstashVersion = '7.4'
         slf4jVersion = '2.0.9'
-        googleTruthVersion = '1.1.5'
-        logbackVersion = '1.4.11'
-        jacksonVersion = '2.16.0'
-        jacksonDatabindVersion = '2.16.0'
+        googleTruthVersion = '1.2.0'
+        logbackVersion = '1.4.14'
+        jacksonVersion = '2.16.1'
+        jacksonDatabindVersion = '2.16.1'
         nettyTcnativeBoringsslStaticVersion = '2.0.62.Final'
         nettyVersion = '4.1.104.Final'
         micrometerVersion = '1.12.0'
-        springBootVersion = '3.2.0' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
-        janinoVersion = '3.1.10'
+        springBootVersion = '3.2.1' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
+        janinoVersion = '3.1.11'
         servletVersion = '6.0.0' // jakarta
         logbookVersion = '3.7.2'
         jacksonSyntaxHighlightVersion = '1.0.8'
@@ -62,9 +63,9 @@ configure(buildProjects()) {
         commonsIoVersion = '2.15.1'
         commonsTextVersion = '1.11.0'
 
-        grpcNettyVersion = '1.58.0'
-        grpcVersion = '1.58.0'
-        grpcCommonsVersion = '2.28.0'
+        grpcNettyVersion = '1.60.1'
+        grpcVersion = '1.60.1'
+        grpcCommonsVersion = '2.29.0'
         grpcProtobufVersion = '3.25.0'
 
         jsonAssertVersion = '0.6.2'
@@ -86,6 +87,7 @@ configure(buildProjects()) {
 
     dependencies {
         components.all(LogbackAlignmentRule)
+        components.all(GrpcAlignmentRule)
 
         // JUnit Jupiter API and TestEngine implementation
         testImplementation("org.junit.jupiter:junit-jupiter:${junitJupiterVersion}")
@@ -101,16 +103,26 @@ configure(buildProjects()) {
 // projects which should be published
 configure(libraryProjects()) {
     apply plugin: 'maven-publish'
+    apply plugin: 'signing'
+
+    task sourceJar(type: Jar) {
+        from sourceSets.main.allJava
+        archiveClassifier = "sources"
+    }
+
+    afterEvaluate {
+        generateMetadataFileForMavenPublication.dependsOn sourceJar
+    }
 
     publishing {
 
         publications {
             maven(MavenPublication) {
+                from components.java
+
                 groupId = "no.entur.logging.cloud"
                 artifactId = project.name
                 version = "$version"
-
-                from components.java
 
                 pom {
                     name = project.name
@@ -139,26 +151,23 @@ configure(libraryProjects()) {
             }
         }
 
-        repositories {
-            maven {
-                credentials {
-                    if (project.hasProperty("publishTarget") && project.getProperty("publishTarget").equals("partner")) {
-                        username = "${project.properties['entur_artifactory_user'] ?: System.env.PARTNER_ARTIFACTORY_USER}"
-                        password = "${project.properties['entur_artifactory_password'] ?: System.env.PARTNER_ARTIFACTORY_APIKEY}"
-                    } else {
-                        username = "${project.properties['entur_artifactory_user'] ?: System.env.ARTIFACTORY_USER}"
-                        password = "${project.properties['entur_artifactory_password'] ?: System.env.ARTIFACTORY_PASSWORD}"
-                    }
-                }
+        if(project.hasProperty("signing.gnupg.keyName")) {
+            signing {
+                useGpgCmd()
 
-                if (project.hasProperty("publishTarget") && project.getProperty("publishTarget").equals("partner")) {
-                    url = "${project.properties['entur_artifactory_contextUrl'] ?: System.env.ARTIFACTORY_URL}/${version.endsWith('SNAPSHOT') ? 'partner-snapshot' : 'partner-release'}"
-                } else {
-                    url = "${project.properties['entur_artifactory_contextUrl'] ?: System.env.ARTIFACTORY_URL}/${version.endsWith('SNAPSHOT') ? 'entur-snapshot-standard' : 'entur-release-standard'}"
-                }
+                // set
+                // signing.gnupg.keyName=xxx
+                // signing.gnupg.passphrase=yyy
+                // via command line or global gradle properties
+                // then run
+                // w17 build publishToSonatype --info --stacktrace
+
+                sign(publishing.publications)
             }
         }
+
     }
+
 }
 
 allprojects {
@@ -228,6 +237,24 @@ abstract class LogbackAlignmentRule implements ComponentMetadataRule {
         }
     }
 }
+
+abstract class GrpcAlignmentRule implements ComponentMetadataRule {
+    void execute(ComponentMetadataContext ctx) {
+        ctx.details.with {
+            if (id.group.startsWith("io.grpc")) {
+                belongsTo("io.grpc:grpc-virtual-platform:${id.version}")
+            }
+        }
+    }
+}
+
+
+nexusPublishing {
+    repositories {
+        sonatype()
+    }
+}
+
 
 
 
