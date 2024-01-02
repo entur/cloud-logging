@@ -120,7 +120,7 @@ configure(libraryProjects()) {
             maven(MavenPublication) {
                 from components.java
 
-                groupId = "no.entur.logging.cloud"
+                groupId = "$group"
                 artifactId = project.name
                 version = "$version"
 
@@ -248,10 +248,10 @@ abstract class GrpcAlignmentRule implements ComponentMetadataRule {
     }
 }
 
-
 nexusPublishing {
     repositories {
-        sonatype()
+        sonatype {
+        }
     }
 }
 
