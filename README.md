@@ -1,5 +1,5 @@
 # cloud-logging
-Entur cloud logging libraries for JVM applications. Goals
+Logging libraries for JVM applications. Goals
 
  * make developers more productive when developing and maintaining applications
  * keep cloud logging costs within reason
@@ -91,4 +91,11 @@ See [GCP](gcp) for further details.
 
 # Known issues
 Hosting gRPC and web services (i.e. REST services other than actuator) in the same app is not supported.
+
+# Roadmap
+
+ * Replace the correlation-id tracing artifacts with standardized modern equivalents, i.e. span id and so on.
+ * Better define and tune request-response logging JSON format 
+
+
 

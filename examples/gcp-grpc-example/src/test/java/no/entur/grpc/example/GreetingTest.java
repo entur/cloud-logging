@@ -6,7 +6,7 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 
 import no.entur.logging.cloud.api.DevOpsLevel;
-import no.entur.logging.cloud.grpc.trace.GrpcTraceMdcContext;
+import no.entur.logging.cloud.grpc.trace.CorrelationIdGrpcMdcContext;
 import no.entur.logging.cloud.logback.logstash.test.junit.CaptureLogStatements;
 import no.entur.logging.cloud.logback.logstash.test.junit.LogStatement;
 import no.entur.logging.cloud.logback.logstash.test.junit.LogStatements;
@@ -106,14 +106,14 @@ public class GreetingTest extends AbstractGrpcTest {
 			LogStatements http = statements.forLogger("no.entur.logging.cloud");
 			LogStatement request = http.get(0);
 
-			String s = request.getMdc().get(GrpcTraceMdcContext.CORRELATION_ID_MDC_KEY);
+			String s = request.getMdc().get(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY);
 
 			for (LogStatement statement : statements) {
 
 				// check that correlation-id was set back as a header in both request and response
 				// and that it was logged
-				assertEquals(statement.getMdc().get(GrpcTraceMdcContext.CORRELATION_ID_MDC_KEY), s);
-				statement.assertThatHttpHeader(GrpcTraceMdcContext.CORRELATION_ID_HEADER.toLowerCase()).contains(s);
+				assertEquals(statement.getMdc().get(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY), s);
+				statement.assertThatHttpHeader(CorrelationIdGrpcMdcContext.CORRELATION_ID_HEADER.toLowerCase()).contains(s);
 			}
 		} finally {
 			shutdown(stub);
@@ -143,7 +143,7 @@ public class GreetingTest extends AbstractGrpcTest {
 		response.assertThatHttpHeader("grpc-status").contains("3");
 
 		// check that correlation-id was set back as a header in the response
-		response.assertThatHttpHeader(GrpcTraceMdcContext.CORRELATION_ID_HEADER.toLowerCase()).contains(response.getMdc().get(GrpcTraceMdcContext.CORRELATION_ID_MDC_KEY));
+		response.assertThatHttpHeader(CorrelationIdGrpcMdcContext.CORRELATION_ID_HEADER.toLowerCase()).contains(response.getMdc().get(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY));
 	}	
 	
 	@Test 
@@ -249,7 +249,7 @@ public class GreetingTest extends AbstractGrpcTest {
 		assertThat(response.getJson().contains("fieldViolations")); // json path with dotted field names = crap
 
 		// check that correlation-id was set back as a header in the response
-		response.assertThatHttpHeader(GrpcTraceMdcContext.CORRELATION_ID_HEADER.toLowerCase()).contains(response.getMdc().get(GrpcTraceMdcContext.CORRELATION_ID_MDC_KEY));
+		response.assertThatHttpHeader(CorrelationIdGrpcMdcContext.CORRELATION_ID_HEADER.toLowerCase()).contains(response.getMdc().get(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY));
 	}
 
 	@Test
@@ -295,7 +295,7 @@ public class GreetingTest extends AbstractGrpcTest {
 
 			// check that correlation-id was set back as a header in the response
 			LogStatement response = http.get(2);
-			response.assertThatHttpHeader(GrpcTraceMdcContext.CORRELATION_ID_HEADER.toLowerCase()).contains(response.getMdc().get(GrpcTraceMdcContext.CORRELATION_ID_MDC_KEY));
+			response.assertThatHttpHeader(CorrelationIdGrpcMdcContext.CORRELATION_ID_HEADER.toLowerCase()).contains(response.getMdc().get(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY));
 		} finally {
 			shutdown(stub);
 		}

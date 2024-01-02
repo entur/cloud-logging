@@ -114,7 +114,7 @@ testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-
 ## spring-boot-starter-gcp-grpc-lognet
 Machine-readable JSON log configuration for Stackdriver.
 
-## spring-boot-starter-gcp-grpc-lognet-test
+## spring-boot-starter-gcp-grpc-test
 Classic log configuration for local development.
 
 Supported logging modes:
@@ -169,7 +169,7 @@ and
 </dependency>
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>spring-boot-starter-gcp-grpc-lognet-test</artifactId>
+    <artifactId>spring-boot-starter-gcp-grpc-test</artifactId>
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
@@ -201,7 +201,7 @@ add
 ```groovy
 implementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-lognet:${cloudLoggingVersion}")
 implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-lognet:${cloudLoggingVersion}")
-testImplementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-lognet-test:${cloudLoggingVersion}")
+testImplementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-test:${cloudLoggingVersion}")
 testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-lognet-test:${cloudLoggingVersion}")
 ```
 

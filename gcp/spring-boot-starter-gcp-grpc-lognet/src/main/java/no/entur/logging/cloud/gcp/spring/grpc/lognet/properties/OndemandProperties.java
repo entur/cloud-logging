@@ -10,6 +10,9 @@ import java.util.List;
 public class OndemandProperties {
 
     private boolean enabled;
+
+    private int interceptorOrder = Ordered.HIGHEST_PRECEDENCE;
+
     private OndemandSuccess success = new OndemandSuccess();
 
     private OndemandFailure failure = new OndemandFailure();
@@ -56,5 +59,13 @@ public class OndemandProperties {
 
     public void setTroubleshoot(OndemandTroubleshoot troubleshoot) {
         this.troubleshoot = troubleshoot;
+    }
+
+    public int getInterceptorOrder() {
+        return interceptorOrder;
+    }
+
+    public void setInterceptorOrder(int interceptorOrder) {
+        this.interceptorOrder = interceptorOrder;
     }
 }

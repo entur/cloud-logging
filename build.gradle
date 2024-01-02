@@ -1,7 +1,7 @@
 
 plugins {
     id 'com.github.ben-manes.versions' version '0.49.0' apply false
-    id 'org.owasp.dependencycheck' version '8.4.2' apply false
+    id 'org.owasp.dependencycheck' version '9.0.7' apply false
     id "org.sonarqube" version "4.0.0.2929"
     id('io.github.gradle-nexus.publish-plugin') version '1.1.0'
 
@@ -50,18 +50,18 @@ configure(buildProjects()) {
         slf4jVersion = '2.0.9'
         googleTruthVersion = '1.1.5'
         logbackVersion = '1.4.11'
-        jacksonVersion = '2.15.3'
-        jacksonDatabindVersion = '2.15.3'
+        jacksonVersion = '2.16.0'
+        jacksonDatabindVersion = '2.16.0'
         nettyTcnativeBoringsslStaticVersion = '2.0.62.Final'
-        nettyVersion = '4.1.100.Final'
-        micrometerVersion = '1.11.4'
-        springBootVersion = '3.1.5' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
+        nettyVersion = '4.1.104.Final'
+        micrometerVersion = '1.12.0'
+        springBootVersion = '3.2.0' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
         janinoVersion = '3.1.10'
         servletVersion = '6.0.0' // jakarta
-        logbookVersion = '3.6.0'
+        logbookVersion = '3.7.2'
         jacksonSyntaxHighlightVersion = '1.0.8'
         logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.0.7'
-        commonsIoVersion = '2.15.0'
+        commonsIoVersion = '2.15.1'
         commonsTextVersion = '1.11.0'
 
         grpcNettyVersion = '1.58.0'

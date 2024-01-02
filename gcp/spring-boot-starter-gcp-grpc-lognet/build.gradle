@@ -1,7 +1,7 @@
 
 dependencies {
     api project(':trace:mdc-context-grpc-netty')
-    api project(':trace:server:correlation-id-trace-grpc-netty')
+    api project(':trace:server:correlation-id-trace-spring-boot-grpc')
 
     api project(':gcp:micrometer-gcp')
     api project(':micrometer')

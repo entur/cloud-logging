@@ -2,6 +2,7 @@ package no.entur.logging.cloud.rr.grpc;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.Timestamp;
+import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import no.entur.logging.cloud.grpc.trace.test.GreetingRequest;
@@ -40,7 +41,6 @@ public class GreetingTest extends AbstractGreetingTest {
 			assertThat(response.getMessage()).isEqualTo("Hello");
 		}
 	}
-	
 
 	@Test 
 	public void testBlockingRequestsOnNewStubs() throws InterruptedException {
@@ -297,6 +297,18 @@ public class GreetingTest extends AbstractGreetingTest {
 		GreetingServiceBlockingStub stub = stub();
 		GreetingResponse response = stub.greeting5(greetingRequest);
 		assertThat(response.getMessage()).isEqualTo("Hello");
+	}
+
+	@Test
+	public void testNoCorrelationId() {
+		// validation errors added by interceptor
+		StatusRuntimeException exception = assertThrows(StatusRuntimeException.class,
+				() -> {
+					GreetingServiceBlockingStub stub = stubWithoutCorrelationId();
+					GreetingResponse response = stub.fullLogging(greetingRequest);
+				});
+
+		assertThat(exception.getStatus().getCode()).isEqualTo(Status.Code.INVALID_ARGUMENT);
 	}
 
 }
