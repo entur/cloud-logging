@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Utility class for tracing fields going into the MDC.
+ * Utility class for tracing fields going into the MDC via {@linkplain no.entur.logging.cloud.grpc.mdc.GrpcMdcContextAsyncAppender}.
+ * Fields are stored in the current {@linkplain io.grpc.Context}.
  */
 
 public class CorrelationIdGrpcMdcContext extends GrpcMdcContext {

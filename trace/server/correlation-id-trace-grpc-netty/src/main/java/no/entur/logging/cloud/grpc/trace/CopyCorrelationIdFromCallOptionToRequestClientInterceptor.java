@@ -1,7 +1,6 @@
 package no.entur.logging.cloud.grpc.trace;
 
 import io.grpc.*;
-import no.entur.logging.cloud.grpc.mdc.GrpcMdcContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -19,25 +18,25 @@ public class CopyCorrelationIdFromCallOptionToRequestClientInterceptor implement
 	public static final String CORRELATION_ID_OPTION = "correlationId";
 	public static final CallOptions.Key<String> CORRELATION_ID_OPTION_KEY = CallOptions.Key.of(CORRELATION_ID_OPTION, null);
 
-	public static Builder newValueBuilder() {
-		return new Builder();
+	public static ValueBuilder newValueBuilder() {
+		return new ValueBuilder();
 	}
 
-	public static class Builder {
+	public static class ValueBuilder {
 
 		private String correlationId;
 
-		public Builder withCorrelationId(String correlationId) {
+		public ValueBuilder withCorrelationId(String correlationId) {
 			this.correlationId = correlationId;
 			return this;
 		}
 
-		public Builder withRandomCorrelationId() {
+		public ValueBuilder withRandomCorrelationId() {
 			this.correlationId = UUID.randomUUID().toString();
 			return this;
 		}
 
-		public Builder withSlf4jMdcContextCorrelationId() {
+		public ValueBuilder withSlf4jMdcContextCorrelationId() {
 			String id = MDC.get(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY);
 			if(id == null) {
 				throw new IllegalStateException("Expected correlation id in MDC context");
@@ -45,7 +44,7 @@ public class CopyCorrelationIdFromCallOptionToRequestClientInterceptor implement
 			return withCorrelationId(id);
 		}
 
-		public Builder withGrpcMdcContextCorrelationId() {
+		public ValueBuilder withGrpcMdcContextCorrelationId() {
 			CorrelationIdGrpcMdcContext grpcMdcContext = CorrelationIdGrpcMdcContext.get();
 			if(grpcMdcContext == null) {
 				throw new IllegalStateException("Expected MDC context");
@@ -57,7 +56,7 @@ public class CopyCorrelationIdFromCallOptionToRequestClientInterceptor implement
 			return withCorrelationId(id);
 		}
 
-		public Builder withMdcContextCorrelationId() {
+		public ValueBuilder withMdcContextCorrelationId() {
 			CorrelationIdGrpcMdcContext grpcMdcContext = CorrelationIdGrpcMdcContext.get();
 			if(grpcMdcContext != null) {
 				String id = grpcMdcContext.getCorrelationId();
@@ -96,7 +95,7 @@ public class CopyCorrelationIdFromCallOptionToRequestClientInterceptor implement
 			};
 
 		}
-		log.warn("No correlation-id available for {}", method.getFullMethodName());
+		log.warn("No correlation-id available for client call to {}", method.getFullMethodName());
 
 		return next.newCall(method, callOptions);
 

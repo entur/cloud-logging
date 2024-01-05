@@ -7,7 +7,8 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 
 /**
- * Helper for wrapping blocks with MDC fields
+ *
+ * Helper for adding correlation id into the SLF4J MDC.
  *
  */
 

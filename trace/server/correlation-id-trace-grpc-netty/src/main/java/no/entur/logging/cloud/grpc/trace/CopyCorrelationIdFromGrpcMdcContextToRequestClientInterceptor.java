@@ -33,7 +33,7 @@ public class CopyCorrelationIdFromGrpcMdcContextToRequestClientInterceptor imple
 
 			}
 		}
-		log.warn("No correlation-id available for {}", method.getFullMethodName());
+		log.warn("No correlation-id available for client call to {}", method.getFullMethodName());
 
 		return next.newCall(method, callOptions);
 
