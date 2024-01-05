@@ -23,7 +23,15 @@ public class CorrelationIdGrpcMdcContext extends GrpcMdcContext {
 	}
 
 	public static CorrelationIdGrpcMdcContextBuilder newEmptyContext() {
-		return new CorrelationIdGrpcMdcContextBuilder();
+		return new CorrelationIdGrpcMdcContextBuilder(new HashMap<>());
+	}
+
+	public static CorrelationIdGrpcMdcContext get() {
+		GrpcMdcContext grpcMdcContext = KEY_CONTEXT.get();
+		if(grpcMdcContext == null) {
+			return null;
+		}
+		return new CorrelationIdGrpcMdcContext(grpcMdcContext);
 	}
 
 	public CorrelationIdGrpcMdcContext(Map<String, String> context) {

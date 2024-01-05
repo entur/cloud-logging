@@ -10,9 +10,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.MDC;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -63,7 +60,7 @@ public class CorrelationIdFilter implements Filter {
 		if(inputValue == null) {
 			correlationId = UUID.randomUUID().toString();
 		} else {
-			correlationId = sanitize(inputValue);
+			correlationId = CorrelationIdMdcSupportBuilder.sanitize(inputValue);
 		}
 
 		setCorrelationId(request, correlationId);
@@ -86,24 +83,6 @@ public class CorrelationIdFilter implements Filter {
 			MDC.remove(CORRELATION_ID_MDC_KEY);
 		}
 
-	}
-
-	public static String sanitize(String inputValue) throws UnsupportedEncodingException {
-		// https://en.wikipedia.org/wiki/HTTP_response_splitting
-		if(!containsNumbersLowercaseLettersAndDashes(inputValue)) {
-			return URLEncoder.encode(inputValue, StandardCharsets.UTF_8);
-		}
-		return inputValue;
-	}
-
-	public static boolean containsNumbersLowercaseLettersAndDashes(String inputValue) {
-		for(int i = 0; i < inputValue.length(); i++) {
-			char c = inputValue.charAt(i);
-			if(!Character.isDigit(c) && c != '-' && (c < 'a'|| c > 'z')) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 }

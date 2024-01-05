@@ -8,9 +8,13 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 /**
- * Utility class for use holding MDC fields.<br>
+ * Utility class for use holding MDC fields. Note that this exists in parallel to the classic SLF4J MDC.
+ * <br>
  * <p>
- * Note: Mutable context state is allowed, however the context itself is immutable
+ * Note 1: Mutable context state is allowed, however the context itself is immutable
+ * </p>
+ * <p>
+ * Note 2: Use of this context must be backed by logging configuration.
  * </p>
  */
 
