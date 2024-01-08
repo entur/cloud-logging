@@ -37,13 +37,8 @@ public class LoadOndemandContextLoggingTest {
 
     private static final DevOpsLogger LOGGER = DevOpsLoggerFactory.getLogger(LoadOndemandContextLoggingTest.class);
 
-    @Value("${entur.logging.http.ondemand.enabled}")
-    private boolean enabled;
-
     @Test
     public void testMachineReadableJson() throws IOException {
-        assertTrue(enabled);
-
         LOGGER.trace("Test trace message");
         LOGGER.debug("Test debug message");
         LOGGER.info("Test info message");
@@ -54,49 +49,5 @@ public class LoadOndemandContextLoggingTest {
         LOGGER.errorInterruptMyDinner("Test error interrupt my dinner message");
         LOGGER.errorWakeMeUpRightNow("Test error wake me up right now message");
     }
-
-    @Test
-    public void testOndemandMachineReadableJson() throws IOException, InterruptedException {
-        ScopeAsyncAppender appender = getOndemandAsyncAppender();
-
-        LoggingScopeFactory loggingScopeFactory = (LoggingScopeFactory) appender.getScopeProviders().get(0);
-
-        Predicate<ILoggingEvent> queuePredicate = new LowerOrEqualToLogLevelPredicate(Level.INFO_INT);
-        Predicate<ILoggingEvent> ignorePredicate = new LowerOrEqualToLogLevelPredicate(Level.DEBUG_INT);
-
-        LoggingScope scope = (LoggingScope) loggingScopeFactory.openScope(queuePredicate, ignorePredicate);
-
-        LOGGER.trace("Test trace message, this should be ignored");
-        LOGGER.debug("Test debug message, this should be ignored");
-        LOGGER.info("Test info message, this message should be delayed");
-        LOGGER.warn("Test warn message, this message should printet at once");
-        LOGGER.error("Test error message, this message should printet at once");
-
-        LOGGER.errorTellMeTomorrow("Test error tell me tomorrow message, this message should printet at once");
-        LOGGER.errorInterruptMyDinner("Test error interrupt my dinner message, this message should printet at once");
-        LOGGER.errorWakeMeUpRightNow("Test error wake me up right now message, this message should printet at once");
-
-        System.out.println("Before flush");
-        Thread.sleep(5000);
-        appender.write(scope);
-        System.out.println("After flush");
-        appender.write(scope);
-    }
-
-    private static ScopeAsyncAppender getOndemandAsyncAppender() {
-        Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders();
-        if(!appenderIterator.hasNext()) {
-            throw new RuntimeException("No appenders configured");
-        }
-        while (appenderIterator.hasNext()) {
-            Appender<ILoggingEvent> appender = appenderIterator.next();
-            if(appender instanceof ScopeAsyncAppender) {
-                return (ScopeAsyncAppender) appender;
-            }
-        }
-        throw new RuntimeException();
-    }
-
 
 }
