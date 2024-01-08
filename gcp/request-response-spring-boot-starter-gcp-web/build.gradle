@@ -12,5 +12,7 @@ dependencies {
     api ("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
     api ("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
 
+    compileOnly project(":gcp:on-demand-spring-boot-starter-gcp-web")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 }

@@ -9,6 +9,7 @@ import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupp
 import no.entur.logging.cloud.logbook.ondemand.state.ResponseHttpMessageStateSupplierSource;
 import no.entur.logging.cloud.spring.logbook.LogbookLoggingAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
@@ -25,8 +26,15 @@ import static jakarta.servlet.DispatcherType.REQUEST;
 @PropertySource(value = "classpath:logbook.gcp.web.properties", ignoreResourceNotFound = false)
 public class LogbookGcpWebAutoConfiguration {
 
+    /**
+     *
+     * If on-demand-logging is enabled, take advantage so that we always output correct JSON.
+     *
+     */
+
     @Configuration
     @ConditionalOnProperty(name = {"entur.logging.http.ondemand.enabled"}, havingValue = "true", matchIfMissing = false)
+    @ConditionalOnClass(OndemandProperties.class)
     public static class OndemandConfiguration {
 
         @Bean

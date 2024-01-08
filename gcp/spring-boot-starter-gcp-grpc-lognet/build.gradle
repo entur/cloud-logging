@@ -5,6 +5,7 @@ dependencies {
 
     api project(':gcp:micrometer-gcp')
     api project(':micrometer')
+    api project(':gcp:spring-boot-starter-gcp')
 
     api("org.slf4j:slf4j-api:${slf4jVersion}")
 
@@ -14,7 +15,6 @@ dependencies {
 
     api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
     api("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
-
     api ("io.github.lognet:grpc-spring-boot-starter:${lognetVersion}") {
         exclude group: 'io.grpc', module: 'grpc-netty-shaded'
         // for some reason this artifact cannot be resolved by gradle

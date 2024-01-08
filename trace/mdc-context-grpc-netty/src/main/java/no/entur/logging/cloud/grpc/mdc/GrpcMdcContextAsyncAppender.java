@@ -2,7 +2,6 @@ package no.entur.logging.cloud.grpc.mdc;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import no.entur.logging.cloud.appender.AsyncAppender;
-import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import org.slf4j.MDC;
 
 import java.util.Map;

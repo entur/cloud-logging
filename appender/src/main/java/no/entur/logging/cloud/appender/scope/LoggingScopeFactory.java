@@ -4,12 +4,10 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 
 import java.util.function.Predicate;
 
-public interface LoggingScopeFactory<T> {
+public interface LoggingScopeFactory<T extends LoggingScope> {
 
     T openScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate);
 
-    LoggingScope getScope();
-
-    void closeScope();
+    void closeScope(LoggingScope scope);
 
 }
