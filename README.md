@@ -9,10 +9,10 @@ Features:
 
  * Cloud-specific log encoders
    * GCP (Stackdriver)
- * SLF4J `Logger`-wrapper for additional error levels 
+ * SLF4J `Logger`-wrapper for additional error levels
  * Plug and play logging scheme
    * Main scope (for production):
-     * Machine-readable JSON 
+     * Machine-readable JSON
    * Test scope (for local development). Log output can be toggeled at runtime:
      * Human-readable 'classic' (one-line + ANSI colors, enabled by default), or
      * Human-readable JSON (pretty-printed + ANSI colored), or
@@ -21,7 +21,7 @@ Features:
      * Logbook style output (i.e. inlined in JSON log statements)
      * Additional ANSI coloring for test scope
  * Selective 'on-demand' logging for unexpected web server behaviour
-     * capture full logs for problematic requests
+     * capture full logs for problematic requests (i.e. not only WARN or ERROR, but also all sibling INFO log statements)
      * reduce logging considerably
  * Unit testing
    * Always assert against machine-readable JSON 'under the hood', regardless what is printed to console during local development

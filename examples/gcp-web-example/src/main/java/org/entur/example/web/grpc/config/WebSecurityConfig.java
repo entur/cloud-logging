@@ -1,4 +1,4 @@
-package org.entur.logbook.example.config;
+package org.entur.example.web.grpc.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

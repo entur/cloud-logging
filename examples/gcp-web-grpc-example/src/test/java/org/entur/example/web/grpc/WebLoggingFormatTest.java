@@ -1,4 +1,4 @@
-package org.entur.logbook.example;
+package org.entur.example.web.grpc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

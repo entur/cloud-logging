@@ -1,4 +1,4 @@
-package org.entur.logbook.example;
+package org.entur.example.web.grpc;
 
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControlClosable;

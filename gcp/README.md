@@ -8,11 +8,6 @@ Log severity metrics for Stackdriver.
 ## spring-boot-starter-gcp-web
 Machine-readable JSON log configuration for Stackdriver.
 
-For on-demand logging, try the [configuration](spring-boot-starter-gcp-grpc-lognet/src/main/java/no/entur/logging/cloud/gcp/spring/grpc/lognet/properties/OndemandProperties.java)
-```
-entur.logging.grpc.ondemand.enabled=true
-```
-
 ## spring-boot-starter-gcp-web-test
 Classic log configuration for local development.
 
@@ -44,6 +39,14 @@ Use `RemoteHttpMessageContextSupplier` to skip syntax validation if remote JSON 
 ## request-response-spring-boot-starter-gcp-web-test
 Logbook request-response-logging for local development.
 
+## on-demand-spring-boot-starter-gcp-web
+Selective (on-demand) logging for logging only interesting requests.
+
+Try the [configuration](on-demand-spring-boot-starter-gcp-web/src/main/java/no/entur/logging/cloud/gcp/spring/web/properties/OndemandProperties.java)
+```
+entur.logging.http.ondemand.enabled=true
+```
+
 ## Spring Web artifact coordinates
 Import the below artifacts:
 
@@ -53,7 +56,7 @@ Import the below artifacts:
 Add
 
 ```xml
-<cloud-logging.version>1.0.x</cloud-logging>
+<cloud-logging.version>2.0.x</cloud-logging>
 ```
 
 and
@@ -81,6 +84,12 @@ and
   <version>${cloud-logging.version}</version>
   <scope>test</scope>
 </dependency>
+<dependency>
+  <groupId>no.entur.logging.cloud</groupId>
+  <artifactId>on-demand-spring-boot-starter-gcp-web</artifactId>
+  <version>${cloud-logging.version}</version>
+  <scope>test</scope>
+</dependency>
 ```
 
 </details>
@@ -94,7 +103,7 @@ For
 
 ```groovy
 ext {
-   cloudLoggingVersion = '1.0.x'
+   cloudLoggingVersion = '2.0.x'
 }
 ```
 
@@ -105,6 +114,7 @@ implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web:${cloudLoggin
 implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web:${cloudLoggingVersion}")
 testImplementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test:${cloudLoggingVersion}")
 testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test:${cloudLoggingVersion}")
+implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-gcp-web:${cloudLoggingVersion}")
 ```
 
 </details>
@@ -141,6 +151,13 @@ gRPC request-response-logging for Stackdriver.
 ## request-response-spring-boot-starter-gcp-grpc-lognet-test
 gRPC request-response-logging for local development.
 
+## on-demand-spring-boot-starter-gcp-grpc
+Selective (on-demand) logging for logging only interesting requests.
+
+Try the [configuration](on-demand-spring-boot-starter-gcp-grpc/src/main/java/no/entur/logging/cloud/gcp/spring/grpc/lognet/properties/OndemandProperties.java)
+```
+entur.logging.grpc.ondemand.enabled=true
+```
 
 ## gRPC artifact coordinates
 Import the below artifacts:
@@ -179,6 +196,12 @@ and
   <version>${cloud-logging.version}</version>
   <scope>test</scope>
 </dependency>
+<dependency>
+  <groupId>no.entur.logging.cloud</groupId>
+  <artifactId>on-demand-spring-boot-starter-gcp-grpc</artifactId>
+  <version>${cloud-logging.version}</version>
+  <scope>test</scope>
+</dependency>
 ```
 
 </details>
@@ -192,7 +215,7 @@ For
 
 ```groovy
 ext {
-   cloudLoggingVersion = '3.0.8'
+   cloudLoggingVersion = '2.0.x'
 }
 ```
 
