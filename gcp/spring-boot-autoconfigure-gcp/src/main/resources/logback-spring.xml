@@ -10,7 +10,7 @@
 
     <if condition='(isDefined("entur.logging.http.ondemand.enabled") &#038;&#038; property("entur.logging.http.ondemand.enabled").equals("true")) || (isDefined("entur.logging.grpc.ondemand.enabled") &#038;&#038; property("entur.logging.grpc.ondemand.enabled").equals("true"))'>
         <then>
-            <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.appender.scope.ScopeAsyncAppender">
+            <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender">
                 <discardingThreshold>0</discardingThreshold>
                 <maxFlushTime>0</maxFlushTime>
                 <appender-ref ref="STDOUT" />

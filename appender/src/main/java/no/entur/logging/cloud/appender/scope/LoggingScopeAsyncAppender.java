@@ -1,19 +1,14 @@
 package no.entur.logging.cloud.appender.scope;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import no.entur.logging.cloud.appender.AsyncAppender;
 import no.entur.logging.cloud.appender.MdcAsyncAppender;
-import no.entur.logging.cloud.appender.scope.*;
-import org.slf4j.MDC;
 import org.slf4j.Marker;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ScopeAsyncAppender extends MdcAsyncAppender implements LoggingScopeSink {
+public class LoggingScopeAsyncAppender extends MdcAsyncAppender implements LoggingScopeSink {
 
     private List<LoggingScopeProvider> scopeProviders = new ArrayList<>();
 

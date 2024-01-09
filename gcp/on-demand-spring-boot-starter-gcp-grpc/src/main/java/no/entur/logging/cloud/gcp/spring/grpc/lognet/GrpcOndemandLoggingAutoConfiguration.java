@@ -6,7 +6,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import io.grpc.Status;
-import no.entur.logging.cloud.appender.scope.ScopeAsyncAppender;
+import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import no.entur.logging.cloud.appender.scope.predicate.HigherOrEqualToLogLevelPredicate;
 import no.entur.logging.cloud.appender.scope.predicate.LoggerNamePrefixHigherOrEqualToLogLevelPredicate;
 import no.entur.logging.cloud.gcp.spring.grpc.lognet.properties.*;
@@ -37,7 +37,7 @@ public class GrpcOndemandLoggingAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean(GrpcLoggingScopeContextInterceptor.class)
         public GrpcLoggingScopeContextInterceptor grpcLoggingScopeContextInterceptor(OndemandProperties properties) {
-            ScopeAsyncAppender appender = getAppender();
+            LoggingScopeAsyncAppender appender = getAppender();
 
             LOGGER.info("Configure on-demand GRPC logging");
 
@@ -96,19 +96,19 @@ public class GrpcOndemandLoggingAutoConfiguration {
             }
         }
 
-        private static ScopeAsyncAppender getAppender() {
+        private static LoggingScopeAsyncAppender getAppender() {
             Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
             Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders();
             if(!appenderIterator.hasNext()) {
-                throw new IllegalStateException("No on-demand log appenders configured, expected at least one which is implementing " + ScopeAsyncAppender.class.getName());
+                throw new IllegalStateException("No on-demand log appenders configured, expected at least one which is implementing " + LoggingScopeAsyncAppender.class.getName());
             }
             while (appenderIterator.hasNext()) {
                 Appender<ILoggingEvent> appender = appenderIterator.next();
-                if (appender instanceof ScopeAsyncAppender) {
-                    return (ScopeAsyncAppender) appender;
+                if (appender instanceof LoggingScopeAsyncAppender) {
+                    return (LoggingScopeAsyncAppender) appender;
                 }
             }
-            throw new IllegalStateException("Expected on-demand log appender implementing " + ScopeAsyncAppender.class.getName());
+            throw new IllegalStateException("Expected on-demand log appender implementing " + LoggingScopeAsyncAppender.class.getName());
         }
 
         public GrpcLoggingScopeFilter toFilter(OndemandSuccess success, OndemandFailure failure, OndemandTroubleshoot troubleshoot) {

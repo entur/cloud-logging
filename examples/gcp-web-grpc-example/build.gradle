@@ -12,11 +12,7 @@ dependencies {
     implementation project(':gcp:on-demand-spring-boot-starter-gcp-web')
     implementation project(":gcp:spring-boot-starter-gcp-web");
     implementation project(":gcp:request-response-spring-boot-starter-gcp-web");
-    implementation project(':trace:server:correlation-id-trace-grpc-netty')
-    implementation project(':trace:mdc-context-grpc-netty')
-
-    implementation project(":gcp:spring-boot-starter-gcp-grpc");
-
+    implementation project(":gcp:spring-boot-autoconfigure-gcp-grpc-mdc");
 
     implementation("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
     implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")

@@ -1,15 +1,11 @@
 package no.entur.logging.cloud.gcp.spring.web.test;
 
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import no.entur.logging.cloud.api.DevOpsLogger;
 import no.entur.logging.cloud.api.DevOpsLoggerFactory;
-import no.entur.logging.cloud.appender.scope.ScopeAsyncAppender;
-import no.entur.logging.cloud.appender.scope.LoggingScope;
-import no.entur.logging.cloud.appender.scope.LoggingScopeFactory;
-import no.entur.logging.cloud.appender.scope.predicate.LowerOrEqualToLogLevelPredicate;
+import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +17,6 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -51,12 +46,12 @@ public class LoadOndemandContextLoggingTest {
 
     @Test
     public void testOndemandMachineReadableJson() throws IOException, InterruptedException {
-        ScopeAsyncAppender appender = getOndemandAsyncAppender();
+        LoggingScopeAsyncAppender appender = getOndemandAsyncAppender();
 
         assertTrue(appender.getScopeProviders().isEmpty());
     }
 
-    private static ScopeAsyncAppender getOndemandAsyncAppender() {
+    private static LoggingScopeAsyncAppender getOndemandAsyncAppender() {
         Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders();
         if(!appenderIterator.hasNext()) {
@@ -64,8 +59,8 @@ public class LoadOndemandContextLoggingTest {
         }
         while (appenderIterator.hasNext()) {
             Appender<ILoggingEvent> appender = appenderIterator.next();
-            if(appender instanceof ScopeAsyncAppender) {
-                return (ScopeAsyncAppender) appender;
+            if(appender instanceof LoggingScopeAsyncAppender) {
+                return (LoggingScopeAsyncAppender) appender;
             }
         }
         throw new RuntimeException();

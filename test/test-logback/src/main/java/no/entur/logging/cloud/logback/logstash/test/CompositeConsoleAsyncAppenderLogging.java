@@ -1,9 +1,9 @@
 package no.entur.logging.cloud.logback.logstash.test;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import no.entur.logging.cloud.appender.scope.ScopeAsyncAppender;
+import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 
-public class CompositeConsoleAsyncAppender extends ScopeAsyncAppender {
+public class CompositeConsoleAsyncAppenderLogging extends LoggingScopeAsyncAppender {
 
     @Override
     protected void append(ILoggingEvent eventObject) {

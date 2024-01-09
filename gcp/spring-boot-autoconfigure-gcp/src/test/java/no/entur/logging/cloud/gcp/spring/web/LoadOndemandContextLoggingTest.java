@@ -5,7 +5,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import no.entur.logging.cloud.api.DevOpsLogger;
 import no.entur.logging.cloud.api.DevOpsLoggerFactory;
-import no.entur.logging.cloud.appender.scope.ScopeAsyncAppender;
+import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -46,12 +46,12 @@ public class LoadOndemandContextLoggingTest {
 
     @Test
     public void testAppender() throws IOException, InterruptedException {
-        ScopeAsyncAppender appender = getOndemandAsyncAppender();
+        LoggingScopeAsyncAppender appender = getOndemandAsyncAppender();
 
         assertTrue(appender.getScopeProviders().isEmpty());
     }
 
-    private static ScopeAsyncAppender getOndemandAsyncAppender() {
+    private static LoggingScopeAsyncAppender getOndemandAsyncAppender() {
         Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders();
         if(!appenderIterator.hasNext()) {
@@ -59,8 +59,8 @@ public class LoadOndemandContextLoggingTest {
         }
         while (appenderIterator.hasNext()) {
             Appender<ILoggingEvent> appender = appenderIterator.next();
-            if(appender instanceof ScopeAsyncAppender) {
-                return (ScopeAsyncAppender) appender;
+            if(appender instanceof LoggingScopeAsyncAppender) {
+                return (LoggingScopeAsyncAppender) appender;
             }
         }
         throw new RuntimeException();

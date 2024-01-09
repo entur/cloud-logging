@@ -4,7 +4,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import no.entur.logging.cloud.appender.MdcAsyncAppender;
-import no.entur.logging.cloud.appender.scope.ScopeAsyncAppender;
+import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import no.entur.logging.cloud.grpc.mdc.GrpcMdcContributer;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +33,7 @@ public class GrpcMdcLoggingAutoConfiguration {
         while (appenderIterator.hasNext()) {
             Appender<ILoggingEvent> appender = appenderIterator.next();
             if (appender instanceof MdcAsyncAppender) {
-                return (ScopeAsyncAppender) appender;
+                return (LoggingScopeAsyncAppender) appender;
             }
         }
         throw new IllegalStateException("Unexpected log appenders configured, expected one implementing " + MdcAsyncAppender.class.getName());
