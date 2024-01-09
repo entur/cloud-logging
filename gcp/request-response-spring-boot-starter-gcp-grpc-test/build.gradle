@@ -1,7 +1,7 @@
 
 dependencies {
     api project(":gcp:spring-boot-autoconfigure-gcp-test")
-    api project(':gcp:request-response-spring-boot-starter-gcp-grpc-lognet')
+    api project(':gcp:request-response-spring-boot-starter-gcp-grpc')
 
     api ("com.github.skjolber.jackson:jackson-syntax-highlight:${jacksonSyntaxHighlightVersion}")
     api ("com.github.skjolber.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")

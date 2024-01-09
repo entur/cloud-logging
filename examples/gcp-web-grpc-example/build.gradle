@@ -15,7 +15,7 @@ dependencies {
     implementation project(':trace:server:correlation-id-trace-grpc-netty')
     implementation project(':trace:mdc-context-grpc-netty')
 
-    implementation project(":gcp:spring-boot-starter-gcp-grpc-lognet");
+    implementation project(":gcp:spring-boot-starter-gcp-grpc");
 
 
     implementation("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")

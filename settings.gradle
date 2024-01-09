@@ -9,9 +9,9 @@ pluginManagement {
 include 'api', 'appender'
 include 'test:test-logback', 'test:test-logback-junit'
 include 'gcp:logback-logstash-encoder-gcp', 'gcp:spring-boot-autoconfigure-gcp'
-include 'gcp:spring-boot-starter-gcp-web', 'gcp:on-demand-spring-boot-starter-gcp-web', 'gcp:spring-boot-starter-gcp-web-test', 'gcp:spring-boot-starter-gcp-grpc-test', 'gcp:on-demand-spring-boot-starter-gcp-grpc', 'gcp:spring-boot-starter-gcp-grpc-lognet'
+include 'gcp:spring-boot-starter-gcp-web', 'gcp:on-demand-spring-boot-starter-gcp-web', 'gcp:spring-boot-starter-gcp-web-test', 'gcp:spring-boot-starter-gcp-grpc-test', 'gcp:on-demand-spring-boot-starter-gcp-grpc', 'gcp:spring-boot-starter-gcp-grpc'
 
-include 'gcp:spring-boot-autoconfigure-gcp-test', 'gcp:request-response-spring-boot-starter-gcp-web', 'gcp:request-response-spring-boot-starter-gcp-web-test', 'gcp:request-response-spring-boot-starter-gcp-grpc-lognet', 'gcp:request-response-spring-boot-starter-gcp-grpc-lognet-test'
+include 'gcp:spring-boot-autoconfigure-gcp-test', 'gcp:request-response-spring-boot-starter-gcp-web', 'gcp:request-response-spring-boot-starter-gcp-web-test', 'gcp:request-response-spring-boot-starter-gcp-grpc', 'gcp:request-response-spring-boot-starter-gcp-grpc-test'
 
 include 'micrometer', 'gcp:micrometer-gcp'
 
