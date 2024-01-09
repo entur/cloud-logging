@@ -1,5 +1,5 @@
 # GCP support
-Stackdriver logging support (via console).  
+Stackdriver logging support (via console). Most features are opt-in via dependency import (this includes test dependencies).
 
 ## micrometer-gcp
 Log severity metrics for Stackdriver.
@@ -168,7 +168,7 @@ Import the below artifacts:
 Add
 
 ```xml
-<cloud-logging.version>1.0.x</cloud-logging>
+<cloud-logging.version>2.0.x</cloud-logging>
 ```
 
 and
@@ -262,3 +262,4 @@ See [test-logback-junit](../test/test-logback-junit) for basic JUnit test suppor
 
    * [gcp-grpc-example](../examples/gcp-grpc-example) Lognet gRPC example
    * [gcp-web-example](../examples/gcp-web-example) Spring-flavoured REST example
+   * [gcp-web-grpc-example](../examples/gcp-web-example) Spring-flavoured REST example with gRPC context (read: for further gRPC calls).

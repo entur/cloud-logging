@@ -23,8 +23,6 @@ public class MdcAsyncAppender extends AsyncAppender {
             for (Map.Entry<String, String> entry : mdc.entrySet()) {
                 MDC.put(entry.getKey(), entry.getValue());
             }
-            // TODO this currently does not work with testing, since it is not possible
-            // to set the MDC map twice in the original ILoggingEvent
             try {
                 super.preprocess(eventObject);
             } finally {
