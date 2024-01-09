@@ -1,4 +1,4 @@
-package org.entur.example.web.grpc.rest;
+package org.entur.example.web.rest;
 
 import org.codehaus.commons.nullanalysis.NotNull;
 

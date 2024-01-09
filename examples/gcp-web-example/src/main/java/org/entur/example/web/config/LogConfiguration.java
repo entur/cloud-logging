@@ -1,4 +1,4 @@
-package org.entur.example.web.grpc.config;
+package org.entur.example.web.config;
 
 import java.util.HashSet;
 import java.util.Set;

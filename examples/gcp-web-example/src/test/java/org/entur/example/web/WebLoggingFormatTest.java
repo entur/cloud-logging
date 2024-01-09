@@ -1,10 +1,10 @@
-package org.entur.logbook.example;
+package org.entur.example.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControlClosable;
-import org.entur.example.web.grpc.rest.MyEntity;
+import org.entur.example.web.rest.MyEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
