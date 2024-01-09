@@ -2,7 +2,7 @@
 dependencies {
     api project(':appender')
     api project(':api')
-    api project(':gcp:spring-boot-starter-gcp')
+    api project(':gcp:spring-boot-autoconfigure-gcp')
 
     api("org.slf4j:slf4j-api:${slf4jVersion}")
     api ("org.codehaus.janino:commons-compiler:${janinoVersion}")

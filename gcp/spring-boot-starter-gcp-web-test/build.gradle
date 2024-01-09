@@ -1,6 +1,6 @@
 
 dependencies {
-    api project(":gcp:spring-boot-gcp-test")
+    api project(":gcp:spring-boot-autoconfigure-gcp-test")
     api project(":gcp:spring-boot-starter-gcp-web")
 
     api("org.slf4j:slf4j-api:${slf4jVersion}")

@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.function.Predicate;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @DirtiesContext
 @EnableAutoConfiguration
@@ -51,30 +53,7 @@ public class LoadOndemandContextLoggingTest {
     public void testOndemandMachineReadableJson() throws IOException, InterruptedException {
         ScopeAsyncAppender appender = getOndemandAsyncAppender();
 
-        LoggingScopeFactory loggingScopeFactory = (LoggingScopeFactory) appender.getScopeProviders().get(0);
-
-        Predicate<ILoggingEvent> queuePredicate = new LowerOrEqualToLogLevelPredicate(Level.INFO_INT);
-        Predicate<ILoggingEvent> ignorePredicate = new LowerOrEqualToLogLevelPredicate(Level.DEBUG_INT);
-
-        LoggingScope scope = (LoggingScope) loggingScopeFactory.openScope(queuePredicate, ignorePredicate);
-
-        LOGGER.trace("Test trace message, this should be ignored");
-        LOGGER.debug("Test debug message, this should be ignored");
-        LOGGER.info("Test info message, this message should be delayed");
-        LOGGER.warn("Test warn message, this message should printet at once");
-        LOGGER.error("Test error message, this message should printet at once");
-
-        LOGGER.errorTellMeTomorrow("Test error tell me tomorrow message, this message should printet at once");
-        LOGGER.errorInterruptMyDinner("Test error interrupt my dinner message, this message should printet at once");
-        LOGGER.errorWakeMeUpRightNow("Test error wake me up right now message, this message should printet at once");
-
-        Thread.sleep(1);
-
-        System.out.println("Before flush");
-        Thread.sleep(5000);
-        appender.write(scope);
-        System.out.println("After flush");
-        loggingScopeFactory.closeScope(scope);
+        assertTrue(appender.getScopeProviders().isEmpty());
     }
 
     private static ScopeAsyncAppender getOndemandAsyncAppender() {

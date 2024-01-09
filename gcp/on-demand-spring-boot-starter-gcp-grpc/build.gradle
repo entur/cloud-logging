@@ -1,7 +1,7 @@
 
 dependencies {
     api project(':trace:mdc-context-grpc-netty')
-    api project(':gcp:spring-boot-starter-gcp')
+    api project(':gcp:spring-boot-autoconfigure-gcp')
 
     api("org.slf4j:slf4j-api:${slf4jVersion}")
 
@@ -15,7 +15,7 @@ dependencies {
     api "io.grpc:grpc-netty:${grpcNettyVersion}"
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
-    testImplementation project(":gcp:spring-boot-gcp-test")
+    testImplementation project(":gcp:spring-boot-autoconfigure-gcp-test")
 }
 
 
