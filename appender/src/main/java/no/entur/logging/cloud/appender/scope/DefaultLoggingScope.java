@@ -14,11 +14,16 @@ public class DefaultLoggingScope implements LoggingScope {
     private final Predicate<ILoggingEvent> queuePredicate;
     private final Predicate<ILoggingEvent> ignorePredicate;
 
+    private final Predicate<ILoggingEvent> logLevelFailurePredicate;
+
+    private boolean logLevelFailure = false;
+
     private ConcurrentLinkedQueue<ILoggingEvent> queue = new ConcurrentLinkedQueue<ILoggingEvent>();
 
-    public DefaultLoggingScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate) {
+    public DefaultLoggingScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate, Predicate<ILoggingEvent> logLevelFailurePredicate) {
         this.queuePredicate = queuePredicate;
         this.ignorePredicate = ignorePredicate;
+        this.logLevelFailurePredicate = logLevelFailurePredicate;
     }
 
     public ConcurrentLinkedQueue<ILoggingEvent> getEvents() {
@@ -29,6 +34,11 @@ public class DefaultLoggingScope implements LoggingScope {
         if(ignorePredicate.test(eventObject)) {
             return true;
         }
+
+        if(!logLevelFailure && logLevelFailurePredicate.test(eventObject)) {
+            logLevelFailure = true;
+        }
+
         if(queuePredicate.test(eventObject)) {
             queue.add(eventObject);
 
@@ -37,4 +47,7 @@ public class DefaultLoggingScope implements LoggingScope {
         return false;
     }
 
+    public boolean isLogLevelFailure() {
+        return logLevelFailure;
+    }
 }

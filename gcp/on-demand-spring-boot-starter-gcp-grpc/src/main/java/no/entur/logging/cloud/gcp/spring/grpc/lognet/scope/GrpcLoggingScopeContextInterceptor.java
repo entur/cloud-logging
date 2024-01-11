@@ -105,7 +105,7 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor, Or
 			ignorePredicate = filter.getTroubleshootIgnorePredicate();
 		}
 
-		LoggingScope scope = factory.openScope(queuePredicate, ignorePredicate);
+		LoggingScope scope = factory.openScope(queuePredicate, ignorePredicate, filter.getLogLevelFailurePredicate());
 
 		Context context = Context.current().withValue(KEY_CONTEXT, scope);
 
@@ -115,16 +115,9 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor, Or
 					if (filter.getGrpcStatusPredicate().test(status)) {
 						// was there an error response
 						sink.write(scope);
-					} else {
-						// was there some dangerous error message?
-						Predicate<ILoggingEvent> logLevelFailurePredicate = filter.getLogLevelFailurePredicate();
-						ConcurrentLinkedQueue<ILoggingEvent> events = scope.getEvents();
-						for (ILoggingEvent event : events) {
-							if (logLevelFailurePredicate.test(event)) {
-								sink.write(scope);
-								break;
-							}
-						}
+					} else if(scope.isLogLevelFailure()) {
+						// there some dangerous error message
+						sink.write(scope);
 					}
 				} finally {
 					factory.closeScope(scope); // this is really a noop operation

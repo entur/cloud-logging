@@ -46,7 +46,7 @@ public class OndemandFilter implements Filter {
 				ignorePredicate = filter.getTroubleshootIgnorePredicate();
 			}
 
-			LoggingScope scope = loggingScopeFactory.openScope(queuePredicate, ignorePredicate);
+			LoggingScope scope = loggingScopeFactory.openScope(queuePredicate, ignorePredicate, filter.getLogLevelFailurePredicate());
 			try {
 				filterChain.doFilter(httpServletRequest, servletResponse);
 			} finally {
@@ -54,16 +54,9 @@ public class OndemandFilter implements Filter {
 				if(filter.getHttpStatusFailurePredicate().test(response.getStatus())) {
 					// was there an error response
 					sink.write(scope);
-				} else {
+				} else if(scope.isLogLevelFailure()) {
 					// was there some dangerous error message?
-					Predicate<ILoggingEvent> logLevelFailurePredicate = filter.getLogLevelFailurePredicate();
-					ConcurrentLinkedQueue<ILoggingEvent> events = scope.getEvents();
-					for (ILoggingEvent event : events) {
-						if (logLevelFailurePredicate.test(event)) {
-							sink.write(scope);
-							break;
-						}
-					}
+					sink.write(scope);
 				}
 				loggingScopeFactory.closeScope(scope);
 			}

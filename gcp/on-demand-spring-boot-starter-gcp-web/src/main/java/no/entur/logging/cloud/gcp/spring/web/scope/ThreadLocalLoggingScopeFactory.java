@@ -12,8 +12,8 @@ public class ThreadLocalLoggingScopeFactory implements LoggingScopeFactory, Logg
     private final ThreadLocal<LoggingScope> queues = new ThreadLocal<>();
 
     @Override
-    public LoggingScope openScope(Predicate queuePredicate, Predicate ignorePredicate) {
-        DefaultLoggingScope scope = new DefaultLoggingScope(queuePredicate, ignorePredicate);
+    public LoggingScope openScope(Predicate queuePredicate, Predicate ignorePredicate, Predicate logLevelFailurePredicate) {
+        DefaultLoggingScope scope = new DefaultLoggingScope(queuePredicate, ignorePredicate, logLevelFailurePredicate);
         queues.set(scope);
         return scope;
     }

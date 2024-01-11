@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 
 public interface LoggingScopeFactory<T extends LoggingScope> {
 
-    T openScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate);
+    T openScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate, Predicate<ILoggingEvent> logLevelFailurePredicate);
 
     void closeScope(LoggingScope scope);
 

@@ -28,6 +28,7 @@ public class AbstractGreetingController extends GreetingServiceGrpc.GreetingServ
 			LOGGER.debug("Hello greeting / debug");
 			LOGGER.info("Hello greeting / info");
 			LOGGER.warn("Hello greeting / warn");
+			LOGGER.error("Hello greeting / error");
 		} finally {
 			MDC.remove("localKey");
 		}

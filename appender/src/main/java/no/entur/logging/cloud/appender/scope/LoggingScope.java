@@ -15,4 +15,6 @@ public interface LoggingScope {
 
     boolean append(ILoggingEvent eventObject);
 
+    boolean isLogLevelFailure();
+
 }

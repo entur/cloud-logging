@@ -21,6 +21,7 @@ public class DocumentEndpoint {
 		logger.debug("Hello entity with secret / debug");
 		logger.info("Hello entity with secret / info");
 		logger.warn("Hello entity with secret / warn");
+		logger.error("Hello entity with secret / error");
 
 		entity.setName("Entur response");
 		return entity;

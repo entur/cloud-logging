@@ -11,8 +11,8 @@ import java.util.function.Predicate;
 public class GrpcContextLoggingScopeFactory implements LoggingScopeFactory<GrpcLoggingScope>, LoggingScopeProvider {
 
     @Override
-    public GrpcLoggingScope openScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate) {
-        return new GrpcLoggingScope(queuePredicate, ignorePredicate);
+    public GrpcLoggingScope openScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate, Predicate<ILoggingEvent> logLevelFailurePredicate) {
+        return new GrpcLoggingScope(queuePredicate, ignorePredicate, logLevelFailurePredicate);
     }
 
     @Override
