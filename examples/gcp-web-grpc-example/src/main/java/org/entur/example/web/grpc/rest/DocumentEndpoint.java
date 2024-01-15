@@ -33,10 +33,7 @@ public class DocumentEndpoint {
 			logger.debug("Hello entity with secret / debug");
 			logger.info("Hello entity with secret / info");
 			logger.warn("Hello entity with secret / warn");
-
-			if(!grpcMdcContext.isWithinContext()) {
-				logger.error("Hello entity with secret / error - outside context");
-			}
+			logger.error("Hello entity with secret / error");
 
 		});
 
@@ -69,7 +66,5 @@ public class DocumentEndpoint {
 
 		return new ResponseEntity(HttpStatus.NOT_FOUND);
 	}
-
-
 
 }
