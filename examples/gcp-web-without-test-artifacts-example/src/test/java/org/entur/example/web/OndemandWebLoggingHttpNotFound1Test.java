@@ -1,7 +1,5 @@
 package org.entur.example.web;
 
-import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
-import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControlClosable;
 import org.entur.example.web.rest.MyEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,37 +30,13 @@ public class OndemandWebLoggingHttpNotFound1Test {
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void useHumanReadablePlainEncoderExpectFullLogging() {
+	public void useMachineReadableJsonEncoderExpectFullLogging() {
 		MyEntity entity = new MyEntity();
 		entity.setName("Entur");
 		entity.setSecret("mySecret");
 
 		ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/error", entity, MyEntity.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-	}
-
-	@Test 
-	public void useHumanReadableJsonEncoderExpectFullLogging() {
-		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
-			MyEntity entity = new MyEntity();
-			entity.setName("Entur");
-			entity.setSecret("mySecret");
-
-			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/error", entity, MyEntity.class);
-			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-		}
-	}
-
-	@Test
-	public void useMachineReadableJsonEncoderExpectFullLogging() {
-		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
-			MyEntity entity = new MyEntity();
-			entity.setName("Entur");
-			entity.setSecret("mySecret");
-
-			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/error", entity, MyEntity.class);
-			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-		}
 	}
 
 

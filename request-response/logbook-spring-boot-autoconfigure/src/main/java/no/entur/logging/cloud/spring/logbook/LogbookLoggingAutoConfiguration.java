@@ -2,10 +2,13 @@ package no.entur.logging.cloud.spring.logbook;
 
 import no.entur.logging.cloud.logbook.DefaultRemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
+import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupplierSource;
+import no.entur.logging.cloud.logbook.ondemand.state.ResponseHttpMessageStateSupplierSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +27,16 @@ public class LogbookLoggingAutoConfiguration extends AbstractLogbookLoggingAutoC
     public RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier() {
         // by default, verify syntax of all remote JSON payloads
         return new DefaultRemoteHttpMessageContextSupplier();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(Sink.class)
+    @ConditionalOnBean({RequestHttpMessageStateSupplierSource.class, ResponseHttpMessageStateSupplierSource.class, RemoteHttpMessageContextSupplier.class})
+    public Sink asyncSink(RequestHttpMessageStateSupplierSource requestHttpMessageStateSupplierSource, ResponseHttpMessageStateSupplierSource responseHttpMessageStateSupplierSource, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
+        Logger logger = LoggerFactory.getLogger(loggerName);
+        Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
+
+        return createAsyncMachineReadbleSink(logger, level, requestHttpMessageStateSupplierSource, responseHttpMessageStateSupplierSource, remoteHttpMessageContextSupplier);
     }
 
     // ignore HttpLogFormatter and HttpLogWriter

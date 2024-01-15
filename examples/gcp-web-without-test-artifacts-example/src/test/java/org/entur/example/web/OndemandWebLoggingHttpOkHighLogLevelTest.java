@@ -1,7 +1,5 @@
 package org.entur.example.web;
 
-import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
-import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControlClosable;
 import org.entur.example.web.rest.MyEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,37 +33,13 @@ public class OndemandWebLoggingHttpOkHighLogLevelTest {
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void useHumanReadablePlainEncoderExpectFullLogging() {
+	public void useMachineReadableJsonEncoderExpectFullLogging() {
 		MyEntity entity = new MyEntity();
 		entity.setName("Entur");
 		entity.setSecret("mySecret");
 
 		ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method", entity, MyEntity.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-	}
-
-	@Test
-	public void useHumanReadableJsonEncoderExpectFullLogging() {
-		MyEntity entity = new MyEntity();
-		entity.setName("Entur");
-		entity.setSecret("mySecret");
-
-		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
-			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method", entity, MyEntity.class);
-			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		}
-	}
-
-	@Test
-	public void useMachineReadableJsonEncoderExpectFullLogging() {
-		MyEntity entity = new MyEntity();
-		entity.setName("Entur");
-		entity.setSecret("mySecret");
-
-		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
-			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method", entity, MyEntity.class);
-			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		}
 	}
 
 

@@ -64,7 +64,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                 if(body != null && body.length > 0) {
                     if (request.getOrigin().equals("local")) {
                         // trust our own data to be wellformed
-                        if (body.length > maxBodySize) {
+                        if (body.length < maxBodySize) {
                             writer = new LocalHttpMessageBodyWriter(body);
                         } else {
                             writer = new MaxSizeLocalHttpMessageBodyWriter(jsonFactory, body, maxBodySize);
@@ -73,14 +73,14 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                         boolean verify = remoteHttpMessageContextSupplier.verifyJsonSyntax(request);
                         if(verify) {
                             HttpMessageStateSupplier httpMessageStateSupplier = requestHttpMessageStateSupplierSource.get();
-                            if (body.length > maxBodySize) {
+                            if (body.length < maxBodySize) {
                                 writer = new RemoteHttpMessageBodyWriter(jsonFactory, body, httpMessageStateSupplier);
                             } else {
                                 writer = new MaxSizeRemoteHttpMessageBodyWriter(jsonFactory, body, maxSize, httpMessageStateSupplier);
                             }
                         } else {
                             // trust contents is well formed
-                            if (body.length > maxBodySize) {
+                            if (body.length < maxBodySize) {
                                 writer = new LocalHttpMessageBodyWriter(body);
                             } else {
                                 writer = new MaxSizeLocalHttpMessageBodyWriter(jsonFactory, body, maxBodySize);
@@ -106,7 +106,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                 if(body != null && body.length > 0) {
                     if (response.getOrigin().equals("local")) {
                         // trust our own data to be wellformed
-                        if (body.length > maxBodySize) {
+                        if (body.length < maxBodySize) {
                             writer = new LocalHttpMessageBodyWriter(body);
                         } else {
                             writer = new MaxSizeLocalHttpMessageBodyWriter(jsonFactory, body, maxBodySize);
@@ -115,14 +115,14 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                         boolean verify = remoteHttpMessageContextSupplier.verifyJsonSyntax(response);
                         if(verify) {
                             HttpMessageStateSupplier httpMessageStateSupplier = responseHttpMessageStateSupplierSource.get();
-                            if (body.length > maxBodySize) {
+                            if (body.length < maxBodySize) {
                                 writer = new RemoteHttpMessageBodyWriter(jsonFactory, body, httpMessageStateSupplier);
                             } else {
                                 writer = new MaxSizeRemoteHttpMessageBodyWriter(jsonFactory, body, maxSize, httpMessageStateSupplier);
                             }
                         } else {
                             // trust contents is well formed
-                            if (body.length > maxBodySize) {
+                            if (body.length < maxBodySize) {
                                 writer = new LocalHttpMessageBodyWriter(body);
                             } else {
                                 writer = new MaxSizeLocalHttpMessageBodyWriter(jsonFactory, body, maxBodySize);

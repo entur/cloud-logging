@@ -33,7 +33,7 @@ public class GrpcMdcLoggingAutoConfiguration {
         while (appenderIterator.hasNext()) {
             Appender<ILoggingEvent> appender = appenderIterator.next();
             if (appender instanceof MdcAsyncAppender) {
-                return (LoggingScopeAsyncAppender) appender;
+                return (MdcAsyncAppender) appender;
             }
         }
         throw new IllegalStateException("Unexpected log appenders configured, expected one implementing " + MdcAsyncAppender.class.getName());

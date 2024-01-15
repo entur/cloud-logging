@@ -49,8 +49,6 @@ public class RemoteHttpMessageBodyWriter extends LocalHttpMessageBodyWriter {
             this.output = output = createOutput();
         }
         if(output.isWellformed()) {
-            System.out.println("FAST WRITE");
-
             generator.writeFieldName("body");
             generator.writeRawValue(output.getBody());
         } else {
