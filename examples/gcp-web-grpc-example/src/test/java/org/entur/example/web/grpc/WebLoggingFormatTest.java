@@ -24,7 +24,7 @@ public class WebLoggingFormatTest {
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void useHumanReadablePlainEncoderTest() {
+	public void useHumanReadablePlainEncoderExpectDebugLogging() {
 		MyEntity entity = new MyEntity();
 		entity.setName("Entur");
 		entity.setSecret("mySecret");
@@ -34,7 +34,7 @@ public class WebLoggingFormatTest {
 	}
 
 	@Test 
-	public void useHumanReadableJsonEncoderTest() throws InterruptedException {
+	public void useHumanReadableJsonEncoderExpectDebugLogging() throws InterruptedException {
 		MyEntity entity = new MyEntity();
 		entity.setName("Entur");
 		entity.setSecret("mySecret");
@@ -46,7 +46,7 @@ public class WebLoggingFormatTest {
 	}
 
 	@Test
-	public void useMachineReadableJsonEncoder() throws InterruptedException {
+	public void useMachineReadableJsonEncoderExpectDebugLogging() throws InterruptedException {
 		MyEntity entity = new MyEntity();
 		entity.setName("Entur");
 		entity.setSecret("mySecret");
