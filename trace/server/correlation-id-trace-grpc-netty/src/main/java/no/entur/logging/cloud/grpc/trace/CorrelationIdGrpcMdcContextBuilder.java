@@ -2,6 +2,7 @@ package no.entur.logging.cloud.grpc.trace;
 
 import no.entur.logging.cloud.grpc.mdc.AbstractGrpcMdcContextBuilder;
 import no.entur.logging.cloud.grpc.mdc.GrpcMdcContextBuilder;
+import org.slf4j.MDC;
 
 import java.util.Map;
 import java.util.UUID;
@@ -12,12 +13,20 @@ public class CorrelationIdGrpcMdcContextBuilder extends GrpcMdcContextBuilder<Co
 	private String correlationId;
 	private String requestId;
 
+	/** Allow the implementation to look for trace headers in the SLF4J MDC context */
+	private boolean slf4jMdc = true;
+
 	public CorrelationIdGrpcMdcContextBuilder() {
-		super();
+		super(); // picks up any existing context
 	}
 
 	public CorrelationIdGrpcMdcContextBuilder(Map<String, String> fields) {
 		super(fields);
+	}
+
+	public CorrelationIdGrpcMdcContextBuilder withTraceFromSlf4j(boolean slf4jMdc) {
+		this.slf4jMdc = slf4jMdc;
+		return this;
 	}
 
 	public CorrelationIdGrpcMdcContextBuilder withCorrelationId(String value) {
@@ -60,17 +69,35 @@ public class CorrelationIdGrpcMdcContextBuilder extends GrpcMdcContextBuilder<Co
 
 	public CorrelationIdGrpcMdcContext build() {
 		if (correlationId == null) {
-			correlationId = UUID.randomUUID().toString();
+			if(slf4jMdc) {
+				correlationId = MDC.get(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY);
+			}
+			if (correlationId == null) {
+				correlationId = UUID.randomUUID().toString();
+			}
 		}
 
 		if (requestId == null) {
-			requestId = UUID.randomUUID().toString();
+			if(slf4jMdc) {
+				requestId = MDC.get(CorrelationIdGrpcMdcContext.REQUEST_ID_MDC_KEY);
+			}
+			if (requestId == null) {
+				requestId = UUID.randomUUID().toString();
+			}
 		}
 
 		super.withField(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY, correlationId);
 		super.withField(CorrelationIdGrpcMdcContext.REQUEST_ID_MDC_KEY, requestId);
 
 		return new CorrelationIdGrpcMdcContext(fields);
+	}
+
+	public boolean hasRequestId() {
+		return requestId == null;
+	}
+
+	public boolean hasCorrelationId() {
+		return correlationId == null;
 	}
 
 }

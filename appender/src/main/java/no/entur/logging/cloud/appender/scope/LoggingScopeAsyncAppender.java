@@ -1,23 +1,19 @@
 package no.entur.logging.cloud.appender.scope;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import no.entur.logging.cloud.appender.AsyncAppender;
+import no.entur.logging.cloud.appender.MdcAsyncAppender;
 import org.slf4j.Marker;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Predicate;
 
-public class LoggingScopeAsyncAppender extends AsyncAppender {
+public class LoggingScopeAsyncAppender extends MdcAsyncAppender implements LoggingScopeSink {
 
-    protected LoggingScopeFactory loggingScopeFactory = new NoopLoggingScopeFactory();
+    private List<LoggingScopeProvider> scopeProviders = new ArrayList<>();
 
-    public void setLoggingScopeFactory(LoggingScopeFactory loggingScopeFactory) {
-        this.loggingScopeFactory = loggingScopeFactory;
-    }
-
-    public LoggingScopeAsyncAppender() {
-        // do nothing
+    public void addScopeProvider(LoggingScopeProvider scopeProvider) {
+        this.scopeProviders.add(scopeProvider);
     }
 
     @Override
@@ -27,21 +23,28 @@ public class LoggingScopeAsyncAppender extends AsyncAppender {
         }
         preprocess(eventObject);
 
-        LoggingScope scope = loggingScopeFactory.getScope();
+        LoggingScope scope = getCurrentScope();
         if(scope == null || !scope.append(eventObject)) {
             postProcess(eventObject);
             put(eventObject);
         }
     }
 
-    public void flushScope() {
-        LoggingScope scope = loggingScopeFactory.getScope();
-        if (scope != null) {
-            ConcurrentLinkedQueue<ILoggingEvent> events = scope.getEvents();
-            for (ILoggingEvent eventObject : events) {
-                postProcess(eventObject);
-                put(eventObject);
+    public LoggingScope getCurrentScope() {
+        for (LoggingScopeProvider loggingScopeFactory : scopeProviders) {
+            LoggingScope scope = loggingScopeFactory.getCurrentScope();
+            if(scope != null) {
+                return scope;
             }
+        }
+        return null;
+    }
+
+    public void write(LoggingScope scope) {
+        ConcurrentLinkedQueue<ILoggingEvent> events = scope.getEvents();
+        for (ILoggingEvent eventObject : events) {
+            postProcess(eventObject);
+            put(eventObject);
         }
     }
 
@@ -53,15 +56,10 @@ public class LoggingScopeAsyncAppender extends AsyncAppender {
                     postProcessing.performPostProcessing();
                 }
             }
-
         }
     }
 
-    public void closeScope() {
-        loggingScopeFactory.closeScope();
-    }
-
-    public <T> LoggingScopeFactory<T> getLoggingScopeFactory() {
-        return loggingScopeFactory;
+    public List<LoggingScopeProvider> getScopeProviders() {
+        return scopeProviders;
     }
 }

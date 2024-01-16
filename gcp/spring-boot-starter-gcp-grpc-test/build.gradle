@@ -3,7 +3,7 @@ dependencies {
     api("org.slf4j:slf4j-api:${slf4jVersion}")
     api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
     api project(":trace:mdc-context-grpc-netty")
-    api project(":gcp:spring-boot-gcp-test")
+    api project(":gcp:spring-boot-autoconfigure-gcp-test")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 }
