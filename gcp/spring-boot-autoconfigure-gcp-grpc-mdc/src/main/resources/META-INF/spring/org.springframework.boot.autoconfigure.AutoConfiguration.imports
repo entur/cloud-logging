@@ -1,1 +1,1 @@
-no.entur.logging.cloud.gcp.spring.grpc.GrpcMdcLoggingAutoConfiguration
+no.entur.logging.cloud.gcp.spring.grpc.mdc.GrpcMdcLoggingAutoConfiguration

@@ -3,7 +3,7 @@ package no.entur.grpc.example;
 
 import io.grpc.util.TransmitStatusRuntimeExceptionInterceptor;
 import no.entur.logging.cloud.gcp.spring.gcp.grpc.lognet.RequestResponseGRpcExceptionHandlerInterceptor;
-import no.entur.logging.cloud.gcp.spring.grpc.lognet.scope.GrpcLoggingScopeContextInterceptor;
+import no.entur.logging.cloud.gcp.spring.ondemand.grpc.lognet.scope.GrpcLoggingScopeContextInterceptor;
 import no.entur.logging.cloud.grpc.mdc.InitializeGrpcMdcContextServerInterceptor;
 import no.entur.logging.cloud.grpc.trace.CorrelationIdGrpcMdcContextServerInterceptor;
 import no.entur.logging.cloud.rr.grpc.GrpcLoggingServerInterceptor;

@@ -1,6 +1,6 @@
 package no.entur.logging.cloud.gcp.spring.web;
 
-import no.entur.logging.cloud.gcp.spring.web.scope.HttpStatusAtLeastOrNotPredicate;
+import no.entur.logging.cloud.gcp.spring.ondemand.web.scope.HttpStatusAtLeastOrNotPredicate;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

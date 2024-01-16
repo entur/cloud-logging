@@ -2,7 +2,7 @@ package no.entur.logging.cloud.gcp.spring.logbook.web;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import no.entur.logging.cloud.gcp.spring.web.properties.OndemandProperties;
+import no.entur.logging.cloud.gcp.spring.ondemand.web.properties.OndemandProperties;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageState;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateSupplier;
 import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupplierSource;
