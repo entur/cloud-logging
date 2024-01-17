@@ -4,6 +4,8 @@ package no.entur.grpc.example;
 import io.grpc.Metadata;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
+import org.entur.grpc.example.GreetingRequest;
 import org.entur.grpc.example.GreetingResponse;
 import org.entur.grpc.example.GreetingServiceGrpc;
 import org.slf4j.Logger;
@@ -37,7 +39,8 @@ public class AbstractGreetingController extends GreetingServiceGrpc.GreetingServ
 		responseObserver.onCompleted();
 	}
 
-	public void exceptionLogging(org.entur.grpc.example.GreetingRequest request, io.grpc.stub.StreamObserver<GreetingResponse> responseObserver) {
+	@Override
+	public void statusRuntimeExceptionLogging(GreetingRequest request, StreamObserver<GreetingResponse> responseObserver) {
 		MDC.put("localKey", "value");
 		try {
 
@@ -63,6 +66,34 @@ public class AbstractGreetingController extends GreetingServiceGrpc.GreetingServ
 
 		Status status = Status.INVALID_ARGUMENT.withDescription("Mock exception");
 		throw status.asRuntimeException();
+	}
+
+	@Override
+	public void runtimeExceptionLogging(GreetingRequest request, StreamObserver<GreetingResponse> responseObserver) {
+		MDC.put("localKey", "value");
+		try {
+
+			System.out.flush();
+			System.out.println("System out before endpoint logging");
+
+			LOGGER.trace("This message should be ignored / trace");
+			LOGGER.debug("This message should be ignored / debug");
+			LOGGER.info("This message should be delayed / info");
+			LOGGER.warn("This message should be logged / warn");
+			LOGGER.error("This message should be logged / error");
+
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+			System.out.println("System out after endpoint logging + 1000ms");
+
+		} finally {
+			MDC.remove("localKey");
+		}
+
+		throw new RuntimeException("TEST");
 	}
 
 	/**

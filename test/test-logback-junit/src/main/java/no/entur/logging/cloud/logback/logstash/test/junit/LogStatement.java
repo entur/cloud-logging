@@ -93,6 +93,9 @@ public class LogStatement {
 		return JsonAssertion.assertThat(getJson()).field("http").field("uri");
 	}
 
+	public JsonVerifiable assertThatHttp() {
+		return JsonAssertion.assertThat(getJson()).field("http");
+	}
 	public JsonVerifiable assertThatHttpBody() {
 		return JsonAssertion.assertThat(getJson()).field("http").field("body");
 	}

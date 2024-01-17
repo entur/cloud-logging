@@ -26,7 +26,7 @@ public class OndemandGrpcLoggingFormatTest extends AbstractGrpcTest {
 				() -> {
 					GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
 					try {
-						GreetingResponse response = stub.exceptionLogging(greetingRequest);
+						GreetingResponse response = stub.statusRuntimeExceptionLogging(greetingRequest);
 					} finally {
 						shutdown(stub);
 					}
@@ -40,7 +40,7 @@ public class OndemandGrpcLoggingFormatTest extends AbstractGrpcTest {
 				() -> {
 					GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
 					try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
-						GreetingResponse response = stub.exceptionLogging(greetingRequest);
+						GreetingResponse response = stub.statusRuntimeExceptionLogging(greetingRequest);
 					} finally {
 						shutdown(stub);
 					}
@@ -54,7 +54,7 @@ public class OndemandGrpcLoggingFormatTest extends AbstractGrpcTest {
 				() -> {
 					GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
 					try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
-						GreetingResponse response = stub.exceptionLogging(greetingRequest);
+						GreetingResponse response = stub.statusRuntimeExceptionLogging(greetingRequest);
 					} finally {
 						shutdown(stub);
 					}
