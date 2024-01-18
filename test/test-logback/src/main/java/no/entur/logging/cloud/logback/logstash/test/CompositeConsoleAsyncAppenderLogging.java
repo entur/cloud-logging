@@ -5,9 +5,9 @@ import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 
 public class CompositeConsoleAsyncAppenderLogging extends LoggingScopeAsyncAppender {
 
-    private ILoggingEventListener listener;
+    private CompositeConsoleLoggingEventListener listener;
 
-    public void setListener(ILoggingEventListener listener) {
+    public void setListener(CompositeConsoleLoggingEventListener listener) {
         this.listener = listener;
     }
 
@@ -23,6 +23,7 @@ public class CompositeConsoleAsyncAppenderLogging extends LoggingScopeAsyncAppen
     public void put(ILoggingEvent eventObject) {
         super.put(eventObject);
 
+        CompositeConsoleLoggingEventListener listener = this.listener; // defensive copy
         if(listener != null) {
             listener.put(eventObject);
         }

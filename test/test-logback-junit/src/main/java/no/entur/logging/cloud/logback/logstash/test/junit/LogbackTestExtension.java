@@ -1,6 +1,5 @@
 package no.entur.logging.cloud.logback.logstash.test.junit;
 
-import ch.qos.logback.classic.AsyncAppender;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -14,7 +13,7 @@ import no.entur.logging.cloud.api.DevOpsLevel;
 import no.entur.logging.cloud.api.DevOpsMarker;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleAppender;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleAsyncAppenderLogging;
-import no.entur.logging.cloud.logback.logstash.test.ILoggingEventListener;
+import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleLoggingEventListener;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -33,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class LogbackTestExtension extends LogbackInitializerExtension implements ParameterResolver, AfterAllCallback, BeforeEachCallback, AfterEachCallback, ILoggingEventListener {
+public class LogbackTestExtension extends LogbackInitializerExtension implements ParameterResolver, AfterAllCallback, BeforeEachCallback, AfterEachCallback, CompositeConsoleLoggingEventListener {
 
 	// implementation note: If there is a CompositeConsoleAsyncAppenderLogging available, connect to it directly so
 	// that we get the log statements which are actually flushed (written) to console (include on-demand aspect).

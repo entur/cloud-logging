@@ -8,7 +8,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
  *
  */
 
-public interface ILoggingEventListener {
+public interface CompositeConsoleLoggingEventListener {
 
     void put(ILoggingEvent event);
 }
