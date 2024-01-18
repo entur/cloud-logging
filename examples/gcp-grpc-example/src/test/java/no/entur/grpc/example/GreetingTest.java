@@ -121,12 +121,12 @@ public class GreetingTest extends AbstractGrpcTest {
 	}
 
 	@Test
-	public void testBlockingRequestWithException(LogStatements statements) {
+	public void testBlockingRequestWithStatusRuntimeException(LogStatements statements) {
 		Throwable exception = assertThrows(StatusRuntimeException.class,
 				() -> {
 					GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
 					try {
-						GreetingResponse response = stub.exceptionLogging(greetingRequest);
+						GreetingResponse response = stub.statusRuntimeExceptionLogging(greetingRequest);
 					} finally {
 						shutdown(stub);
 					}
@@ -136,16 +136,43 @@ public class GreetingTest extends AbstractGrpcTest {
 
 		LogStatements http = statements.forLogger("no.entur.logging.cloud");
 		LogStatement request = http.get(0);
-		request.assertThatMessage().toString().matches("REQ #[0-9]* GET [/a-zA-Z\\.]+");
+		request.assertThatMessage().equals("REQ /org.entur.grpc.example.GreetingService/statusRuntimeExceptionLogging #1");
 		LogStatement response = http.get(http.size() - 1);
-		response.assertThatMessage().toString().matches("RESP #[0-9]* 3 INVALID_ARGUMENT [/a-zA-Z\\.]+");
+		response.assertThatMessage().equals("RESP INVALID_ARGUMENT /org.entur.grpc.example.GreetingService/statusRuntimeExceptionLogging #1");
 
 		response.assertThatHttpHeader("grpc-status").contains("3");
 
 		// check that correlation-id was set back as a header in the response
 		response.assertThatHttpHeader(CorrelationIdGrpcMdcContext.CORRELATION_ID_HEADER.toLowerCase()).contains(response.getMdc().get(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY));
-	}	
-	
+	}
+
+	@Test
+	public void testBlockingRequestWithRuntimeException(LogStatements statements) {
+		Throwable exception = assertThrows(StatusRuntimeException.class,
+				() -> {
+					GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
+					try {
+						GreetingResponse response = stub.runtimeExceptionLogging(greetingRequest);
+					} finally {
+						shutdown(stub);
+					}
+				});
+
+		assertThat(exception).isInstanceOf(StatusRuntimeException.class);
+
+		LogStatements http = statements.forLogger("no.entur.logging.cloud");
+		LogStatement request = http.get(0);
+		request.assertThatMessage().equals("REQ /org.entur.grpc.example.GreetingService/runtimeExceptionLogging #1");
+		LogStatement response = http.get(http.size() - 1);
+		response.assertThatMessage().equals("RESP INTERNAL /org.entur.grpc.example.GreetingService/runtimeExceptionLogging #1");
+
+		response.assertThatHttpHeader("grpc-status").contains("13");
+
+		// check that correlation-id was set back as a header in the response
+		response.assertThatHttpHeader(CorrelationIdGrpcMdcContext.CORRELATION_ID_HEADER.toLowerCase()).contains(response.getMdc().get(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY));
+	}
+
+
 	@Test 
 	public void testFutureRequestWithSameStub() throws InterruptedException {
 		int n = Math.min(4, Runtime.getRuntime().availableProcessors() * 2);
@@ -239,10 +266,11 @@ public class GreetingTest extends AbstractGrpcTest {
 		assertThat(exception).isInstanceOf(StatusRuntimeException.class);
 
 		LogStatements http = statements.forLogger("no.entur.logging.cloud");
+
 		LogStatement request = http.get(0);
-		request.assertThatMessage().toString().matches("REQ #[0-9]* GET [/a-zA-Z0-9\\.]+");
+		request.assertThatMessage().equals("REQ /org.entur.grpc.example.GreetingService/statusRuntimeExceptionLogging #1");
 		LogStatement response = http.get(http.size() - 1);
-		response.assertThatMessage().toString().matches("RESP #[0-9]* 3 INVALID_ARGUMENT [/a-zA-Z0-9\\.]+");
+		response.assertThatMessage().equals("RESP INVALID_ARGUMENT /org.entur.grpc.example.GreetingService/statusRuntimeExceptionLogging #1");
 
 		response.assertThatHttpHeader("grpc-status").contains("3");
 		response.assertThatHttpHeader("grpc-message").contains("My error message");
@@ -291,7 +319,7 @@ public class GreetingTest extends AbstractGrpcTest {
 
 			LogStatements http = statements.forLogger("no.entur.logging.cloud");
 			LogStatement request = http.get(1);
-			request.assertThatHttpBody().toString().matches("Omitted binary message size [0-9]+");
+			request.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
 
 			// check that correlation-id was set back as a header in the response
 			LogStatement response = http.get(2);
@@ -421,11 +449,6 @@ public class GreetingTest extends AbstractGrpcTest {
 		try {
 			GreetingResponse response = stub.greeting5(greetingRequest);
 			assertThat(response.getMessage()).isEqualTo("Hello");
-
-			LogStatements grpcLoggerStatements = statements.forLogger("no.entur.logging.cloud");
-			for (LogStatement logStatement : grpcLoggerStatements) {
-				logStatement.assertThatHttpBody().toString().matches("Unable to format message");
-			}
 
 			List<LogStatement> logStatements = statements.forLogger(GrpcLoggingServerInterceptor.class);
 			logStatements.get(0).assertThatField("severity").isEqualTo("INFO");

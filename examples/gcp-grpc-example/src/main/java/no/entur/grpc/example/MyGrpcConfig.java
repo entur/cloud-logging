@@ -1,9 +1,16 @@
 package no.entur.grpc.example;
 
+import io.grpc.Metadata;
 import io.grpc.ServerInterceptor;
+import io.grpc.Status;
 import io.grpc.util.TransmitStatusRuntimeExceptionInterceptor;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcServerLoggingFilters;
 import org.entur.grpc.example.GreetingServiceGrpc;
+import org.lognet.springboot.grpc.recovery.GRpcExceptionHandler;
+import org.lognet.springboot.grpc.recovery.GRpcExceptionScope;
+import org.lognet.springboot.grpc.recovery.GRpcServiceAdvice;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
