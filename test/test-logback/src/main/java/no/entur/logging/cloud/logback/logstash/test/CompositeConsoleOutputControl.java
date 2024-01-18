@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.logback.logstash.test;
 
 import java.io.Closeable;
+import java.util.concurrent.Callable;
 
 /**
  *
@@ -8,6 +9,11 @@ import java.io.Closeable;
  *
  */
 public class CompositeConsoleOutputControl {
+
+    @FunctionalInterface
+    public interface Consumer {
+        void run() throws Exception;
+    }
 
     private static final CompositeConsoleOutputControlClosable HUMAN_READABLE_PLAIN = new CompositeConsoleOutputControlClosable(CompositeConsoleOutputType.humanReadablePlain);
     private static final CompositeConsoleOutputControlClosable HUMAN_READABLE_JSON = new CompositeConsoleOutputControlClosable(CompositeConsoleOutputType.humanReadableJson);
@@ -32,6 +38,18 @@ public class CompositeConsoleOutputControl {
         }
     }
 
+    public static void useHumanReadablePlainEncoder(Consumer r) throws Exception {
+        try (CompositeConsoleOutputControlClosable c = useHumanReadablePlainEncoder()) {
+            r.run();
+        }
+    }
+
+    public static <V> V useHumanReadablePlainEncoder(Callable<V> r) throws Exception {
+        try (CompositeConsoleOutputControlClosable c = useHumanReadablePlainEncoder()) {
+            return r.call();
+        }
+    }
+
     public static CompositeConsoleOutputControlClosable useHumanReadableJsonEncoder() {
         CompositeConsoleOutputType output = getOutput();
         try {
@@ -41,12 +59,36 @@ public class CompositeConsoleOutputControl {
         }
     }
 
+    public static void useHumanReadableJsonEncoder(Consumer r) throws Exception {
+        try (CompositeConsoleOutputControlClosable c = useHumanReadableJsonEncoder()) {
+            r.run();
+        }
+    }
+
+    public static <V> V useHumanReadableJsonEncoder(Callable<V> r) throws Exception {
+        try (CompositeConsoleOutputControlClosable c = useHumanReadableJsonEncoder()) {
+            return r.call();
+        }
+    }
+
     public static CompositeConsoleOutputControlClosable useMachineReadableJsonEncoder() {
         CompositeConsoleOutputType output = getOutput();
         try {
             setOutput(CompositeConsoleOutputType.machineReadableJson);
         } finally {
             return toClosable(output);
+        }
+    }
+
+    public static void useMachineReadableJsonEncoder(Consumer r) throws Exception {
+        try (CompositeConsoleOutputControlClosable c = useMachineReadableJsonEncoder()) {
+            r.run();
+        }
+    }
+
+    public static <V> V useMachineReadableJsonEncoder(Callable<V> r) throws Exception {
+        try (CompositeConsoleOutputControlClosable c = useMachineReadableJsonEncoder()){
+            return r.call();
         }
     }
 

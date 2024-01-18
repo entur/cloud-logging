@@ -23,14 +23,18 @@ public class MdcAsyncAppender extends AsyncAppender {
         } else {
             // make sure the original MDC values are left after this operation
 
-            Map<String, String> copyOfContextMap = MDC.getCopyOfContextMap();
+            // this only works if there is a single appender, i.e.
+            // ILoggingEvent#prepareForDeferredProcessing() has not been called
+            MDCAdapter mdcAdapter = MDC.getMDCAdapter();
             for (Map.Entry<String, String> entry : mdc.entrySet()) {
-                MDC.put(entry.getKey(), entry.getValue());
+                mdcAdapter.put(entry.getKey(), entry.getValue());
             }
             try {
                 super.preprocess(eventObject);
             } finally {
-                MDC.setContextMap(copyOfContextMap);
+                for (Map.Entry<String, String> entry : mdc.entrySet()) {
+                    mdcAdapter.remove(entry.getKey());
+                }
             }
         }
     }

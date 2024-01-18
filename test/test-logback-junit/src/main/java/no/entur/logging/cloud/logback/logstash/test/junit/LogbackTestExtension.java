@@ -13,6 +13,8 @@ import net.logstash.logback.encoder.CompositeJsonEncoder;
 import no.entur.logging.cloud.api.DevOpsLevel;
 import no.entur.logging.cloud.api.DevOpsMarker;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleAppender;
+import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleAsyncAppenderLogging;
+import no.entur.logging.cloud.logback.logstash.test.ILoggingEventListener;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -31,7 +33,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class LogbackTestExtension extends LogbackInitializerExtension implements ParameterResolver, AfterAllCallback, BeforeEachCallback, AfterEachCallback {
+public class LogbackTestExtension extends LogbackInitializerExtension implements ParameterResolver, AfterAllCallback, BeforeEachCallback, AfterEachCallback, ILoggingEventListener {
+
+	// implementation note: If there is a CompositeConsoleAsyncAppenderLogging available, connect to it directly so
+	// that we get the log statements which are actually flushed (written) to console (include on-demand aspect).
+	// Also we do not want multiple appenders if using multiple MDC sources; this avoid wrapping
+	// logging events to get the extra MDC fields just for test support.
 
 	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(LogbackTestExtension.class);
 
@@ -92,13 +99,35 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 		return Level.INFO_INT;
 	}
 
+	@Override
+	public void put(ILoggingEvent event) {
+		for (Entry entry : entries) {
+			entry.add(event);
+		}
+	}
+
 	protected static class Entry {
-		private Logger logger;
+		private String name;
 		private ListAppender appender;
 
-		public Entry(Logger logger, ListAppender appender) {
-			this.logger = logger;
+		private Level level;
+
+		private Logger logger;
+
+		public Entry(String name, ListAppender appender, Level level) {
+			this.name = name;
 			this.appender = appender;
+			this.level = level;
+		}
+
+		public void add(ILoggingEvent event) {
+			if(event.getLoggerName().startsWith(name) && event.getLevel().isGreaterOrEqual(level)) {
+				appender.append(event);
+			}
+		}
+
+		public String getName() {
+			return name;
 		}
 	}
 
@@ -106,6 +135,8 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 	protected boolean postProcessed = false;
 	protected long flushDelay = 500;
 	protected DevOpsLevel defaultLevel;
+
+	protected boolean connected = false;
 
 	@Override
 	public void beforeAll(ExtensionContext context) throws Exception {
@@ -121,18 +152,42 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 
 	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
-		// at this point, some classes might already have been logging due to
-		// other extensions, like spring boot extension and so on.
+		if(!connected) {
+			connected = connect();
+		}
+		if(connected) {
+			for (Entry entry : entries) {
+				entry.appender.start();
+			}
+		} else {
+			for (Entry entry : entries) {
+				if(entry.logger == null) {
+					entry.logger = (Logger) LoggerFactory.getLogger(entry.name);
+					entry.logger.addAppender(entry.appender);
+					// if set to false, there is no log output
+					entry.logger.setAdditive(true); // https://examples.javacodegeeks.com/enterprise-java/logback/logback-additivity-example/
+				}
+
+				entry.appender.start();
+			}
+		}
 	}
 
 	@Override
 	public void afterAll(ExtensionContext context) throws Exception {
 		for(Entry entry : entries) {
-			entry.logger.detachAppender(entry.appender);
-			
 			entry.appender.stop();
+			if(entry.logger != null) {
+				entry.logger.detachAppender(entry.appender);
+			}
 		}
 		entries.clear();
+
+		if(connected) {
+			disconnect();
+
+			connected = true;
+		}
 	}
 
 	@Override
@@ -166,7 +221,7 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 
 			return new LogbackLogStatements(defaultLevel, this);
 		}
-	
+
         throw new RuntimeException();
 	}
 
@@ -193,7 +248,7 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 
 	private boolean isLogged(String value) {
 		for (Entry entry : entries) {
-			if(value.startsWith(entry.logger.getName())) {
+			if(value.startsWith(entry.getName())) {
 				return true;
 			}
 		}
@@ -261,17 +316,7 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 		appender.setName(name);
 		appender.start();
 
-		Logger logger = (Logger) LoggerFactory.getLogger(name);
-
-		// TODO intercept appender so to capture GRPC MDC context using appender
-
-		logger.addAppender(appender);
-		logger.setLevel(level);
-
-		// if set to false, there is no log output
-		logger.setAdditive(true); // https://examples.javacodegeeks.com/enterprise-java/logback/logback-additivity-example/
-		
-		entries.add(new Entry(logger, appender));
+		entries.add(new Entry(name, appender, level));
 		
 		return appender;
 	}
@@ -287,10 +332,8 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 	}
 	
 	protected List<ILoggingEvent> nextEvents(String name) {
-		Logger logger = (Logger) LoggerFactory.getLogger(name);
-		
 		for(Entry entry : entries) {
-			if(entry.logger == logger) {
+			if(entry.name.equals(name)) {
 				return entry.appender.nextEvents(null);
 			}
 		}
@@ -346,6 +389,34 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 		}
 		return null;
 	}
+
+	protected boolean connect() {
+		Logger logger = LOGGER.getLoggerContext().getLogger(Logger.ROOT_LOGGER_NAME);
+
+		Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders();
+		while (appenderIterator.hasNext()) {
+			Appender<ILoggingEvent> appender = appenderIterator.next();
+			if (appender instanceof CompositeConsoleAsyncAppenderLogging a) {
+				a.setListener(this);
+
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected void disconnect() {
+		Logger logger = LOGGER.getLoggerContext().getLogger(Logger.ROOT_LOGGER_NAME);
+
+		Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders();
+		while (appenderIterator.hasNext()) {
+			Appender<ILoggingEvent> appender = appenderIterator.next();
+			if (appender instanceof CompositeConsoleAsyncAppenderLogging a) {
+				a.setListener(null);
+			}
+		}
+	}
+
 
 	protected CompositeJsonEncoder getEncoder() {
 		Logger logger = LOGGER.getLoggerContext().getLogger(Logger.ROOT_LOGGER_NAME);
