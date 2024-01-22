@@ -144,6 +144,8 @@ implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-gcp-web:${c
 implementation("no.entur.logging.cloud:micrometer-gcp:${cloudLoggingVersion}")
 // logger with additional log levels
 implementation("no.entur.logging.cloud:api:${cloudLoggingVersion}")
+
+
 ```
 
 </details>
@@ -245,6 +247,23 @@ and
     <artifactId>api</artifactId>
     <version>${cloud-logging.version}</version>
 </dependency>
+// MDC support
+<dependency>
+    <groupId>no.entur.logging.cloud</groupId>
+    <artifactId>mdc-context-grpc-netty</artifactId>
+    <version>${cloud-logging.version}</version>
+</dependency>
+// Correlation id + various interceptors
+<dependency>
+    <groupId>no.entur.logging.cloud</groupId>
+    <artifactId>correlation-id-trace-grpc-netty</artifactId>
+    <version>${cloud-logging.version}</version>
+</dependency>
+<dependency>
+    <groupId>no.entur.logging.cloud</groupId>
+    <artifactId>correlation-id-trace-spring-boot-grpc</artifactId>
+    <version>${cloud-logging.version}</version>
+</dependency>
 ```
 
 </details>
@@ -276,6 +295,12 @@ implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-gcp-grpc:${
 implementation("no.entur.logging.cloud:micrometer-gcp:${cloudLoggingVersion}")
 // logger with additional log levels
 implementation("no.entur.logging.cloud:api:${cloudLoggingVersion}")
+// MDC support
+implementation project(':trace:mdc-context-grpc-netty')
+// Correlation id + various interceptors
+implementation project(':trace:server:correlation-id-trace-grpc-netty')
+implementation project(':trace:server:correlation-id-trace-spring-boot-grpc')
+
 ```
 
 </details>
