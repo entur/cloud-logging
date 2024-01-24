@@ -13,12 +13,20 @@ def buildProjects() {
     subprojects.findAll { new File(it.projectDir, 'build.gradle').file }
 }
 
+def platformProjects() {
+    buildProjects().findAll { it.name.equals("bom") }
+}
+
 def exampleProjects() {
     buildProjects().findAll { it.name.endsWith("-example") }
 }
 
 def libraryProjects() {
-    buildProjects().findAll { !exampleProjects().contains(it) }
+    buildProjects().findAll { !exampleProjects().contains(it) && !platformProjects().contains(it) }
+}
+
+def jvmProjects() {
+    buildProjects().findAll { !platformProjects().contains(it) }
 }
 
 configure(exampleProjects()) {
@@ -30,18 +38,14 @@ configure(exampleProjects()) {
 
 configure(libraryProjects()) {
     apply plugin: 'java-library'
-    
+
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-configure(buildProjects()) {
-    apply plugin: 'java'
+configure(jvmProjects()) {
     apply plugin: 'com.github.ben-manes.versions'
 
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-    
     ext {
         junitJupiterVersion = '5.10.1'
         mockitoVersion = '5.8.0'
