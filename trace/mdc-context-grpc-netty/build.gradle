@@ -24,6 +24,7 @@ dependencies {
     api("io.grpc:grpc-api:$grpcVersion")
     api("io.grpc:grpc-core:$grpcVersion")
     api("io.grpc:grpc-protobuf:$grpcVersion")
+    api("io.grpc:grpc-util:$grpcVersion")
 
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     api("org.slf4j:slf4j-api:") {
