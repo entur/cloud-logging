@@ -1,5 +1,6 @@
 apply plugin: 'java-platform'
 apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 dependencies {
     constraints {
