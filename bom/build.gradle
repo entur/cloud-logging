@@ -1,0 +1,67 @@
+apply plugin: 'java-platform'
+apply plugin: 'maven-publish'
+
+dependencies {
+    constraints {
+        project.rootProject.subprojects.forEach { subproject ->
+            if (subproject.name != project.name && !subproject.name.contains("example")) {
+                api(subproject)
+            }
+        }
+    }
+}
+
+publishing {
+    publications {
+        jwtPlatform(MavenPublication) {
+            from components.javaPlatform
+
+            groupId = "$group"
+            artifactId = project.name
+            version = "$version"
+
+            pom {
+                name = project.name
+                url = 'https://github.com/entur/cloud-logging'
+                packaging = 'pom'
+                inceptionYear = '2023'
+                description = project.name
+
+                licenses {
+                    license {
+                        name = 'European Union Public Licence v1.2'
+                        url = 'https://www.eupl.eu/'
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id = "skjolber"
+                        name = "Thomas Skjølberg"
+                        email = "thomas.rorvik.skjolberg@entur.org"
+                    }
+                }
+                scm {
+                    url = 'https://github.com/entur/cloud-logging'
+                    connection = 'git@github.com:entur/cloud-logging.git'
+                }
+            }
+        }
+    }
+
+    if (project.hasProperty("signing.gnupg.keyName")) {
+        signing {
+            useGpgCmd()
+
+            // set
+            // signing.gnupg.keyName=xxx
+            // signing.gnupg.passphrase=yyy
+            // via command line or global gradle properties
+            // then run
+            // w17 build publishToSonatype --info --stacktrace
+
+            sign(publishing.publications)
+        }
+    }
+
+}
