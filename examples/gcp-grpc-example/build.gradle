@@ -23,6 +23,7 @@ dependencies {
     //implementation("io.grpc:grpc-inprocess:$grpcVersion")
     implementation("io.grpc:grpc-services:$grpcVersion")
     implementation("io.grpc:grpc-netty:$grpcVersion")
+    implementation("io.grpc:grpc-util:$grpcVersion")
     implementation("org.springframework.boot:spring-boot-starter:${springBootVersion}")
 
     testImplementation project(":gcp:spring-boot-starter-gcp-grpc-test")
