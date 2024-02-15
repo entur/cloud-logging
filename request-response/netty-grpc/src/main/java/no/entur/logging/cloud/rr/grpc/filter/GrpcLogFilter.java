@@ -14,6 +14,11 @@ public class GrpcLogFilter {
             .withResponse()
             .build();
 
+    public static GrpcLogFilter REQUEST_SUMMARY = GrpcLogFilter.newBuilder()
+            .withRequest()
+            .withDisconnect()
+            .build();
+
     public static GrpcLogFilter SUMMARY = GrpcLogFilter.newBuilder()
             .withDisconnect()
             .build();
