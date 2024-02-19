@@ -35,39 +35,69 @@ public class GrpcServerLoggingFilters {
 			return this;
 		}
 
+
+		public Builder requestSummaryLoggingForService(String serviceName) {
+			return loggingForService(serviceName, GrpcLogFilter.REQUEST_SUMMARY, Collections.emptySet());
+		}
+
+		public Builder requestSummaryLoggingForService(String serviceName, String ... methods) {
+			return loggingForService(serviceName, GrpcLogFilter.REQUEST_SUMMARY, methods);
+		}
+
+		public Builder fullLoggingForService(String serviceName) {
+			return loggingForService(serviceName, GrpcLogFilter.FULL, Collections.emptySet());
+		}
+
 		public Builder fullLoggingForService(String serviceName, String ... methods) {
-			return loggingForService(GrpcLogFilter.FULL, serviceName, methods);
+			return loggingForService(serviceName, GrpcLogFilter.FULL, methods);
 		}
 
 		public Builder classicLoggingForService(String serviceName, String ... methods) {
-			return loggingForService(GrpcLogFilter.REQUEST_RESPONSE, serviceName, methods);
+			return loggingForService(serviceName, GrpcLogFilter.REQUEST_RESPONSE, methods);
+		}
+
+		public Builder classicLoggingForService(String serviceName) {
+			return loggingForService(serviceName, GrpcLogFilter.REQUEST_RESPONSE, Collections.emptySet());
 		}
 
 		public Builder summaryLoggingForService(String serviceName, String ... methods) {
-			return loggingForService(GrpcLogFilter.SUMMARY, serviceName, methods);
+			return loggingForService(serviceName, GrpcLogFilter.SUMMARY, methods);
+		}
+
+		public Builder summaryLoggingForService(String serviceName) {
+			return loggingForService(serviceName, GrpcLogFilter.SUMMARY, Collections.emptySet());
 		}
 
 		public Builder noLoggingForService(String serviceName, String ... methods) {
-			return loggingForService(GrpcLogFilter.NONE, serviceName, methods);
+			return loggingForService(serviceName, GrpcLogFilter.NONE, methods);
+		}
+
+
+		public Builder noLoggingForService(String serviceName) {
+			return loggingForService(serviceName, GrpcLogFilter.NONE, Collections.emptySet());
+		}
+
+		public Builder requestSummaryLoggingForService(String serviceName, MethodDescriptor ... methods) {
+			return loggingForService(serviceName, GrpcLogFilter.REQUEST_SUMMARY, methods);
 		}
 
 		public Builder fullLoggingForService(String serviceName, MethodDescriptor ... methods) {
-			return loggingForService(GrpcLogFilter.FULL, serviceName, methods);
+			return loggingForService(serviceName, GrpcLogFilter.FULL, methods);
 		}
 
 		public Builder classicLoggingForService(String serviceName, MethodDescriptor ... methods) {
-			return loggingForService(GrpcLogFilter.REQUEST_RESPONSE, serviceName, methods);
+			return loggingForService(serviceName, GrpcLogFilter.REQUEST_RESPONSE, methods);
 		}
 
 		public Builder summaryLoggingForService(String serviceName, MethodDescriptor... methods) {
-			return loggingForService(GrpcLogFilter.SUMMARY, serviceName, methods);
+			return loggingForService(serviceName, GrpcLogFilter.SUMMARY, methods);
 		}
 
 		public Builder noLoggingForService(String serviceName, MethodDescriptor ... methods) {
-			return loggingForService(GrpcLogFilter.NONE, serviceName, methods);
+			return loggingForService(serviceName, GrpcLogFilter.NONE, methods);
 		}
 
-		private Builder loggingForService(GrpcLogFilter filter, String serviceName, Set<String> methods) {
+		public Builder loggingForService(String serviceName, GrpcLogFilter filter, Set<String> methods) {
 			if(methods == null || methods.isEmpty()) {
 				services.put(serviceName, filter);
 			} else {
@@ -84,12 +114,16 @@ public class GrpcServerLoggingFilters {
 			return this;
 		}
 
-		private Builder loggingForService(GrpcLogFilter filter, String serviceName, MethodDescriptor ... methods) {
-			return loggingForService(filter, serviceName, toSet(methods));
+		public Builder loggingForService(String serviceName, GrpcLogFilter filter, MethodDescriptor ... methods) {
+			return loggingForService(serviceName, filter, toSet(methods));
 		}
 
-		private Builder loggingForService(GrpcLogFilter filter, String serviceName, String ... methods) {
-			return loggingForService(filter, serviceName, toSet(methods));
+		public Builder loggingForService(String serviceName, GrpcLogFilter filter) {
+			return loggingForService(serviceName, filter, Collections.emptySet());
+		}
+
+		public Builder loggingForService(String serviceName, GrpcLogFilter filter, String ... methods) {
+			return loggingForService(serviceName, filter, toSet(methods));
 		}
 
 		public Builder noDefaultLogging() {
@@ -106,6 +140,10 @@ public class GrpcServerLoggingFilters {
 
 		public Builder fullDefaultLogging() {
 			return defaultFilter(GrpcLogFilter.FULL);
+		}
+
+		public Builder requestSummaryDefaultLogging() {
+			return defaultFilter(GrpcLogFilter.REQUEST_SUMMARY);
 		}
 
 		private static Set<String> toSet(String[] methods) {
