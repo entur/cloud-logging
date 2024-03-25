@@ -451,8 +451,8 @@ public class GreetingTest extends AbstractGrpcTest {
 			assertThat(response.getMessage()).isEqualTo("Hello");
 
 			List<LogStatement> logStatements = statements.forLogger(GrpcLoggingServerInterceptor.class);
-			logStatements.get(0).assertThatField("severity").isEqualTo("INFO");
-			logStatements.get(1).assertThatField("severity").isEqualTo("WARNING");
+			logStatements.get(0).assertThatField("level").isEqualTo("INFO");
+			logStatements.get(1).assertThatField("level").isEqualTo("WARN");
 		} finally {
 			shutdown(stub);
 		}
