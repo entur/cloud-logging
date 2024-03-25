@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.gcp.logback.logstash;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.joran.spi.DefaultClass;
 import net.logstash.logback.LogstashFormatter;
 import net.logstash.logback.composite.AbstractCompositeJsonFormatter;
 import net.logstash.logback.composite.JsonProvider;
@@ -24,12 +25,19 @@ public class AzureLogstashEncoder extends LoggingEventCompositeJsonEncoder {
         AbstractCompositeJsonFormatter formatter = (AbstractCompositeJsonFormatter) super.createFormatter();
 
         JsonProviders loggingEventJsonProviders = formatter.getProviders();
-        List<JsonProvider<ILoggingEvent>> providers = new ArrayList<>(loggingEventJsonProviders.getProviders());
 
-        for (JsonProvider<ILoggingEvent> jsonProvider : providers) {
-            // TODO
-        }
+        loggingEventJsonProviders.addProvider(new AzureServiceContextJsonProvider());
 
         return formatter;
     }
+
+    @Override
+    @DefaultClass(LoggingEventJsonProviders.class)
+    public void setProviders(JsonProviders<ILoggingEvent> jsonProviders) {
+        jsonProviders.addProvider(new AzureServiceContextJsonProvider());
+        super.setProviders(jsonProviders);
+    }
+
+
+
 }
