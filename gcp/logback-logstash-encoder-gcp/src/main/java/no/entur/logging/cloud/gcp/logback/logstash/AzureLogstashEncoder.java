@@ -21,17 +21,6 @@ import java.util.List;
 public class AzureLogstashEncoder extends LoggingEventCompositeJsonEncoder {
 
     @Override
-    protected AbstractCompositeJsonFormatter<ILoggingEvent> createFormatter() {
-        AbstractCompositeJsonFormatter formatter = (AbstractCompositeJsonFormatter) super.createFormatter();
-
-        JsonProviders loggingEventJsonProviders = formatter.getProviders();
-
-        loggingEventJsonProviders.addProvider(new AzureServiceContextJsonProvider());
-
-        return formatter;
-    }
-
-    @Override
     @DefaultClass(LoggingEventJsonProviders.class)
     public void setProviders(JsonProviders<ILoggingEvent> jsonProviders) {
         jsonProviders.addProvider(new AzureServiceContextJsonProvider());
