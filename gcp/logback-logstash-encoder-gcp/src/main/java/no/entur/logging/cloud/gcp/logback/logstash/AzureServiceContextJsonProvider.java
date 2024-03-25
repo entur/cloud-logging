@@ -33,12 +33,16 @@ public class AzureServiceContextJsonProvider extends AbstractFieldJsonProvider<I
 
 	public void setService(String service) {
 		if(service == null || service.equals(UNDEFINED)) {
-			this.service = getHostNameFromEnvironment();
+			autodetectService();
 		} else {
 			this.service = service;
 		}
 	}
-	
+
+	public void autodetectService() {
+		this.service = getHostNameFromEnvironment();
+	}
+
 	public String getHostNameFromEnvironment() {
 		try {
 			// prefer getting system variable rather than the actual network address

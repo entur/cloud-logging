@@ -23,7 +23,9 @@ public class AzureLogstashEncoder extends LoggingEventCompositeJsonEncoder {
     @Override
     @DefaultClass(LoggingEventJsonProviders.class)
     public void setProviders(JsonProviders<ILoggingEvent> jsonProviders) {
-        jsonProviders.addProvider(new AzureServiceContextJsonProvider());
+        AzureServiceContextJsonProvider azureServiceContextJsonProvider = new AzureServiceContextJsonProvider();
+        azureServiceContextJsonProvider.autodetectService();
+        jsonProviders.addProvider(azureServiceContextJsonProvider);
         super.setProviders(jsonProviders);
     }
 
