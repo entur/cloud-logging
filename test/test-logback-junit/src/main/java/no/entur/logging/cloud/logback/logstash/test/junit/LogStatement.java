@@ -41,8 +41,6 @@ public class LogStatement {
 
 	public String getJson() {
 		if(json == null) {
-			System.out.println("Encode using " + event);
-
 			json = new String(encoder.encode(event), StandardCharsets.UTF_8);
 		}
 		return json;

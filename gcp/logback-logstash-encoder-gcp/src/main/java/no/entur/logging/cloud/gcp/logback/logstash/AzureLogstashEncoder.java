@@ -27,7 +27,7 @@ public class AzureLogstashEncoder extends LoggingEventCompositeJsonEncoder {
         List<JsonProvider<ILoggingEvent>> providers = new ArrayList<>(loggingEventJsonProviders.getProviders());
 
         for (JsonProvider<ILoggingEvent> jsonProvider : providers) {
-            System.out.println(jsonProvider);
+            // TODO
         }
 
         return formatter;

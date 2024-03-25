@@ -361,7 +361,6 @@ public class GreetingTest extends AbstractGrpcTest {
 
 			LogStatements http = statements.forLogger("no.entur.logging.cloud");
 			LogStatement request = http.get(1);
-			System.out.println(request.getJson());
 			request.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
 			LogStatement response = http.get(http.size() - 2);
 			response.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
@@ -434,9 +433,6 @@ public class GreetingTest extends AbstractGrpcTest {
 
 			LogStatements http = statements.forLogger("no.entur.logging.cloud");
 			LogStatement request = http.get(0);
-
-			System.out.println(request.getMessage());
-			System.out.println(request.getJson());
 			request.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
 			LogStatement response = http.get(http.size() - 1);
 			response.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
@@ -455,8 +451,8 @@ public class GreetingTest extends AbstractGrpcTest {
 			assertThat(response.getMessage()).isEqualTo("Hello");
 
 			List<LogStatement> logStatements = statements.forLogger(GrpcLoggingServerInterceptor.class);
-			logStatements.get(0).assertThatField("level").isEqualTo("INFO");
-			logStatements.get(1).assertThatField("level").isEqualTo("WARN");
+			logStatements.get(0).assertThatField("severity").isEqualTo("INFO");
+			logStatements.get(1).assertThatField("severity").isEqualTo("WARNING");
 		} finally {
 			shutdown(stub);
 		}
