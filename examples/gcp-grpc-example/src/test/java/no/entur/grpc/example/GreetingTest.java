@@ -434,6 +434,9 @@ public class GreetingTest extends AbstractGrpcTest {
 
 			LogStatements http = statements.forLogger("no.entur.logging.cloud");
 			LogStatement request = http.get(0);
+
+			System.out.println(request.getMessage());
+			System.out.println(request.getJson());
 			request.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
 			LogStatement response = http.get(http.size() - 1);
 			response.assertThatHttpBody().matches("Omitted binary message size [0-9]+");

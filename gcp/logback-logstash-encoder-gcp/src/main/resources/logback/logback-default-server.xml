@@ -15,12 +15,7 @@
                 <threadName>
                     <fieldName>thread</fieldName>
                 </threadName>
-                <nestedField>
-                    <fieldName>mdc</fieldName>
-                    <providers>
-                        <mdc />
-                    </providers>
-                </nestedField>
+                <nonEmptyMdc class="no.entur.logging.cloud.gcp.logback.logstash.AzureMdcJsonProvider"/>
                 <stackTrace>
                     <fieldName>stackTrace</fieldName>
                     <!-- maxLength - limit the length of the stack trace -->
@@ -30,6 +25,7 @@
                         <rootCauseFirst>true</rootCauseFirst>
                     </throwableConverter>
                 </stackTrace>
+                <logstashMarkers/>
                 <message />
                 <throwableClassName>
                     <fieldName>exceptionClass</fieldName>

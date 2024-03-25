@@ -13,10 +13,6 @@
 		<humanReadableJsonEncoder class="no.entur.logging.cloud.gcp.logback.logstash.AzureLogstashEncoder">
 			<!-- remove unnecessary fields in testing -->
 			<!-- note: severity and severity is removed in code -->
-			<fieldNames>
-				<version>[ignore]</version>
-			</fieldNames>
-
 			<providers>
 				<timestamp>
 					<fieldName>timestamp</fieldName>
@@ -46,6 +42,7 @@
 						<rootCauseFirst>true</rootCauseFirst>
 					</throwableConverter>
 				</stackTrace>
+				<logstashMarkers/>
 				<message />
 				<throwableClassName>
 					<fieldName>exceptionClass</fieldName>
@@ -69,11 +66,6 @@
 		</humanReadableJsonEncoder>
 		<machineReadableJsonEncoder class="no.entur.logging.cloud.gcp.logback.logstash.AzureLogstashEncoder">
 			<!-- note: this encoder will be used to evaluate assertions against log statements -->
-			<fieldNames>
-				<version>[ignore]</version>
-				<timestamp>[ignore]</timestamp>
-			</fieldNames>
-
 			<providers>
 				<timestamp>
 					<fieldName>timestamp</fieldName>
@@ -103,6 +95,7 @@
 						<rootCauseFirst>true</rootCauseFirst>
 					</throwableConverter>
 				</stackTrace>
+				<logstashMarkers/>
 				<message />
 				<throwableClassName>
 					<fieldName>exceptionClass</fieldName>

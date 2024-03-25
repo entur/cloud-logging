@@ -27,13 +27,7 @@ public class AzureLogstashEncoder extends LoggingEventCompositeJsonEncoder {
         List<JsonProvider<ILoggingEvent>> providers = new ArrayList<>(loggingEventJsonProviders.getProviders());
 
         for (JsonProvider<ILoggingEvent> jsonProvider : providers) {
-            if(jsonProvider instanceof TagsJsonProvider) {
-                // we only want to use json markers, so omit this "tags" element
-                // TODO subclass TagsJonProvider to also ignore our log level marker
-                loggingEventJsonProviders.removeProvider(jsonProvider);
-            } else if(jsonProvider instanceof LogLevelValueJsonProvider) {
-                loggingEventJsonProviders.removeProvider(jsonProvider);
-            }
+            System.out.println(jsonProvider);
         }
 
         return formatter;
