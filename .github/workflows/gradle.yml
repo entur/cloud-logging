@@ -25,16 +25,4 @@ jobs:
         cache: gradle
     - name: Build with Gradle
       run: ./gradlew build --info
-  owasp-dependency-check:
-    runs-on: ubuntu-latest
-    name: OWASP dependency check
-    - uses: actions/checkout@v4
-    - name: Set up JDK
-      uses: actions/setup-java@v2
-      with:
-        distribution: temurin
-        java-version: ${{ matrix.java }}
-        cache: gradle
-    - name: Build with Gradle
-      run: ./gradlew dependencyCheckAnalyze --info
 
