@@ -1,6 +1,7 @@
 <included>
+
 	<!-- from org/springframework/boot/logging/logback/base.xml -->
-	<include resource="org/springframework/boot/logging/logback/defaults.xml" />
+	<include resource="logback/spring-defaults-test.xml" />
 
 	<appender name="STDOUT" class="no.entur.logging.cloud.gcp.spring.test.SpringCompositeConsoleAppender">
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">

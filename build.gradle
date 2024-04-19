@@ -61,14 +61,14 @@ configure(jvmProjects()) {
         springBootVersion = '3.2.4' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
         janinoVersion = '3.1.12'
         servletVersion = '6.0.0' // jakarta
-        logbookVersion = '3.7.2'
-        jacksonSyntaxHighlightVersion = '1.0.8'
+        logbookVersion = '3.8.0'
+        jacksonSyntaxHighlightVersion = '1.0.9'
         logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.0.7'
-        commonsIoVersion = '2.15.1'
+        commonsIoVersion = '2.16.1'
         commonsTextVersion = '1.11.0'
 
-        grpcNettyVersion = '1.62.2'
-        grpcVersion = '1.62.2'
+        grpcNettyVersion = '1.63.0'
+        grpcVersion = '1.63.0'
         grpcCommonsVersion = '2.37.1'
         grpcProtobufVersion = '3.25.3'
 
