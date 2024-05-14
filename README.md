@@ -51,7 +51,87 @@ Supported clouds:
 [European Union Public Licence v1.2](https://eupl.eu/).
 
 # Usage
-See [GCP](gcp) to get started.
+
+## Overview
+This project contains Spring boot starters which allows for property-based configuration:
+
+ * base configuration (required)
+ * request-response-logging (optional)
+ * on-demand-logging (optional)
+
+Each Spring Boot starter has a corresponding Spring Boot test starter. The Spring boot test starters enhance the developer experience during local development. 
+
+The above starters are implemented in two flavours:
+
+ * Servlet-based web
+ * Lognet gRPC
+
+## Getting started
+
+ * Remove any preexisting log configuration (i.e. logback.xml) and so on.
+ * Import the cloud-logging BOM using below coordinates:
+
+<details>
+  <summary>Maven BOM coordinates</summary>
+
+Add
+
+```xml
+<cloud-logging.version>2.0.x</cloud-logging>
+```
+
+and
+
+```xml
+<dependency>
+    <groupId>no.entur.logging.cloud</groupId>
+    <artifactId>bom</artifactId>
+    <version>${cloud-logging.version}</version>
+    <type>pom</type>
+    <scope>import</scope>    
+</dependency>
+```
+
+</details>
+
+or
+
+<details>
+  <summary>Gradle BOM coordinates</summary>
+
+For
+
+```groovy
+ext {
+   cloudLoggingVersion = '2.0.x'
+}
+```
+
+add
+
+```groovy
+implementation platform("no.entur.logging.cloud:bom:${cloudLoggingVersion}")
+testImplementation platform("no.entur.logging.cloud:bom:${cloudLoggingVersion}")
+```
+</details>
+
+## Getting started - web
+
+Import [spring-boot-starter-gcp-web] and [spring-boot-starter-gcp-web-test] into your project.
+
+Verify configuration by toggling between output modes in a unit test:
+
+```
+try (Closeable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
+    // your logging here
+}
+```
+
+### Getting started with request-response logging - web
+Import [request-response-spring-boot-starter-gcp-web] and [request-response-spring-boot-starter-gcp-web-test].
+
+### Getting started with on-demand logging - web
+Import [request-response-spring-boot-starter-gcp-web] and [request-response-spring-boot-starter-gcp-web-test].
 
 # Roadmap
 
