@@ -139,7 +139,7 @@ testImplementation ("no.entur.logging.cloud:request-response-spring-boot-starter
 By default [certain OpenAPI and actuator endpoints](../gcp/request-response-spring-boot-starter-gcp-web/src/main/resources/logbook.gcp.web.properties) are excluded. See [Logbook](https://github.com/zalando/logbook) for additional configuration options.
 
 ### on-demand logging
-Import the request-response Spring Boot starters:
+Import the on-demand Spring Boot starters:
 
 <details>
   <summary>Maven Spring Boot Starter coordinates</summary>
