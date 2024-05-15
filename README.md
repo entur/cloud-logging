@@ -51,7 +51,23 @@ Supported clouds:
 [European Union Public Licence v1.2](https://eupl.eu/).
 
 # Usage
-See [GCP](gcp) to get started.
+
+## Overview
+This project contains Spring boot starters which allows for property-based configuration:
+
+ * base configuration (required)
+ * request-response-logging (optional)
+ * on-demand-logging (optional)
+
+Each Spring Boot starter has a corresponding Spring Boot test starter. The Spring boot test starters enhance the developer experience during local development. 
+
+The above starters are implemented in two flavours:
+
+ * Servlet-based web
+ * Lognet gRPC
+
+## Getting started
+See [Getting started with gRPC](guides/gRPC.md) or [Getting started with servlet-based web](guides/web.md)
 
 # Roadmap
 
