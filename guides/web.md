@@ -192,7 +192,7 @@ entur.logging.http.ondemand.failure.level=info
 where 
 
  * `success`: log level for the happy case 
-   * cached log statements are discareded 
+   * cached log statements are discarded 
  * `failure`: log level for the unhappy case
    * cached log statements are printed
 
