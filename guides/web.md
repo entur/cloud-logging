@@ -86,7 +86,7 @@ try (Closeable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) 
 }
 ```
 
-For additional error levels, try the [DevOpsLogger](../api)
+For additional error levels, try the [DevOpsLogger](../api):
 
 ```
 DevOpsLogger LOGGER = DevOpsLoggerFactory.getLogger(MyClass.class);
@@ -138,7 +138,7 @@ testImplementation ("no.entur.logging.cloud:request-response-spring-boot-starter
 
 By default [certain OpenAPI and actuator endpoints](../gcp/request-response-spring-boot-starter-gcp-web/src/main/resources/logbook.gcp.web.properties) are excluded. See [Logbook](https://github.com/zalando/logbook) for additional configuration options.
 
-### on-demand logging
+### On-demand logging
 Import the on-demand Spring Boot starters:
 
 <details>
@@ -211,7 +211,7 @@ entur.logging.http.ondemand.failure.http.status-code.equal-to=404,405
 entur.logging.http.ondemand.failure.http.status-code.not-equal-to=200,201
 ```
 
-and/or by log level
+and/or by log level severity
 
 ``` 
 entur.logging.http.ondemand.failure.logger.level=error
