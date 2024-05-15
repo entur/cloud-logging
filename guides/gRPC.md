@@ -86,7 +86,7 @@ try (Closeable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) 
 }
 ```
 
-For additional error levels, try the [DevOpsLogger](../api)
+For additional error levels, try the [DevOpsLogger](../api):
 
 ```
 DevOpsLogger LOGGER = DevOpsLoggerFactory.getLogger(MyClass.class);
@@ -136,8 +136,8 @@ testImplementation ("no.entur.logging.cloud:request-response-spring-boot-starter
 ```
 </details>
 
-### on-demand logging
-Import the request-response Spring Boot starters:
+### On-demand logging
+Import the on-demand Spring Boot starters:
 
 <details>
   <summary>Maven Spring Boot Starter coordinates</summary>
