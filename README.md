@@ -67,7 +67,7 @@ The above starters are implemented in two flavours:
  * Lognet gRPC
 
 ## Getting started
-See [Getting started with gRPC](guides/gRPC.md) or [Getting started with servlet-based web](guides/web.md)
+See [Getting started with gRPC](guides/gRPC.md) or [Getting started with servlet-based web](guides/web.md). Alternatively, go directly to the [examples](examples).
 
 # Roadmap
 
