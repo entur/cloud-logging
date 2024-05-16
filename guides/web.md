@@ -136,7 +136,16 @@ testImplementation ("no.entur.logging.cloud:request-response-spring-boot-starter
 ```
 </details>
 
-By default [certain OpenAPI and actuator endpoints](../gcp/request-response-spring-boot-starter-gcp-web/src/main/resources/logbook.gcp.web.properties) are excluded. See [Logbook](https://github.com/zalando/logbook) for additional configuration options.
+By default [certain OpenAPI and actuator endpoints](../gcp/request-response-spring-boot-starter-gcp-web/src/main/resources/logbook.gcp.web.properties) are excluded. 
+
+Adjust the logger using
+
+```
+entur.logging.request-response.logger.level=INFO
+entur.logging.request-response.logger.name=no.entur.logging.cloud
+```
+
+See [Logbook](https://github.com/zalando/logbook) for additional configuration options.
 
 ### On-demand logging
 Import the on-demand Spring Boot starters:
@@ -233,3 +242,11 @@ entur.logging.http.ondemand.troubleshoot.http.headers[0].name=x-debug-this-reque
 
 which allows for additional logging in the precense of certain HTTP headers.
 
+## Opting out
+Some included features can be removed by excluding the corresponding artifacts:
+
+ * micrometer
+   * micrometer
+   * micrometer-gcp
+ * correlation id tracing
+   * correlation-id-trace-spring-boot-web 

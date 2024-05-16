@@ -136,6 +136,41 @@ testImplementation ("no.entur.logging.cloud:request-response-spring-boot-starter
 ```
 </details>
 
+Adjust the logger using
+
+```
+entur.logging.request-response.logger.level=INFO
+entur.logging.request-response.logger.name=no.entur.logging.cloud
+```
+
+Set `OrderedGrpcLoggingServerInterceptor` order using
+
+```
+entur.logging.request-response.grpc.server.interceptor-order=0
+```
+
+also add `RequestResponseGRpcExceptionHandlerInterceptor` error handler before the response logging, so that the response status is logged correctly
+
+```
+entur.logging.request-response.grpc.server.exception-handler.interceptor-order=0
+```
+
+Optionally also configure the `OrderedGrpcLoggingClientInterceptor` order using
+
+```
+entur.logging.request-response.grpc.client.interceptor-order=0
+```
+
+Also create your own beans for 
+
+ * `JsonFormat.TypeRegistry`
+ * `GrpcStatusMapper`
+* `GrpcPayloadJsonMapper`
+* `GrpcMetadataJsonMapper`
+* `GrpcClientLoggingFilters`
+
+to further customize logging.
+
 ### On-demand logging
 Import the on-demand Spring Boot starters:
 
@@ -166,3 +201,14 @@ implementation ("no.entur.logging.cloud:on-demand-spring-boot-starter-gcp-grpc")
 testImplementation ("no.entur.logging.cloud:on-demand-spring-boot-starter-gcp-grpc-test")
 ```
 </details>
+
+## Opting out
+Some included features can be removed by excluding the corresponding artifacts:
+
+* micrometer
+  * micrometer
+  * micrometer-gcp
+* correlation id trace
+  * correlation-id-trace-spring-boot-grpc
+
+
