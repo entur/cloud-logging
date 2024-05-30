@@ -47,6 +47,8 @@ testImplementation platform("no.entur.logging.cloud:bom:${cloudLoggingVersion}")
 ```
 </details>
 
+Please note that features below must be individually added __via artifact import__.
+
 ## Spring Boot starter
 Add the spring-boot-starter artifact coordinates to your project.
 
@@ -249,4 +251,20 @@ Some included features can be removed by excluding the corresponding artifacts:
    * micrometer
    * micrometer-gcp
  * correlation id tracing
-   * correlation-id-trace-spring-boot-web 
+   * correlation-id-trace-spring-boot-web
+
+## Running applications locally
+For 'classic' on-line log output when running a server locally (i.e. when no log accumulation tool is involved), additionally add the logging test artifacts to the main scope during local execution only.
+
+ * Maven: Use profiles
+ * Gradle: Use configurations. See example.
+
+## Troubleshooting
+
+### request-response logging not working
+Did you import the relevant artifacts?
+
+### on-demand logging not working
+Did you import the relevant artifacts?
+
+
