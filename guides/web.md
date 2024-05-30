@@ -254,10 +254,26 @@ Some included features can be removed by excluding the corresponding artifacts:
    * correlation-id-trace-spring-boot-web
 
 ## Running applications locally
-For 'classic' one-line log output when running a server locally (i.e. when no log accumulation tool is involved), additionally add the logging test artifacts to the main scope during local execution only.
+For 'classic' one-line log output when running a server locally, additionally add the logging test artifacts to the main scope during local execution only.
 
  * Maven: Use profiles
- * Gradle: Use configurations. See example.
+ * Gradle:
+   * Use configurations, and/or
+   * add dependencies directly to task
+
+<details>
+  <summary>Gradle bootRun example</summary>
+
+```groovy
+bootRun {
+    dependencies {
+        implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test")
+        implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test")
+    }
+}
+```
+
+</details>
 
 ## Troubleshooting
 
