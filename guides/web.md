@@ -254,7 +254,7 @@ Some included features can be removed by excluding the corresponding artifacts:
    * correlation-id-trace-spring-boot-web
 
 ## Running applications locally
-For 'classic' on-line log output when running a server locally (i.e. when no log accumulation tool is involved), additionally add the logging test artifacts to the main scope during local execution only.
+For 'classic' one-line log output when running a server locally (i.e. when no log accumulation tool is involved), additionally add the logging test artifacts to the main scope during local execution only.
 
  * Maven: Use profiles
  * Gradle: Use configurations. See example.
