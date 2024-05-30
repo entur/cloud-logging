@@ -202,6 +202,28 @@ testImplementation ("no.entur.logging.cloud:on-demand-spring-boot-starter-gcp-gr
 ```
 </details>
 
+## Running applications locally
+For 'classic' one-line log output when running a server locally, additionally add the logging test artifacts to the main scope during local execution only.
+
+ * Maven: Use profiles
+ * Gradle:
+   * Use configurations, and/or
+   * add dependencies directly to task
+
+<details>
+  <summary>Gradle bootRun example</summary>
+
+```groovy
+bootRun {
+    dependencies {
+        implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test")
+        implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test")
+    }
+}
+```
+
+</details>
+
 ## Opting out
 Some included features can be removed by excluding the corresponding artifacts:
 
