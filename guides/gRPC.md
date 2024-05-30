@@ -182,11 +182,6 @@ Import the on-demand Spring Boot starters:
     <groupId>no.entur.logging.cloud</groupId>
     <artifactId>on-demand-spring-boot-starter-gcp-grpc</artifactId>
 </dependency>
-<dependency>
-    <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>on-demand-spring-boot-starter-gcp-grpc-test</artifactId>
-    <scope>test</scope>
-</dependency>
 ```
 
 </details>
@@ -198,7 +193,6 @@ or
 
 ```groovy
 implementation ("no.entur.logging.cloud:on-demand-spring-boot-starter-gcp-grpc")
-testImplementation ("no.entur.logging.cloud:on-demand-spring-boot-starter-gcp-grpc-test")
 ```
 </details>
 
