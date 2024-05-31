@@ -196,6 +196,13 @@ implementation ("no.entur.logging.cloud:on-demand-spring-boot-starter-gcp-grpc")
 ```
 </details>
 
+While __disabled__ by default, on-demand logging can be enabled using
+
+```
+entur.logging.grpc.ondemand.enabled=true
+```
+
+
 ## Running applications locally
 For 'classic' one-line log output when running a server locally, additionally add the logging test artifacts to the main scope during local execution only.
 
