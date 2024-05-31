@@ -34,7 +34,7 @@ public class GcpWebOndemandLoggingAutoConfiguration {
     private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(GcpWebOndemandLoggingAutoConfiguration.class);
 
     @Configuration
-    @ConditionalOnProperty(name = {"entur.logging.http.ondemand.enabled"}, havingValue = "true", matchIfMissing = false)
+    @ConditionalOnProperty(name = {"entur.logging.http.ondemand.enabled"}, havingValue = "true", matchIfMissing = true)
     public static class OndemandConfiguration {
 
         @Bean

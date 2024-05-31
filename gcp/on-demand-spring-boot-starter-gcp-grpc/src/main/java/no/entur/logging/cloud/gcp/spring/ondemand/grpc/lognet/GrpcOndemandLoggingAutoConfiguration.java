@@ -31,7 +31,7 @@ public class GrpcOndemandLoggingAutoConfiguration {
     private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(GrpcOndemandLoggingAutoConfiguration.class);
 
     @Configuration
-    @ConditionalOnProperty(name = {"entur.logging.grpc.ondemand.enabled"}, havingValue = "true", matchIfMissing = false)
+    @ConditionalOnProperty(name = {"entur.logging.grpc.ondemand.enabled"}, havingValue = "true", matchIfMissing = true)
     public static class OndemandConfiguration {
 
         @Bean
