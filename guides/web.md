@@ -174,10 +174,10 @@ implementation ("no.entur.logging.cloud:on-demand-spring-boot-starter-gcp-web")
 ```
 </details>
 
-While enabled by default, on-demand logging can be toggled using
+While __disabled__ by default, on-demand logging can be enabled using
 
 ```
-entur.logging.http.ondemand.enabled=false
+entur.logging.http.ondemand.enabled=true
 ```
 
 Set the servlet order and pattern (defaults):
