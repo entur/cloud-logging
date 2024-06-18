@@ -37,7 +37,7 @@ public abstract class AbstractOndemandSingleFieldAppendingMarker<T extends HttpM
     }
 
     protected void writeBody(JsonGenerator generator) {
-        if(httpMessageBodyWriter != null && ContentType.isJsonMediaType(contentType)) {
+        if(httpMessageBodyWriter != null) {
             // check that body is well-formed and within size
 
             // TODO get the generator.getOutputTarget() and calculate the size allocated to

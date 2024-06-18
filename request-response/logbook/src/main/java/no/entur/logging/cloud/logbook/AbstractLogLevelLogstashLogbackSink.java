@@ -9,11 +9,23 @@ import org.zalando.logbook.Correlation;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
 
+import javax.annotation.Nullable;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
 public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLevelSink {
-    
+
+    public static boolean isXmlMediaType(@Nullable final String contentType) {
+        if (contentType == null) {
+            return false;
+        }
+        final String lowerCasedContentType = contentType.toLowerCase();
+        if (lowerCasedContentType.equals("application/xml") || lowerCasedContentType.equals("text/xml")) {
+            return true;
+        }
+        return false;
+    }
+
     protected final MaxSizeJsonFilter maxSizeJsonFilter;
     protected final JsonValidator jsonValidator;
 
@@ -33,7 +45,11 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
 
     public Marker createRequestMarker(HttpRequest request) {
 
-        if(!ContentType.isJsonMediaType(request.getContentType())) {
+        String contentType = request.getContentType();
+        boolean isJson = ContentType.isJsonMediaType(contentType);
+        boolean isXml = isXmlMediaType(contentType);
+
+        if(!isJson && !isXml) {
             return newRequestSingleFieldAppendingMarker(request, null, false);
         }
 
@@ -46,6 +62,15 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
 
         if(bodyAsString == null || bodyAsString.length() == 0) {
             return newRequestSingleFieldAppendingMarker(request, null, false);
+        }
+
+        if (!isJson) {
+            if(bodyAsString.length() > maxSize) {
+                // TODO add filter
+                String truncatedBody = bodyAsString.substring(0, maxSize);
+                return newRequestSingleFieldAppendingMarker(request, truncatedBody, false);
+            }
+            return newRequestSingleFieldAppendingMarker(request, bodyAsString, false);
         }
 
         String body = null;
@@ -93,8 +118,13 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
     protected abstract Marker newRequestSingleFieldAppendingMarker(HttpRequest request, String body, boolean wellformed);
 
     public Marker createResponseMarker(Correlation correlation, HttpResponse response) {
-        if(!ContentType.isJsonMediaType(response.getContentType())) {
-            new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), null, false);
+
+        String contentType = response.getContentType();
+        boolean isJson = ContentType.isJsonMediaType(contentType);
+        boolean isXml = isXmlMediaType(contentType);
+
+        if(!isJson && !isXml) {
+            return new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), null, false);
         }
 
         String bodyAsString;
@@ -106,6 +136,15 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
 
         if(bodyAsString == null || bodyAsString.length() == 0) {
             return newResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), null, false);
+        }
+
+        if (!isJson) {
+            if(bodyAsString.length() > maxSize) {
+                // TODO add filter
+                String truncatedBody = bodyAsString.substring(0, maxSize);
+                return new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), truncatedBody, false);
+            }
+            return new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), bodyAsString, false);
         }
 
         String body = null;

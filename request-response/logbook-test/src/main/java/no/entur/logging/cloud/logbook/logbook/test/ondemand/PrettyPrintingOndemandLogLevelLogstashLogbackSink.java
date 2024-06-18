@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.logbook.logbook.test.ondemand;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import no.entur.logging.cloud.logbook.AbstractLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.DefaultRemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.ondemand.*;
@@ -14,6 +15,7 @@ import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
@@ -85,6 +87,21 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
             } catch (IOException e) {
                 // ignore
             }
+        } else if(AbstractLogLevelLogstashLogbackSink.isXmlMediaType(request.getContentType())) {
+            // TODO pretty printing XML filter
+            try {
+                String bodyAsString = request.getBodyAsString();
+                if(bodyAsString != null && bodyAsString.length() > 0) {
+                    if (bodyAsString.length() > maxBodySize) {
+                        String truncated = bodyAsString.substring(0, maxBodySize);
+                        writer = new StringHttpMessageBodyWriter(truncated);
+                    } else {
+                        writer = new StringHttpMessageBodyWriter(bodyAsString);
+                    }
+                }
+            } catch (IOException e) {
+                // ignore
+            }
         }
 
         return new RequestOndemandSingleFieldAppendingMarker(request, writer);
@@ -112,6 +129,21 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
                         } else {
                             writer = new PrettyPrintingRemoteMaxSizeHttpMessageBodyWriter(jsonFactory, body, maxSize, httpMessageStateSupplier);
                         }
+                    }
+                }
+            } catch (IOException e) {
+                // ignore
+            }
+        } else if(AbstractLogLevelLogstashLogbackSink.isXmlMediaType(response.getContentType())) {
+            try {
+                // TODO pretty printing XML filter
+                String bodyAsString = response.getBodyAsString();
+                if(bodyAsString != null && bodyAsString.length() > 0) {
+                    if (bodyAsString.length() > maxBodySize) {
+                        String truncated = bodyAsString.substring(0, maxBodySize);
+                        writer = new StringHttpMessageBodyWriter(truncated);
+                    } else {
+                        writer = new StringHttpMessageBodyWriter(bodyAsString);
                     }
                 }
             } catch (IOException e) {
