@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.logbook.ondemand;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import no.entur.logging.cloud.logbook.AbstractLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.DefaultRemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateSupplier;
@@ -92,7 +93,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
             } catch (IOException e) {
                 // ignore
             }
-        } else if("application/xml".equals(request.getContentType())) {
+        } else if(AbstractLogLevelLogstashLogbackSink.isXmlMediaType(request.getContentType())) {
             try {
                 String bodyAsString = request.getBodyAsString();
                 if(bodyAsString != null && bodyAsString.length() > 0) {
@@ -148,7 +149,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
             } catch (IOException e) {
                 // ignore
             }
-        } else if("application/xml".equals(response.getContentType())) {
+        } else if(AbstractLogLevelLogstashLogbackSink.isXmlMediaType(response.getContentType())) {
             try {
                 String bodyAsString = response.getBodyAsString();
                 if(bodyAsString != null && bodyAsString.length() > 0) {

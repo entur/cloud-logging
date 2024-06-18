@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.logbook.logbook.test.ondemand;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import no.entur.logging.cloud.logbook.AbstractLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.DefaultRemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.ondemand.*;
@@ -86,7 +87,7 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
             } catch (IOException e) {
                 // ignore
             }
-        } else if("application/xml".equals(request.getContentType())) {
+        } else if(AbstractLogLevelLogstashLogbackSink.isXmlMediaType(request.getContentType())) {
             // TODO pretty printing XML filter
             try {
                 String bodyAsString = request.getBodyAsString();
@@ -133,7 +134,7 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
             } catch (IOException e) {
                 // ignore
             }
-        } else if("application/xml".equals(response.getContentType())) {
+        } else if(AbstractLogLevelLogstashLogbackSink.isXmlMediaType(response.getContentType())) {
             try {
                 // TODO pretty printing XML filter
                 String bodyAsString = response.getBodyAsString();
