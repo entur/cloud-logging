@@ -34,15 +34,23 @@ public abstract class AbstractSingleFieldAppendingMarker<T extends HttpMessage> 
     }
 
     protected void writeBody(JsonGenerator generator) {
-        if(body != null && ContentType.isJsonMediaType(contentType)) {
-            try {
-                if(wellformed) {
-                    writeWellformedBody(generator);
-                } else {
-                    generator.writeStringField("body", body);
+        if(body != null) {
+            if (ContentType.isJsonMediaType(contentType)) {
+                try {
+                    if (wellformed) {
+                        writeWellformedBody(generator);
+                    } else {
+                        generator.writeStringField("body", body);
+                    }
+                } catch (Exception e) {
+                    // should never happen, this is probably going to blow up somewhere else
                 }
-            } catch(Exception e) {
-                // should never happen, this is probably going to blow up somewhere else
+            } else {
+                try {
+                    generator.writeStringField("body", body);
+                } catch (Exception e) {
+                    // should never happen, this is probably going to blow up somewhere else
+                }
             }
         }
     }

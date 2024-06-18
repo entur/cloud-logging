@@ -33,7 +33,11 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
 
     public Marker createRequestMarker(HttpRequest request) {
 
-        if(!ContentType.isJsonMediaType(request.getContentType())) {
+        String contentType = request.getContentType();
+        boolean isJson = ContentType.isJsonMediaType(contentType);
+        boolean isXml = "application/xml".equals(contentType);
+
+        if(!isJson && !isXml) {
             return newRequestSingleFieldAppendingMarker(request, null, false);
         }
 
@@ -46,6 +50,15 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
 
         if(bodyAsString == null || bodyAsString.length() == 0) {
             return newRequestSingleFieldAppendingMarker(request, null, false);
+        }
+
+        if (!isJson) {
+            if(bodyAsString.length() > maxSize) {
+                // TODO add filter
+                String truncatedBody = bodyAsString.substring(0, maxSize);
+                return newRequestSingleFieldAppendingMarker(request, truncatedBody, false);
+            }
+            return newRequestSingleFieldAppendingMarker(request, bodyAsString, false);
         }
 
         String body = null;
@@ -93,8 +106,13 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
     protected abstract Marker newRequestSingleFieldAppendingMarker(HttpRequest request, String body, boolean wellformed);
 
     public Marker createResponseMarker(Correlation correlation, HttpResponse response) {
-        if(!ContentType.isJsonMediaType(response.getContentType())) {
-            new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), null, false);
+
+        String contentType = response.getContentType();
+        boolean isJson = ContentType.isJsonMediaType(contentType);
+        boolean isXml = "application/xml".equals(contentType);
+
+        if(!isJson && !isXml) {
+            return new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), null, false);
         }
 
         String bodyAsString;
@@ -106,6 +124,15 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
 
         if(bodyAsString == null || bodyAsString.length() == 0) {
             return newResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), null, false);
+        }
+
+        if (!isJson) {
+            if(bodyAsString.length() > maxSize) {
+                // TODO add filter
+                String truncatedBody = bodyAsString.substring(0, maxSize);
+                return new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), truncatedBody, false);
+            }
+            return new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), bodyAsString, false);
         }
 
         String body = null;

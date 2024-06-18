@@ -10,6 +10,7 @@ import org.slf4j.Marker;
 import org.zalando.logbook.*;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
@@ -91,6 +92,20 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
             } catch (IOException e) {
                 // ignore
             }
+        } else if("application/xml".equals(request.getContentType())) {
+            try {
+                String bodyAsString = request.getBodyAsString();
+                if(bodyAsString != null && bodyAsString.length() > 0) {
+                    if (bodyAsString.length() > maxBodySize) {
+                        String truncated = bodyAsString.substring(0, maxBodySize);
+                        writer = new StringHttpMessageBodyWriter(truncated);
+                    } else {
+                        writer = new StringHttpMessageBodyWriter(bodyAsString);
+                    }
+                }
+            } catch (IOException e) {
+                // ignore
+            }
         }
 
         return new RequestOndemandSingleFieldAppendingMarker(request, writer);
@@ -128,6 +143,20 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                                 writer = new MaxSizeLocalHttpMessageBodyWriter(jsonFactory, body, maxBodySize);
                             }
                         }
+                    }
+                }
+            } catch (IOException e) {
+                // ignore
+            }
+        } else if("application/xml".equals(response.getContentType())) {
+            try {
+                String bodyAsString = response.getBodyAsString();
+                if(bodyAsString != null && bodyAsString.length() > 0) {
+                    if (bodyAsString.length() > maxBodySize) {
+                        String truncated = bodyAsString.substring(0, maxBodySize);
+                        writer = new StringHttpMessageBodyWriter(truncated);
+                    } else {
+                        writer = new StringHttpMessageBodyWriter(bodyAsString);
                     }
                 }
             } catch (IOException e) {
