@@ -54,14 +54,10 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 				loggingEventJsonProviders.removeProvider(jsonProvider);
 			} else if(jsonProvider instanceof MdcJsonProvider p) {
 				if(openTelemetry) {
-					p.addExcludeMdcKeyName("traceId");
-					p.addExcludeMdcKeyName("spanId");
+					loggingEventJsonProviders.removeProvider(jsonProvider);
+					loggingEventJsonProviders.addProvider(new StackdriverOpenTelemetryTraceMdcJsonProvider());
 				}
 			}
-		}
-
-		if(openTelemetry) {
-			loggingEventJsonProviders.addProvider(new StackdriverOpenTelemetryTraceJsonProvider());
 		}
 
 		loggingEventJsonProviders.addProvider(new StackdriverLogSeverityJsonProvider());
