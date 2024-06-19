@@ -81,7 +81,7 @@ jobs:
                 command: |
                   # TODO add signing key and password
                   echo $SONATYPE_GPG_KEY_BASE64 | base64 --decode | gpg --batch --no-tty --import --yes
-                  ./gradlew build publishToSonatype closeAndReleaseSonatypeStagingRepository -x test -Psigning.gnupg.passphrase=$SONATYPE_GPG_KEY_PASSWORD -Psigning.gnupg.keyName=$SONATYPE_GPG_KEY_NAME -PsonatypeUsername=$SONATYPE_USERNAME2 -PsonatypePassword=$SONATYPE_PASSWORD2  --info --stacktrace
+                  ./gradlew build publishToSonatype closeAndReleaseSonatypeStagingRepository -x test -Psigning.gnupg.passphrase=$SONATYPE_GPG_KEY_PASSWORD -Psigning.gnupg.keyName=$SONATYPE_GPG_KEY_NAME -PsonatypeUsername=$SONATYPE_USERNAME -PsonatypePassword=$SONATYPE_PASSWORD  --info --stacktrace
                   
 
   publish_maven_central_snapshot:
@@ -95,7 +95,7 @@ jobs:
                 command: |
                   # TODO add signing key and password
                   echo $SONATYPE_GPG_KEY_BASE64 | base64 --decode | gpg --batch --no-tty --import --yes
-                  ./gradlew build publishToSonatype -x test -Psigning.gnupg.passphrase=$SONATYPE_GPG_KEY_PASSWORD -Psigning.gnupg.keyName=$SONATYPE_GPG_KEY_NAME -PsonatypeUsername=$SONATYPE_USERNAME2 -PsonatypePassword=$SONATYPE_PASSWORD2 --info --stacktrace
+                  ./gradlew build publishToSonatype -x test -Psigning.gnupg.passphrase=$SONATYPE_GPG_KEY_PASSWORD -Psigning.gnupg.keyName=$SONATYPE_GPG_KEY_NAME -PsonatypeUsername=$SONATYPE_USERNAME -PsonatypePassword=$SONATYPE_PASSWORD --info --stacktrace
 
   create-git-release:
     executor: java_17
