@@ -72,7 +72,8 @@ See [Getting started with gRPC](guides/gRPC.md) or [Getting started with servlet
 # Roadmap
 
  * Replace the correlation-id tracing artifacts with standardized modern equivalents, i.e. span id and so on.
- * Better define and tune request-response logging JSON format 
+ * Better define and tune request-response logging JSON format
+    * Add support for other text formats 
 
 
 
