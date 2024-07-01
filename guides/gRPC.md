@@ -172,6 +172,14 @@ Also create your own beans for
 to further customize logging.
 
 ### On-demand logging
+This feature adjusts the log level for individual web server requests, taking into account actual behaviour.
+
+* increase log level for happy-cases (i.e. WARN or ERROR), otherwise
+* reduce log level (i.e. INFO) for
+    * unexpected HTTP response codes
+    * unexpected log statement levels (i.e. ERROR)
+    * troubleshooting
+
 Import the on-demand Spring Boot starters:
 
 <details>
