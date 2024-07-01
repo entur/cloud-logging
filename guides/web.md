@@ -298,6 +298,8 @@ public class HumanReadableJsonApplicationListener implements ApplicationListener
 Did you import the relevant artifacts?
 
 ### on-demand logging not working
-Did you import the relevant artifacts?
+Did you import the relevant artifacts? 
+
+Set property to enable.
 
 
