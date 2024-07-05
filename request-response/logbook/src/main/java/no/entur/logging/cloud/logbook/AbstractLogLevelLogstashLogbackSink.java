@@ -19,11 +19,24 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
         if (contentType == null) {
             return false;
         }
-        final String lowerCasedContentType = contentType.toLowerCase();
-        if (lowerCasedContentType.equals("application/xml") || lowerCasedContentType.equals("text/xml")) {
-            return true;
+
+        String contentTypeWithoutEncoding;
+        // text/xml;charset=UTF-8
+        int index = contentType.indexOf(';');
+        if(index == -1) {
+            contentTypeWithoutEncoding = contentType;
+        } else {
+            contentTypeWithoutEncoding = contentType.substring(0, index).trim();
         }
-        return false;
+
+        final String lowerCasedContentType = contentTypeWithoutEncoding.toLowerCase();
+
+        boolean isApplicationOrText = lowerCasedContentType.startsWith("application/") || lowerCasedContentType.startsWith("text/");
+        if(!isApplicationOrText) {
+            return false;
+        }
+
+        return lowerCasedContentType.endsWith("+xml") || lowerCasedContentType.endsWith("/xml");
     }
 
     protected final MaxSizeJsonFilter maxSizeJsonFilter;
