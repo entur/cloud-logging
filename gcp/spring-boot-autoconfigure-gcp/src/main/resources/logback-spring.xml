@@ -1,7 +1,6 @@
 <configuration>
 
     <!-- https://github.com/spring-projects/spring-boot/blob/main/spring-boot-project/spring-boot/src/main/resources/org/springframework/boot/logging/logback/defaults.xml -->
-    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <include resource="logback/logback-default-server.xml" />
 
     <!-- TODO refering to subproject properties is a bit ugly -->
