@@ -48,6 +48,8 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
                 jsonFactory = new JsonFactory();
             }
 
+            // TODO what about max size here? Max size is really a function of the logging backend, but getting the same during testing as in production makes most sense
+
             return new PrettyPrintingSink(logEnabledToBooleanSupplier(), loggerToBiConsumer(), jsonFactory, syntaxHighlighter);
         }
 
