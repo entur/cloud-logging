@@ -35,7 +35,7 @@ public class AbstractLogbookLoggingAutoConfiguration {
                 .build();
     }
 
-    protected OndemandLogLevelLogstashLogbackSink createAsyncMachineReadbleSink(Logger logger, Level level, RequestHttpMessageStateSupplierSource validateRequestJsonBodyWellformed, ResponseHttpMessageStateSupplierSource validateResponseJsonBodyWellformed, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
+    protected OndemandLogLevelLogstashLogbackSink createAsyncMachineReadableSink(Logger logger, Level level, RequestHttpMessageStateSupplierSource validateRequestJsonBodyWellformed, ResponseHttpMessageStateSupplierSource validateResponseJsonBodyWellformed, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
         return OndemandLogLevelLogstashLogbackSink.newBuilder()
                 .withLogger(logger)
                 .withLogLevel(level)

@@ -36,7 +36,7 @@ public class LogbookLoggingAutoConfiguration extends AbstractLogbookLoggingAutoC
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
 
-        return createAsyncMachineReadbleSink(logger, level, requestHttpMessageStateSupplierSource, responseHttpMessageStateSupplierSource, remoteHttpMessageContextSupplier);
+        return createAsyncMachineReadableSink(logger, level, requestHttpMessageStateSupplierSource, responseHttpMessageStateSupplierSource, remoteHttpMessageContextSupplier);
     }
 
     // ignore HttpLogFormatter and HttpLogWriter

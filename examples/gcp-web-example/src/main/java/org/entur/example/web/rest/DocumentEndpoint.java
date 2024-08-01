@@ -1,13 +1,21 @@
 package org.entur.example.web.rest;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/document")
@@ -45,6 +53,43 @@ public class DocumentEndpoint {
 		return new ResponseEntity(HttpStatus.NOT_FOUND);
 	}
 
+	@GetMapping(value = "/some/newlines", produces = "application/json")
+	ResponseEntity<String> age() {
+		String json = "{\n}\n";
+
+		return new ResponseEntity<>(json, HttpStatus.OK);
+	}
+
+	@GetMapping(value = "/some/bigResponse", produces = "application/json")
+	ResponseEntity<String> bigResponse() throws IOException {
+		JsonFactory factory = new JsonFactory();
+
+		CharArrayWriter writer = new CharArrayWriter();
+
+		JsonGenerator generator = factory.createGenerator(writer);
+
+		generator.writeStartObject();
+		generator.writeStringField("start", "here");
+		generator.writeStringField("longValue", generateLongString(64*1024));
+		generator.writeStringField("end", "here");
+		generator.writeEndObject();
+
+		generator.flush();
+
+		return new ResponseEntity<>(writer.toString(), HttpStatus.OK);
+	}
+
+	private String generateLongString(int length) {
+		StringBuilder builder = new StringBuilder(length);
+
+		int mod = 'z' - 'a';
+
+		for(int i = 0; i < length; i++) {
+			char c = (char) ('a' + i % mod);
+			builder.append(c);
+		}
+		return builder.toString();
+	}
 
 
 }
