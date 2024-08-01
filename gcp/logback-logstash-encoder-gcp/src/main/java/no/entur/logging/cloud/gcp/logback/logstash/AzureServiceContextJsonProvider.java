@@ -16,7 +16,7 @@ import java.io.IOException;
  * @see <a href="https://kubernetes.io/docs/concepts/containers/container-environment-variables/">https://kubernetes.io/docs/concepts/containers/container-environment-variables/</a>
  */
 
-public class StackdriverServiceContextJsonProvider extends AbstractFieldJsonProvider<ILoggingEvent> implements FieldNamesAware<LogstashFieldNames> {
+public class AzureServiceContextJsonProvider extends AbstractFieldJsonProvider<ILoggingEvent> implements FieldNamesAware<LogstashFieldNames> {
 
 	public static final String SERVICE_CONTEXT = "serviceContext";
 
@@ -27,18 +27,22 @@ public class StackdriverServiceContextJsonProvider extends AbstractFieldJsonProv
 
 	// versionType: Value is set automatically for incoming errors and must not be set when reporting errors.
 	
-	public StackdriverServiceContextJsonProvider() {
+	public AzureServiceContextJsonProvider() {
 		setFieldName(SERVICE_CONTEXT);
 	}
 
 	public void setService(String service) {
 		if(service == null || service.equals(UNDEFINED)) {
-			this.service = getHostNameFromEnvironment();
+			autodetectService();
 		} else {
 			this.service = service;
 		}
 	}
-	
+
+	public void autodetectService() {
+		this.service = getHostNameFromEnvironment();
+	}
+
 	public String getHostNameFromEnvironment() {
 		try {
 			// prefer getting system variable rather than the actual network address
