@@ -25,20 +25,12 @@ public class WebLoggingFormatWithNewlinesTest {
 
 	@Test
 	public void useHumanReadablePlainEncoderTest() {
-		MyEntity entity = new MyEntity();
-		entity.setName("Entur");
-		entity.setSecret("mySecret");
-
 		ResponseEntity<MyEntity> response = restTemplate.getForEntity("/api/document/some/newlines", MyEntity.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
 	@Test 
 	public void useHumanReadableJsonEncoderTest() throws InterruptedException {
-		MyEntity entity = new MyEntity();
-		entity.setName("Entur");
-		entity.setSecret("mySecret");
-
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
 			ResponseEntity<MyEntity> response = restTemplate.getForEntity("/api/document/some/newlines", MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
