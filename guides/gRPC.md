@@ -172,6 +172,14 @@ Also create your own beans for
 to further customize logging.
 
 ### On-demand logging
+This feature adjusts the log level for individual web server requests, taking into account actual behaviour.
+
+* increase log level for happy-cases (i.e. WARN or ERROR), otherwise
+* reduce log level (i.e. INFO) for
+    * unexpected HTTP response codes
+    * unexpected log statement levels (i.e. ERROR)
+    * troubleshooting
+
 Import the on-demand Spring Boot starters:
 
 <details>
@@ -234,4 +242,50 @@ Some included features can be removed by excluding the corresponding artifacts:
 * correlation id trace
   * correlation-id-trace-spring-boot-grpc
 
+## Running applications locally
+For 'classic' one-line log output when running a server locally, additionally add the logging test artifacts to the main scope during local execution only.
+
+* Maven: Use profiles
+* Gradle:
+    * Use configurations, and/or
+    * add dependencies directly to task
+
+<details>
+  <summary>Gradle bootRun example</summary>
+
+```groovy
+bootRun {
+    dependencies {
+        implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test")
+        implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test")
+    }
+}
+```
+
+</details>
+
+## Toggle output mode using profiles
+Add an event listener to set your preferred log output:
+
+```
+@Component
+@Profile("local")
+public class HumanReadableJsonApplicationListener implements ApplicationListener<ContextRefreshedEvent> {
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        CompositeConsoleOutputControl.useHumanReadableJsonEncoder();
+    }
+}
+```
+
+## Troubleshooting
+
+### request-response logging not working
+Did you import the relevant artifacts?
+
+### on-demand logging not working
+Did you import the relevant artifacts?
+
+Set property to enable.
 

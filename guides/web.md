@@ -150,6 +150,14 @@ entur.logging.request-response.logger.name=no.entur.logging.cloud
 See [Logbook](https://github.com/zalando/logbook) for additional configuration options.
 
 ### On-demand logging
+This feature adjusts the log level for individual web server requests, taking into account actual behaviour. 
+
+ * increase log level for happy-cases (i.e. WARN or ERROR), otherwise  
+ * reduce log level (i.e. INFO) for
+   * unexpected HTTP response codes
+   * unexpected log statement levels (i.e. ERROR)
+   * troubleshooting
+
 Import the on-demand Spring Boot starters:
 
 <details>
@@ -269,12 +277,29 @@ bootRun {
 
 </details>
 
+## Toggle output mode using profiles
+Add an event listener to set your preferred log output:
+
+```
+@Component
+@Profile("local")
+public class HumanReadableJsonApplicationListener implements ApplicationListener<ContextRefreshedEvent> {
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        CompositeConsoleOutputControl.useHumanReadableJsonEncoder();
+    }
+}
+```
+
 ## Troubleshooting
 
 ### request-response logging not working
 Did you import the relevant artifacts?
 
 ### on-demand logging not working
-Did you import the relevant artifacts?
+Did you import the relevant artifacts? 
+
+Set property to enable.
 
 

@@ -28,10 +28,10 @@ public class MaxSizeJsonFilter {
     }
 
     public String transform(String body) {
-        StringBuilder output = new StringBuilder(maxBodySize);
+        StringBuilder output = new StringBuilder(maxBodySize + 128);
         try (
                 final JsonParser parser = factory.createParser(body);
-                StringBuilderWriter writer = new StringBuilderWriter(maxBodySize + 128);
+                StringBuilderWriter writer = new StringBuilderWriter(output);
                 JsonGenerator generator = factory.createGenerator(writer);
         ) {
             process(parser, generator, () -> generator.getOutputBuffered() + output.length());
@@ -45,10 +45,10 @@ public class MaxSizeJsonFilter {
     }
 
     public String transform(byte[] body) {
-        StringBuilder output = new StringBuilder(maxBodySize);
+        StringBuilder output = new StringBuilder(maxBodySize + 128);
         try (
                 final JsonParser parser = factory.createParser(body);
-                StringBuilderWriter writer = new StringBuilderWriter(maxBodySize + 128);
+                StringBuilderWriter writer = new StringBuilderWriter(output);
                 JsonGenerator generator = factory.createGenerator(writer);
         ) {
             process(parser, generator, () -> generator.getOutputBuffered() + output.length());
