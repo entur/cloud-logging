@@ -1,4 +1,3 @@
-![Build Status](https://github.com/entur/cloud-logging/actions/workflows/gradle.yml/badge.svg)
 [![Maven Central](https://img.shields.io/maven-central/v/no.entur.logging.cloud/api.svg)](https://mvnrepository.com/artifact/no.entur.logging.cloud)
 
 # cloud-logging
