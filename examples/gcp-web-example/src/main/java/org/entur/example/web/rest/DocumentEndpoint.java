@@ -62,8 +62,6 @@ public class DocumentEndpoint {
 
 	@GetMapping(value = "/some/bigResponse", produces = "application/json")
 	ResponseEntity<String> bigResponse() throws IOException {
-		String json = "{\n}\n";
-
 		JsonFactory factory = new JsonFactory();
 
 		CharArrayWriter writer = new CharArrayWriter();
