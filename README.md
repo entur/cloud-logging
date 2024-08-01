@@ -1,3 +1,6 @@
+![Build Status](https://github.com/entur/cloud-logging/actions/workflows/gradle.yml/badge.svg)
+[![Maven Central](https://img.shields.io/maven-central/v/no.entur.logging.cloud/api.svg)](https://mvnrepository.com/artifact/no.entur.logging.cloud)
+
 # cloud-logging
 Logging libraries for JVM applications. Goals
 
@@ -7,8 +10,6 @@ Logging libraries for JVM applications. Goals
 
 Features:
 
- * Cloud-specific log encoders
-   * GCP (Stackdriver)
  * SLF4J `Logger`-wrapper for additional error levels
  * Plug and play logging scheme
    * Main scope (for production):
@@ -42,57 +43,39 @@ Supported web technologies are:
  * Spring + gRPC via Lognet
  * Micrometer
 
+Supported clouds:
+
+ * GCP (stackdriver)
+
 # License
 [European Union Public Licence v1.2](https://eupl.eu/).
 
-# Feature details
+# Usage
 
-## Logger-wrapper: Additional error levels
-Most cloud logging backends support more error levels than SFL4J. 
+## Overview
+This project contains Spring boot starters which allows for property-based configuration:
 
-This library lets developers add some more details about the seriousness of the errors:
+ * base configuration (required)
+ * request-response-logging (optional)
+ * on-demand-logging (optional)
 
-* Tell me tomorrow (default error logging)
-    * Handled by devops team during next available work hours
-* Interrupt my dinner
-    * Handled by devops team if within work hours, otherwise
-    * Handled by operations team during wake hours
-* Wake me up right now
-    * Handled by devops team if within work hours, otherwise
-    * Handled by operations team during wake or sleep hours
+Each Spring Boot starter has a corresponding Spring Boot test starter. The Spring boot test starters enhance the developer experience during local development. 
 
-## On-demand logging
-Enable "on-demand" logging for unexpected web server behaviour:
+The above starters are implemented in two flavours:
 
-  * Caches log statements for each request in memory, then
-  * throws them away for successful responses, or
-  * logs them in case of
-      * failed responses (i.e. HTTP status code >= 400) and/or
-      * log events of a certain level (i.e. warning or error) was made
-      * troubleshooting flag passed a header
+ * Servlet-based web
+ * Lognet gRPC
 
-Advantages:
-
-  * reduced logging for happy cases
-  * more "sibling" log statements for non-happy cases (i.e. not just WARN or ERROR log statements)
-  * reduces the amount of work necessary to guarantee well-formed JSON log statements for request-response logging
-      * skips JSON syntax check for throw-away request-response log statements, and/or
-      * piggybacks on Spring REST framework databinding JSON syntax check 
-
-# Cloud adaptations
-
-## GCP
-Stackdriver 
-
- * JSON encoder
- * Max log statement size (for request-response log statements)
-
-See [GCP](gcp) for further details.
+## Getting started
+See [Getting started with gRPC](guides/gRPC.md) or [Getting started with servlet-based web](guides/web.md). Alternatively, go directly to the [examples](examples).
 
 # Roadmap
 
  * Replace the correlation-id tracing artifacts with standardized modern equivalents, i.e. span id and so on.
- * Better define and tune request-response logging JSON format 
+ * Better define and tune request-response logging JSON format
+    * Add support for other text formats
+    
+ 
 
 
 

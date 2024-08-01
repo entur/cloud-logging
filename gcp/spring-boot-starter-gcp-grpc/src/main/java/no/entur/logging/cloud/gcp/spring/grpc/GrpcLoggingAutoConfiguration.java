@@ -50,7 +50,13 @@ public class GrpcLoggingAutoConfiguration {
 
                 Status status = e.getStatus();
                 String description = status.getDescription();
-                LOGGER.error("Call to " + scope.getMethodDescriptor().getFullMethodName() + " resulted in " + e.getClass().getSimpleName() + ": " + status.getCode().name() + (description != null ? (" " + status.getDescription()) : ""), e);
+
+                String message = "Call to " + scope.getMethodDescriptor().getFullMethodName() + " resulted in " + e.getClass().getSimpleName() + ": " + status.getCode().name() + (description != null ? (" " + status.getDescription()) : "");
+                if(status.getCode() == Status.Code.INTERNAL) {
+                    LOGGER.error(message, e);
+                } else {
+                    LOGGER.info(message, e);
+                }
 
                 return status.withDescription(e.getMessage());
             }

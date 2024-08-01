@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 
 public class CorrelationIdRequiredServerInterceptor implements ServerInterceptor {
+	public static final String X_CORRELATION_ID_HEADER_IS_MISSING = "x-correlation-id header is missing";
 	private static Logger LOGGER = LoggerFactory.getLogger(CorrelationIdRequiredServerInterceptor.class);
 	public static final Metadata.Key<String> X_CORRELATION_ID_HEADER_KEY = Metadata.Key.of("x-correlation-id", Metadata.ASCII_STRING_MARSHALLER);
 
@@ -77,12 +78,12 @@ public class CorrelationIdRequiredServerInterceptor implements ServerInterceptor
 		correlationIdListener.onCorrelationIdMissing(call, m);
 
 		// https://stackoverflow.com/questions/73954274/what-is-the-proper-way-to-return-an-error-from-grpc-serverinterceptor
-		Status statusProto = Status.newBuilder().setCode(Code.INVALID_ARGUMENT_VALUE).setMessage("x-correlation-id header is invalid").build();
+		Status statusProto = Status.newBuilder().setCode(Code.INVALID_ARGUMENT_VALUE).setMessage(X_CORRELATION_ID_HEADER_IS_MISSING).build();
 
 		Metadata metadata = new Metadata();
 		metadata.put(STATUS_DETAILS_KEY, statusProto);
 
-		call.close(io.grpc.Status.INVALID_ARGUMENT, metadata);
+		call.close(io.grpc.Status.INVALID_ARGUMENT.withDescription(X_CORRELATION_ID_HEADER_IS_MISSING), metadata);
 		return new ServerCall.Listener<ReqT>() {};
 	}
 }
