@@ -38,7 +38,7 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
 
-        Sink machineReadableSink = createAsyncMachineReadbleSink(logger, level, requestHttpMessageStateSupplierSource, responseHttpMessageStateSupplierSource, remoteHttpMessageContextSupplier);
+        Sink machineReadableSink = createAsyncMachineReadableSink(logger, level, requestHttpMessageStateSupplierSource, responseHttpMessageStateSupplierSource, remoteHttpMessageContextSupplier);
 
         // emulate default intellij color scheme
         DefaultSyntaxHighlighter highlighter = DefaultSyntaxHighlighter.newBuilder()
