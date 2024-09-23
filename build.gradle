@@ -1,9 +1,9 @@
 
 plugins {
     id 'com.github.ben-manes.versions' version '0.51.0' apply false
-    id 'org.owasp.dependencycheck' version '9.0.10' apply false
-    id "org.sonarqube" version "4.0.0.2929"
-    id('io.github.gradle-nexus.publish-plugin') version '1.3.0'
+    id 'org.owasp.dependencycheck' version '10.0.4' apply false
+    id "org.sonarqube" version "5.1.0.4882"
+    id('io.github.gradle-nexus.publish-plugin') version '2.0.0'
 }
 
 // Split projects into buildable: examples and libraries. 
@@ -49,7 +49,7 @@ configure(jvmProjects()) {
     ext {
         junitJupiterVersion = '5.10.2'
         mockitoVersion = '5.11.0'
-        logbackLogstashVersion = '7.4'
+        logbackLogstashVersion = '8.0'
         slf4jVersion = '2.0.12'
         googleTruthVersion = '1.4.2'
         logbackVersion = '1.4.14'
@@ -70,7 +70,7 @@ configure(jvmProjects()) {
         grpcNettyVersion = '1.63.0'
         grpcVersion = '1.63.0'
         grpcCommonsVersion = '2.37.1'
-        grpcProtobufVersion = '3.25.3'
+        grpcProtobufVersion = '4.28.2'
 
         jsonAssertVersion = '0.8.0'
         jsonPathVersion = '2.9.0'
