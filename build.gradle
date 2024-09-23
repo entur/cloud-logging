@@ -58,7 +58,7 @@ configure(jvmProjects()) {
         nettyTcnativeBoringsslStaticVersion = '2.0.65.Final'
         nettyVersion = '4.1.110.Final'
         micrometerVersion = '1.12.6'
-        springBootVersion = '3.2.6' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
+        springBootVersion = '3.3.4' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
         janinoVersion = '3.1.12'
         servletVersion = '6.0.0' // jakarta
         logbookVersion = '3.8.0'
