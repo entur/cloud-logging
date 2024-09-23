@@ -47,29 +47,29 @@ configure(jvmProjects()) {
     apply plugin: 'com.github.ben-manes.versions'
 
     ext {
-        junitJupiterVersion = '5.10.2'
-        mockitoVersion = '5.11.0'
+        junitJupiterVersion = '5.11.0'
+        mockitoVersion = '5.13.0'
         logbackLogstashVersion = '7.4'
-        slf4jVersion = '2.0.12'
-        googleTruthVersion = '1.4.2'
-        logbackVersion = '1.4.14'
-        jacksonVersion = '2.17.1'
-        jacksonDatabindVersion = '2.17.0'
-        nettyTcnativeBoringsslStaticVersion = '2.0.65.Final'
-        nettyVersion = '4.1.110.Final'
-        micrometerVersion = '1.12.6'
-        springBootVersion = '3.2.6' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
+        slf4jVersion = '2.0.16'
+        googleTruthVersion = '1.4.4'
+        logbackVersion = '1.5.8'
+        jacksonVersion = '2.17.2'
+        jacksonDatabindVersion = '2.17.2'
+        nettyTcnativeBoringsslStaticVersion = '2.0.66.Final'
+        nettyVersion = '4.1.113.Final'
+        micrometerVersion = '1.13.4'
+        springBootVersion = '3.3.4' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
         janinoVersion = '3.1.12'
-        servletVersion = '6.0.0' // jakarta
-        logbookVersion = '3.8.0'
+        servletVersion = '6.1.0' // jakarta
+        logbookVersion = '3.9.0'
         jacksonSyntaxHighlightVersion = '1.0.9'
         logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.0.7'
-        commonsIoVersion = '2.16.1'
-        commonsTextVersion = '1.11.0'
+        commonsIoVersion = '2.17.0'
+        commonsTextVersion = '1.12.0'
 
-        grpcNettyVersion = '1.63.0'
-        grpcVersion = '1.63.0'
-        grpcCommonsVersion = '2.37.1'
+        grpcNettyVersion = '1.68.0'
+        grpcVersion = '1.68.0'
+        grpcCommonsVersion = '2.44.0'
         grpcProtobufVersion = '3.25.3'
 
         jsonAssertVersion = '0.8.0'
