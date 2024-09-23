@@ -3,8 +3,6 @@ updates:
   - package-ecosystem: "gradle"
     directories:
       - "/"
-    registries:
-      - jfrog-artifactory
     groups:
       minor-and-patch:
         update-types:
