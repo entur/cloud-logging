@@ -1,0 +1,29 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directories:
+      - "/"
+    registries:
+      - jfrog-artifactory
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+      major-updates:
+        update-types:
+          - "major"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "github-actions"
+    directory: ".github/workflows"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+      major-updates:
+        update-types:
+          - "major"
+    schedule:
+      interval: "daily"
