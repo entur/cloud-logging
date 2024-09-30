@@ -1,7 +1,7 @@
 
 plugins {
     id 'com.github.ben-manes.versions' version '0.51.0' apply false
-    id 'org.owasp.dependencycheck' version '9.0.10' apply false
+    id 'org.owasp.dependencycheck' version '10.0.4' apply false
     id "org.sonarqube" version "4.0.0.2929"
     id('io.github.gradle-nexus.publish-plugin') version '1.3.0'
 }
@@ -52,25 +52,25 @@ configure(jvmProjects()) {
         logbackLogstashVersion = '7.4'
         slf4jVersion = '2.0.16'
         googleTruthVersion = '1.4.2'
-        logbackVersion = '1.4.14'
-        jacksonVersion = '2.17.2'
-        jacksonDatabindVersion = '2.17.0'
-        nettyTcnativeBoringsslStaticVersion = '2.0.65.Final'
-        nettyVersion = '4.1.110.Final'
-        micrometerVersion = '1.12.6'
-        springBootVersion = '3.2.6' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
+        logbackVersion = '1.5.8'
+        jacksonVersion = '2.18.0'
+        jacksonDatabindVersion = '2.18.0'
+        nettyTcnativeBoringsslStaticVersion = '2.0.66.Final'
+        nettyVersion = '4.1.113.Final'
+        micrometerVersion = '1.13.4'
+        springBootVersion = '3.3.4' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
         janinoVersion = '3.1.12'
         servletVersion = '6.0.0' // jakarta
-        logbookVersion = '3.8.0'
+        logbookVersion = '3.9.0'
         jacksonSyntaxHighlightVersion = '1.0.9'
         logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.0.7'
-        commonsIoVersion = '2.16.1'
-        commonsTextVersion = '1.11.0'
+        commonsIoVersion = '2.17.0'
+        commonsTextVersion = '1.12.0'
 
-        grpcNettyVersion = '1.63.0'
-        grpcVersion = '1.63.0'
-        grpcCommonsVersion = '2.37.1'
-        grpcProtobufVersion = '3.25.3'
+        grpcNettyVersion = '1.68.0'
+        grpcVersion = '1.68.0'
+        grpcCommonsVersion = '2.45.1'
+        grpcProtobufVersion = '3.25.5'
 
         jsonAssertVersion = '0.8.0'
         jsonPathVersion = '2.9.0'
@@ -88,6 +88,7 @@ configure(jvmProjects()) {
     dependencies {
         components.all(LogbackAlignmentRule)
         components.all(GrpcAlignmentRule)
+        components.all(ProtobufAlignmentRule)
 
         // JUnit Jupiter API and TestEngine implementation
         testImplementation("org.junit.jupiter:junit-jupiter:${junitJupiterVersion}")
@@ -244,6 +245,15 @@ abstract class GrpcAlignmentRule implements ComponentMetadataRule {
         ctx.details.with {
             if (id.group.startsWith("io.grpc")) {
                 belongsTo("io.grpc:grpc-virtual-platform:${id.version}")
+            }
+        }
+    }
+}
+abstract class ProtobufAlignmentRule implements ComponentMetadataRule {
+    void execute(ComponentMetadataContext ctx) {
+        ctx.details.with {
+            if (id.group.startsWith("com.google.protobuf")) {
+                belongsTo("icom.google.protobuf:protobuf-virtual-platform:${id.version}")
             }
         }
     }
