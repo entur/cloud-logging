@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import io.grpc.Metadata;
-import io.grpc.protobuf.lite.ProtoLiteUtils;
+import io.grpc.protobuf.ProtoUtils;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcMetadataFilter;
 
 import java.io.IOException;
@@ -24,7 +24,7 @@ public class DefaultMetadataJsonMapper implements GrpcMetadataJsonMapper {
     protected static final Metadata.Key<com.google.rpc.Status> STATUS_DETAILS_KEY =
             Metadata.Key.of(
                     "grpc-status-details-bin",
-                    ProtoLiteUtils.metadataMarshaller(com.google.rpc.Status.getDefaultInstance()));
+                    ProtoUtils.metadataMarshaller(com.google.rpc.Status.getDefaultInstance()));
 
     public static Map<String, Metadata.Key<String>> getDefaultAsciiKeys() {
         List<String> keys = Arrays.asList(
