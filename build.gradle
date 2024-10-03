@@ -49,7 +49,7 @@ configure(jvmProjects()) {
     ext {
         junitJupiterVersion = '5.11.1'
         mockitoVersion = '5.14.1'
-        logbackLogstashVersion = '7.4'
+        logbackLogstashVersion = '8.0'
         slf4jVersion = '2.0.16'
         googleTruthVersion = '1.4.2'
         logbackVersion = '1.5.8'
