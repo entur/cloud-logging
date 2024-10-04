@@ -1,8 +1,8 @@
 package no.entur.logging.cloud.gcp.spring.test;
 
-import com.github.skjolber.decorators.syntaxhighlight.DelegateSyntaxHighlighter;
-import com.github.skjolber.jackson.jsh.AnsiSyntaxHighlight;
-import com.github.skjolber.jackson.jsh.SyntaxHighlighter;
+import org.entur.decorators.syntaxhighlight.DelegateSyntaxHighlighter;
+import org.entur.jackson.jsh.AnsiSyntaxHighlight;
+import org.entur.jackson.jsh.SyntaxHighlighter;
 
 public class LogSeveritySyntaxHighlighter extends DelegateSyntaxHighlighter {
 

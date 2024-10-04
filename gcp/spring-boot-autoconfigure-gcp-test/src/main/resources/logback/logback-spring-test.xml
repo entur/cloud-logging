@@ -22,7 +22,7 @@
 				TODO this seems to add an extract space after the last newline,
 				but as this is just the human readable format, this is not important.
 			 -->
-			<jsonGeneratorDecorator class="com.github.skjolber.decorators.SyntaxHighlightingDecorator">
+			<jsonGeneratorDecorator class="org.entur.decorators.SyntaxHighlightingDecorator">
 				<syntaxHighlighterFactory class="no.entur.logging.cloud.gcp.spring.test.LogSeveritySyntaxHighlighterFactory">
 					<!-- Emulate intellij color scheme: Settings | Editor | Color Scheme | JSON. -->
 					<stringValue>green</stringValue>

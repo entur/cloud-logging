@@ -1,7 +1,7 @@
 package no.entur.logging.cloud.gcp.spring.gcp.grpc.lognet.test;
 
-import com.github.skjolber.jackson.jsh.AnsiSyntaxHighlight;
-import com.github.skjolber.jackson.jsh.DefaultSyntaxHighlighter;
+import org.entur.jackson.jsh.AnsiSyntaxHighlight;
+import org.entur.jackson.jsh.DefaultSyntaxHighlighter;
 import no.entur.logging.cloud.gcp.spring.gcp.grpc.lognet.AbstractRequestResponseGcpGrpcLognetAutoConfiguration;
 import no.entur.logging.cloud.gcp.spring.gcp.grpc.lognet.RequestResponseGcpGrpcLognetAutoConfiguration;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;
