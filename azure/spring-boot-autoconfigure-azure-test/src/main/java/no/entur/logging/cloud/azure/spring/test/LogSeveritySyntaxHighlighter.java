@@ -31,18 +31,12 @@ public class LogSeveritySyntaxHighlighter extends DelegateSyntaxHighlighter {
 	protected String warn;
 	protected String error;
 
-	protected String critical;
-
-	protected String alert;
-
-	protected String emergency;
-
 	protected boolean messageField;
 	protected String message;
 
 	protected String loggerName;
 
-	public LogSeveritySyntaxHighlighter(SyntaxHighlighter delegate, String defaultSeverity, String debug, String info, String warn, String error, String critical, String alert, String emergency, String loggerName, String message) {
+	public LogSeveritySyntaxHighlighter(SyntaxHighlighter delegate, String defaultSeverity, String debug, String info, String warn, String error, String loggerName, String message) {
 		super(delegate);
 		
 		this.defaultSeverity = defaultSeverity;
@@ -50,21 +44,18 @@ public class LogSeveritySyntaxHighlighter extends DelegateSyntaxHighlighter {
 		this.info = info;
 		this.warn = warn;
 		this.error = error;
-		this.critical = critical;
-		this.alert = alert;
-		this.emergency = emergency;
 
 		this.loggerName = loggerName;
 		this.message = message;
 	}
 
 	public LogSeveritySyntaxHighlighter(SyntaxHighlighter delegate) {
-		this(delegate, DEFAULT, DEBUG, INFO, WARN, ERROR, CRITICAL, ALERT, EMERGENCY, LOGGER_NAME, MESSAGE);
+		this(delegate, DEFAULT, DEBUG, INFO, WARN, ERROR, LOGGER_NAME, MESSAGE);
 	}
 
 	@Override
 	public String forFieldName(String value) {
-		this.severityLevelField = "severity".equals(value);
+		this.severityLevelField = "level".equals(value);
 		this.loggerNameField = "logger_name".equals(value);
 		this.messageField = "message".equals(value);
 		
@@ -87,12 +78,6 @@ public class LogSeveritySyntaxHighlighter extends DelegateSyntaxHighlighter {
 					return warn;
 				} else if(string.equals("ERROR")) {
 					return error;
-				} else if(string.equals("CRITICAL")) {
-					return critical;
-				} else if(string.equals("ALERT")) {
-					return alert;
-				} else if(string.equals("EMERGENCY")) {
-					return emergency;
 				}
 			}
 		} else if(messageField) {
@@ -135,27 +120,4 @@ public class LogSeveritySyntaxHighlighter extends DelegateSyntaxHighlighter {
 		this.message = message;
 	}
 
-	public void setAlert(String alert) {
-		this.alert = alert;
-	}
-
-	public void setCritical(String critical) {
-		this.critical = critical;
-	}
-
-	public void setEmergency(String emergency) {
-		this.emergency = emergency;
-	}
-
-	public String getAlert() {
-		return alert;
-	}
-
-	public String getCritical() {
-		return critical;
-	}
-
-	public String getEmergency() {
-		return emergency;
-	}
 }

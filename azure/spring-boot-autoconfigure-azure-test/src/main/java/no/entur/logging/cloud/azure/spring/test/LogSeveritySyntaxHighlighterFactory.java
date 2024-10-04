@@ -16,18 +16,6 @@ public class LogSeveritySyntaxHighlighterFactory extends ConfigurableSyntaxHighl
 		private String warning = LogSeveritySyntaxHighlighter.WARN;
 		private String error = LogSeveritySyntaxHighlighter.ERROR;
 
-		private String critical = LogSeveritySyntaxHighlighter.CRITICAL;
-
-		private String alert = LogSeveritySyntaxHighlighter.ALERT;
-
-		private String emergency = LogSeveritySyntaxHighlighter.EMERGENCY;
-
-		public static final String CRITICAL = AnsiSyntaxHighlight.build(AnsiSyntaxHighlight.BACKGROUND_RED, AnsiSyntaxHighlight.WHITE);
-
-		public static final String ALERT = AnsiSyntaxHighlight.build(AnsiSyntaxHighlight.BACKGROUND_RED, AnsiSyntaxHighlight.WHITE);
-
-		public static final String EMERGENCY = AnsiSyntaxHighlight.build(AnsiSyntaxHighlight.BACKGROUND_RED, AnsiSyntaxHighlight.WHITE);
-
 		public void setDefault(String value) {
 			this.defaultValue = AnsiSyntaxHighlight.build(parseColors(value));
 		}
@@ -48,18 +36,6 @@ public class LogSeveritySyntaxHighlighterFactory extends ConfigurableSyntaxHighl
 			this.error = AnsiSyntaxHighlight.build(parseColors(value));
 		}
 
-		public void setCritical(String value) {
-			this.critical = AnsiSyntaxHighlight.build(parseColors(value));
-		}
-
-		public void setAlert(String value) {
-			this.alert = AnsiSyntaxHighlight.build(parseColors(value));
-		}
-
-		public void setEmergency(String value) {
-			this.emergency = AnsiSyntaxHighlight.build(parseColors(value));
-		}
-
 	}
 	
 	protected SyntaxHighlighter cachedSyntaxHighlighter;
@@ -78,7 +54,7 @@ public class LogSeveritySyntaxHighlighterFactory extends ConfigurableSyntaxHighl
 		if(cachedSyntaxHighlighter == null) {
 			cachedSyntaxHighlighter = super.createSyntaxHighlighter(generator);
 		}
-		return new LogSeveritySyntaxHighlighter(cachedSyntaxHighlighter, severity.defaultValue, severity.debug, severity.info, severity.warning, severity.error, severity.critical, severity.alert, severity.emergency, loggerName, message);
+		return new LogSeveritySyntaxHighlighter(cachedSyntaxHighlighter, severity.defaultValue, severity.debug, severity.info, severity.warning, severity.error, loggerName, message);
 	}
 	
 	public void setSeverity(Severity severity) {
