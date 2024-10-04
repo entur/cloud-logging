@@ -3,8 +3,8 @@ dependencies {
     api project(':request-response:netty-grpc')
     api project(":test:test-logback")
 
-    api ("com.github.skjolber.jackson:jackson-syntax-highlight:${jacksonSyntaxHighlightVersion}")
-    api ("com.github.skjolber.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
+    api ("org.entur.jackson:jackson-syntax-highlight:${jacksonSyntaxHighlightVersion}")
+    api ("org.entur.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
 
     api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
     api("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
