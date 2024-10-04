@@ -1,12 +1,8 @@
 package no.entur.grpc.example;
 
 
-import io.grpc.util.TransmitStatusRuntimeExceptionInterceptor;
-import no.entur.logging.cloud.gcp.spring.gcp.grpc.lognet.OrderedGrpcLoggingServerInterceptor;
-import no.entur.logging.cloud.gcp.spring.gcp.grpc.lognet.RequestResponseGRpcExceptionHandlerInterceptor;
-import no.entur.logging.cloud.grpc.mdc.InitializeGrpcMdcContextServerInterceptor;
-import no.entur.logging.cloud.grpc.trace.CorrelationIdGrpcMdcContextServerInterceptor;
-import no.entur.logging.cloud.rr.grpc.GrpcLoggingServerInterceptor;
+import no.entur.logging.cloud.spring.grpc.lognet.OrderedGrpcLoggingServerInterceptor;
+import no.entur.logging.cloud.spring.grpc.lognet.RequestResponseGrpcExceptionHandlerInterceptor;
 import no.entur.logging.cloud.trace.spring.grpc.interceptor.OrderedCorrelationIdGrpcMdcContextServerInterceptor;
 import org.lognet.springboot.grpc.GRpcService;
 import org.lognet.springboot.grpc.recovery.GRpcExceptionHandlerInterceptor;
@@ -17,7 +13,7 @@ import org.springframework.context.annotation.Profile;
 		MyValidationServerInterceptor.class,
 
 		// logging
-		RequestResponseGRpcExceptionHandlerInterceptor.class,
+		RequestResponseGrpcExceptionHandlerInterceptor.class,
 		OrderedGrpcLoggingServerInterceptor.class,
 
 		GRpcExceptionHandlerInterceptor.class,

@@ -5,6 +5,7 @@ dependencies {
     api project(':azure:logback-logstash-encoder-azure')
     api project(':azure:spring-boot-starter-azure-web')
     api project(":azure:logbook-spring-boot-autoconfigure-azure")
+    api project(':request-response:request-response-spring-boot-autoconfigure-web')
 
     api "org.zalando:logbook-spring-boot-starter:${logbookVersion}"
 
@@ -12,7 +13,7 @@ dependencies {
     api ("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
     api ("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
 
-    compileOnly project(":azure:on-demand-spring-boot-starter-azure-web")
+    compileOnly project(":on-demand:on-demand-spring-boot-starter-web")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 }
