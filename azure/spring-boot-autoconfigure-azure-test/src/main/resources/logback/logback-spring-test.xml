@@ -1,0 +1,108 @@
+<included>
+
+	<!-- from org/springframework/boot/logging/logback/base.xml -->
+	<include resource="logback/spring-defaults-test.xml" />
+
+	<appender name="STDOUT" class="no.entur.logging.cloud.azure.spring.test.SpringCompositeConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>${CONSOLE_LOG_THRESHOLD}</level>
+		</filter>
+		<humanReadablePlainEncoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${CONSOLE_LOG_PATTERN}</pattern>
+			<charset>${CONSOLE_LOG_CHARSET}</charset>
+		</humanReadablePlainEncoder>
+		<humanReadableJsonEncoder class="no.entur.logging.cloud.azure.logback.logstash.AzureLogstashEncoder">
+			<!-- remove unnecessary fields in testing -->
+			<!-- note: severity and severity is removed in code -->
+			<providers>
+				<timestamp>
+					<fieldName>timestamp</fieldName>
+					<timeZone>UTC</timeZone>
+				</timestamp>
+				<loggerName>
+					<fieldName>logger</fieldName>
+				</loggerName>
+				<logLevel>
+					<fieldName>level</fieldName>
+				</logLevel>
+				<threadName>
+					<fieldName>thread</fieldName>
+				</threadName>
+				<nestedField>
+					<fieldName>mdc</fieldName>
+					<providers>
+						<mdc />
+					</providers>
+				</nestedField>
+				<stackTrace>
+					<fieldName>stackTrace</fieldName>
+					<!-- maxLength - limit the length of the stack trace -->
+					<throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+						<maxDepthPerThrowable>200</maxDepthPerThrowable>
+						<maxLength>14000</maxLength>
+						<rootCauseFirst>true</rootCauseFirst>
+					</throwableConverter>
+				</stackTrace>
+				<logstashMarkers/>
+				<message />
+				<throwableClassName>
+					<fieldName>exceptionClass</fieldName>
+				</throwableClassName>
+			</providers>
+
+			<!-- add pretty-printing and coloring for testing -->
+			<!--
+				TODO this seems to add an extract space after the last newline,
+				but as this is just the human readable format, this is not important.
+			 -->
+			<jsonGeneratorDecorator class="org.entur.decorators.SyntaxHighlightingDecorator">
+				<syntaxHighlighterFactory class="no.entur.logging.cloud.azure.spring.test.LogSeveritySyntaxHighlighterFactory">
+					<!-- Emulate intellij color scheme: Settings | Editor | Color Scheme | JSON. -->
+					<stringValue>green</stringValue>
+					<booleanValue>blue</booleanValue>
+					<numberValue>blue</numberValue>
+					<fieldName>magenta</fieldName>
+				</syntaxHighlighterFactory>
+			</jsonGeneratorDecorator>
+		</humanReadableJsonEncoder>
+		<machineReadableJsonEncoder class="no.entur.logging.cloud.azure.logback.logstash.AzureLogstashEncoder">
+			<!-- note: this encoder will be used to evaluate assertions against log statements -->
+			<providers>
+				<timestamp>
+					<fieldName>timestamp</fieldName>
+					<timeZone>UTC</timeZone>
+				</timestamp>
+				<loggerName>
+					<fieldName>logger</fieldName>
+				</loggerName>
+				<logLevel>
+					<fieldName>level</fieldName>
+				</logLevel>
+				<threadName>
+					<fieldName>thread</fieldName>
+				</threadName>
+				<nestedField>
+					<fieldName>mdc</fieldName>
+					<providers>
+						<mdc />
+					</providers>
+				</nestedField>
+				<stackTrace>
+					<fieldName>stackTrace</fieldName>
+					<!-- maxLength - limit the length of the stack trace -->
+					<throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+						<maxDepthPerThrowable>200</maxDepthPerThrowable>
+						<maxLength>14000</maxLength>
+						<rootCauseFirst>true</rootCauseFirst>
+					</throwableConverter>
+				</stackTrace>
+				<logstashMarkers/>
+				<message />
+				<throwableClassName>
+					<fieldName>exceptionClass</fieldName>
+				</throwableClassName>
+			</providers>
+		</machineReadableJsonEncoder>
+	</appender>
+
+</included>

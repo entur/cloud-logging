@@ -1,0 +1,31 @@
+<configuration>
+
+    <!-- https://github.com/spring-projects/spring-boot/blob/main/spring-boot-project/spring-boot/src/main/resources/org/springframework/boot/logging/logback/defaults.xml -->
+    <include resource="logback/logback-default-server.xml" />
+
+    <!-- TODO refering to subproject properties is a bit ugly -->
+    <springProperty name="entur.logging.http.ondemand.enabled" source="entur.logging.http.ondemand.enabled"/>
+    <springProperty name="entur.logging.grpc.ondemand.enabled" source="entur.logging.grpc.ondemand.enabled"/>
+
+    <if condition='(isDefined("entur.logging.http.ondemand.enabled") &#038;&#038; property("entur.logging.http.ondemand.enabled").equals("true")) || (isDefined("entur.logging.grpc.ondemand.enabled") &#038;&#038; property("entur.logging.grpc.ondemand.enabled").equals("true"))'>
+        <then>
+            <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender">
+                <discardingThreshold>0</discardingThreshold>
+                <maxFlushTime>0</maxFlushTime>
+                <appender-ref ref="STDOUT" />
+            </appender>
+        </then>
+        <else>
+            <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.appender.MdcAsyncAppender">
+                <discardingThreshold>0</discardingThreshold>
+                <maxFlushTime>0</maxFlushTime>
+                <appender-ref ref="STDOUT" />
+            </appender>
+        </else>
+    </if>
+
+    <root>
+        <appender-ref ref="STDOUT_ASYNC" />
+    </root>
+
+</configuration>
