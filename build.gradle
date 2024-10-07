@@ -69,7 +69,7 @@ configure(jvmProjects()) {
 
         grpcNettyVersion = '1.68.0'
         grpcVersion = '1.68.0'
-        grpcCommonsVersion = '2.45.1'
+        grpcCommonsVersion = '2.46.0'
         grpcProtobufVersion = '3.25.5'
 
         jsonAssertVersion = '0.8.0'
