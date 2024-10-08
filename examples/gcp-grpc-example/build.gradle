@@ -10,11 +10,12 @@ test {
 }
 
 dependencies {
-    implementation project(':gcp:on-demand-spring-boot-starter-gcp-grpc')
+    implementation project(':on-demand:on-demand-spring-boot-starter-grpc')
     implementation project(':gcp:spring-boot-starter-gcp-grpc')
     implementation project(':gcp:request-response-spring-boot-starter-gcp-grpc')
     implementation project(':trace:server:correlation-id-trace-grpc-netty')
     implementation project(':trace:mdc-context-grpc-netty')
+    implementation project(':request-response:request-response-spring-boot-autoconfigure-grpc')
 
     implementation("io.grpc:grpc-api:$grpcVersion")
     implementation("io.grpc:grpc-core:$grpcVersion")

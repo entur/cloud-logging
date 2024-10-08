@@ -5,6 +5,7 @@ dependencies {
     api project(':gcp:logback-logstash-encoder-gcp')
     api project(':gcp:spring-boot-starter-gcp-web')
     api project(":gcp:logbook-spring-boot-autoconfigure-gcp")
+    api project(':request-response:request-response-spring-boot-autoconfigure-web')
 
     api "org.zalando:logbook-spring-boot-starter:${logbookVersion}"
 
@@ -12,7 +13,7 @@ dependencies {
     api ("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
     api ("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
 
-    compileOnly project(":gcp:on-demand-spring-boot-starter-gcp-web")
+    compileOnly project(":on-demand:on-demand-spring-boot-starter-web")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 }

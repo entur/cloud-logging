@@ -45,6 +45,7 @@ Supported web technologies are:
 Supported clouds:
 
  * GCP (stackdriver)
+ * Azure
 
 # License
 [European Union Public Licence v1.2](https://eupl.eu/).

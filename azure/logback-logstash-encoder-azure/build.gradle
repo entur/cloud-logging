@@ -1,0 +1,17 @@
+
+dependencies {
+    api project(':api')
+
+    api("org.slf4j:slf4j-api:${slf4jVersion}")
+    api ("ch.qos.logback:logback-classic:${logbackVersion}")
+    api ("ch.qos.logback:logback-core:${logbackVersion}")
+
+    api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
+    api("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
+
+
+}
+
+
+
+

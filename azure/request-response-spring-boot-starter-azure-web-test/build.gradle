@@ -1,0 +1,16 @@
+
+dependencies {
+    api project(":azure:spring-boot-autoconfigure-azure-test")
+    api project(":request-response:logbook-spring-boot-autoconfigure-test")
+    api project(':azure:request-response-spring-boot-starter-azure-web')
+
+    api("org.slf4j:slf4j-api:${slf4jVersion}")
+    api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+
+}
+
+
+
+

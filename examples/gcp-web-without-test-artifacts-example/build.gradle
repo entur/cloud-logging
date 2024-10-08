@@ -9,7 +9,7 @@ test {
 }
 
 dependencies {
-    implementation project(':gcp:on-demand-spring-boot-starter-gcp-web')
+    implementation project(':on-demand:on-demand-spring-boot-starter-web')
     implementation project(":gcp:spring-boot-starter-gcp-web");
     implementation project(":gcp:request-response-spring-boot-starter-gcp-web");
 
