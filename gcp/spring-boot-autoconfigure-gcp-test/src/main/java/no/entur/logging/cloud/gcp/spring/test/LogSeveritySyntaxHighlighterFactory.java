@@ -1,10 +1,10 @@
 package no.entur.logging.cloud.gcp.spring.test;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.github.skjolber.decorators.factory.ConfigurableSyntaxHighlighterFactory;
-import com.github.skjolber.jackson.jsh.AnsiSyntaxHighlight;
-import com.github.skjolber.jackson.jsh.DefaultSyntaxHighlighter;
-import com.github.skjolber.jackson.jsh.SyntaxHighlighter;
+import org.entur.decorators.factory.ConfigurableSyntaxHighlighterFactory;
+import org.entur.jackson.jsh.AnsiSyntaxHighlight;
+import org.entur.jackson.jsh.DefaultSyntaxHighlighter;
+import org.entur.jackson.jsh.SyntaxHighlighter;
 
 public class LogSeveritySyntaxHighlighterFactory extends ConfigurableSyntaxHighlighterFactory {
 

@@ -1,0 +1,17 @@
+
+dependencies {
+
+    api project(':api')
+    api project(':request-response:logbook')
+    api project(':request-response:logbook-spring-boot-autoconfigure')
+
+    api "org.zalando:logbook-spring-boot-starter:${logbookVersion}"
+
+    api ("org.slf4j:slf4j-api:${slf4jVersion}")
+    api ("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
+    api ("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
+
+    compileOnly project(":on-demand:on-demand-spring-boot-starter-web")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+}

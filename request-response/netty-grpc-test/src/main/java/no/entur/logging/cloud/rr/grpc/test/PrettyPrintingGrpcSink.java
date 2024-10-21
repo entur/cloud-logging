@@ -3,17 +3,11 @@ package no.entur.logging.cloud.rr.grpc.test;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.github.skjolber.jackson.jsh.AnsiSyntaxHighlight;
-import com.github.skjolber.jackson.jsh.SyntaxHighlighter;
-import com.github.skjolber.jackson.jsh.SyntaxHighlightingJsonGenerator;
-import no.entur.logging.cloud.rr.grpc.AbstractLogLevelGrpcSink;
-import no.entur.logging.cloud.rr.grpc.AbstractLogLevelLogstashLogbackGrpcSink;
+import org.entur.jackson.jsh.AnsiSyntaxHighlight;
+import org.entur.jackson.jsh.SyntaxHighlighter;
+import org.entur.jackson.jsh.SyntaxHighlightingJsonGenerator;
 import no.entur.logging.cloud.rr.grpc.AbstractSinkBuilder;
 import no.entur.logging.cloud.rr.grpc.LogbackLogstashGrpcSink;
-import no.entur.logging.cloud.rr.grpc.marker.GrpcConnectMarker;
-import no.entur.logging.cloud.rr.grpc.marker.GrpcDisconnectMarker;
-import no.entur.logging.cloud.rr.grpc.marker.GrpcRequestMarker;
-import no.entur.logging.cloud.rr.grpc.marker.GrpcResponseMarker;
 import no.entur.logging.cloud.rr.grpc.message.GrpcConnect;
 import no.entur.logging.cloud.rr.grpc.message.GrpcDisconnect;
 import no.entur.logging.cloud.rr.grpc.message.GrpcRequest;
@@ -25,13 +19,6 @@ import java.io.StringWriter;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-
-import static org.slf4j.event.EventConstants.DEBUG_INT;
-import static org.slf4j.event.EventConstants.ERROR_INT;
-import static org.slf4j.event.EventConstants.INFO_INT;
-import static org.slf4j.event.EventConstants.TRACE_INT;
-import static org.slf4j.event.EventConstants.WARN_INT;
 
 /** Pretty printing + coloring of request-response logging message. */
 

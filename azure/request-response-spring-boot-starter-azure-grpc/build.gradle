@@ -1,0 +1,23 @@
+
+dependencies {
+
+    api project(':api')
+    api project(':azure:logback-logstash-encoder-azure')
+    api project(':request-response:netty-grpc')
+    api project(':request-response:request-response-spring-boot-autoconfigure-grpc')
+
+    api ("org.slf4j:slf4j-api:${slf4jVersion}")
+    api ("org.springframework.boot:spring-boot-starter:${springBootVersion}")
+    api ("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
+    api ("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
+
+    api ("io.github.lognet:grpc-spring-boot-starter:${lognetVersion}") {
+        exclude group: 'io.grpc', module: 'grpc-netty-shaded'
+        // for some reason this artifact cannot be resolved by gradle
+        // possible cause: the pom does not have a version for this artifact, only dependency management
+        // https://repo1.maven.org/maven2/io/github/lognet/grpc-spring-boot-starter/5.1.4/grpc-spring-boot-starter-5.1.4.pom
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter'
+    }
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+}

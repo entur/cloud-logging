@@ -1,6 +1,6 @@
 
 plugins {
-    id "com.google.protobuf" version "0.9.3"
+    id "com.google.protobuf" version "0.9.4"
 }
 
 dependencies {
@@ -22,7 +22,6 @@ dependencies {
     api("io.grpc:grpc-api:$grpcVersion")
     api("io.grpc:grpc-core:$grpcVersion")
     api("io.grpc:grpc-protobuf:$grpcVersion")
-    api("io.grpc:grpc-protobuf-lite:$grpcVersion")
     api("io.grpc:grpc-util:$grpcVersion")
 
     api("org.slf4j:slf4j-api:") {

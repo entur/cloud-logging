@@ -4,6 +4,7 @@ dependencies {
     api project(':api')
     api project(':gcp:logback-logstash-encoder-gcp')
     api project(':request-response:netty-grpc')
+    api project(':request-response:request-response-spring-boot-autoconfigure-grpc')
 
     api ("org.slf4j:slf4j-api:${slf4jVersion}")
     api ("org.springframework.boot:spring-boot-starter:${springBootVersion}")

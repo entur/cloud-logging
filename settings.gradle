@@ -8,18 +8,37 @@ pluginManagement {
 
 include 'api', 'appender'
 include 'test:test-logback', 'test:test-logback-junit'
-include 'gcp:logback-logstash-encoder-gcp', 'gcp:spring-boot-autoconfigure-gcp', 'gcp:spring-boot-autoconfigure-gcp-grpc-mdc'
-include 'gcp:spring-boot-starter-gcp-web', 'gcp:on-demand-spring-boot-starter-gcp-web', 'gcp:spring-boot-starter-gcp-web-test', 'gcp:spring-boot-starter-gcp-grpc-test', 'gcp:on-demand-spring-boot-starter-gcp-grpc', 'gcp:spring-boot-starter-gcp-grpc'
 
+include 'micrometer'
+
+// GCP
+include 'gcp:logback-logstash-encoder-gcp', 'gcp:spring-boot-autoconfigure-gcp', 'gcp:spring-boot-autoconfigure-gcp-grpc-mdc'
+include 'gcp:spring-boot-starter-gcp-web', 'gcp:spring-boot-starter-gcp-web-test', 'gcp:spring-boot-starter-gcp-grpc-test', 'gcp:spring-boot-starter-gcp-grpc'
 include 'gcp:spring-boot-autoconfigure-gcp-test', 'gcp:request-response-spring-boot-starter-gcp-web', 'gcp:request-response-spring-boot-starter-gcp-web-test', 'gcp:request-response-spring-boot-starter-gcp-grpc', 'gcp:request-response-spring-boot-starter-gcp-grpc-test'
 
-include 'micrometer', 'gcp:micrometer-gcp'
+include 'gcp:micrometer-gcp'
+include 'gcp:logbook-spring-boot-autoconfigure-gcp'
+
+// Azure
+include 'azure:logback-logstash-encoder-azure', 'azure:spring-boot-autoconfigure-azure', 'azure:spring-boot-autoconfigure-azure-grpc-mdc'
+include 'azure:spring-boot-starter-azure-web', 'azure:spring-boot-starter-azure-web-test', 'azure:spring-boot-starter-azure-grpc-test', 'azure:spring-boot-starter-azure-grpc'
+include 'azure:spring-boot-autoconfigure-azure-test', 'azure:request-response-spring-boot-starter-azure-web', 'azure:request-response-spring-boot-starter-azure-web-test', 'azure:request-response-spring-boot-starter-azure-grpc', 'azure:request-response-spring-boot-starter-azure-grpc-test'
+
+include 'azure:micrometer-azure'
+include 'azure:logbook-spring-boot-autoconfigure-azure'
+
 
 include 'trace:mdc-context-grpc-netty', 'trace:server:correlation-id-trace-spring-boot-web', 'trace:server:correlation-id-trace-grpc-netty', 'trace:server:correlation-id-trace-spring-boot-grpc'
 
 include 'request-response:netty-grpc', 'request-response:netty-grpc-test'
-include 'request-response:logbook', 'request-response:logbook-test', 'request-response:logbook-spring-boot-autoconfigure', 'request-response:logbook-spring-boot-autoconfigure-test', 'gcp:logbook-spring-boot-autoconfigure-gcp'
+include 'request-response:logbook', 'request-response:logbook-test', 'request-response:logbook-spring-boot-autoconfigure', 'request-response:logbook-spring-boot-autoconfigure-test'
+include 'on-demand:on-demand-spring-boot-starter-web', 'on-demand:on-demand-spring-boot-starter-grpc'
+include 'request-response:request-response-spring-boot-autoconfigure-web', 'request-response:request-response-spring-boot-autoconfigure-grpc'
 
 include 'bom'
 
+// GCP
 include 'examples:gcp-web-example', 'examples:gcp-grpc-example', 'examples:gcp-web-grpc-example', 'examples:gcp-web-without-test-artifacts-example', 'examples:gcp-grpc-without-test-artifacts-example'
+
+// Azure
+include 'examples:azure-web-example'

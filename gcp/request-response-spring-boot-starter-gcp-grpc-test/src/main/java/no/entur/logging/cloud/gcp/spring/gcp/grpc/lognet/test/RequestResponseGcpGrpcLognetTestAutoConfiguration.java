@@ -1,9 +1,9 @@
 package no.entur.logging.cloud.gcp.spring.gcp.grpc.lognet.test;
 
-import com.github.skjolber.jackson.jsh.AnsiSyntaxHighlight;
-import com.github.skjolber.jackson.jsh.DefaultSyntaxHighlighter;
-import no.entur.logging.cloud.gcp.spring.gcp.grpc.lognet.AbstractRequestResponseGcpGrpcLognetAutoConfiguration;
 import no.entur.logging.cloud.gcp.spring.gcp.grpc.lognet.RequestResponseGcpGrpcLognetAutoConfiguration;
+import no.entur.logging.cloud.spring.grpc.lognet.AbstractRequestResponseGrpcLognetSinkAutoConfiguration;
+import org.entur.jackson.jsh.AnsiSyntaxHighlight;
+import org.entur.jackson.jsh.DefaultSyntaxHighlighter;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;
 import no.entur.logging.cloud.rr.grpc.test.CompositeSink;
 import no.entur.logging.cloud.rr.grpc.test.PrettyPrintingLogLevelLogstashLogbackGrpcSink;
@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
 })
 
 @Configuration
-public class RequestResponseGcpGrpcLognetTestAutoConfiguration extends AbstractRequestResponseGcpGrpcLognetAutoConfiguration {
+public class RequestResponseGcpGrpcLognetTestAutoConfiguration extends AbstractRequestResponseGrpcLognetSinkAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(GrpcSink.class)
