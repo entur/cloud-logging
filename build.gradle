@@ -253,7 +253,7 @@ abstract class ProtobufAlignmentRule implements ComponentMetadataRule {
     void execute(ComponentMetadataContext ctx) {
         ctx.details.with {
             if (id.group.startsWith("com.google.protobuf")) {
-                belongsTo("icom.google.protobuf:protobuf-virtual-platform:${id.version}")
+                belongsTo("com.google.protobuf:protobuf-virtual-platform:${id.version}")
             }
         }
     }
