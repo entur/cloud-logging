@@ -65,7 +65,7 @@ Import the below artifacts:
 Add
 
 ```xml
-<cloud-logging.version>2.0.x</cloud-logging>
+<cloud-logging.version>2.0.x</cloud-logging.version>
 ```
 
 and
