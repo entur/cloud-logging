@@ -10,12 +10,12 @@ test {
 }
 
 dependencies {
-    implementation project(':on-demand:on-demand-spring-boot-starter-grpc')
-    implementation project(':gcp:spring-boot-starter-gcp-grpc')
-    implementation project(':gcp:request-response-spring-boot-starter-gcp-grpc')
+    implementation project(':on-demand:on-demand-spring-boot-starter-grpc-lognet')
+    implementation project(':gcp:spring-boot-starter-gcp-grpc-lognet')
+    implementation project(':gcp:request-response-spring-boot-starter-gcp-grpc-lognet')
     implementation project(':trace:server:correlation-id-trace-grpc-netty')
     implementation project(':trace:mdc-context-grpc-netty')
-    implementation project(':request-response:request-response-spring-boot-autoconfigure-grpc')
+    implementation project(':request-response:request-response-spring-boot-autoconfigure-grpc-lognet')
 
     implementation("io.grpc:grpc-api:$grpcVersion")
     implementation("io.grpc:grpc-core:$grpcVersion")
@@ -27,8 +27,8 @@ dependencies {
     implementation("io.grpc:grpc-util:$grpcVersion")
     implementation("org.springframework.boot:spring-boot-starter:${springBootVersion}")
 
-    testImplementation project(":gcp:spring-boot-starter-gcp-grpc-test")
-    testImplementation project(':gcp:request-response-spring-boot-starter-gcp-grpc-test')
+    testImplementation project(":gcp:spring-boot-starter-gcp-grpc-lognet-test")
+    testImplementation project(':gcp:request-response-spring-boot-starter-gcp-grpc-lognet-test')
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 
     // JUnit Jupiter API and TestEngine implementation

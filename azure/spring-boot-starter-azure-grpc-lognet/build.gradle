@@ -2,11 +2,11 @@
 dependencies {
     api project(':trace:mdc-context-grpc-netty')
     api project(':trace:server:correlation-id-trace-spring-boot-grpc')
-    api project(':gcp:spring-boot-autoconfigure-gcp-grpc-mdc')
+    api project(':azure:spring-boot-autoconfigure-azure-grpc-lognet-mdc')
 
-    api project(':gcp:micrometer-gcp')
+    api project(':azure:micrometer-azure')
     api project(':micrometer')
-    api project(':gcp:spring-boot-autoconfigure-gcp')
+    api project(':azure:spring-boot-autoconfigure-azure')
 
     api("org.slf4j:slf4j-api:${slf4jVersion}")
 
@@ -26,7 +26,7 @@ dependencies {
     api "io.grpc:grpc-netty:${grpcNettyVersion}"
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
-    testImplementation project(":gcp:spring-boot-autoconfigure-gcp-test")
+    testImplementation project(":azure:spring-boot-autoconfigure-azure-test")
 
 }
 
