@@ -10,7 +10,7 @@ test {
 }
 
 dependencies {
-    implementation project(':on-demand:on-demand-spring-boot-starter-grpc-lognet')
+    implementation project(':on-demand:on-demand-spring-boot-starter-grpc')
     implementation project(':gcp:spring-boot-starter-gcp-grpc-lognet')
     implementation project(':gcp:request-response-spring-boot-starter-gcp-grpc-lognet')
     implementation project(':trace:server:correlation-id-trace-grpc-netty')

@@ -32,7 +32,7 @@ include 'trace:mdc-context-grpc-netty', 'trace:server:correlation-id-trace-sprin
 
 include 'request-response:netty-grpc', 'request-response:netty-grpc-test'
 include 'request-response:logbook', 'request-response:logbook-test', 'request-response:logbook-spring-boot-autoconfigure', 'request-response:logbook-spring-boot-autoconfigure-test'
-include 'on-demand:on-demand-spring-boot-starter-web', 'on-demand:on-demand-spring-boot-starter-grpc-lognet'
+include 'on-demand:on-demand-spring-boot-starter-web', 'on-demand:on-demand-spring-boot-starter-grpc'
 include 'request-response:request-response-spring-boot-autoconfigure-web', 'request-response:request-response-spring-boot-autoconfigure-grpc-lognet'
 
 include 'bom'
