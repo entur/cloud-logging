@@ -38,7 +38,7 @@ include 'request-response:request-response-spring-boot-autoconfigure-web', 'requ
 include 'bom'
 
 // GCP
-include 'examples:gcp-web-example', 'examples:gcp-grpc-example', 'examples:gcp-web-grpc-example', 'examples:gcp-web-without-test-artifacts-example', 'examples:gcp-grpc-without-test-artifacts-example'
+include 'examples:gcp-web-example', 'examples:gcp-grpc-lognet-example', 'examples:gcp-web-grpc-lognet-example', 'examples:gcp-web-without-test-artifacts-example', 'examples:gcp-grpc-lognet-without-test-artifacts-example'
 
 // Azure
 include 'examples:azure-web-example'

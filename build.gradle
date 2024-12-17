@@ -48,28 +48,28 @@ configure(jvmProjects()) {
 
     ext {
         junitJupiterVersion = '5.11.2'
-        mockitoVersion = '5.14.1'
+        mockitoVersion = '5.14.2'
         logbackLogstashVersion = '8.0'
         slf4jVersion = '2.0.16'
         googleTruthVersion = '1.4.4'
         logbackVersion = '1.5.12'
-        jacksonVersion = '2.18.0'
-        jacksonDatabindVersion = '2.18.0'
+        jacksonVersion = '2.18.1'
+        jacksonDatabindVersion = '2.18.1'
         nettyTcnativeBoringsslStaticVersion = '2.0.69.Final'
         nettyVersion = '4.1.115.Final'
-        micrometerVersion = '1.13.8'
+        micrometerVersion = '1.14.1'
         springBootVersion = '3.3.6' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
         janinoVersion = '3.1.12'
         servletVersion = '6.0.0' // jakarta
         logbookVersion = '3.10.0'
         jacksonSyntaxHighlightVersion = '1.1.0'
         logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.1.0'
-        commonsIoVersion = '2.17.0'
+        commonsIoVersion = '2.18.0'
         commonsTextVersion = '1.12.0'
 
-        grpcNettyVersion = '1.68.0'
-        grpcVersion = '1.68.0'
-        grpcCommonsVersion = '2.46.0'
+        grpcNettyVersion = '1.68.1'
+        grpcVersion = '1.68.1'
+        grpcCommonsVersion = '2.49.0'
         grpcProtobufVersion = '3.25.5'
 
         jsonAssertVersion = '0.8.0'
@@ -121,8 +121,12 @@ configure(libraryProjects()) {
                 artifactId = project.name
                 version = "$version"
 
+                if(project.ext.has('artifactId') && !project.name.equals(project.ext.artifactId)) {
+                    throw new RuntimeException("Expected " + project.name + ", was " + project.ext.artifactId)
+                }
+
                 pom {
-                    name = project.name
+                    name = "${!project.ext.has('artifactId') ? project.name : project.ext.artifactId}"
                     url = 'https://github.com/entur/cloud-logging'
                     packaging = 'jar'
                     inceptionYear = '2023'
