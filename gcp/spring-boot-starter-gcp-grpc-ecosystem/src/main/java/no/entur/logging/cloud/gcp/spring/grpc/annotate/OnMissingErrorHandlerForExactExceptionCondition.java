@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.gcp.spring.grpc.annotate;
+package no.entur.logging.cloud.gcp.spring.grpc.lognet.annotate;
 
 import org.lognet.springboot.grpc.recovery.GRpcExceptionHandler;
 import org.lognet.springboot.grpc.recovery.GRpcServiceAdvice;

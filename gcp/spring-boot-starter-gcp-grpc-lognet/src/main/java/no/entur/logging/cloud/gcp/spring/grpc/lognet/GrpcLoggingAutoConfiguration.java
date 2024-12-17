@@ -1,8 +1,8 @@
-package no.entur.logging.cloud.gcp.spring.grpc;
+package no.entur.logging.cloud.gcp.spring.grpc.lognet;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import no.entur.logging.cloud.gcp.spring.grpc.annotate.ConditionalOnMissingErrorHandlerForExactException;
+import no.entur.logging.cloud.gcp.spring.grpc.lognet.annotate.ConditionalOnMissingErrorHandlerForExactException;
 import org.lognet.springboot.grpc.autoconfigure.GRpcAutoConfiguration;
 import org.lognet.springboot.grpc.recovery.GRpcExceptionHandler;
 import org.lognet.springboot.grpc.recovery.GRpcExceptionScope;

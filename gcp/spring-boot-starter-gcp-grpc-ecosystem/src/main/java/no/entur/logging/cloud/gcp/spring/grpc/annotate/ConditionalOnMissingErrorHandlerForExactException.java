@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.gcp.spring.grpc.annotate;
+package no.entur.logging.cloud.gcp.spring.grpc.lognet.annotate;
 
 
 import org.springframework.context.annotation.Conditional;
