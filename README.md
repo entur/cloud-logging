@@ -13,7 +13,7 @@ Features:
  * Plug and play logging scheme
    * Main scope (for production):
      * Machine-readable JSON
-   * Test scope (for local development). Log output can be toggeled at runtime:
+   * Test scope (for local development). Log output can be toggled at runtime:
      * Human-readable 'classic' (one-line + ANSI colors, enabled by default), or
      * Human-readable JSON (pretty-printed + ANSI colored), or
      * Machine-readable JSON (single line)

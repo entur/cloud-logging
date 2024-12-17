@@ -121,8 +121,8 @@ configure(libraryProjects()) {
                 artifactId = project.name
                 version = "$version"
 
-                if(project.ext.has('artifactId') && !project.name.equals(project.ext.artifactId)) {
-                    throw new RuntimeException("Expected " + project.name + ", was " + project.ext.artifactId)
+                if(project.ext.has('artifactId')) {
+                    System.out.println("Publishing " + project.name + " with artifact-id " + project.ext.artifactId)
                 }
 
                 pom {
