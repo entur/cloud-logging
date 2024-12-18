@@ -21,9 +21,10 @@ include 'gcp:micrometer-gcp'
 include 'gcp:logbook-spring-boot-autoconfigure-gcp'
 
 // Azure
-include 'azure:logback-logstash-encoder-azure', 'azure:spring-boot-autoconfigure-azure', 'azure:spring-boot-autoconfigure-azure-grpc-lognet-mdc'
-include 'azure:spring-boot-starter-azure-web', 'azure:spring-boot-starter-azure-web-test', 'azure:spring-boot-starter-azure-grpc-lognet-test', 'azure:spring-boot-starter-azure-grpc-lognet'
-include 'azure:spring-boot-autoconfigure-azure-test', 'azure:request-response-spring-boot-starter-azure-web', 'azure:request-response-spring-boot-starter-azure-web-test', 'azure:request-response-spring-boot-starter-azure-grpc-lognet', 'azure:request-response-spring-boot-starter-azure-grpc-lognet-test'
+include 'azure:logback-logstash-encoder-azure', 'azure:spring-boot-autoconfigure-azure', 'azure:spring-boot-autoconfigure-azure-grpc-mdc'
+include 'azure:spring-boot-starter-azure-web', 'azure:spring-boot-starter-azure-web-test', 'azure:spring-boot-starter-azure-grpc-lognet-test', 'azure:spring-boot-starter-azure-grpc-lognet', 'azure:spring-boot-starter-azure-grpc-ecosystem-test', 'azure:spring-boot-starter-azure-grpc-ecosystem'
+include 'azure:spring-boot-autoconfigure-azure-test', 'azure:request-response-spring-boot-starter-azure-web', 'azure:request-response-spring-boot-starter-azure-web-test'
+include 'azure:request-response-spring-boot-starter-azure-grpc-lognet', 'azure:request-response-spring-boot-starter-azure-grpc-lognet-test', 'azure:request-response-spring-boot-starter-azure-grpc-ecosystem', 'azure:request-response-spring-boot-starter-azure-grpc-ecosystem-test'
 
 include 'azure:micrometer-azure'
 include 'azure:logbook-spring-boot-autoconfigure-azure'
@@ -42,4 +43,4 @@ include 'bom'
 include 'examples:gcp-web-example', 'examples:gcp-grpc-lognet-example', 'examples:gcp-web-grpc-lognet-example', 'examples:gcp-web-without-test-artifacts-example', 'examples:gcp-grpc-lognet-without-test-artifacts-example'
 include 'examples:gcp-grpc-ecosystem-example'
 // Azure
-include 'examples:azure-web-example'
+include 'examples:azure-web-example', 'examples:azure-grpc-ecosystem-example'

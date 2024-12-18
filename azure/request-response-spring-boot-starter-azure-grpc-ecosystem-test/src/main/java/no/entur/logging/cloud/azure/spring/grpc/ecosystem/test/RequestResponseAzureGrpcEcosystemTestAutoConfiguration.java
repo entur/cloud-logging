@@ -1,7 +1,6 @@
-package no.entur.logging.cloud.azure.spring.azure.grpc.lognet.test;
+package no.entur.logging.cloud.azure.spring.grpc.ecosystem.test;
 
-import no.entur.logging.cloud.azure.spring.grpc.lognet.RequestResponseAzureGrpcLognetAutoConfiguration;
-import no.entur.logging.cloud.spring.grpc.lognet.AbstractRequestResponseGrpcLognetSinkAutoConfiguration;
+import no.entur.logging.cloud.spring.grpc.ecosystem.AbstractRequestResponseGrpcEcosystemSinkAutoConfiguration;
 import org.entur.jackson.jsh.AnsiSyntaxHighlight;
 import org.entur.jackson.jsh.DefaultSyntaxHighlighter;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;
@@ -17,11 +16,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @AutoConfigureBefore(value = {
-        RequestResponseAzureGrpcLognetAutoConfiguration.class,
+        no.entur.logging.cloud.azure.spring.grpc.ecosystem.RequestResponseAzureGrpcEcosystemAutoConfiguration.class,
 })
 
 @Configuration
-public class RequestResponseAzureGrpcLognetTestAutoConfiguration extends AbstractRequestResponseGrpcLognetSinkAutoConfiguration {
+public class RequestResponseAzureGrpcEcosystemTestAutoConfiguration extends AbstractRequestResponseGrpcEcosystemSinkAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(GrpcSink.class)
