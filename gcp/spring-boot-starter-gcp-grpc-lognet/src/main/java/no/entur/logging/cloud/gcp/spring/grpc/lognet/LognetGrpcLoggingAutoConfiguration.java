@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @AutoConfigureBefore(GRpcAutoConfiguration.class)
-public class GrpcLoggingAutoConfiguration {
+public class LognetGrpcLoggingAutoConfiguration {
 
     // catch all and log stacktrace
     // note: this will eclipse all other users of the annotation ConditionalOnMissingErrorHandler

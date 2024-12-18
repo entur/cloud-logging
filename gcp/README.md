@@ -82,7 +82,7 @@ and
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
-<!-- request-respons support -->
+<!-- request-response support -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
     <artifactId>request-response-spring-boot-starter-gcp-web</artifactId>
@@ -97,7 +97,7 @@ and
 <!-- on-demand logging support -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>on-demand-spring-boot-starter-gcp-web</artifactId>
+    <artifactId>on-demand-spring-boot-starter-grpc</artifactId>
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
@@ -135,11 +135,11 @@ add
 ```groovy
 implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web:${cloudLoggingVersion}")
 testImplementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test:${cloudLoggingVersion}")
-// request response logging support
+// request-response logging support
 implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web:${cloudLoggingVersion}")
 testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test:${cloudLoggingVersion}")
 // on-demand logging support
-implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-gcp-web:${cloudLoggingVersion}")
+implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-web:${cloudLoggingVersion}")
 // metrics
 implementation("no.entur.logging.cloud:micrometer-gcp:${cloudLoggingVersion}")
 // logger with additional log levels
@@ -231,7 +231,7 @@ and
 <!-- on-demand logging -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>on-demand-spring-boot-starter-gcp-grpc</artifactId>
+    <artifactId>on-demand-spring-boot-starter-grpc</artifactId>
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
@@ -286,11 +286,11 @@ add
 ```groovy
 implementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc:${cloudLoggingVersion}")
 testImplementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-test:${cloudLoggingVersion}")
-// requst-response logging
+// request-response logging
 implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc:${cloudLoggingVersion}")
 testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-test:${cloudLoggingVersion}")
 // on-demand logging support
-implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-gcp-grpc:${cloudLoggingVersion}")
+implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-grpc:${cloudLoggingVersion}")
 // metrics
 implementation("no.entur.logging.cloud:micrometer-gcp:${cloudLoggingVersion}")
 // logger with additional log levels

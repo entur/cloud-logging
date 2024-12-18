@@ -2,7 +2,7 @@
 dependencies {
     api project(':trace:mdc-context-grpc-netty')
     api project(':trace:server:correlation-id-trace-spring-boot-grpc')
-    api project(':gcp:spring-boot-autoconfigure-gcp-grpc-ecosystem-mdc')
+    api project(':gcp:spring-boot-autoconfigure-gcp-grpc-mdc')
 
     api project(':gcp:micrometer-gcp')
     api project(':micrometer')
@@ -17,7 +17,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
     api("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
 
-    api("net.devh:grpc-server-spring-boot-starter:{ecosystemGrpcVersion}")
+    api("net.devh:grpc-server-spring-boot-starter:${ecosystemGrpcVersion}")
 
     api "io.grpc:grpc-netty:${grpcNettyVersion}"
 

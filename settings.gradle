@@ -12,9 +12,10 @@ include 'test:test-logback', 'test:test-logback-junit'
 include 'micrometer'
 
 // GCP
-include 'gcp:logback-logstash-encoder-gcp', 'gcp:spring-boot-autoconfigure-gcp', 'gcp:spring-boot-autoconfigure-gcp-grpc-lognet-mdc'
-include 'gcp:spring-boot-starter-gcp-web', 'gcp:spring-boot-starter-gcp-web-test', 'gcp:spring-boot-starter-gcp-grpc-lognet-test', 'gcp:spring-boot-starter-gcp-grpc-lognet'
-include 'gcp:spring-boot-autoconfigure-gcp-test', 'gcp:request-response-spring-boot-starter-gcp-web', 'gcp:request-response-spring-boot-starter-gcp-web-test', 'gcp:request-response-spring-boot-starter-gcp-grpc-lognet', 'gcp:request-response-spring-boot-starter-gcp-grpc-lognet-test'
+include 'gcp:logback-logstash-encoder-gcp', 'gcp:spring-boot-autoconfigure-gcp', 'gcp:spring-boot-autoconfigure-gcp-grpc-mdc'
+include 'gcp:spring-boot-starter-gcp-web', 'gcp:spring-boot-starter-gcp-web-test', 'gcp:spring-boot-starter-gcp-grpc-lognet-test', 'gcp:spring-boot-starter-gcp-grpc-lognet', 'gcp:spring-boot-starter-gcp-grpc-ecosystem-test', 'gcp:spring-boot-starter-gcp-grpc-ecosystem'
+include 'gcp:spring-boot-autoconfigure-gcp-test', 'gcp:request-response-spring-boot-starter-gcp-web', 'gcp:request-response-spring-boot-starter-gcp-web-test'
+include 'gcp:request-response-spring-boot-starter-gcp-grpc-lognet', 'gcp:request-response-spring-boot-starter-gcp-grpc-lognet-test', 'gcp:request-response-spring-boot-starter-gcp-grpc-ecosystem', 'gcp:request-response-spring-boot-starter-gcp-grpc-ecosystem-test'
 
 include 'gcp:micrometer-gcp'
 include 'gcp:logbook-spring-boot-autoconfigure-gcp'
@@ -33,12 +34,12 @@ include 'trace:mdc-context-grpc-netty', 'trace:server:correlation-id-trace-sprin
 include 'request-response:netty-grpc', 'request-response:netty-grpc-test'
 include 'request-response:logbook', 'request-response:logbook-test', 'request-response:logbook-spring-boot-autoconfigure', 'request-response:logbook-spring-boot-autoconfigure-test'
 include 'on-demand:on-demand-spring-boot-starter-web', 'on-demand:on-demand-spring-boot-starter-grpc'
-include 'request-response:request-response-spring-boot-autoconfigure-web', 'request-response:request-response-spring-boot-autoconfigure-grpc-lognet'
+include 'request-response:request-response-spring-boot-autoconfigure-web', 'request-response:request-response-spring-boot-autoconfigure-grpc-lognet', 'request-response:request-response-spring-boot-autoconfigure-grpc-ecosystem'
 
 include 'bom'
 
 // GCP
 include 'examples:gcp-web-example', 'examples:gcp-grpc-lognet-example', 'examples:gcp-web-grpc-lognet-example', 'examples:gcp-web-without-test-artifacts-example', 'examples:gcp-grpc-lognet-without-test-artifacts-example'
-
+include 'examples:gcp-grpc-ecosystem-example'
 // Azure
 include 'examples:azure-web-example'

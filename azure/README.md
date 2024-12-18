@@ -82,7 +82,7 @@ and
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
-<!-- request-respons support -->
+<!-- request-response support -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
     <artifactId>request-response-spring-boot-starter-azure-web</artifactId>
@@ -97,7 +97,7 @@ and
 <!-- on-demand logging support -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>on-demand-spring-boot-starter-azure-web</artifactId>
+    <artifactId>on-demand-spring-boot-starter-web</artifactId>
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
@@ -139,7 +139,7 @@ testImplementation("no.entur.logging.cloud:spring-boot-starter-azure-web-test:${
 implementation("no.entur.logging.cloud:request-response-spring-boot-starter-azure-web:${cloudLoggingVersion}")
 testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-azure-web-test:${cloudLoggingVersion}")
 // on-demand logging support
-implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-azure-web:${cloudLoggingVersion}")
+implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-web:${cloudLoggingVersion}")
 // metrics
 implementation("no.entur.logging.cloud:micrometer-azure:${cloudLoggingVersion}")
 // logger with additional log levels
@@ -231,7 +231,7 @@ and
 <!-- on-demand logging -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>on-demand-spring-boot-starter-azure-grpc</artifactId>
+    <artifactId>on-demand-spring-boot-starter-grpc</artifactId>
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
@@ -247,13 +247,13 @@ and
     <artifactId>api</artifactId>
     <version>${cloud-logging.version}</version>
 </dependency>
-// MDC support
+<!-- MDC support -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
     <artifactId>mdc-context-grpc-netty</artifactId>
     <version>${cloud-logging.version}</version>
 </dependency>
-// Correlation id + various interceptors
+<!-- Correlation id + various interceptors -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
     <artifactId>correlation-id-trace-grpc-netty</artifactId>
@@ -290,7 +290,7 @@ testImplementation("no.entur.logging.cloud:spring-boot-starter-azure-grpc-test:$
 implementation("no.entur.logging.cloud:request-response-spring-boot-starter-azure-grpc:${cloudLoggingVersion}")
 testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-azure-grpc-test:${cloudLoggingVersion}")
 // on-demand logging support
-implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-azure-grpc:${cloudLoggingVersion}")
+implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-grpc:${cloudLoggingVersion}")
 // metrics
 implementation("no.entur.logging.cloud:micrometer-azure:${cloudLoggingVersion}")
 // logger with additional log levels

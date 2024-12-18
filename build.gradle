@@ -56,7 +56,7 @@ configure(jvmProjects()) {
         jacksonVersion = '2.18.1'
         jacksonDatabindVersion = '2.18.1'
         nettyTcnativeBoringsslStaticVersion = '2.0.69.Final'
-        nettyVersion = '4.1.115.Final'
+        nettyVersion = '4.1.116.Final'
         micrometerVersion = '1.14.1'
         springBootVersion = '3.3.6' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
         janinoVersion = '3.1.12'
@@ -71,7 +71,7 @@ configure(jvmProjects()) {
         grpcVersion = '1.68.1'
         grpcCommonsVersion = '2.49.0'
         grpcProtobufVersion = '3.25.5'
-        ecosystemGrpcVersion = '3.1.0-RELEASE'
+        ecosystemGrpcVersion = '3.1.0.RELEASE'
 
         jsonAssertVersion = '0.8.0'
         jsonPathVersion = '2.9.0'

@@ -1,0 +1,2 @@
+no.entur.logging.cloud.spring.grpc.ecosystem.RequestResponseGrpcEcosystemAutoConfiguration
+no.entur.logging.cloud.spring.grpc.ecosystem.StatusRuntimeExceptionErrorHandlerAutoConfiguration
