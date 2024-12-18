@@ -17,6 +17,7 @@ public class StatusRuntimeExceptionErrorHandlerAutoConfiguration {
     public static class StatusRuntimeExceptionGrpcServiceAdvice {
         @java.lang.SuppressWarnings("all")
 
+        // this error mapper can be overriden by specifying value in the annotation
         @GrpcExceptionHandler
         public Status handle(StatusRuntimeException e) {
             return e.getStatus();
