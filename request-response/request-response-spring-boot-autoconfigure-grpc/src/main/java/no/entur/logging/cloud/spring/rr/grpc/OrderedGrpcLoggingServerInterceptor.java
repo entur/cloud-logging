@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.spring.grpc.ecosystem;
+package no.entur.logging.cloud.spring.rr.grpc;
 
 import no.entur.logging.cloud.rr.grpc.GrpcLoggingServerInterceptor;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;

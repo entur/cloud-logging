@@ -1,10 +1,9 @@
-package no.entur.logging.cloud.spring.grpc.ecosystem;
+package no.entur.logging.cloud.spring.rr.grpc;
 
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
-import net.devh.boot.grpc.server.error.GrpcExceptionInterceptor;
 import org.springframework.core.Ordered;
 
 /**
@@ -19,9 +18,9 @@ public class RequestResponseGrpcExceptionHandlerInterceptor implements ServerInt
 
     protected final int order;
 
-    private final GrpcExceptionInterceptor delegate;
+    private final ServerInterceptor delegate;
 
-    public RequestResponseGrpcExceptionHandlerInterceptor(GrpcExceptionInterceptor delegate, int order) {
+    public RequestResponseGrpcExceptionHandlerInterceptor(ServerInterceptor delegate, int order) {
         this.delegate = delegate;
         this.order = order;
     }

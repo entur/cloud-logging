@@ -1,11 +1,11 @@
-package no.entur.logging.cloud.spring.grpc.lognet;
+package no.entur.logging.cloud.spring.rr.grpc;
 
 import no.entur.logging.cloud.rr.grpc.LogbackLogstashGrpcSink;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Value;
 
-public abstract class AbstractRequestResponseGrpcLognetSinkAutoConfiguration {
+public abstract class AbstractRequestResponseGrpcSinkAutoConfiguration {
 
     @Value("${entur.logging.request-response.logger.level:info}")
     protected String loggerLevel;

@@ -1,7 +1,7 @@
 package no.entur.logging.cloud.gcp.spring.gcp.grpc.ecosystem.test;
 
 import no.entur.logging.cloud.gcp.spring.gcp.grpc.ecosystem.RequestResponseGcpGrpcEcosystemAutoConfiguration;
-import no.entur.logging.cloud.spring.grpc.ecosystem.AbstractRequestResponseGrpcEcosystemSinkAutoConfiguration;
+import no.entur.logging.cloud.spring.rr.grpc.AbstractRequestResponseGrpcSinkAutoConfiguration;
 import org.entur.jackson.jsh.AnsiSyntaxHighlight;
 import org.entur.jackson.jsh.DefaultSyntaxHighlighter;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;
@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
 })
 
 @Configuration
-public class RequestResponseGcpGrpcEcosystemTestAutoConfiguration extends AbstractRequestResponseGrpcEcosystemSinkAutoConfiguration {
+public class RequestResponseGcpGrpcEcosystemTestAutoConfiguration extends AbstractRequestResponseGrpcSinkAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(GrpcSink.class)
