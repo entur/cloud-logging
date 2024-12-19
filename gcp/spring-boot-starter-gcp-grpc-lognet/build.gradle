@@ -2,7 +2,7 @@
 dependencies {
     api project(':trace:mdc-context-grpc-netty')
     api project(':trace:server:correlation-id-trace-spring-boot-grpc')
-    api project(':gcp:spring-boot-autoconfigure-gcp-grpc-lognet-mdc')
+    api project(':gcp:spring-boot-autoconfigure-gcp-grpc-mdc')
 
     api project(':gcp:micrometer-gcp')
     api project(':micrometer')

@@ -33,7 +33,9 @@ This library is mostly based on
 
  * SLF4J 2
  * Logback + Logback logstash
- * Lognet GRPC
+ * GRPC
+   * Lognet
+   * Ecosystem
  * Logbook
 
 Supported web technologies are:

@@ -1,1 +1,1 @@
-no.entur.logging.cloud.spring.logbook.azure.LogbookAzureAutoConfiguration
+no.entur.logging.cloud.azure.logbook.spring.LogbookAzureAutoConfiguration

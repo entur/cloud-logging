@@ -1,0 +1,17 @@
+
+dependencies {
+
+    api project(':api')
+    api project(':azure:logback-logstash-encoder-azure')
+    api project(':request-response:netty-grpc')
+    api project(':request-response:request-response-spring-boot-autoconfigure-grpc-ecosystem')
+
+    api ("org.slf4j:slf4j-api:${slf4jVersion}")
+    api ("org.springframework.boot:spring-boot-starter:${springBootVersion}")
+    api ("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
+    api ("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
+
+    api("net.devh:grpc-server-spring-boot-starter:${ecosystemGrpcVersion}")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+}

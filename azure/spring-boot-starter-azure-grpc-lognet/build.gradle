@@ -2,7 +2,7 @@
 dependencies {
     api project(':trace:mdc-context-grpc-netty')
     api project(':trace:server:correlation-id-trace-spring-boot-grpc')
-    api project(':azure:spring-boot-autoconfigure-azure-grpc-lognet-mdc')
+    api project(':azure:spring-boot-autoconfigure-azure-grpc-mdc')
 
     api project(':azure:micrometer-azure')
     api project(':micrometer')

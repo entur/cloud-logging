@@ -136,9 +136,9 @@ public class GreetingTest extends AbstractGrpcTest {
 
 		LogStatements http = statements.forLogger("no.entur.logging.cloud");
 		LogStatement request = http.get(0);
-		request.assertThatMessage().equals("REQ /org.entur.grpc.example.GreetingService/statusRuntimeExceptionLogging #1");
+		request.assertThatMessage().matches("REQ /org.entur.grpc.example.GreetingService/statusRuntimeExceptionLogging #1[\\s\\S]*");
 		LogStatement response = http.get(http.size() - 1);
-		response.assertThatMessage().equals("RESP INVALID_ARGUMENT /org.entur.grpc.example.GreetingService/statusRuntimeExceptionLogging #1");
+		response.assertThatMessage().matches("RESP INVALID_ARGUMENT /org.entur.grpc.example.GreetingService/statusRuntimeExceptionLogging #1[\\s\\S]*");
 
 		response.assertThatHttpHeader("grpc-status").contains("3");
 
@@ -162,9 +162,9 @@ public class GreetingTest extends AbstractGrpcTest {
 
 		LogStatements http = statements.forLogger("no.entur.logging.cloud");
 		LogStatement request = http.get(0);
-		request.assertThatMessage().equals("REQ /org.entur.grpc.example.GreetingService/runtimeExceptionLogging #1");
+		request.assertThatMessage().matches("REQ /org.entur.grpc.example.GreetingService/runtimeExceptionLogging #1[\\s\\S]*");
 		LogStatement response = http.get(http.size() - 1);
-		response.assertThatMessage().equals("RESP INTERNAL /org.entur.grpc.example.GreetingService/runtimeExceptionLogging #1");
+		response.assertThatMessage().matches("RESP INTERNAL /org.entur.grpc.example.GreetingService/runtimeExceptionLogging #1[\\s\\S]*");
 
 		response.assertThatHttpHeader("grpc-status").contains("13");
 
@@ -268,9 +268,9 @@ public class GreetingTest extends AbstractGrpcTest {
 		LogStatements http = statements.forLogger("no.entur.logging.cloud");
 
 		LogStatement request = http.get(0);
-		request.assertThatMessage().equals("REQ /org.entur.grpc.example.GreetingService/statusRuntimeExceptionLogging #1");
+		request.assertThatMessage().matches("REQ /org.entur.grpc.example.GreetingService/greeting4 #1[\\s\\S]*");
 		LogStatement response = http.get(http.size() - 1);
-		response.assertThatMessage().equals("RESP INVALID_ARGUMENT /org.entur.grpc.example.GreetingService/statusRuntimeExceptionLogging #1");
+		response.assertThatMessage().matches("RESP INVALID_ARGUMENT /org.entur.grpc.example.GreetingService/greeting4 #1[\\s\\S]*");
 
 		response.assertThatHttpHeader("grpc-status").contains("3");
 		response.assertThatHttpHeader("grpc-message").contains("My error message");
