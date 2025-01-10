@@ -43,7 +43,6 @@ public class RequestResponseGrpcLognetAutoConfiguration {
     @Bean
     @ConditionalOnBean({FailureHandlingSupport.class, GRpcExceptionHandlerMethodResolver.class})
     @ConditionalOnProperty(name = {"entur.logging.request-response.grpc.server.exception-handler.enabled"}, havingValue = "true", matchIfMissing = true)
-    @Primary
     public RequestResponseGrpcExceptionHandlerInterceptor requestResponseGRpcExceptionHandlerInterceptor(GRpcExceptionHandlerInterceptor interceptor) {
         return new RequestResponseGrpcExceptionHandlerInterceptor(interceptor, exceptionInterceptorOrder);
     }

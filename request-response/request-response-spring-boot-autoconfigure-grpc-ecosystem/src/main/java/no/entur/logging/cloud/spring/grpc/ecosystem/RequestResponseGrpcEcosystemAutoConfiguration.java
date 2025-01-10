@@ -14,7 +14,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-//@ConditionalOnMissingErrorHandler(StatusRuntimeException.class)
+/**
+ *
+ * We need the proper error handling to run before the response is logged, i.e. to make sure no exception is thrown through the
+ * request-response interceptor, we wrap the system error handler to run in an additional interceptor and make it run first.
+ * .
+ *
+ */
+
 @Configuration
 @AutoConfigureBefore(GrpcAdviceAutoConfiguration.class)
 public class RequestResponseGrpcEcosystemAutoConfiguration {
@@ -23,6 +30,7 @@ public class RequestResponseGrpcEcosystemAutoConfiguration {
     private int exceptionInterceptorOrder;
 
     @GrpcAdvice
+    @ConditionalOnProperty(name = {"entur.logging.request-response.grpc.server.exception-handler.enabled"}, havingValue = "true", matchIfMissing = true)
     public static class StatusRuntimeExceptionGrpcServiceAdvice {
         @java.lang.SuppressWarnings("all")
 
@@ -33,11 +41,8 @@ public class RequestResponseGrpcEcosystemAutoConfiguration {
         }
     }
 
-    // handle status runtime exception
-
     @Bean
     @ConditionalOnProperty(name = {"entur.logging.request-response.grpc.server.exception-handler.enabled"}, havingValue = "true", matchIfMissing = true)
-    @Primary
     public RequestResponseGrpcExceptionHandlerInterceptor requestResponseGRpcExceptionHandlerInterceptor(GrpcExceptionInterceptor interceptor) {
         return new RequestResponseGrpcExceptionHandlerInterceptor(interceptor, exceptionInterceptorOrder);
     }

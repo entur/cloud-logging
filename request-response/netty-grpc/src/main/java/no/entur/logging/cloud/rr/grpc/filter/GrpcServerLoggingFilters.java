@@ -35,7 +35,6 @@ public class GrpcServerLoggingFilters {
 			return this;
 		}
 
-
 		public Builder requestSummaryLoggingForService(String serviceName) {
 			return loggingForService(serviceName, GrpcLogFilter.REQUEST_SUMMARY, Collections.emptySet());
 		}
