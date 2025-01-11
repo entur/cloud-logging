@@ -31,14 +31,8 @@ public class RequestResponseGrpcAutoConfiguration extends AbstractRequestRespons
     @Value("${entur.logging.request-response.max-body-size}")
     protected int maxBodySize;
 
-    @Value("${entur.logging.request-response.grpc.server.interceptor-order:0}")
-    private int serverInterceptorOrder;
-
     @Value("${entur.logging.request-response.grpc.client.interceptor-order:0}")
     private int clientInterceptorOrder;
-
-    @Value("${entur.logging.request-response.grpc.server.exception-handler.interceptor-order:0}")
-    private int exceptionInterceptorOrder;
 
     @Bean
     @ConditionalOnMissingBean(JsonFormat.TypeRegistry.class)
@@ -76,12 +70,6 @@ public class RequestResponseGrpcAutoConfiguration extends AbstractRequestRespons
     @ConditionalOnMissingBean(GrpcServerLoggingFilters.class)
     public GrpcServerLoggingFilters grpcServerLoggingFilters() {
         return GrpcServerLoggingFilters.newBuilder().classicDefaultLogging().build();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(OrderedGrpcLoggingServerInterceptor.class)
-    public OrderedGrpcLoggingServerInterceptor orderedGrpcLoggingServerInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcServerLoggingFilters grpcServerLoggingFilters) {
-        return new OrderedGrpcLoggingServerInterceptor(grpcSink, grpcServerLoggingFilters, grpcMetadataJsonMapper, grpcPayloadJsonMapper, serverInterceptorOrder);
     }
 
     @Bean

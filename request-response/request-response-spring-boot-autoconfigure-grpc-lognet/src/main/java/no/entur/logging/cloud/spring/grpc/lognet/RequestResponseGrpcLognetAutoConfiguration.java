@@ -14,6 +14,7 @@ import no.entur.logging.cloud.rr.grpc.mapper.GrpcStatusMapper;
 import no.entur.logging.cloud.rr.grpc.mapper.JsonPrinterFactory;
 import no.entur.logging.cloud.rr.grpc.mapper.JsonPrinterStatusMapper;
 import no.entur.logging.cloud.rr.grpc.mapper.TypeRegistryFactory;
+import no.entur.logging.cloud.spring.rr.grpc.OrderedGrpcLoggingServerInterceptor;
 import no.entur.logging.cloud.spring.rr.grpc.RequestResponseGrpcExceptionHandlerInterceptor;
 import org.lognet.springboot.grpc.FailureHandlingSupport;
 import org.lognet.springboot.grpc.autoconfigure.ConditionalOnMissingErrorHandler;
@@ -39,6 +40,15 @@ public class RequestResponseGrpcLognetAutoConfiguration {
 
     @Value("${entur.logging.request-response.grpc.server.exception-handler.interceptor-order:0}")
     private int exceptionInterceptorOrder;
+
+    @Value("${entur.logging.request-response.grpc.server.interceptor-order:0}")
+    private int serverInterceptorOrder;
+
+    @Bean
+    @ConditionalOnMissingBean(OrderedGrpcLoggingServerInterceptor.class)
+    public OrderedGrpcLoggingServerInterceptor orderedGrpcLoggingServerInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcServerLoggingFilters grpcServerLoggingFilters) {
+        return new OrderedGrpcLoggingServerInterceptor(grpcSink, grpcServerLoggingFilters, grpcMetadataJsonMapper, grpcPayloadJsonMapper, serverInterceptorOrder);
+    }
 
     @Bean
     @ConditionalOnBean({FailureHandlingSupport.class, GRpcExceptionHandlerMethodResolver.class})
