@@ -34,7 +34,7 @@ This library is mostly based on
  * SLF4J 2
  * Logback + Logback logstash
  * GRPC
-   * Lognet
+   * Lognet (deprecated)
    * Ecosystem
  * Logbook
 

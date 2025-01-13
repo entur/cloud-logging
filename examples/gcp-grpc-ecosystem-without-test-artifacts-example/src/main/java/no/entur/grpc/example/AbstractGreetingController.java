@@ -4,6 +4,8 @@ package no.entur.grpc.example;
 import io.grpc.Metadata;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
+import org.entur.grpc.example.GreetingRequest;
 import org.entur.grpc.example.GreetingResponse;
 import org.entur.grpc.example.GreetingServiceGrpc;
 import org.slf4j.Logger;
@@ -84,6 +86,11 @@ public class AbstractGreetingController extends GreetingServiceGrpc.GreetingServ
 			responseObserver.onNext(GreetingResponse.newBuilder().setMessage("Hello " + i).setStatus(counter.getAndIncrement()).build());
 		}
 		responseObserver.onCompleted();
+	}
+
+	@Override
+	public void greeting4(GreetingRequest request, StreamObserver<GreetingResponse> responseObserver) {
+		throw new RuntimeException("The validation interceptor should block this method from being executed");
 	}
 
 	public void noLogging(org.entur.grpc.example.GreetingRequest request,

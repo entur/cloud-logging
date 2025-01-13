@@ -65,7 +65,7 @@ Import the below artifacts:
 Add
 
 ```xml
-<cloud-logging.version>2.0.x</cloud-logging>
+<cloud-logging.version>4.0.x</cloud-logging>
 ```
 
 and
@@ -207,24 +207,24 @@ and
 ```xml
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>spring-boot-starter-azure-grpc</artifactId>
+    <artifactId>spring-boot-starter-azure-grpc-ecosystem</artifactId>
     <version>${cloud-logging.version}</version>
 </dependency>
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>spring-boot-starter-azure-grpc-test</artifactId>
+    <artifactId>spring-boot-starter-azure-grpc-ecosystem-test</artifactId>
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
 <!-- request-response logging -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>request-response-spring-boot-starter-azure-grpc</artifactId>
+    <artifactId>request-response-spring-boot-starter-azure-grpc-ecosystem</artifactId>
     <version>${cloud-logging.version}</version>
 </dependency>
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>request-response-spring-boot-starter-azure-grpc-test</artifactId>
+    <artifactId>request-response-spring-boot-starter-azure-grpc-ecosystem-test</artifactId>
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
@@ -284,11 +284,11 @@ ext {
 add
 
 ```groovy
-implementation("no.entur.logging.cloud:spring-boot-starter-azure-grpc:${cloudLoggingVersion}")
-testImplementation("no.entur.logging.cloud:spring-boot-starter-azure-grpc-test:${cloudLoggingVersion}")
+implementation("no.entur.logging.cloud:spring-boot-starter-azure-grpc-ecosystem:${cloudLoggingVersion}")
+testImplementation("no.entur.logging.cloud:spring-boot-starter-azure-grpc-ecosystem-test:${cloudLoggingVersion}")
 // requst-response logging
-implementation("no.entur.logging.cloud:request-response-spring-boot-starter-azure-grpc:${cloudLoggingVersion}")
-testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-azure-grpc-test:${cloudLoggingVersion}")
+implementation("no.entur.logging.cloud:request-response-spring-boot-starter-azure-grpc-ecosystem:${cloudLoggingVersion}")
+testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-azure-grpc-ecosystem-test:${cloudLoggingVersion}")
 // on-demand logging support
 implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-grpc:${cloudLoggingVersion}")
 // metrics
@@ -334,9 +334,4 @@ Avoid [OWASP dependency supressions](dependencycheck-root-suppression.xml) flagg
 See [test-logback-junit](../test/test-logback-junit) for basic JUnit test support.
  
 ## Examples:
-
-   * [azure-grpc-example](../examples/azure-grpc-example) Lognet gRPC example
-   * [azure-web-example](../examples/azure-web-example) Spring-flavoured REST example
-   * [azure-web-grpc-example](../examples/azure-web-example) Spring-flavoured REST example with gRPC context (read: for further gRPC calls).
-   * [azure-grpc-without-test-artifacts-example](../examples/azure-grpc-without-test-artifacts-example) Lognet gRPC example without test artifacts
-   * [azure-web-without-test-artifacts-example](../examples/azure-web-without-test-artifacts-example) Spring-flavoured REST example without test artifacts
+See [examples](../examples) for various examples.

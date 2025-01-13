@@ -65,7 +65,7 @@ Import the below artifacts:
 Add
 
 ```xml
-<cloud-logging.version>2.0.x</cloud-logging.version>
+<cloud-logging.version>4.0.x</cloud-logging.version>
 ```
 
 and
@@ -334,9 +334,4 @@ Avoid [OWASP dependency supressions](dependencycheck-root-suppression.xml) flagg
 See [test-logback-junit](../test/test-logback-junit) for basic JUnit test support.
  
 ## Examples:
-
-   * [gcp-grpc-example](../examples/gcp-grpc-example) Lognet gRPC example
-   * [gcp-web-example](../examples/gcp-web-example) Spring-flavoured REST example
-   * [gcp-web-grpc-example](../examples/gcp-web-example) Spring-flavoured REST example with gRPC context (read: for further gRPC calls).
-   * [gcp-grpc-without-test-artifacts-example](../examples/gcp-grpc-without-test-artifacts-example) Lognet gRPC example without test artifacts
-   * [gcp-web-without-test-artifacts-example](../examples/gcp-web-without-test-artifacts-example) Spring-flavoured REST example without test artifacts
+See [examples](../examples) for various examples.

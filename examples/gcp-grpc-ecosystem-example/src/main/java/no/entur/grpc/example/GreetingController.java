@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Profile;
 		// Validation
 		MyValidationServerInterceptor.class,
 
-}, sortInterceptors = false)
+}, sortInterceptors = true)
 
 @Profile("!ondemand")
 public class GreetingController extends AbstractGreetingController {

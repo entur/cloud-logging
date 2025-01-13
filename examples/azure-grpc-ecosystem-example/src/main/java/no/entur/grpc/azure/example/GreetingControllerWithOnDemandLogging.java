@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Profile;
 
 		// Validation
 		MyValidationServerInterceptor.class,
-})
+}, sortInterceptors = true)
 public class GreetingControllerWithOnDemandLogging extends AbstractGreetingController {
 
 }

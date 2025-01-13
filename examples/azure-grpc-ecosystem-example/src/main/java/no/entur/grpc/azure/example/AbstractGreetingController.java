@@ -117,6 +117,11 @@ public class AbstractGreetingController extends GreetingServiceGrpc.GreetingServ
 		responseObserver.onCompleted();
 	}
 
+	@Override
+	public void greeting4(GreetingRequest request, StreamObserver<GreetingResponse> responseObserver) {
+		throw new RuntimeException("The validation interceptor should block this method from being executed");
+	}
+
 	public void noLogging(org.entur.grpc.example.GreetingRequest request,
 						  io.grpc.stub.StreamObserver<GreetingResponse> responseObserver) {
 

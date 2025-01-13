@@ -9,20 +9,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MyGrpcConfig {
 
-    // interceptors:
-    // 50: CorrelationIdGrpcMdcContextServerInterceptor
-    //  - cloud-logging via no.entur.logging.grpc.trace.mdc.interceptor-order
-    // 100: lognet recovery - GRpcExceptionHandlerInterceptor for auth errors
-    //  - grpc.recovery.interceptor-order
-    // 275: GrpcLoggingServerInterceptor - request-response logging via
-    //  - entur.logging.request-response.grpc.server.interceptor-order
-    // 280: lognet recovery clone / handle most errors here
-    //  - entur.logging.request-response.grpc.server.exception-handler.interceptor-order
-    // 500: MyValidationServerInterceptor
-
     @Bean
     public ServerInterceptor myValidationServerInterceptor() {
-        return new MyValidationServerInterceptor(500);
+        return new MyValidationServerInterceptor(6000);
     }
 
     @Bean
