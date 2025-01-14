@@ -1,5 +1,5 @@
-# logback-filter
-Various request/response/body filters:
+# logbook-filter
+Various request/response/body filters for Logbook:
 
  * max body size filter
  * max string field value body filter
