@@ -9,8 +9,8 @@ import java.util.function.Predicate;
 
 public class JsonOnlyMatchPathStrategy extends MatchPathStrategy {
 
-    public JsonOnlyMatchPathStrategy(List<Predicate<String>> excludeRequests, List<Predicate<String>> excludeResponses) {
-        super(excludeRequests, excludeResponses);
+    public JsonOnlyMatchPathStrategy(List<Predicate<String>> includeRequests, List<Predicate<String>> includeResponses) {
+        super(includeRequests, includeResponses);
     }
 
     @Override
