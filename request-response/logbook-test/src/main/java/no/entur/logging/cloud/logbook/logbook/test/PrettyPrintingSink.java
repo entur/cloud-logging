@@ -74,7 +74,7 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
 
         String contentType = request.getContentType();
         boolean isJson = ContentType.isJsonMediaType(contentType);
-        boolean isXml = AbstractLogLevelLogstashLogbackSink.isXmlMediaType(contentType);
+        boolean isXml = isXmlMediaType(contentType);
 
         if(isJson || isXml) {
             final String body = request.getBodyAsString();
@@ -91,7 +91,7 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
 
         String contentType = response.getContentType();
         boolean isJson = ContentType.isJsonMediaType(contentType);
-        boolean isXml = AbstractLogLevelLogstashLogbackSink.isXmlMediaType(contentType);
+        boolean isXml = isXmlMediaType(contentType);
 
         if(isJson || isXml) {
             final String body = response.getBodyAsString();
