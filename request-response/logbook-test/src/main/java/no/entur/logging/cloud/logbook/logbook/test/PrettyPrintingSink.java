@@ -3,6 +3,7 @@ package no.entur.logging.cloud.logbook.logbook.test;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import no.entur.logging.cloud.logbook.AbstractLogLevelLogstashLogbackSink;
 import org.entur.jackson.jsh.AnsiSyntaxHighlight;
 import org.entur.jackson.jsh.SyntaxHighlighter;
 import org.entur.jackson.jsh.SyntaxHighlightingJsonGenerator;
@@ -68,27 +69,35 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
     protected void requestMessage(HttpRequest request, StringBuilder messageBuilder) throws IOException {
         super.requestMessage(request, messageBuilder);
 
-        final String body = request.getBodyAsString();
-
         messageBuilder.append('\n');
         writeHeaders(request.getHeaders(), messageBuilder);
-        writeBody(body, request.getContentType(), messageBuilder);
+
+        String contentType = request.getContentType();
+        boolean isJson = ContentType.isJsonMediaType(contentType);
+        boolean isXml = isXmlMediaType(contentType);
+
+        if(isJson || isXml) {
+            final String body = request.getBodyAsString();
+            writeBody(body, contentType, messageBuilder);
+        }
     }
 
     @Override
     protected void responseMessage(Correlation correlation, HttpRequest request, HttpResponse response, StringBuilder messageBuilder) throws IOException {
         super.responseMessage(correlation, request, response, messageBuilder);
 
-        final String body = response.getBodyAsString();
-
         messageBuilder.append('\n');
         writeHeaders(response.getHeaders(), messageBuilder);
-        if(body != null) {
-            writeBody(body, response.getContentType(), messageBuilder);
+
+        String contentType = response.getContentType();
+        boolean isJson = ContentType.isJsonMediaType(contentType);
+        boolean isXml = isXmlMediaType(contentType);
+
+        if(isJson || isXml) {
+            final String body = response.getBodyAsString();
+            writeBody(body, contentType, messageBuilder);
         }
-
     }
-
 
     private void writeHeaders(final Map<String, List<String>> headers, final StringBuilder output) {
         if (headers.isEmpty()) {
@@ -118,9 +127,11 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
     }
 
     private void writeBody(final String body, String contentType, final StringBuilder output) {
-        if (!body.isEmpty()) {
+        if (body != null && !body.isEmpty()) {
             output.append('\n');
-            if(ContentType.isJsonMediaType(contentType)) {
+
+            boolean isJson = ContentType.isJsonMediaType(contentType);
+            if(isJson) {
                 output.append(prettyPrint(body));
             } else {
                 output.append(body);
