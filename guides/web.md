@@ -138,7 +138,19 @@ testImplementation ("no.entur.logging.cloud:request-response-spring-boot-starter
 ```
 </details>
 
-By default [certain OpenAPI and actuator endpoints](../gcp/request-response-spring-boot-starter-gcp-web/src/main/resources/logbook.gcp.web.properties) are excluded. 
+Some default Logbook excludes are recommended: 
+
+```
+logbook:
+  predicate:
+    exclude:
+      - path: /actuator/**
+      - path: /favicon.*
+      - path: /v2/api-docs/**
+      - path: /v3/api-docs/**
+      - path: /metrics
+      - path: /swagger
+```
 
 Adjust the logger using
 
