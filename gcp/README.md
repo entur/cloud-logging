@@ -185,7 +185,8 @@ gRPC request-response-logging for local development, for additional coloring and
 ## on-demand-spring-boot-starter-gcp-grpc
 Selective (on-demand) logging for logging only interesting requests.
 
-Try the [configuration](on-demand-spring-boot-starter-gcp-grpc/src/main/java/no/entur/logging/cloud/gcp/spring/grpc/lognet/properties/OndemandProperties.java)
+See the [configuration properties](../on-demand/on-demand-spring-boot-starter-gcp-grpc/src/main/java/no/entur/logging/cloud/spring/ondemand/grpc/properties/OndemandProperties.java)
+
 ```
 entur.logging.grpc.ondemand.enabled=true
 ```
@@ -199,7 +200,7 @@ Import the below artifacts:
 Add
 
 ```xml
-<cloud-logging.version>2.0.x</cloud-logging>
+<cloud-logging.version>4.0.x</cloud-logging>
 ```
 
 and
