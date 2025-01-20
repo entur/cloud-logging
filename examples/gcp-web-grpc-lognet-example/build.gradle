@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '3.3.4'
+    id 'org.springframework.boot' version '3.3.7'
 }
 
 test {
@@ -12,7 +12,7 @@ dependencies {
     implementation project(':on-demand:on-demand-spring-boot-starter-web')
     implementation project(":gcp:spring-boot-starter-gcp-web");
     implementation project(":gcp:request-response-spring-boot-starter-gcp-web");
-    implementation project(":gcp:spring-boot-autoconfigure-gcp-grpc-lognet-mdc");
+    implementation project(":gcp:spring-boot-autoconfigure-gcp-grpc-mdc");
 
     implementation("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
     implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")

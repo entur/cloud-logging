@@ -1,4 +1,4 @@
-# Getting started with Lognet gRPC
+# Getting started with gRPC
 First remove any preexisting log configuration (i.e. logback.xml) and so on.
 
 Then import the cloud-logging BOM:
@@ -9,7 +9,7 @@ Then import the cloud-logging BOM:
 Add
 
 ```xml
-<cloud-logging.version>2.0.x</cloud-logging>
+<cloud-logging.version>4.0.x</cloud-logging>
 ```
 
 and
@@ -35,7 +35,7 @@ For
 
 ```groovy
 ext {
-   cloudLoggingVersion = '2.0.x'
+   cloudLoggingVersion = '4.0.x'
 }
 ```
 
@@ -56,11 +56,11 @@ Add the spring-boot-starter artifact coordinates to your project.
 ```xml
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>spring-boot-starter-gcp-grpc</artifactId>
+    <artifactId>spring-boot-starter-gcp-grpc-ecosystem</artifactId>
 </dependency>
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>spring-boot-starter-gcp-grpc-test</artifactId>
+    <artifactId>spring-boot-starter-gcp-grpc-ecosystem-test</artifactId>
     <scope>test</scope>
 </dependency>
 ```
@@ -73,8 +73,8 @@ or
   <summary>Gradle Spring Boot Starter coordinates</summary>
 
 ```groovy
-implementation ("no.entur.logging.cloud:spring-boot-starter-gcp-grpc")
-testImplementation ("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-test")
+implementation ("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-ecosystem")
+testImplementation ("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-ecosystem-test")
 ```
 </details>
 
@@ -114,11 +114,11 @@ Import the request-response Spring Boot starters:
 ```xml
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>request-response-spring-boot-starter-gcp-grpc</artifactId>
+    <artifactId>request-response-spring-boot-starter-gcp-grpc-ecosystem</artifactId>
 </dependency>
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>request-response-spring-boot-starter-gcp-grpc-test</artifactId>
+    <artifactId>request-response-spring-boot-starter-gcp-grpc-ecosystem-test</artifactId>
     <scope>test</scope>
 </dependency>
 ```
@@ -131,8 +131,8 @@ or
   <summary>Gradle Spring Boot Starter coordinates</summary>
 
 ```groovy
-implementation ("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc")
-testImplementation ("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-test")
+implementation ("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-ecosystem")
+testImplementation ("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-ecosystem-test")
 ```
 </details>
 
@@ -210,6 +210,7 @@ While __disabled__ by default, on-demand logging can be enabled using
 entur.logging.grpc.ondemand.enabled=true
 ```
 
+Add the `GrpcLoggingScopeContextInterceptor` interceptor to your gRPC services.
 
 ## Running applications locally
 For 'classic' one-line log output when running a server locally, additionally add the logging test artifacts to the main scope during local execution only.
