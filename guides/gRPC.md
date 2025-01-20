@@ -215,24 +215,46 @@ Add the `GrpcLoggingScopeContextInterceptor` interceptor to your gRPC services.
 ## Running applications locally
 For 'classic' one-line log output when running a server locally, additionally add the logging test artifacts to the main scope during local execution only.
 
- * Maven: Use profiles
- * Gradle:
-   * Use configurations, and/or
-   * add dependencies directly to task
+* Maven: Use profiles
+* Gradle:
+    * Use configurations, and/or
+    * add dependencies directly to task
 
 <details>
   <summary>Gradle bootRun example</summary>
 
 ```groovy
-bootRun {
-    dependencies {
-        implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test")
-        implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test")
+dependencies {
+   // Setup HumanReadableJsonApplicationListener without reflection
+   compileOnly("no.entur.logging.cloud:test-logback") { transitive = false }
+}
+
+tasks.register("logPlainly") {
+   dependencies {
+      implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-ecosystem-test")
+      implementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-ecosystem-test")
+   }
+}
+
+tasks.withType(JavaExec).configureEach {
+   dependsOn("logPlainly")
+}
+```
+</details>
+
+Add an event listener to set your preferred log output:
+
+```
+@Component
+@ConditionalOnClass(name = {"no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl"})
+public class HumanReadableJsonApplicationListener implements ApplicationListener<ContextRefreshedEvent> {
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        CompositeConsoleOutputControl.useHumanReadableJsonEncoder();
     }
 }
 ```
-
-</details>
 
 ## Opting out
 Some included features can be removed by excluding the corresponding artifacts:
