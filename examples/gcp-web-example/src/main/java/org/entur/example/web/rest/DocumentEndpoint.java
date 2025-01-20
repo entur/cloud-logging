@@ -91,5 +91,13 @@ public class DocumentEndpoint {
 		return builder.toString();
 	}
 
+	@PostMapping("/some/method/infoLoggingOnly")
+	public MyEntity infoLoggingOnly(@RequestBody MyEntity entity) {
+		logger.info("Hello entity with secret / info");
+
+		entity.setName("Entur response");
+		return entity;
+	}
+
 
 }
