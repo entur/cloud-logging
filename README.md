@@ -23,6 +23,7 @@ Features:
  * Selective 'on-demand' logging for unexpected web server behaviour
      * capture full logs for problematic requests (i.e. not only WARN or ERROR, but also all sibling INFO log statements)
      * reduce cost of logging considerably
+     * only supported for sync calls for now
  * Unit testing
    * Always assert against machine-readable JSON 'under the hood', regardless what is printed to console during local development
    * Supported frameworks
