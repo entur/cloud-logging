@@ -5,15 +5,13 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonStreamContext;
 import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.zalando.logbook.BodyFilter;
 import org.zalando.logbook.ContentType;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.function.LongSupplier;
-import java.util.function.Predicate;
 
 /**
  * Thread-safe filter for JSON fields.
@@ -34,7 +32,7 @@ public class JsonMaxBodySizeFilter implements BodyFilter {
 
     public JsonMaxBodySizeFilter(int maxBodySize) {
         this.maxBodySize = maxBodySize;
-        this.factory = new ObjectMapper().getFactory();
+        this.factory = new MappingJsonFactory();
     }
 
     @Override

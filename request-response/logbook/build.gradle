@@ -2,6 +2,7 @@
 dependencies {
     api("org.slf4j:slf4j-api:${slf4jVersion}")
     api project(':appender')
+    api project(':request-response:logbook-filter')
     api("org.zalando:logbook-api:${logbookVersion}")
     api("org.zalando:logbook-api:${logbookVersion}")
 

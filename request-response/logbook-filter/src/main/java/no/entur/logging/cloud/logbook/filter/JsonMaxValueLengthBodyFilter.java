@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.zalando.logbook.BodyFilter;
 import org.zalando.logbook.ContentType;
@@ -29,7 +30,7 @@ public class JsonMaxValueLengthBodyFilter implements BodyFilter {
 
     public JsonMaxValueLengthBodyFilter(int maxFieldLength) {
         this.maxFieldLength = maxFieldLength;
-        this.factory = new ObjectMapper().getFactory();
+        this.factory = new MappingJsonFactory();
     }
 
     @Override
