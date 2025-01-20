@@ -8,7 +8,6 @@ import ch.qos.logback.core.Appender;
 import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import no.entur.logging.cloud.appender.scope.predicate.HigherOrEqualToLogLevelPredicate;
 import no.entur.logging.cloud.appender.scope.predicate.LoggerNamePrefixHigherOrEqualToLogLevelPredicate;
-import no.entur.logging.cloud.spring.ondemand.web.properties.*;
 import no.entur.logging.cloud.spring.ondemand.web.scope.*;
 import no.entur.logging.cloud.spring.ondemand.web.properties.OndemandFailure;
 import no.entur.logging.cloud.spring.ondemand.web.properties.OndemandHttpHeader;
@@ -54,6 +53,18 @@ public class GcpWebOndemandLoggingAutoConfiguration {
     @ConditionalOnProperty(name = {"entur.logging.http.ondemand.enabled"}, havingValue = "true", matchIfMissing = false)
     public static class OndemandConfiguration {
 
+        private ThreadLocalLoggingScopeFactory factory = new ThreadLocalLoggingScopeFactory();
+
+        @Bean
+        public LoggingScopeControls loggingScopeControls() {
+            return factory;
+        }
+
+        @Bean
+        public LoggingScopeThreadUtils loggingScopeThreadUtils() {
+            return new LoggingScopeThreadUtils(factory);
+        }
+
         @Bean
         public FilterRegistrationBean<OndemandFilter> ondemandFilter(OndemandProperties properties) {
             LoggingScopeAsyncAppender appender = getAppender();
@@ -74,8 +85,6 @@ public class GcpWebOndemandLoggingAutoConfiguration {
                 RequestMatcher requestMatcher = AntPathRequestMatcher.antMatcher(path.getMatcher());
                 filters.addFilter(requestMatcher, filter);
             }
-
-            ThreadLocalLoggingScopeFactory factory = new ThreadLocalLoggingScopeFactory();
 
             OndemandFilter filter = new OndemandFilter(appender, filters, factory);
 

@@ -5,6 +5,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import no.entur.logging.cloud.appender.scope.LoggingScope;
+import no.entur.logging.cloud.appender.scope.LoggingScopeFactory;
 import no.entur.logging.cloud.appender.scope.LoggingScopeSink;
 import no.entur.logging.cloud.spring.ondemand.web.scope.HttpLoggingScopeFilter;
 import no.entur.logging.cloud.spring.ondemand.web.scope.HttpLoggingScopeFilters;
@@ -19,9 +20,9 @@ public class OndemandFilter implements Filter {
 	private final LoggingScopeSink sink;
 	private final HttpLoggingScopeFilters filters;
 
-	private final ThreadLocalLoggingScopeFactory loggingScopeFactory;
+	private final LoggingScopeFactory loggingScopeFactory;
 
-	public OndemandFilter(LoggingScopeSink sink, HttpLoggingScopeFilters filters, ThreadLocalLoggingScopeFactory loggingScopeFactory) {
+	public OndemandFilter(LoggingScopeSink sink, HttpLoggingScopeFilters filters, LoggingScopeFactory loggingScopeFactory) {
 		this.sink = sink;
 		this.filters = filters;
         this.loggingScopeFactory = loggingScopeFactory;

@@ -7,7 +7,7 @@ import no.entur.logging.cloud.appender.scope.LoggingScopeProvider;
 
 import java.util.function.Predicate;
 
-public class ThreadLocalLoggingScopeFactory implements LoggingScopeFactory, LoggingScopeProvider {
+public class ThreadLocalLoggingScopeFactory implements LoggingScopeFactory, LoggingScopeControls {
 
     private final ThreadLocal<LoggingScope> queues = new ThreadLocal<>();
 
@@ -25,6 +25,14 @@ public class ThreadLocalLoggingScopeFactory implements LoggingScopeFactory, Logg
 
     @Override
     public void closeScope(LoggingScope scope) {
+        queues.remove();
+    }
+
+    public void setCurrentScope(LoggingScope scope) {
+        queues.set(scope);
+    }
+
+    public void clearCurrentScope() {
         queues.remove();
     }
 }
