@@ -8,6 +8,7 @@ import no.entur.logging.cloud.spring.ondemand.web.scope.LoggingScopeThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/async-document")
+@Profile("async")
 public class AsyncDocumentEndpoint {
 
     private final static Logger logger = LoggerFactory.getLogger(AsyncDocumentEndpoint.class);
@@ -35,6 +37,9 @@ public class AsyncDocumentEndpoint {
 
 		entity.setName("Entur response");
 		return CompletableFuture.supplyAsync(utils.withLoggingScope(() -> {
+			System.out.println("Complete future on thread " + Thread.currentThread().getName());
+
+			logger.info("Async: This message should be logged / info");
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -53,7 +58,6 @@ public class AsyncDocumentEndpoint {
 		logger.debug("This message should be ignored / debug");
 		logger.info("This message should be delayed / info");
 		logger.warn("This message should be logged / warn");
-		logger.error("This message should be logged / error");
 
 		Thread.sleep(1000);
 		System.out.println("System out after endpoint logging + 1000ms");
@@ -61,7 +65,7 @@ public class AsyncDocumentEndpoint {
 		return CompletableFuture.supplyAsync(utils.withLoggingScope( () -> {
 			System.out.println("Complete future on thread " + Thread.currentThread().getName());
 
-			logger.info("Async: This message should be logged / info");
+			logger.info("Async: This message should be delayed / info");
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {

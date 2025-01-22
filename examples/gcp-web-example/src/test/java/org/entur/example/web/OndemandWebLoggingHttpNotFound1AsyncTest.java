@@ -13,6 +13,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("async")
 @TestPropertySource(properties = {"entur.logging.http.ondemand.enabled=true", "entur.logging.http.ondemand.failure.http.statusCode.equalOrHigherThan=400", "entur.logging.http.ondemand.failure.logger.level=error", "entur.logging.http.ondemand.failure.level=info"})
 public class OndemandWebLoggingHttpNotFound1AsyncTest {
 
@@ -44,7 +46,6 @@ public class OndemandWebLoggingHttpNotFound1AsyncTest {
 	}
 
 	@Test
-	@Disabled
 	public void useHumanReadableJsonEncoderExpectFullLogging() {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
 			MyEntity entity = new MyEntity();
@@ -57,7 +58,6 @@ public class OndemandWebLoggingHttpNotFound1AsyncTest {
 	}
 
 	@Test
-	@Disabled
 	public void useMachineReadableJsonEncoderExpectFullLogging() {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
 			MyEntity entity = new MyEntity();
