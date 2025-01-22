@@ -40,6 +40,10 @@ public class DefaultLoggingScope implements LoggingScope {
         }
 
         if(queuePredicate.test(eventObject)) {
+            if(logLevelFailure) {
+                // log now, no point in buffering this
+                return false;
+            }
             queue.add(eventObject);
 
             return true;
