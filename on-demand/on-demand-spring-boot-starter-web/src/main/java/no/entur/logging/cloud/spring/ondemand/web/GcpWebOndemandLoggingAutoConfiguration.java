@@ -27,6 +27,7 @@ import no.entur.logging.cloud.spring.ondemand.web.scope.HttpStatusEqualToPredica
 import no.entur.logging.cloud.spring.ondemand.web.scope.HttpStatusNotEqualToPredicate;
 import no.entur.logging.cloud.spring.ondemand.web.scope.ThreadLocalLoggingScopeFactory;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -56,13 +57,9 @@ public class GcpWebOndemandLoggingAutoConfiguration {
         private ThreadLocalLoggingScopeFactory factory = new ThreadLocalLoggingScopeFactory();
 
         @Bean
-        public LoggingScopeControls loggingScopeControls() {
-            return factory;
-        }
-
-        @Bean
+        @ConditionalOnMissingBean(LoggingScopeThreadUtils.class)
         public LoggingScopeThreadUtils loggingScopeThreadUtils() {
-            return new LoggingScopeThreadUtils(factory);
+            return new DefaultLoggingScopeThreadUtils(factory);
         }
 
         @Bean
@@ -221,7 +218,7 @@ public class GcpWebOndemandLoggingAutoConfiguration {
                     filter.setLogLevelFailurePredicate(new LoggerNamePrefixHigherOrEqualToLogLevelPredicate(flushForLevel.toInt(), name));
                 }
             } else {
-                filter.setLogLevelFailurePredicate((e) -> false);
+                filter.setLogLevelFailurePredicate(null);
             }
 
             return filter;
@@ -247,4 +244,16 @@ public class GcpWebOndemandLoggingAutoConfiguration {
 
     }
 
+
+    @Configuration
+    @ConditionalOnProperty(name = {"entur.logging.http.ondemand.enabled"}, havingValue = "false", matchIfMissing = true)
+    public static class DisabledOndemandConfiguration {
+
+        // this avoids breaking autowiring when on-demand is disabled
+        @Bean
+        @ConditionalOnMissingBean(LoggingScopeThreadUtils.class)
+        public LoggingScopeThreadUtils loggingScopeThreadUtils() {
+            return new NoopLoggingScopeThreadUtils();
+        }
+    }
 }

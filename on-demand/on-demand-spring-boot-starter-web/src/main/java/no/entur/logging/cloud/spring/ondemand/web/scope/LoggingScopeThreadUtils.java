@@ -2,46 +2,42 @@ package no.entur.logging.cloud.spring.ondemand.web.scope;
 
 import no.entur.logging.cloud.appender.scope.LoggingScope;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-public class LoggingScopeThreadUtils {
+/**
+ *
+ * Helper class for propagation of logging scope across multiple threads ++.
+ *
+ */
 
-    protected final LoggingScopeControls controls;
+public interface LoggingScopeThreadUtils {
 
-    public LoggingScopeThreadUtils(LoggingScopeControls controls) {
-        this.controls = controls;
-    }
+    /**
+     *
+     * Manually trigger failure in the current logging scope, i.e. (usually) get more logging in the current scope.
+     *
+     */
 
-    public Runnable withLoggingScope(Runnable runnable) {
-        LoggingScope currentScope = controls.getCurrentScope();
-        if(currentScope == null) {
-            return runnable;
-        }
+    void failure();
 
-        return () -> {
-            controls.setCurrentScope(currentScope);
-            try {
-                runnable.run();
-            } finally {
-                controls.clearCurrentScope();
-            }
-        };
-    }
+    /**
+     * Create wrapper runnable which forwards the current scope
+     *
+     * @param runnable job
+     * @return wrapped job
+     */
 
-    public <U> Supplier<U> withLoggingScope(Supplier<U> supplier) {
-        LoggingScope currentScope = controls.getCurrentScope();
-        if(currentScope == null) {
-            return supplier;
-        }
-        return (Supplier) () -> {
-            controls.setCurrentScope(currentScope);
-            try {
-                return supplier.get();
-            } finally {
-                controls.clearCurrentScope();
-            }
-        };
-    }
+    Runnable with(Runnable runnable);
+
+    /**
+     *
+     * Create wrapper runnable which forwards the current scope
+     *
+     * @param supplier job
+     * @return wrapped job
+     * @param <U> job output
+     */
+
+    <U> Supplier<U> with(Supplier<U> supplier);
 
 }

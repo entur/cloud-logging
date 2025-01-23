@@ -191,7 +191,7 @@ public class GrpcOndemandLoggingAutoConfiguration {
                     filter.setLogLevelFailurePredicate(new LoggerNamePrefixHigherOrEqualToLogLevelPredicate(flushForLevel.toInt(), name));
                 }
             } else {
-                filter.setLogLevelFailurePredicate((e) -> false);
+                filter.setLogLevelFailurePredicate(null);
             }
 
             return filter;

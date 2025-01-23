@@ -1,9 +1,5 @@
 package org.entur.example.web.rest;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import no.entur.logging.cloud.appender.scope.LoggingScope;
-import no.entur.logging.cloud.spring.ondemand.web.scope.LoggingScopeControls;
 import no.entur.logging.cloud.spring.ondemand.web.scope.LoggingScopeThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.CharArrayWriter;
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -36,7 +30,7 @@ public class AsyncDocumentEndpoint {
 		logger.error("Hello entity with secret / error");
 
 		entity.setName("Entur response");
-		return CompletableFuture.supplyAsync(utils.withLoggingScope(() -> {
+		return CompletableFuture.supplyAsync(utils.with(() -> {
 			System.out.println("Complete future on thread " + Thread.currentThread().getName());
 
 			logger.info("Async: This message should be logged / info");
@@ -62,7 +56,7 @@ public class AsyncDocumentEndpoint {
 		Thread.sleep(1000);
 		System.out.println("System out after endpoint logging + 1000ms");
 
-		return CompletableFuture.supplyAsync(utils.withLoggingScope( () -> {
+		return CompletableFuture.supplyAsync(utils.with( () -> {
 			System.out.println("Complete future on thread " + Thread.currentThread().getName());
 
 			logger.info("Async: This message should be delayed / info");
