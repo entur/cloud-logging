@@ -57,6 +57,11 @@ public class GcpWebOndemandLoggingAutoConfiguration {
         private ThreadLocalLoggingScopeFactory factory = new ThreadLocalLoggingScopeFactory();
 
         @Bean
+        public LoggingScopeControls loggingScopeControls() {
+            return factory;
+        }
+        
+        @Bean
         @ConditionalOnMissingBean(LoggingScopeThreadUtils.class)
         public LoggingScopeThreadUtils loggingScopeThreadUtils() {
             return new DefaultLoggingScopeThreadUtils(factory);
