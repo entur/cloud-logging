@@ -11,38 +11,56 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class WebLoggingFormatWithNewlinesTest {
+
+// Triggers by error log level or >= 400 status code by default
+
+@TestPropertySource(properties = {"entur.logging.http.ondemand.enabled=true"})
+public class AsyncOndemandWebLoggingHttpOkTest {
 
 	@LocalServerPort
-    private int randomServerPort;
+	private int randomServerPort;
 	
 	@Autowired
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void useHumanReadablePlainEncoderTest() {
-		ResponseEntity<MyEntity> response = restTemplate.getForEntity("/api/document/some/newlines", MyEntity.class);
+	public void useHumanReadablePlainEncoderExpectReducedLogging() {
+		MyEntity entity = new MyEntity();
+		entity.setName("Entur");
+		entity.setSecret("mySecret");
+
+		ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method/infoLoggingOnly", entity, MyEntity.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
-	@Test 
-	public void useHumanReadableJsonEncoderTest() throws InterruptedException {
+	@Test
+	public void useHumanReadableJsonEncoderExpectReducedLogging() throws InterruptedException {
+		MyEntity entity = new MyEntity();
+		entity.setName("Entur");
+		entity.setSecret("mySecret");
+
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
-			ResponseEntity<MyEntity> response = restTemplate.getForEntity("/api/document/some/newlines", MyEntity.class);
+			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method/infoLoggingOnly", entity, MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		}
 	}
 
 	@Test
-	public void useMachineReadableJsonEncoder() throws InterruptedException {
+	public void useMachineReadableJsonEncoderExpectReducedLogging() throws InterruptedException {
+		MyEntity entity = new MyEntity();
+		entity.setName("Entur");
+		entity.setSecret("mySecret");
+
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
-			ResponseEntity<MyEntity> response = restTemplate.getForEntity("/api/document/some/newlines", MyEntity.class);
+			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method/infoLoggingOnly", entity, MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		}
 	}
+
 
 }

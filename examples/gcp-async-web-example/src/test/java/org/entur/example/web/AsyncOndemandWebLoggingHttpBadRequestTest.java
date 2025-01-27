@@ -26,8 +26,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource(properties = {"entur.logging.http.ondemand.enabled=true", "entur.logging.http.ondemand.failure.http.statusCode.equalOrHigherThan=400"})
-public class OndemandWebLoggingHttpBadRequestTest {
+@TestPropertySource(properties = {
+		"entur.logging.http.ondemand.enabled=true",
+		"entur.logging.http.ondemand.failure.logger.enabled=false",
+})
+public class AsyncOndemandWebLoggingHttpBadRequestTest {
 
 	@LocalServerPort
 	private int randomServerPort;

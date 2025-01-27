@@ -11,63 +11,38 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- *
- * Test additional logging due to a log statement with high log level.
- *
- */
-
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource(properties = {
-		"entur.logging.http.ondemand.enabled=true",
-		"entur.logging.http.ondemand.failure.logger.level=error",
-})
-
-public class OndemandWebLoggingHttpOkHighLogLevelTest {
+public class AsyncWebLoggingFormatWithNewlinesTest {
 
 	@LocalServerPort
-	private int randomServerPort;
-
+    private int randomServerPort;
+	
 	@Autowired
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void useHumanReadablePlainEncoderExpectFullLogging() {
-		MyEntity entity = new MyEntity();
-		entity.setName("Entur");
-		entity.setSecret("mySecret");
-
-		ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method", entity, MyEntity.class);
+	public void useHumanReadablePlainEncoderTest() {
+		ResponseEntity<MyEntity> response = restTemplate.getForEntity("/api/document/some/newlines", MyEntity.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
-	@Test
-	public void useHumanReadableJsonEncoderExpectFullLogging() {
-		MyEntity entity = new MyEntity();
-		entity.setName("Entur");
-		entity.setSecret("mySecret");
-
+	@Test 
+	public void useHumanReadableJsonEncoderTest() throws InterruptedException {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
-			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method", entity, MyEntity.class);
+			ResponseEntity<MyEntity> response = restTemplate.getForEntity("/api/document/some/newlines", MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		}
 	}
 
 	@Test
-	public void useMachineReadableJsonEncoderExpectFullLogging() {
-		MyEntity entity = new MyEntity();
-		entity.setName("Entur");
-		entity.setSecret("mySecret");
-
+	public void useMachineReadableJsonEncoder() throws InterruptedException {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
-			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method", entity, MyEntity.class);
+			ResponseEntity<MyEntity> response = restTemplate.getForEntity("/api/document/some/newlines", MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		}
 	}
-
 
 }

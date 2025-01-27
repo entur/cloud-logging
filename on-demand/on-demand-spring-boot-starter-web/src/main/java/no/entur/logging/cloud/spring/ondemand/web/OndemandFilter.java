@@ -1,20 +1,13 @@
 package no.entur.logging.cloud.spring.ondemand.web;
 
-import jakarta.servlet.AsyncContext;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
+import jakarta.servlet.*;
 import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import jakarta.servlet.AsyncEvent;
-import jakarta.servlet.AsyncListener;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import no.entur.logging.cloud.appender.scope.LoggingScope;
@@ -48,10 +41,12 @@ public class OndemandFilter extends HttpFilter {
 
         @Override
         public void onTimeout(AsyncEvent event) {
+
         }
 
         @Override
         public void onError(AsyncEvent event) {
+
         }
 
         @Override
@@ -75,6 +70,7 @@ public class OndemandFilter extends HttpFilter {
     @Override
     public void doFilter(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse,
                          final FilterChain filterChain) throws ServletException, IOException {
+
         HttpLoggingScopeFilter filter = filters.getScope(httpServletRequest);
 
         Predicate<ILoggingEvent> queuePredicate = filter.getQueuePredicate();

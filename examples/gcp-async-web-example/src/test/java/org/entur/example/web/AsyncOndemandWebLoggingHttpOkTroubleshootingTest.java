@@ -18,10 +18,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @TestPropertySource(properties = {
 		"entur.logging.http.ondemand.enabled=true",
-		"entur.logging.http.ondemand.failure.http.statusCode.equalOrHigherThan=400",
+		"entur.logging.http.ondemand.failure.http.enabled=false",
+		"entur.logging.http.ondemand.failure.logger.enabled=false",
 		"entur.logging.http.ondemand.troubleshoot.http.headers[0].name=X-DEBUG"
 })
-public class OndemandWebLoggingHttpOkTroubleshootingTest {
+public class AsyncOndemandWebLoggingHttpOkTroubleshootingTest {
 
 	@LocalServerPort
 	private int randomServerPort;
