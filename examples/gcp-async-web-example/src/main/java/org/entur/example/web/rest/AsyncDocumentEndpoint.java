@@ -37,7 +37,18 @@ public class AsyncDocumentEndpoint {
 
 		entity.setName("Entur response");
 
-		return CompletableFuture.supplyAsync(utils.with(() -> entity));
+		entity.setName("Entur response");
+		return CompletableFuture.supplyAsync(utils.with(() -> {
+			System.out.println("Async: System out on thread " + Thread.currentThread().getName());
+
+			logger.trace("Async: Hello entity with secret / trace");
+			logger.debug("Async: Hello entity with secret / debug");
+			logger.info("Async: Hello entity with secret / info");
+			logger.warn("Async: Hello entity with secret / warn");
+			logger.error("Async: Hello entity with secret / error");
+
+			return entity;
+		}));
 	}
 
 	@PostMapping("/some/error")
@@ -55,7 +66,17 @@ public class AsyncDocumentEndpoint {
 		System.out.println("System out after endpoint logging + 1000ms");
 
 
-		return CompletableFuture.supplyAsync(utils.with(() -> new ResponseEntity(HttpStatus.NOT_FOUND)));
+		return CompletableFuture.supplyAsync(utils.with(() -> {
+			System.out.println("Async: System out on thread " + Thread.currentThread().getName());
+
+			logger.trace("Async: This message should be ignored / trace");
+			logger.debug("Async: This message should be ignored / debug");
+			logger.info("Async: This message should be delayed / info");
+			logger.warn("Async: This message should be logged / warn");
+			logger.error("Async: This message should be logged / error");
+
+			return new ResponseEntity(HttpStatus.NOT_FOUND);
+		}));
 	}
 
 	@GetMapping(value = "/some/newlines", produces = "application/json")
@@ -101,7 +122,13 @@ public class AsyncDocumentEndpoint {
 		logger.info("Hello entity with secret / info");
 
 		entity.setName("Entur response");
-		return CompletableFuture.supplyAsync(utils.with(() -> entity));
+		return CompletableFuture.supplyAsync(utils.with(() -> {
+			System.out.println("Async: System out on thread " + Thread.currentThread().getName());
+
+			logger.info("Async: Hello entity with secret / info");
+
+			return entity;
+		}));
 	}
 
 

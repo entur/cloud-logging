@@ -26,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		"entur.logging.http.ondemand.enabled=true",
 		"entur.logging.http.ondemand.failure.logger.level=error",
 })
+
 public class OndemandWebLoggingHttpOkHighLogLevelTest {
 
 	@LocalServerPort
