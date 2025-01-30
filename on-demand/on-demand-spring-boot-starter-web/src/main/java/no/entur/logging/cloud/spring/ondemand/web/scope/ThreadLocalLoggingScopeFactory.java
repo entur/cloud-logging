@@ -24,6 +24,11 @@ public class ThreadLocalLoggingScopeFactory implements LoggingScopeFactory, Logg
     }
 
     @Override
+    public void reconnectScope(LoggingScope scope) {
+        queues.set(scope);
+    }
+
+    @Override
     public LoggingScope getCurrentScope() {
         return queues.get();
     }

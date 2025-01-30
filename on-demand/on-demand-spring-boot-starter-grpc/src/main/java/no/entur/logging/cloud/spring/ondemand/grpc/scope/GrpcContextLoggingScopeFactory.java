@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.spring.ondemand.grpc.scope;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import io.grpc.Context;
 import no.entur.logging.cloud.appender.scope.*;
 
 import java.util.function.Predicate;
@@ -15,7 +16,13 @@ public class GrpcContextLoggingScopeFactory implements LoggingScopeFactory<Loggi
         } else {
             scope = new LogLevelLoggingScope(queuePredicate, ignorePredicate, logLevelFailurePredicate);
         }
+
         return scope;
+    }
+
+    @Override
+    public void reconnectScope(LoggingScope scope) {
+        // do nothing
     }
 
     @Override

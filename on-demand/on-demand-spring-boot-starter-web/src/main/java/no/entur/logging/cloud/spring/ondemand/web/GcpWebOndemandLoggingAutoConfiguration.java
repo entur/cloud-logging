@@ -5,6 +5,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import jakarta.servlet.DispatcherType;
 import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import no.entur.logging.cloud.appender.scope.predicate.HigherOrEqualToLogLevelPredicate;
 import no.entur.logging.cloud.appender.scope.predicate.LoggerNamePrefixHigherOrEqualToLogLevelPredicate;
@@ -23,6 +24,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -87,7 +89,7 @@ public class GcpWebOndemandLoggingAutoConfiguration {
 
             FilterRegistrationBean<OndemandFilter> registration = new FilterRegistrationBean<>();
             registration.setFilter(filter);
-            registration.setDispatcherTypes(REQUEST, ERROR);
+            registration.setDispatcherTypes(REQUEST, ERROR, ASYNC);
 
             registration.setOrder(properties.getFilterOrder());
             registration.addUrlPatterns(properties.getFilterUrlPatterns());
@@ -254,4 +256,5 @@ public class GcpWebOndemandLoggingAutoConfiguration {
             return new NoopLoggingScopeThreadUtils();
         }
     }
+
 }
