@@ -8,11 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
@@ -96,6 +92,23 @@ public class AsyncDocumentEndpoint {
 		String json = "{\n}\n";
 
 		return CompletableFuture.supplyAsync(utils.with(() -> new ResponseEntity<>(json, HttpStatus.OK)));
+	}
+
+	@GetMapping(value = "/some/slow/method", produces = "application/json")
+	public CompletableFuture<ResponseEntity<String>> age(@RequestParam("wait") Long wait) throws InterruptedException {
+		logger.info("Async: This message should be delayed; printed for slow requests / info");
+
+		String json = "{\n}\n";
+		return CompletableFuture.supplyAsync(utils.with(() -> {
+			logger.info("Async: This async message should be delayed; printed for slow requests / info");
+            try {
+                Thread.sleep(wait);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            return new ResponseEntity<>(json, HttpStatus.OK);
+		}));
 	}
 
 	@GetMapping(value = "/some/bigResponse", produces = "application/json")

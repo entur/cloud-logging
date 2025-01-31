@@ -5,7 +5,6 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
-import jakarta.servlet.DispatcherType;
 import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import no.entur.logging.cloud.appender.scope.predicate.HigherOrEqualToLogLevelPredicate;
 import no.entur.logging.cloud.appender.scope.predicate.LoggerNamePrefixHigherOrEqualToLogLevelPredicate;
@@ -24,13 +23,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import java.util.HashSet;
+import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -195,6 +193,15 @@ public class GcpWebOndemandLoggingAutoConfiguration {
                 filter.setHttpStatusFailurePredicate((e) -> false);
             }
 
+            OndemandDurationTrigger duration = failure.getDuration();
+            if(duration.isEnabled() && duration.getAfter() != null) {
+                Duration after = duration.getAfter();
+
+                filter.setFailureDuration(after.toMillis());
+
+                LOGGER.info("Configure on-demand logging for {} http exchanges longer than {}ms ", matcher == null ? "default" : matcher, filter.getFailureDuration());
+            }
+
             OndemandLogLevelTrigger logLevelTrigger = failure.getLogger();
             if(logLevelTrigger.isEnabled()) {
                 Level flushForLevel = toLevel(logLevelTrigger.getLevel());
@@ -214,7 +221,6 @@ public class GcpWebOndemandLoggingAutoConfiguration {
 
             return filter;
         }
-
 
         protected Level toLevel(String level) {
             switch (level.toLowerCase()) {

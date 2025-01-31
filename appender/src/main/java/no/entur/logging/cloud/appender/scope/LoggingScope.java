@@ -24,4 +24,6 @@ public interface LoggingScope {
      */
 
     void failure();
+
+    long getTimestamp();
 }

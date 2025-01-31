@@ -22,6 +22,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -142,11 +143,20 @@ public class GrpcOndemandLoggingAutoConfiguration {
                 filter.setTroubleshootIgnorePredicate((e) -> false);
             }
 
+            OndemandDurationTrigger duration = failure.getDuration();
+            if(duration.isEnabled() && duration.getAfter() != null) {
+                Duration after = duration.getAfter();
+
+                filter.setFailureDuration(after.toMillis());
+
+                LOGGER.info("Configure {} on-demand logging for http exchanges longer than {} ms ", methodNames.isEmpty() ? serviceName : serviceName + methodNames, filter.getFailureDuration());
+            }
+
             OndemandGrpcResponseTrigger httpStatusCodeTrigger = failure.getGrpc();
             if(httpStatusCodeTrigger.isEnabled()) {
                 Set<String> status = httpStatusCodeTrigger.getStatus().stream().map( (s) -> s.toUpperCase()).collect(Collectors.toSet());
 
-                LOGGER.info("Configure GRPC  {} on-demand logging for status codes ", methodNames.isEmpty() ? serviceName : serviceName + methodNames, status);
+                LOGGER.info("Configure GRPC  {} on-demand logging for status codes {}", methodNames.isEmpty() ? serviceName : serviceName + methodNames, status);
 
                 Status.Code[] values = Status.Code.values();
 
@@ -179,5 +189,6 @@ public class GrpcOndemandLoggingAutoConfiguration {
 
             return filter;
         }
+
     }
 }
