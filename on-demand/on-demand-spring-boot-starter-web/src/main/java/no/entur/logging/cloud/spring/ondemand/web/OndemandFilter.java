@@ -16,7 +16,6 @@ import no.entur.logging.cloud.spring.ondemand.web.scope.HttpLoggingScopeFilters;
 
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.UUID;
 import java.util.function.Predicate;
 
 public class OndemandFilter extends HttpFilter {
@@ -78,16 +77,18 @@ public class OndemandFilter extends HttpFilter {
         LoggingScope scope = getLoggingScope(httpServletRequest, filter);
 
         try {
-            filterChain.doFilter(httpServletRequest, httpServletResponse);
-        } finally {
-            if (httpServletRequest.isAsyncStarted()) {
+            try {
+                filterChain.doFilter(httpServletRequest, httpServletResponse);
+            } finally {
+                if (httpServletRequest.isAsyncStarted()) {
 
-                // wait for result before deciding to flush
-                httpServletRequest.getAsyncContext().addListener(new ScopeAsyncListener(() -> flush(httpServletRequest, httpServletResponse, filter, scope)));
-            } else {
-                flush(httpServletRequest, httpServletResponse, filter, scope);
+                    // wait for result before deciding to flush
+                    httpServletRequest.getAsyncContext().addListener(new ScopeAsyncListener(() -> flush(httpServletRequest, httpServletResponse, filter, scope)));
+                } else {
+                    flush(httpServletRequest, httpServletResponse, filter, scope);
+                }
             }
-
+        } finally {
             // clear thread-local
             loggingScopeFactory.closeScope(scope);
         }
@@ -112,7 +113,7 @@ public class OndemandFilter extends HttpFilter {
 
             httpServletRequest.setAttribute(SCOPE, scope);
         } else {
-            loggingScopeFactory.reconnectScope(scope);
+            loggingScopeFactory.reopenScope(scope);
         }
         return scope;
     }
@@ -142,6 +143,7 @@ public class OndemandFilter extends HttpFilter {
     }
 
     public void destroy() {
+        // do nothing
     }
 
 }

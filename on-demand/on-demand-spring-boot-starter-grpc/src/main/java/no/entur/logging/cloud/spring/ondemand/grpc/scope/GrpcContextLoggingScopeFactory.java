@@ -21,7 +21,7 @@ public class GrpcContextLoggingScopeFactory implements LoggingScopeFactory<Loggi
     }
 
     @Override
-    public void reconnectScope(LoggingScope scope) {
+    public void reopenScope(LoggingScope scope) {
         // do nothing
     }
 

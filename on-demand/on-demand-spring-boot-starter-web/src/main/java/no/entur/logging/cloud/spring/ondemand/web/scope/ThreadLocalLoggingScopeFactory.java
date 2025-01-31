@@ -24,7 +24,7 @@ public class ThreadLocalLoggingScopeFactory implements LoggingScopeFactory, Logg
     }
 
     @Override
-    public void reconnectScope(LoggingScope scope) {
+    public void reopenScope(LoggingScope scope) {
         queues.set(scope);
     }
 
