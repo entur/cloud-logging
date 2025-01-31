@@ -23,7 +23,7 @@ public class GrpcLoggingScopeFilter {
     public Predicate<Status> getGrpcStatusPredicate() {
         return grpcStatusPredicate;
     }
-    private long failureDuration = -1L;
+    private long failureDuration = -1L; // in milliseconds
 
     public void setGrpcStatusPredicate(Predicate<Status> grpcStatusPredicate) {
         this.grpcStatusPredicate = grpcStatusPredicate;
@@ -86,6 +86,6 @@ public class GrpcLoggingScopeFilter {
     }
 
     public boolean hasFailureDuration() {
-        return failureDuration != -1;
+        return failureDuration != -1L;
     }
 }

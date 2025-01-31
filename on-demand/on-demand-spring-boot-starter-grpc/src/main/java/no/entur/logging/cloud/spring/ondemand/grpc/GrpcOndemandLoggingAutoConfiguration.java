@@ -203,7 +203,7 @@ public class GrpcOndemandLoggingAutoConfiguration {
             if(after.endsWith("ms")) {
                 return Long.parseLong(after.substring(0, after.length() - 2));
             } else if(!after.endsWith("s")) {
-                return Long.parseLong(after.substring(0, after.length() - 1));
+                return Long.parseLong(after.substring(0, after.length() - 1)) * 1000;
             } else {
                 throw new IllegalArgumentException("Duration must be in milliseconds (ms) or seconds (s)");
             }
