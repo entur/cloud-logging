@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
+import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -203,9 +204,11 @@ public class GcpWebOndemandLoggingAutoConfiguration {
 
             OndemandDurationTrigger duration = failure.getDuration();
             if(duration.isEnabled() && duration.getAfter() != null) {
-                String after = duration.getAfter();
+                Duration after = duration.getAfter();
 
-                filter.setFailureDuration(parseDuration(after));
+                filter.setFailureDuration(after.toMillis());
+
+                LOGGER.info("Configure on-demand logging for {} http exchanges longer than {}ms ", matcher == null ? "default" : matcher, filter.getFailureDuration());
             }
 
             OndemandLogLevelTrigger logLevelTrigger = failure.getLogger();
@@ -226,18 +229,6 @@ public class GcpWebOndemandLoggingAutoConfiguration {
             }
 
             return filter;
-        }
-
-        private long parseDuration(String after) {
-            after = after.replaceAll("\\s+", "");
-
-            if(after.endsWith("ms")) {
-                return Long.parseLong(after.substring(0, after.length() - 2));
-            } else if(!after.endsWith("s")) {
-                return Long.parseLong(after.substring(0, after.length() - 1)) * 1000;
-            } else {
-                throw new IllegalArgumentException("Duration must be in milliseconds (ms) or seconds (s)");
-            }
         }
 
         protected Level toLevel(String level) {

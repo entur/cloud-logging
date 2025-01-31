@@ -22,6 +22,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -154,16 +155,18 @@ public class GrpcOndemandLoggingAutoConfiguration {
 
             OndemandDurationTrigger duration = failure.getDuration();
             if(duration.isEnabled() && duration.getAfter() != null) {
-                String after = duration.getAfter();
+                Duration after = duration.getAfter();
 
-                filter.setFailureDuration(parseDuration(after));
+                filter.setFailureDuration(after.toMillis());
+
+                LOGGER.info("Configure {} on-demand logging for http exchanges longer than {} ms ", methodNames.isEmpty() ? serviceName : serviceName + methodNames, filter.getFailureDuration());
             }
 
             OndemandGrpcResponseTrigger httpStatusCodeTrigger = failure.getGrpc();
             if(httpStatusCodeTrigger.isEnabled()) {
                 Set<String> status = httpStatusCodeTrigger.getStatus().stream().map( (s) -> s.toUpperCase()).collect(Collectors.toSet());
 
-                LOGGER.info("Configure GRPC  {} on-demand logging for status codes ", methodNames.isEmpty() ? serviceName : serviceName + methodNames, status);
+                LOGGER.info("Configure GRPC  {} on-demand logging for status codes {}", methodNames.isEmpty() ? serviceName : serviceName + methodNames, status);
 
                 Status.Code[] values = Status.Code.values();
 
@@ -197,16 +200,5 @@ public class GrpcOndemandLoggingAutoConfiguration {
             return filter;
         }
 
-        private long parseDuration(String after) {
-            after = after.replaceAll("\\s+", "");
-
-            if(after.endsWith("ms")) {
-                return Long.parseLong(after.substring(0, after.length() - 2));
-            } else if(!after.endsWith("s")) {
-                return Long.parseLong(after.substring(0, after.length() - 1)) * 1000;
-            } else {
-                throw new IllegalArgumentException("Duration must be in milliseconds (ms) or seconds (s)");
-            }
-        }
     }
 }

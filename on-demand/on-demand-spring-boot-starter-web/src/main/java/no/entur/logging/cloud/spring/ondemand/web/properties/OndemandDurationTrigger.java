@@ -1,9 +1,11 @@
 package no.entur.logging.cloud.spring.ondemand.web.properties;
 
+import java.time.Duration;
+
 public class OndemandDurationTrigger {
 
     private boolean enabled = true;
-    private String after;
+    private Duration after;
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
@@ -13,11 +15,11 @@ public class OndemandDurationTrigger {
         return enabled;
     }
 
-    public void setAfter(String after) {
+    public void setAfter(Duration after) {
         this.after = after;
     }
 
-    public String getAfter() {
+    public Duration getAfter() {
         return after;
     }
 }
