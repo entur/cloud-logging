@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ActuatorTest {
 
 	@LocalServerPort
-    private int randomServerPort;
+	private int randomServerPort;
 	
 	@Autowired
 	private TestRestTemplate restTemplate;

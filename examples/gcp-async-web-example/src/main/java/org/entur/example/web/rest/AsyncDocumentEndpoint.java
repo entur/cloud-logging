@@ -22,7 +22,7 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("/api/document")
 public class AsyncDocumentEndpoint {
 
-    private final static Logger logger = LoggerFactory.getLogger(AsyncDocumentEndpoint.class);
+	private final static Logger logger = LoggerFactory.getLogger(AsyncDocumentEndpoint.class);
 
 	@Autowired
 	private LoggingScopeThreadUtils utils;
@@ -41,13 +41,13 @@ public class AsyncDocumentEndpoint {
 		return CompletableFuture.supplyAsync(utils.with(() -> {
 			System.out.println("Async: System out on thread " + Thread.currentThread().getName());
 
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
 
-            logger.trace("Async: Hello entity with secret / trace");
+			logger.trace("Async: Hello entity with secret / trace");
 			logger.debug("Async: Hello entity with secret / debug");
 			logger.info("Async: Hello entity with secret / info");
 			logger.warn("Async: Hello entity with secret / warn");

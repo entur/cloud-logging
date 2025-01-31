@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 public class AsyncWebLoggingFormatTest {
 
 	@LocalServerPort
-    private int randomServerPort;
+	private int randomServerPort;
 	
 	@Autowired
 	private TestRestTemplate restTemplate;

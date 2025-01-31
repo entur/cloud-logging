@@ -8,11 +8,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Profile("local")
-public class HumanReadableJsonApplicationListener implements
-        ApplicationListener<ContextRefreshedEvent> {
+public class HumanReadableJsonApplicationListener implements ApplicationListener<ContextRefreshedEvent> {
 
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        CompositeConsoleOutputControl.useHumanReadableJsonEncoder();
-    }
+	@Override 
+	public void onApplicationEvent(ContextRefreshedEvent event) {
+		CompositeConsoleOutputControl.useHumanReadableJsonEncoder();
+	}
 }

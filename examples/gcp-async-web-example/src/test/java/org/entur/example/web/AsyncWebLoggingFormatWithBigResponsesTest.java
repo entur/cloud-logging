@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AsyncWebLoggingFormatWithBigResponsesTest {
 
 	@LocalServerPort
-    private int randomServerPort;
+	private int randomServerPort;
 	
 	@Autowired
 	private TestRestTemplate restTemplate;
