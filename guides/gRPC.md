@@ -265,30 +265,25 @@ For 'classic' one-line log output when running a server locally, additionally ad
   <summary>Gradle bootRun example</summary>
 
 ```groovy
-bootRun {
-    dependencies {
-        implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test")
-        implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test")
-    }
+tasks.register("logPlainly") {
+   dependencies {
+      implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test")
+      implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test")
+   }
 }
+
+tasks.withType(JavaExec).configureEach {
+   dependsOn("logPlainly")
+}
+```
+
+Then configure desired output by specifying `entur.logging.style`
+
+```
+entur.logging.style=humanReadablePlain|humanReadableJson|machineReadableJson
 ```
 
 </details>
-
-## Toggle output mode using profiles
-Add an event listener to set your preferred log output:
-
-```
-@Component
-@Profile("local")
-public class HumanReadableJsonApplicationListener implements ApplicationListener<ContextRefreshedEvent> {
-
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        CompositeConsoleOutputControl.useHumanReadableJsonEncoder();
-    }
-}
-```
 
 ## Troubleshooting
 
