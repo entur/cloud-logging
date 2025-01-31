@@ -82,5 +82,4 @@ public class OndemandProperties {
     public void setTroubleshoot(OndemandTroubleshoot troubleshoot) {
         this.troubleshoot = troubleshoot;
     }
-
 }
