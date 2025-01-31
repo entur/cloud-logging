@@ -226,7 +226,7 @@ public class GcpWebOndemandLoggingAutoConfiguration {
 
 
         protected Level toLevel(String level) {
-            switch (level) {
+            switch (level.toLowerCase()) {
                 case ("trace"):
                     return Level.TRACE;
                 case ("debug"):
