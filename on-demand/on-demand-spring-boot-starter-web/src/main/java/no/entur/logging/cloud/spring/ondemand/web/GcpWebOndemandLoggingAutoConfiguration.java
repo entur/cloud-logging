@@ -5,20 +5,12 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import jakarta.servlet.DispatcherType;
 import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import no.entur.logging.cloud.appender.scope.predicate.HigherOrEqualToLogLevelPredicate;
 import no.entur.logging.cloud.appender.scope.predicate.LoggerNamePrefixHigherOrEqualToLogLevelPredicate;
 import no.entur.logging.cloud.spring.ondemand.web.properties.*;
 import no.entur.logging.cloud.spring.ondemand.web.scope.*;
-import no.entur.logging.cloud.spring.ondemand.web.properties.OndemandFailure;
-import no.entur.logging.cloud.spring.ondemand.web.properties.OndemandHttpHeader;
-import no.entur.logging.cloud.spring.ondemand.web.properties.OndemandHttpResponseTrigger;
-import no.entur.logging.cloud.spring.ondemand.web.properties.OndemandHttpStatus;
-import no.entur.logging.cloud.spring.ondemand.web.properties.OndemandLogLevelTrigger;
-import no.entur.logging.cloud.spring.ondemand.web.properties.OndemandPath;
-import no.entur.logging.cloud.spring.ondemand.web.properties.OndemandProperties;
-import no.entur.logging.cloud.spring.ondemand.web.properties.OndemandSuccess;
-import no.entur.logging.cloud.spring.ondemand.web.properties.OndemandTroubleshoot;
 import no.entur.logging.cloud.spring.ondemand.web.scope.HttpHeaderPresentPredicate;
 import no.entur.logging.cloud.spring.ondemand.web.scope.HttpLoggingScopeFilter;
 import no.entur.logging.cloud.spring.ondemand.web.scope.HttpLoggingScopeFilters;
@@ -28,9 +20,11 @@ import no.entur.logging.cloud.spring.ondemand.web.scope.HttpStatusEqualToPredica
 import no.entur.logging.cloud.spring.ondemand.web.scope.HttpStatusNotEqualToPredicate;
 import no.entur.logging.cloud.spring.ondemand.web.scope.ThreadLocalLoggingScopeFactory;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -43,6 +37,7 @@ import java.util.Set;
 
 import static jakarta.servlet.DispatcherType.ERROR;
 import static jakarta.servlet.DispatcherType.REQUEST;
+import static jakarta.servlet.DispatcherType.ASYNC;
 
 @Configuration
 @EnableConfigurationProperties(value = {OndemandProperties.class})
@@ -54,11 +49,24 @@ public class GcpWebOndemandLoggingAutoConfiguration {
     @ConditionalOnProperty(name = {"entur.logging.http.ondemand.enabled"}, havingValue = "true", matchIfMissing = false)
     public static class OndemandConfiguration {
 
+        private ThreadLocalLoggingScopeFactory factory = new ThreadLocalLoggingScopeFactory();
+
+        @Bean
+        public LoggingScopeControls loggingScopeControls() {
+            return factory;
+        }
+        
+        @Bean
+        @ConditionalOnMissingBean(LoggingScopeThreadUtils.class)
+        public LoggingScopeThreadUtils loggingScopeThreadUtils() {
+            return new DefaultLoggingScopeThreadUtils(factory);
+        }
+
         @Bean
         public FilterRegistrationBean<OndemandFilter> ondemandFilter(OndemandProperties properties) {
             LoggingScopeAsyncAppender appender = getAppender();
 
-            LOGGER.info("Configure on-demand HTTP logging ");
+            LOGGER.info("Enable on-demand HTTP logging filter");
 
             HttpLoggingScopeFilters filters = new HttpLoggingScopeFilters();
 
@@ -75,15 +83,13 @@ public class GcpWebOndemandLoggingAutoConfiguration {
                 filters.addFilter(requestMatcher, filter);
             }
 
-            ThreadLocalLoggingScopeFactory factory = new ThreadLocalLoggingScopeFactory();
-
             OndemandFilter filter = new OndemandFilter(appender, filters, factory);
 
             appender.addScopeProvider(factory);
 
             FilterRegistrationBean<OndemandFilter> registration = new FilterRegistrationBean<>();
             registration.setFilter(filter);
-            registration.setDispatcherTypes(REQUEST, ERROR);
+            registration.setDispatcherTypes(REQUEST, ERROR, ASYNC);
 
             registration.setOrder(properties.getFilterOrder());
             registration.addUrlPatterns(properties.getFilterUrlPatterns());
@@ -109,44 +115,40 @@ public class GcpWebOndemandLoggingAutoConfiguration {
         public HttpLoggingScopeFilter toFilter(String matcher, OndemandSuccess success, OndemandFailure failure, OndemandTroubleshoot troubleshoot) {
             HttpLoggingScopeFilter filter = new HttpLoggingScopeFilter();
 
-            List<OndemandHttpHeader> headers = troubleshoot.getHttp().getHeaders();
-            if(headers != null) {
-                Set<String> headerNames = new HashSet<>(); // thread safe for reading
-                for (OndemandHttpHeader header : headers) {
-                    if(header.isEnabled()) {
-                        headerNames.add(header.getName().toLowerCase());
-                    }
-                }
-                if(!headerNames.isEmpty()) {
-                    filter.setHttpHeaderPresentPredicate(new HttpHeaderPresentPredicate(headerNames));
-                } else {
-                    filter.setHttpHeaderPresentPredicate((e) -> false);
-                }
-            } else {
-                filter.setHttpHeaderPresentPredicate((e) -> false);
-            }
-
             Level alwaysLogLevel = toLevel(success.getLevel());
-            filter.setQueuePredicate( (e) -> e.getLevel().toInt() < alwaysLogLevel.toInt());
+            filter.setQueuePredicate((e) -> e.getLevel().toInt() < alwaysLogLevel.toInt());
 
             Level optionallyLogLevel = toLevel(failure.getLevel());
-            filter.setIgnorePredicate( (e) -> e.getLevel().toInt() < optionallyLogLevel.toInt());
+            filter.setIgnorePredicate((e) -> e.getLevel().toInt() < optionallyLogLevel.toInt());
 
-            // troubleshooting: to take effect, the troubleshooting must be
-            //  - lower than success, and/or
-            //  - lower than failure
-            Level troubleShootAlwaysLogLevel = toLevel(troubleshoot.getLevel());
-            if(troubleShootAlwaysLogLevel.toInt() > alwaysLogLevel.toInt()) {
-                filter.setTroubleshootQueuePredicate( (e) -> e.getLevel().toInt() < alwaysLogLevel.toInt());
-            } else {
-                filter.setTroubleshootQueuePredicate( (e) -> e.getLevel().toInt() < troubleShootAlwaysLogLevel.toInt());
-            }
+            OndemandHttpRequestTrigger troubleshootHttpRequestTrigger = troubleshoot.getHttp();
 
-            Level troubleShootOptionallyLogLevel = troubleShootAlwaysLogLevel;
-            if( troubleShootOptionallyLogLevel.toInt() > optionallyLogLevel.toInt()) {
-                filter.setTroubleshootIgnorePredicate( (e) -> e.getLevel().toInt() < optionallyLogLevel.toInt());
+            Set<String> troubleshootHeaderNames = troubleshoot.getHttp().toEnabledHeaderNames();
+            if(troubleshootHttpRequestTrigger.isEnabled() && !troubleshootHeaderNames.isEmpty()) {
+                filter.setHttpHeaderPresentPredicate(new HttpHeaderPresentPredicate(troubleshootHeaderNames));
+
+                LOGGER.info("Configure {} troubleshooting {} logging for headers {}", matcher == null ? "default" : matcher, troubleshoot.getLevel().toString(), troubleshootHeaderNames);
+
+                // troubleshooting: to take effect, the troubleshooting must be
+                //  - lower than success, and/or
+                //  - lower than failure
+                Level troubleShootAlwaysLogLevel = toLevel(troubleshoot.getLevel());
+                if (troubleShootAlwaysLogLevel.toInt() > alwaysLogLevel.toInt()) {
+                    filter.setTroubleshootQueuePredicate((e) -> e.getLevel().toInt() < alwaysLogLevel.toInt());
+                } else {
+                    filter.setTroubleshootQueuePredicate((e) -> e.getLevel().toInt() < troubleShootAlwaysLogLevel.toInt());
+                }
+
+                Level troubleShootOptionallyLogLevel = troubleShootAlwaysLogLevel;
+                if (troubleShootOptionallyLogLevel.toInt() > optionallyLogLevel.toInt()) {
+                    filter.setTroubleshootIgnorePredicate((e) -> e.getLevel().toInt() < optionallyLogLevel.toInt());
+                } else {
+                    filter.setTroubleshootIgnorePredicate((e) -> e.getLevel().toInt() < troubleShootOptionallyLogLevel.toInt());
+                }
             } else {
-                filter.setTroubleshootIgnorePredicate( (e) -> e.getLevel().toInt() < troubleShootOptionallyLogLevel.toInt());
+                filter.setTroubleshootQueuePredicate((e) -> false);
+                filter.setTroubleshootIgnorePredicate((e) -> false);
+                filter.setHttpHeaderPresentPredicate((e) -> false);
             }
 
             OndemandHttpResponseTrigger httpStatusCodeTrigger = failure.getHttp();
@@ -207,12 +209,16 @@ public class GcpWebOndemandLoggingAutoConfiguration {
                 Level flushForLevel = toLevel(logLevelTrigger.getLevel());
                 List<String> name = logLevelTrigger.getName();
                 if(name.isEmpty()) {
+                    LOGGER.info("Configure {} on-demand logging for log statements with at least {} severity", matcher == null ? "default" : matcher, flushForLevel.toString());
+
                     filter.setLogLevelFailurePredicate(new HigherOrEqualToLogLevelPredicate(flushForLevel.toInt()));
                 } else {
+                    LOGGER.info("Configure {} on-demand logging for {} log statements with at least {} severity ", name, matcher == null ? "default" : matcher, flushForLevel.toString());
+
                     filter.setLogLevelFailurePredicate(new LoggerNamePrefixHigherOrEqualToLogLevelPredicate(flushForLevel.toInt(), name));
                 }
             } else {
-                filter.setLogLevelFailurePredicate((e) -> false);
+                filter.setLogLevelFailurePredicate(null);
             }
 
             return filter;
@@ -236,6 +242,19 @@ public class GcpWebOndemandLoggingAutoConfiguration {
             }
         }
 
+    }
+
+
+    @Configuration
+    @ConditionalOnProperty(name = {"entur.logging.http.ondemand.enabled"}, havingValue = "false", matchIfMissing = true)
+    public static class DisabledOndemandConfiguration {
+
+        // this avoids breaking autowiring when on-demand is disabled
+        @Bean
+        @ConditionalOnMissingBean(LoggingScopeThreadUtils.class)
+        public LoggingScopeThreadUtils loggingScopeThreadUtils() {
+            return new NoopLoggingScopeThreadUtils();
+        }
     }
 
 }

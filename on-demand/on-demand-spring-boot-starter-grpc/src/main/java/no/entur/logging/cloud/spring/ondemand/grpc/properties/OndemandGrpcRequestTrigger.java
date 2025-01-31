@@ -1,7 +1,6 @@
 package no.entur.logging.cloud.spring.ondemand.grpc.properties;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class OndemandGrpcRequestTrigger {
 
@@ -23,6 +22,19 @@ public class OndemandGrpcRequestTrigger {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public Set<String> toEnabledHeaderNames() {
+        if(headers.isEmpty()) {
+            return Collections.emptySet();
+        }
+        Set<String> headerNames = new HashSet<>(); // thread safe for reading
+        for (OndemandGrpcHeader header : headers) {
+            if (header.isEnabled()) {
+                headerNames.add(header.getName().toLowerCase());
+            }
+        }
+        return headerNames;
     }
 
 }

@@ -2,6 +2,7 @@ package org.entur.example.web;
 
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControlClosable;
+import no.entur.logging.cloud.spring.ondemand.web.scope.LoggingScopeControls;
 import org.entur.example.web.rest.MyEntity;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,7 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource(properties = {"entur.logging.http.ondemand.enabled=true", "entur.logging.http.ondemand.failure.http.statusCode.equalOrHigherThan=400"})
+@ActiveProfiles("async")
+@TestPropertySource(properties = {"entur.logging.http.ondemand.enabled=true", "entur.logging.http.ondemand.failure.http.statusCode.equalOrHigherThan=400", "entur.logging.http.ondemand.failure.logger.level=error", "entur.logging.http.ondemand.failure.level=info"})
 public class OndemandWebLoggingHttpNotFound1AsyncTest {
 
 	@LocalServerPort
@@ -33,7 +36,6 @@ public class OndemandWebLoggingHttpNotFound1AsyncTest {
 	private TestRestTemplate restTemplate;
 
 	@Test
-	@Disabled
 	public void useHumanReadablePlainEncoderExpectFullLogging() {
 		MyEntity entity = new MyEntity();
 		entity.setName("Entur");
@@ -44,7 +46,6 @@ public class OndemandWebLoggingHttpNotFound1AsyncTest {
 	}
 
 	@Test
-	@Disabled
 	public void useHumanReadableJsonEncoderExpectFullLogging() {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
 			MyEntity entity = new MyEntity();
@@ -57,7 +58,6 @@ public class OndemandWebLoggingHttpNotFound1AsyncTest {
 	}
 
 	@Test
-	@Disabled
 	public void useMachineReadableJsonEncoderExpectFullLogging() {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
 			MyEntity entity = new MyEntity();

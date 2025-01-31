@@ -23,7 +23,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  */
 
-@TestPropertySource(properties = {"entur.logging.http.ondemand.enabled=true", "entur.logging.http.ondemand.failure.http.statusCode.equalOrHigherThan=400"})
+@TestPropertySource(properties = {
+		"entur.logging.http.ondemand.enabled=true",
+		"entur.logging.http.ondemand.failure.logger.enabled=false"
+})
 public class OndemandWebLoggingHttpNotFound2Test {
 
 	@LocalServerPort

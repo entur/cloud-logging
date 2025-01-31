@@ -114,7 +114,7 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor, Or
 					if (filter.getGrpcStatusPredicate().test(status)) {
 						// was there an error response
 						sink.write(scope);
-					} else if(scope.isLogLevelFailure()) {
+					} else if(scope.isFailure()) {
 						// there some dangerous error message
 						sink.write(scope);
 					}

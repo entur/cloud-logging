@@ -1,7 +1,6 @@
 package no.entur.logging.cloud.spring.ondemand.web.properties;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class OndemandHttpRequestTrigger {
 
@@ -23,6 +22,19 @@ public class OndemandHttpRequestTrigger {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public Set<String> toEnabledHeaderNames() {
+        if(headers.isEmpty()) {
+            return Collections.emptySet();
+        }
+        Set<String> headerNames = new HashSet<>(); // thread safe for reading
+        for (OndemandHttpHeader header : headers) {
+            if (header.isEnabled()) {
+                headerNames.add(header.getName().toLowerCase());
+            }
+        }
+        return headerNames;
     }
 
 }

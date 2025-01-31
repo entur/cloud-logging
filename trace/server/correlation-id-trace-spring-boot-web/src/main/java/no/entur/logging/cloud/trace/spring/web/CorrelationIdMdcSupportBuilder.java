@@ -6,6 +6,33 @@ import java.util.UUID;
 
 public class CorrelationIdMdcSupportBuilder {
 
+	protected static final boolean[] VALUE_CHARACTERS;
+
+	static {
+		// create lookup-table
+		// accept digits, a-z and dash
+		int lowercaseStart = 'a';
+		int lowercaseEnd = 'z';
+
+		int digitStart = '0';
+		int digitEnd = '9';
+
+		boolean[] values = new boolean[lowercaseEnd + 1];
+
+		for (int i = lowercaseStart; i <= lowercaseEnd; i++) {
+			values[i] = true;
+		}
+		for (int i = digitStart; i <= digitEnd; i++) {
+			values[i] = true;
+		}
+
+		// special chars
+		values['-'] = true;
+
+		VALUE_CHARACTERS = values;
+	}
+
+
 	protected String correlationId;
 	protected String requestId;
 
@@ -56,7 +83,11 @@ public class CorrelationIdMdcSupportBuilder {
 	public static boolean containsNumbersLowercaseLettersAndDashes(String inputValue) {
 		for(int i = 0; i < inputValue.length(); i++) {
 			char c = inputValue.charAt(i);
-			if(!Character.isDigit(c) && c != '-' && (c < 'a'|| c > 'z')) {
+
+			if (c >= VALUE_CHARACTERS.length) {
+				return false;
+			}
+			if (!VALUE_CHARACTERS[c]) {
 				return false;
 			}
 		}

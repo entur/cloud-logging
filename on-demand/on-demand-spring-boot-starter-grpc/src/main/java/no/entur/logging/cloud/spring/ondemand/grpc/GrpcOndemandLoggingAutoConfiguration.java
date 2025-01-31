@@ -9,14 +9,7 @@ import io.grpc.Status;
 import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import no.entur.logging.cloud.appender.scope.predicate.HigherOrEqualToLogLevelPredicate;
 import no.entur.logging.cloud.appender.scope.predicate.LoggerNamePrefixHigherOrEqualToLogLevelPredicate;
-import no.entur.logging.cloud.spring.ondemand.grpc.properties.OndemandFailure;
-import no.entur.logging.cloud.spring.ondemand.grpc.properties.OndemandGrpcHeader;
-import no.entur.logging.cloud.spring.ondemand.grpc.properties.OndemandGrpcResponseTrigger;
-import no.entur.logging.cloud.spring.ondemand.grpc.properties.OndemandLogLevelTrigger;
-import no.entur.logging.cloud.spring.ondemand.grpc.properties.OndemandPath;
-import no.entur.logging.cloud.spring.ondemand.grpc.properties.OndemandProperties;
-import no.entur.logging.cloud.spring.ondemand.grpc.properties.OndemandSuccess;
-import no.entur.logging.cloud.spring.ondemand.grpc.properties.OndemandTroubleshoot;
+import no.entur.logging.cloud.spring.ondemand.grpc.properties.*;
 import no.entur.logging.cloud.spring.ondemand.grpc.scope.GrpcContextLoggingScopeFactory;
 import no.entur.logging.cloud.spring.ondemand.grpc.scope.GrpcHeaderPresentPredicate;
 import no.entur.logging.cloud.spring.ondemand.grpc.scope.GrpcLoggingScopeContextInterceptor;
@@ -29,10 +22,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -54,7 +44,7 @@ public class GrpcOndemandLoggingAutoConfiguration {
 
             GrpcLoggingScopeFilters filters = new GrpcLoggingScopeFilters();
 
-            GrpcLoggingScopeFilter defaultFilter = toFilter(properties.getSuccess(), properties.getFailure(), properties.getTroubleshoot());
+            GrpcLoggingScopeFilter defaultFilter = toFilter("default", Collections.emptyList(), properties.getSuccess(), properties.getFailure(), properties.getTroubleshoot());
             filters.setDefaultFilter(defaultFilter);
 
             List<OndemandPath> paths = properties.getPaths();
@@ -62,7 +52,7 @@ public class GrpcOndemandLoggingAutoConfiguration {
                 if(!matcher.isEnabled()) {
                     continue;
                 }
-                GrpcLoggingScopeFilter filter = toFilter(matcher.getSuccess(), matcher.getFailure(), matcher.getTroubleshoot());
+                GrpcLoggingScopeFilter filter = toFilter(matcher.getServiceName(), matcher.getMethodNames(), matcher.getSuccess(), matcher.getFailure(), matcher.getTroubleshoot());
 
                 String serviceName = matcher.getServiceName();
                 List<String> methodNames = matcher.getMethodNames();
@@ -122,25 +112,8 @@ public class GrpcOndemandLoggingAutoConfiguration {
             throw new IllegalStateException("Expected on-demand log appender implementing " + LoggingScopeAsyncAppender.class.getName());
         }
 
-        public GrpcLoggingScopeFilter toFilter(OndemandSuccess success, OndemandFailure failure, OndemandTroubleshoot troubleshoot) {
+        public GrpcLoggingScopeFilter toFilter(String serviceName, List<String> methodNames, OndemandSuccess success, OndemandFailure failure, OndemandTroubleshoot troubleshoot) {
             GrpcLoggingScopeFilter filter = new GrpcLoggingScopeFilter();
-
-            List<OndemandGrpcHeader> headers = troubleshoot.getGrpc().getHeaders();
-            if(headers != null) {
-                Set<String> headerNames = new HashSet<>(); // thread safe for reading
-                for (OndemandGrpcHeader header : headers) {
-                    if(header.isEnabled()) {
-                        headerNames.add(header.getName().toLowerCase());
-                    }
-                }
-                if(!headerNames.isEmpty()) {
-                    filter.setGrpcHeaderPresentPredicate(new GrpcHeaderPresentPredicate(headerNames));
-                } else {
-                    filter.setGrpcHeaderPresentPredicate((e) -> false);
-                }
-            } else {
-                filter.setGrpcHeaderPresentPredicate((e) -> false);
-            }
 
             Level alwaysLogLevel = toLevel(success.getLevel());
             filter.setQueuePredicate( (e) -> e.getLevel().toInt() < alwaysLogLevel.toInt());
@@ -148,26 +121,42 @@ public class GrpcOndemandLoggingAutoConfiguration {
             Level optionallyLogLevel = toLevel(failure.getLevel());
             filter.setIgnorePredicate( (e) -> e.getLevel().toInt() < optionallyLogLevel.toInt());
 
-            // troubleshooting: to take effect, the troubleshooting must be
-            //  - lower than success, and/or
-            //  - lower than failure
-            Level troubleShootAlwaysLogLevel = toLevel(troubleshoot.getLevel());
-            if(troubleShootAlwaysLogLevel.toInt() > alwaysLogLevel.toInt()) {
-                filter.setTroubleshootQueuePredicate( (e) -> e.getLevel().toInt() < alwaysLogLevel.toInt());
-            } else {
-                filter.setTroubleshootQueuePredicate( (e) -> e.getLevel().toInt() < troubleShootAlwaysLogLevel.toInt());
-            }
+            OndemandGrpcRequestTrigger troubleshootHttpRequestTrigger = troubleshoot.getGrpc();
 
-            Level troubleShootOptionallyLogLevel = troubleShootAlwaysLogLevel;
-            if( troubleShootOptionallyLogLevel.toInt() > optionallyLogLevel.toInt()) {
-                filter.setTroubleshootIgnorePredicate( (e) -> e.getLevel().toInt() < optionallyLogLevel.toInt());
+            Set<String> troubleshootHeaderNames = troubleshoot.getGrpc().toEnabledHeaderNames();
+            if(troubleshootHttpRequestTrigger.isEnabled() && !troubleshootHeaderNames.isEmpty()) {
+                filter.setGrpcHeaderPresentPredicate(new GrpcHeaderPresentPredicate(troubleshootHeaderNames));
+
+                LOGGER.info("Configure GRPC {} troubleshooting {} logging for headers {}", methodNames.isEmpty() ? serviceName : serviceName + methodNames, troubleshoot.getLevel(), troubleshootHeaderNames);
+
+                // troubleshooting: to take effect, the troubleshooting must be
+                //  - lower than success, and/or
+                //  - lower than failure
+                Level troubleShootAlwaysLogLevel = toLevel(troubleshoot.getLevel());
+                if(troubleShootAlwaysLogLevel.toInt() > alwaysLogLevel.toInt()) {
+                    filter.setTroubleshootQueuePredicate( (e) -> e.getLevel().toInt() < alwaysLogLevel.toInt());
+                } else {
+                    filter.setTroubleshootQueuePredicate( (e) -> e.getLevel().toInt() < troubleShootAlwaysLogLevel.toInt());
+                }
+
+                Level troubleShootOptionallyLogLevel = troubleShootAlwaysLogLevel;
+                if( troubleShootOptionallyLogLevel.toInt() > optionallyLogLevel.toInt()) {
+                    filter.setTroubleshootIgnorePredicate( (e) -> e.getLevel().toInt() < optionallyLogLevel.toInt());
+                } else {
+                    filter.setTroubleshootIgnorePredicate( (e) -> e.getLevel().toInt() < troubleShootOptionallyLogLevel.toInt());
+                }
+
             } else {
-                filter.setTroubleshootIgnorePredicate( (e) -> e.getLevel().toInt() < troubleShootOptionallyLogLevel.toInt());
+                filter.setGrpcHeaderPresentPredicate((e) -> false);
+                filter.setTroubleshootQueuePredicate((e) -> false);
+                filter.setTroubleshootIgnorePredicate((e) -> false);
             }
 
             OndemandGrpcResponseTrigger httpStatusCodeTrigger = failure.getGrpc();
             if(httpStatusCodeTrigger.isEnabled()) {
                 Set<String> status = httpStatusCodeTrigger.getStatus().stream().map( (s) -> s.toUpperCase()).collect(Collectors.toSet());
+
+                LOGGER.info("Configure GRPC  {} on-demand logging for status codes ", methodNames.isEmpty() ? serviceName : serviceName + methodNames, status);
 
                 Status.Code[] values = Status.Code.values();
 
@@ -186,12 +175,16 @@ public class GrpcOndemandLoggingAutoConfiguration {
                 Level flushForLevel = toLevel(logLevelTrigger.getLevel());
                 List<String> name = logLevelTrigger.getName();
                 if(name.isEmpty()) {
+                    LOGGER.info("Configure GRPC {} on-demand logging for log statements with at least {} severity", methodNames.isEmpty() ? serviceName : serviceName + methodNames, flushForLevel);
+
                     filter.setLogLevelFailurePredicate(new HigherOrEqualToLogLevelPredicate(flushForLevel.toInt()));
                 } else {
+                    LOGGER.info("Configure GRPC {} on-demand logging for {} log statements with at least {} severity ", name, methodNames.isEmpty() ? serviceName : serviceName + methodNames, flushForLevel);
+
                     filter.setLogLevelFailurePredicate(new LoggerNamePrefixHigherOrEqualToLogLevelPredicate(flushForLevel.toInt(), name));
                 }
             } else {
-                filter.setLogLevelFailurePredicate((e) -> false);
+                filter.setLogLevelFailurePredicate(null);
             }
 
             return filter;

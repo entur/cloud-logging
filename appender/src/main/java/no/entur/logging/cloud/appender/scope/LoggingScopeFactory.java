@@ -8,6 +8,8 @@ public interface LoggingScopeFactory<T extends LoggingScope> {
 
     T openScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate, Predicate<ILoggingEvent> logLevelFailurePredicate);
 
+    void reopenScope(LoggingScope scope);
+
     void closeScope(LoggingScope scope);
 
 }

@@ -3,11 +3,11 @@ package no.entur.logging.cloud.appender.scope;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Predicate;
 
 /**
  * Logging scope for temporarily adjusting what gets logged, caching the log skipped-over log statements in the process.
  *
+ *  Logging scopes are thread safe.
  */
 public interface LoggingScope {
 
@@ -15,6 +15,13 @@ public interface LoggingScope {
 
     boolean append(ILoggingEvent eventObject);
 
-    boolean isLogLevelFailure();
+    boolean isFailure();
 
+    /**
+     *
+     * Manually trigger failure condition for this scope.
+     *
+     */
+
+    void failure();
 }
