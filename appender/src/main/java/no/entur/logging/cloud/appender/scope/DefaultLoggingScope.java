@@ -32,7 +32,8 @@ public class DefaultLoggingScope implements LoggingScope {
 
     @Override
     public Queue<ILoggingEvent> getEvents() {
-        if(!failure) {
+        if(flushMode == LoggingScopeFlushMode.LAZY && !failure) {
+            // filter unwanted events
             events.removeIf(queuePredicate);
         }
 
