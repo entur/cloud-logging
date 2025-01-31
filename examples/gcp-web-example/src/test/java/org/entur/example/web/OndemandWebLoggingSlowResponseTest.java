@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		"entur.logging.http.ondemand.failure.http.enabled=false",
 		"entur.logging.http.ondemand.failure.logger.enabled=false",
 		"entur.logging.http.ondemand.failure.duration.enabled=true",
-		"entur.logging.http.ondemand.failure.duration.milliseconds=500",
+		"entur.logging.http.ondemand.failure.duration.after=500ms",
 })
 public class OndemandWebLoggingSlowResponseTest {
 

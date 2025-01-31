@@ -202,8 +202,10 @@ public class GcpWebOndemandLoggingAutoConfiguration {
             }
 
             OndemandDurationTrigger duration = failure.getDuration();
-            if(duration.isEnabled() && duration.getMilliseconds() != -1) {
-                filter.setFailureDuration(duration.getMilliseconds());
+            if(duration.isEnabled() && duration.getAfter() != null) {
+                String after = duration.getAfter();
+
+                filter.setFailureDuration(parseDuration(after));
             }
 
             OndemandLogLevelTrigger logLevelTrigger = failure.getLogger();
@@ -224,6 +226,18 @@ public class GcpWebOndemandLoggingAutoConfiguration {
             }
 
             return filter;
+        }
+
+        private long parseDuration(String after) {
+            after = after.replaceAll("\\s+", "");
+
+            if(after.endsWith("ms")) {
+                return Long.parseLong(after.substring(0, after.length() - 2));
+            } else if(!after.endsWith("s")) {
+                return Long.parseLong(after.substring(0, after.length() - 1));
+            } else {
+                throw new IllegalArgumentException("Duration must be in milliseconds (ms) or seconds (s)");
+            }
         }
 
         protected Level toLevel(String level) {

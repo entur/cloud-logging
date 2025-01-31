@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		"entur.logging.http.ondemand.failure.http.enabled=false",
 		"entur.logging.http.ondemand.failure.logger.enabled=false",
 		"entur.logging.http.ondemand.failure.duration.enabled=true",
-		"entur.logging.http.ondemand.failure.duration.milliseconds=500",
+		"entur.logging.http.ondemand.failure.duration.after=500ms",
 })
 public class AsyncOndemandWebLoggingSlowResponseTest {
 
@@ -52,7 +52,6 @@ public class AsyncOndemandWebLoggingSlowResponseTest {
 		ResponseEntity<MyEntity> response = restTemplate.getForEntity("/api/document/some/slow/method?wait="+wait, MyEntity.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
-
 
 	@Test 
 	public void useHumanReadableJsonEncoderExpectFullLogging() {

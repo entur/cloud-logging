@@ -2,8 +2,8 @@ package no.entur.logging.cloud.spring.ondemand.grpc.properties;
 
 public class OndemandDurationTrigger {
 
-    private boolean enabled = false;
-    private long milliseconds = -1;
+    private boolean enabled = true;
+    private String after;
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
@@ -13,11 +13,11 @@ public class OndemandDurationTrigger {
         return enabled;
     }
 
-    public void setMilliseconds(long milliseconds) {
-        this.milliseconds = milliseconds;
+    public void setAfter(String after) {
+        this.after = after;
     }
 
-    public long getMilliseconds() {
-        return milliseconds;
+    public String getAfter() {
+        return after;
     }
 }
