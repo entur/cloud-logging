@@ -129,23 +129,13 @@ public class GrpcOndemandLoggingAutoConfiguration {
 
                 LOGGER.info("Configure GRPC {} troubleshooting {} logging for headers {}", methodNames.isEmpty() ? serviceName : serviceName + methodNames, troubleshoot.getLevel(), troubleshootHeaderNames);
 
-                // troubleshooting: to take effect, the troubleshooting must be
-                //  - lower than success, and/or
-                //  - lower than failure
+                // troubleshooting: lower the success / failure level
                 Level troubleShootAlwaysLogLevel = toLevel(troubleshoot.getLevel());
-                if(troubleShootAlwaysLogLevel.toInt() > alwaysLogLevel.toInt()) {
-                    filter.setTroubleshootQueuePredicate( (e) -> e.getLevel().toInt() < alwaysLogLevel.toInt());
-                } else {
-                    filter.setTroubleshootQueuePredicate( (e) -> e.getLevel().toInt() < troubleShootAlwaysLogLevel.toInt());
-                }
+                int alwaysLogLevelWhenTroubleShooting = Math.min(alwaysLogLevel.toInt(), troubleShootAlwaysLogLevel.toInt());
+                filter.setTroubleshootQueuePredicate((e) -> e.getLevel().toInt() < alwaysLogLevelWhenTroubleShooting);
 
-                Level troubleShootOptionallyLogLevel = troubleShootAlwaysLogLevel;
-                if( troubleShootOptionallyLogLevel.toInt() > optionallyLogLevel.toInt()) {
-                    filter.setTroubleshootIgnorePredicate( (e) -> e.getLevel().toInt() < optionallyLogLevel.toInt());
-                } else {
-                    filter.setTroubleshootIgnorePredicate( (e) -> e.getLevel().toInt() < troubleShootOptionallyLogLevel.toInt());
-                }
-
+                int optionalLogLevelWhenTroubleShooting = Math.min(optionallyLogLevel.toInt(), troubleShootAlwaysLogLevel.toInt());
+                filter.setTroubleshootIgnorePredicate((e) -> e.getLevel().toInt() < optionalLogLevelWhenTroubleShooting);
             } else {
                 filter.setGrpcHeaderPresentPredicate((e) -> false);
                 filter.setTroubleshootQueuePredicate((e) -> false);
