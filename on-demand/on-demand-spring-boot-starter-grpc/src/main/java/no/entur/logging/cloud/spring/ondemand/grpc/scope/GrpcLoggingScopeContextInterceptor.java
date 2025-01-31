@@ -113,13 +113,12 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor, Or
 				try {
 					if (filter.getGrpcStatusPredicate().test(status)) {
 						// was there an error response
-						sink.write(scope);
-					} else if(scope.isFailure()) {
-						// there some dangerous error message
-						sink.write(scope);
+						scope.failure();
 					} else if(filter.hasFailureDuration() && System.currentTimeMillis() - scope. getTimestamp() > filter.getFailureDuration()) {
-						sink.write(scope);
+						scope.failure();
 					}
+
+					sink.write(scope);
 				} finally {
 					factory.closeScope(scope); // this is really a noop operation
 				}

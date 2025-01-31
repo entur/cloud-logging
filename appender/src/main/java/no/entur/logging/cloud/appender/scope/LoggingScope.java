@@ -2,6 +2,7 @@ package no.entur.logging.cloud.appender.scope;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -11,7 +12,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public interface LoggingScope {
 
-    ConcurrentLinkedQueue<ILoggingEvent> getEvents();
+    Queue<ILoggingEvent> getEvents();
 
     boolean append(ILoggingEvent eventObject);
 

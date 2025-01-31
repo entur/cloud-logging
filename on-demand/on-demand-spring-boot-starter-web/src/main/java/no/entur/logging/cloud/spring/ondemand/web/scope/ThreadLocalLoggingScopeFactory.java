@@ -1,23 +1,25 @@
 package no.entur.logging.cloud.spring.ondemand.web.scope;
 
-import no.entur.logging.cloud.appender.scope.DefaultLoggingScope;
-import no.entur.logging.cloud.appender.scope.LogLevelLoggingScope;
-import no.entur.logging.cloud.appender.scope.LoggingScope;
-import no.entur.logging.cloud.appender.scope.LoggingScopeFactory;
+import no.entur.logging.cloud.appender.scope.*;
 
 import java.util.function.Predicate;
 
 public class ThreadLocalLoggingScopeFactory implements LoggingScopeFactory, LoggingScopeControls {
 
-    private final ThreadLocal<LoggingScope> queues = new ThreadLocal<>();
+    protected final ThreadLocal<LoggingScope> queues = new ThreadLocal<>();
+    protected final LoggingScopeFlushMode flushMode;
+
+    public ThreadLocalLoggingScopeFactory(LoggingScopeFlushMode flushMode) {
+        this.flushMode = flushMode;
+    }
 
     @Override
     public LoggingScope openScope(Predicate queuePredicate, Predicate ignorePredicate, Predicate logLevelFailurePredicate) {
         LoggingScope scope;
         if(logLevelFailurePredicate == null) {
-            scope = new DefaultLoggingScope(queuePredicate, ignorePredicate);
+            scope = new DefaultLoggingScope(queuePredicate, ignorePredicate, flushMode);
         } else {
-            scope = new LogLevelLoggingScope(queuePredicate, ignorePredicate, logLevelFailurePredicate);
+            scope = new LogLevelLoggingScope(queuePredicate, ignorePredicate, logLevelFailurePredicate, flushMode);
         }
         queues.set(scope);
         return scope;

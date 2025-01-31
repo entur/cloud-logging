@@ -1,5 +1,6 @@
 package no.entur.logging.cloud.spring.ondemand.grpc.properties;
 
+import no.entur.logging.cloud.appender.scope.LoggingScopeFlushMode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.Ordered;
 
@@ -20,6 +21,8 @@ public class OndemandProperties {
     private OndemandTroubleshoot troubleshoot = new OndemandTroubleshoot();
 
     private List<OndemandPath> paths = new ArrayList<>();
+
+    private LoggingScopeFlushMode flushMode = LoggingScopeFlushMode.EAGER;
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
@@ -67,5 +70,13 @@ public class OndemandProperties {
 
     public void setInterceptorOrder(int interceptorOrder) {
         this.interceptorOrder = interceptorOrder;
+    }
+
+    public LoggingScopeFlushMode getFlushMode() {
+        return flushMode;
+    }
+
+    public void setFlushMode(LoggingScopeFlushMode flushMode) {
+        this.flushMode = flushMode;
     }
 }

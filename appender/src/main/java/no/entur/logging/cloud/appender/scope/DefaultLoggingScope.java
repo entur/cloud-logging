@@ -2,6 +2,7 @@ package no.entur.logging.cloud.appender.scope;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Predicate;
 
@@ -11,22 +12,32 @@ import java.util.function.Predicate;
  */
 public class DefaultLoggingScope implements LoggingScope {
 
+    // note: not ignored and not queued means it should be printed
     protected final Predicate<ILoggingEvent> queuePredicate;
     protected final Predicate<ILoggingEvent> ignorePredicate;
+
     protected final long timestamp = System.currentTimeMillis();
 
     protected boolean failure = false;
 
-    protected ConcurrentLinkedQueue<ILoggingEvent> queue = new ConcurrentLinkedQueue<ILoggingEvent>();
+    protected final LoggingScopeFlushMode flushMode;
 
-    public DefaultLoggingScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate) {
+    protected ConcurrentLinkedQueue<ILoggingEvent> events = new ConcurrentLinkedQueue<ILoggingEvent>();
+
+    public DefaultLoggingScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate, LoggingScopeFlushMode flushMode) {
         this.queuePredicate = queuePredicate;
         this.ignorePredicate = ignorePredicate;
+        this.flushMode = flushMode;
     }
 
     @Override
-    public ConcurrentLinkedQueue<ILoggingEvent> getEvents() {
-        return queue;
+    public Queue<ILoggingEvent> getEvents() {
+        if(flushMode == LoggingScopeFlushMode.LAZY && !failure) {
+            // filter unwanted events
+            events.removeIf(queuePredicate);
+        }
+
+        return events;
     }
 
     @Override
@@ -35,10 +46,16 @@ public class DefaultLoggingScope implements LoggingScope {
             return true;
         }
 
+        if(flushMode == LoggingScopeFlushMode.LAZY) {
+            // queue for later processing
+            events.add(eventObject);
+            return true;
+        }
+
         if(!failure) {
             if(queuePredicate.test(eventObject)) {
                 // log this event later or not at all
-                queue.add(eventObject);
+                events.add(eventObject);
                 return true;
             }
         }
@@ -53,11 +70,11 @@ public class DefaultLoggingScope implements LoggingScope {
 
     @Override
     public void failure() {
-        // TODO flush buffer here?
         this.failure = true;
     }
 
     public long getTimestamp() {
         return timestamp;
     }
+
 }
