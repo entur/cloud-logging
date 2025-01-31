@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/document")
@@ -59,6 +60,21 @@ public class DocumentEndpoint {
 
 		return new ResponseEntity<>(json, HttpStatus.OK);
 	}
+
+
+	@GetMapping(value = "/some/slow/method", produces = "application/json")
+	public ResponseEntity<String> age(@RequestParam("wait") Long wait) throws InterruptedException {
+		logger.info("This message should be delayed; printed for slow requests / info");
+
+		String json = "{\n}\n";
+		try {
+			Thread.sleep(wait);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+		return new ResponseEntity<>(json, HttpStatus.OK);
+	}
+
 
 	@GetMapping(value = "/some/bigResponse", produces = "application/json")
 	ResponseEntity<String> bigResponse() throws IOException {

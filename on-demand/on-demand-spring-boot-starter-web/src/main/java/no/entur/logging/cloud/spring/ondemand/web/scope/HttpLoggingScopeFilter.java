@@ -19,6 +19,7 @@ public class HttpLoggingScopeFilter {
     private IntPredicate httpStatusFailurePredicate;
 
     private Predicate<Enumeration<String>> httpHeaderPresentPredicate;
+    private long failureDuration = -1L;
 
     public IntPredicate getHttpStatusFailurePredicate() {
         return httpStatusFailurePredicate;
@@ -74,5 +75,17 @@ public class HttpLoggingScopeFilter {
 
     public Predicate<ILoggingEvent> getTroubleshootQueuePredicate() {
         return troubleshootQueuePredicate;
+    }
+
+    public void setFailureDuration(long failureDuration) {
+        this.failureDuration = failureDuration;
+    }
+
+    public long getFailureDuration() {
+        return failureDuration;
+    }
+
+    public boolean hasFailureDuration() {
+        return failureDuration != -1;
     }
 }

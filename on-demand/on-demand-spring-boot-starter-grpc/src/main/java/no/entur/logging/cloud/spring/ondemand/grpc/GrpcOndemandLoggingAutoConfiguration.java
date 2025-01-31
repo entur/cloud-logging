@@ -152,6 +152,11 @@ public class GrpcOndemandLoggingAutoConfiguration {
                 filter.setTroubleshootIgnorePredicate((e) -> false);
             }
 
+            OndemandDurationTrigger duration = failure.getDuration();
+            if(duration.isEnabled() && duration.getMilliseconds() != -1) {
+                filter.setFailureDuration(duration.getMilliseconds());
+            }
+
             OndemandGrpcResponseTrigger httpStatusCodeTrigger = failure.getGrpc();
             if(httpStatusCodeTrigger.isEnabled()) {
                 Set<String> status = httpStatusCodeTrigger.getStatus().stream().map( (s) -> s.toUpperCase()).collect(Collectors.toSet());

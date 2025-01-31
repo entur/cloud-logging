@@ -25,6 +25,8 @@ public class OndemandFilter extends HttpFilter {
     private final String FILTER = OndemandFilter.class.getName() + "-filter";
     private final String SCOPE = OndemandFilter.class.getName() + "-scope";
 
+    private final String DURATION = OndemandFilter.class.getName() + "-scope";
+
     static class ScopeAsyncListener implements AsyncListener {
 
         private final Runnable runnable;
@@ -138,6 +140,8 @@ public class OndemandFilter extends HttpFilter {
             } else if (scope.isFailure()) {
                 // was there some dangerous error message?
                 sink.write(scope);
+            } else if(filter.hasFailureDuration() && System.currentTimeMillis() - scope. getTimestamp() > filter.getFailureDuration()) {
+               sink.write(scope);
             }
         }
     }

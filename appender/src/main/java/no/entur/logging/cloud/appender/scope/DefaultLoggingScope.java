@@ -13,6 +13,7 @@ public class DefaultLoggingScope implements LoggingScope {
 
     protected final Predicate<ILoggingEvent> queuePredicate;
     protected final Predicate<ILoggingEvent> ignorePredicate;
+    protected final long timestamp = System.currentTimeMillis();
 
     protected boolean failure = false;
 
@@ -54,5 +55,9 @@ public class DefaultLoggingScope implements LoggingScope {
     public void failure() {
         // TODO flush buffer here?
         this.failure = true;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 }
