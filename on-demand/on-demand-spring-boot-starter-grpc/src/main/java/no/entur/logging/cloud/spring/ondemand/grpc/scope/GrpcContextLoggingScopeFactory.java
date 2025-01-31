@@ -8,13 +8,20 @@ import java.util.function.Predicate;
 
 public class GrpcContextLoggingScopeFactory implements LoggingScopeFactory<LoggingScope>, LoggingScopeProvider {
 
+    protected final LoggingScopeFlushMode flushMode;
+
+    public GrpcContextLoggingScopeFactory(LoggingScopeFlushMode flushMode) {
+        this.flushMode = flushMode;
+
+    }
+
     @Override
     public LoggingScope openScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate, Predicate<ILoggingEvent> logLevelFailurePredicate) {
         LoggingScope scope;
         if(logLevelFailurePredicate == null) {
-            scope = new DefaultLoggingScope(queuePredicate, ignorePredicate);
+            scope = new DefaultLoggingScope(queuePredicate, ignorePredicate, flushMode);
         } else {
-            scope = new LogLevelLoggingScope(queuePredicate, ignorePredicate, logLevelFailurePredicate);
+            scope = new LogLevelLoggingScope(queuePredicate, ignorePredicate, logLevelFailurePredicate, flushMode);
         }
 
         return scope;

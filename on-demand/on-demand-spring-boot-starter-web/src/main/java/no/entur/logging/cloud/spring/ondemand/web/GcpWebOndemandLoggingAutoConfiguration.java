@@ -47,7 +47,13 @@ public class GcpWebOndemandLoggingAutoConfiguration {
     @ConditionalOnProperty(name = {"entur.logging.http.ondemand.enabled"}, havingValue = "true", matchIfMissing = false)
     public static class OndemandConfiguration {
 
-        private ThreadLocalLoggingScopeFactory factory = new ThreadLocalLoggingScopeFactory();
+        private final ThreadLocalLoggingScopeFactory factory;
+        private OndemandProperties properties;
+
+        public OndemandConfiguration(OndemandProperties properties) {
+            this.properties = properties;
+            this.factory = new ThreadLocalLoggingScopeFactory(properties.getFlushMode());
+        }
 
         @Bean
         public LoggingScopeControls loggingScopeControls() {
@@ -56,12 +62,12 @@ public class GcpWebOndemandLoggingAutoConfiguration {
         
         @Bean
         @ConditionalOnMissingBean(LoggingScopeThreadUtils.class)
-        public LoggingScopeThreadUtils loggingScopeThreadUtils() {
+        public LoggingScopeThreadUtils loggingScopeThreadUtils(OndemandProperties properties) {
             return new DefaultLoggingScopeThreadUtils(factory);
         }
 
         @Bean
-        public FilterRegistrationBean<OndemandFilter> ondemandFilter(OndemandProperties properties) {
+        public FilterRegistrationBean<OndemandFilter> ondemandFilter() {
             LoggingScopeAsyncAppender appender = getAppender();
 
             LOGGER.info("Enable on-demand HTTP logging filter");
@@ -108,7 +114,6 @@ public class GcpWebOndemandLoggingAutoConfiguration {
             }
             throw new IllegalStateException("Expected on-demand log appender implementing " + LoggingScopeAsyncAppender.class.getName());
         }
-
 
         public HttpLoggingScopeFilter toFilter(String matcher, OndemandSuccess success, OndemandFailure failure, OndemandTroubleshoot troubleshoot) {
             HttpLoggingScopeFilter filter = new HttpLoggingScopeFilter();

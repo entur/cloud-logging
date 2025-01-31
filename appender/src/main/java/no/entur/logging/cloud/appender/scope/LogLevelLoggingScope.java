@@ -2,7 +2,6 @@ package no.entur.logging.cloud.appender.scope;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Predicate;
 
 /**
@@ -13,13 +12,23 @@ public class LogLevelLoggingScope extends DefaultLoggingScope {
 
     private final Predicate<ILoggingEvent> logLevelFailurePredicate;
 
-    public LogLevelLoggingScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate, Predicate<ILoggingEvent> logLevelFailurePredicate) {
-        super(queuePredicate, ignorePredicate);
+    public LogLevelLoggingScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate, Predicate<ILoggingEvent> logLevelFailurePredicate, LoggingScopeFlushMode flushMode) {
+        super(queuePredicate, ignorePredicate, flushMode);
         this.logLevelFailurePredicate = logLevelFailurePredicate;
     }
 
     public boolean append(ILoggingEvent eventObject) {
         if(ignorePredicate.test(eventObject)) {
+            return true;
+        }
+
+        if(flushMode == LoggingScopeFlushMode.LAZY) {
+            if(!failure && logLevelFailurePredicate.test(eventObject)) {
+                failure();
+            }
+
+            // queue for later processing
+            events.add(eventObject);
             return true;
         }
 
@@ -32,7 +41,7 @@ public class LogLevelLoggingScope extends DefaultLoggingScope {
             }
             if(queuePredicate.test(eventObject)) {
                 // log this event later or not at all
-                queue.add(eventObject);
+                events.add(eventObject);
                 return true;
             }
         }

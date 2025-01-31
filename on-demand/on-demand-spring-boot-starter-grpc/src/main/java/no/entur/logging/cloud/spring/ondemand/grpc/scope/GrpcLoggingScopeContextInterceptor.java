@@ -113,11 +113,12 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor, Or
 				try {
 					if (filter.getGrpcStatusPredicate().test(status)) {
 						// was there an error response
-						sink.write(scope);
-					} else if(scope.isFailure()) {
-						// there some dangerous error message
-						sink.write(scope);
+						scope.failure();
 					} else if(filter.hasFailureDuration() && System.currentTimeMillis() - scope. getTimestamp() > filter.getFailureDuration()) {
+						scope.failure();
+					}
+
+					if(scope.isFailure()) {
 						sink.write(scope);
 					}
 				} finally {

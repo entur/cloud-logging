@@ -136,13 +136,12 @@ public class OndemandFilter extends HttpFilter {
 
             if (filter.getHttpStatusFailurePredicate().test(servletResponse.getStatus())) {
                 // was there an error response
-                sink.write(scope);
-            } else if (scope.isFailure()) {
-                // was there some dangerous error message?
-                sink.write(scope);
+                scope.failure();
             } else if(filter.hasFailureDuration() && System.currentTimeMillis() - scope. getTimestamp() > filter.getFailureDuration()) {
-               sink.write(scope);
+                scope.failure();
             }
+
+            sink.write(scope);
         }
     }
 
