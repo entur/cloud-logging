@@ -48,6 +48,7 @@ dependencies {
     api("com.google.api.grpc:proto-google-common-protos:$grpcCommonsVersion")
     api("com.google.protobuf:protobuf-java-util:${grpcProtobufVersion}")
 
+    testImplementation("javax.annotation:javax.annotation-api:1.3.2")
     testImplementation("com.google.truth:truth:${googleTruthVersion}")
     testImplementation("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
 
