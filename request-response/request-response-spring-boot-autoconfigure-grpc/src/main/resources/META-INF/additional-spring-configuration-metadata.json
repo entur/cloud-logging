@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "entur.logging.request-response.logger.level",
+      "type": "java.lang.String",
+      "defaultValue": "info"
+    },
+    {
+      "name": "entur.logging.request-response.logger.name",
+      "type": "java.lang.String",
+      "defaultValue": "no.entur.logging.cloud"
+    }
+  ]
+}

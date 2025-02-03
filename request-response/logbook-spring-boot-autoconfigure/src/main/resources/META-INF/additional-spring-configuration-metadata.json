@@ -1,0 +1,23 @@
+{
+  "properties": [
+    {
+      "name": "entur.logging.request-response.logger.level",
+      "type": "java.lang.String",
+      "defaultValue": "info"
+    },
+    {
+      "name": "entur.logging.request-response.logger.name",
+      "type": "java.lang.String",
+      "defaultValue": "no.entur.logging.cloud"
+    },
+    {
+      "name": "entur.logging.request-response.max-size",
+      "type": "java.lang.Integer"
+    },
+    {
+      "name": "entur.logging.request-response.max-body-size",
+      "type": "java.lang.Integer"
+    }
+
+  ]
+}
