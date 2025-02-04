@@ -2,6 +2,7 @@ package no.entur.logging.cloud.gcp.spring.gcp.grpc.lognet.test;
 
 import no.entur.logging.cloud.gcp.spring.gcp.grpc.lognet.RequestResponseGcpGrpcLognetAutoConfiguration;
 import no.entur.logging.cloud.spring.rr.grpc.AbstractRequestResponseGrpcSinkAutoConfiguration;
+import no.entur.logging.cloud.spring.rr.grpc.RequestResponseGrpcAutoConfiguration;
 import org.entur.jackson.jsh.AnsiSyntaxHighlight;
 import org.entur.jackson.jsh.DefaultSyntaxHighlighter;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;
@@ -11,6 +12,7 @@ import no.entur.logging.cloud.rr.grpc.test.PrettyPrintingGrpcSink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;

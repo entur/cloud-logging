@@ -1,0 +1,115 @@
+{
+  "properties": [
+    {
+      "name": "entur.logging.grpc.ondemand.success.level",
+      "type": "java.lang.String",
+      "defaultValue": "warn"
+    },
+    {
+      "name": "entur.logging.grpc.ondemand.failure.level",
+      "type": "java.lang.String",
+      "defaultValue": "info"
+    },
+    {
+      "name": "entur.logging.grpc.ondemand.logger.level",
+      "type": "java.lang.String",
+      "defaultValue": "error"
+    },
+    {
+      "name": "entur.logging.grpc.troubleshoot.level",
+      "type": "java.lang.String",
+      "defaultValue": "debug"
+    }
+  ],
+  "hints": [
+    {
+
+      "name": "entur.logging.grpc.ondemand.success.level",
+      "values": [
+        {
+          "value": "debug",
+          "description": "Debug level."
+        },
+        {
+          "value": "info",
+          "description": "Info level."
+        },
+        {
+          "value": "warn",
+          "description": "Warning level"
+        },
+        {
+          "value": "error",
+          "description": "Error level."
+        }
+      ]
+    },
+    {
+
+      "name": "entur.logging.grpc.ondemand.failure.level",
+      "values": [
+        {
+          "value": "debug",
+          "description": "Debug level."
+        },
+        {
+          "value": "info",
+          "description": "Info level."
+        },
+        {
+          "value": "warn",
+          "description": "Warning level"
+        },
+        {
+          "value": "error",
+          "description": "Error level."
+        }
+      ]
+    },
+    {
+
+      "name": "entur.logging.grpc.ondemand.logger.level",
+      "values": [
+        {
+          "value": "debug",
+          "description": "Debug level."
+        },
+        {
+          "value": "info",
+          "description": "Info level."
+        },
+        {
+          "value": "warn",
+          "description": "Warning level"
+        },
+        {
+          "value": "error",
+          "description": "Error level."
+        }
+      ]
+    },
+    {
+
+      "name": "entur.logging.grpc.troubleshoot.level",
+      "values": [
+        {
+          "value": "debug",
+          "description": "Debug level."
+        },
+        {
+          "value": "info",
+          "description": "Info level."
+        },
+        {
+          "value": "warn",
+          "description": "Warning level"
+        },
+        {
+          "value": "error",
+          "description": "Error level."
+        }
+      ]
+    }
+
+  ]
+}
