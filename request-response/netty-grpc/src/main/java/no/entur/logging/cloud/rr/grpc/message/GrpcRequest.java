@@ -7,6 +7,8 @@ public class GrpcRequest extends GrpcMessage {
     private final String body;
 
     private final int number;
+
+    private final long timeRemainingUntilDeadlineInMilliseconds;
     /**
      * Constructor
      *
@@ -16,12 +18,14 @@ public class GrpcRequest extends GrpcMessage {
      * @param body    body or null
      * @param origin  remote (i.e. for incoming) or local (i.e. for outgoing)
      * @param number request number
+     * @param timeRemainingUntilDeadlineInMilliseconds remaining time before deadline in milliseconds, or -1 if not available
      */
 
-    public GrpcRequest(Map<String, ?> headers, String remote, String uri, String body, String origin, int number) {
+    public GrpcRequest(Map<String, ?> headers, String remote, String uri, String body, String origin, int number, long timeRemainingUntilDeadlineInMilliseconds) {
         super(headers, remote, uri, "request", origin);
         this.body = body;
         this.number = number;
+        this.timeRemainingUntilDeadlineInMilliseconds = timeRemainingUntilDeadlineInMilliseconds;
     }
 
     public String getBody() {
@@ -30,5 +34,9 @@ public class GrpcRequest extends GrpcMessage {
 
     public int getNumber() {
         return number;
+    }
+
+    public long getTimeRemainingUntilDeadlineInMilliseconds() {
+        return timeRemainingUntilDeadlineInMilliseconds;
     }
 }
