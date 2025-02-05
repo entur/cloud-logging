@@ -17,6 +17,12 @@ public class GrpcRequestMarker extends GrpcConnectionMarker<GrpcRequest> {
 	protected void writeFields(JsonGenerator generator) throws IOException {
 		super.writeFields(generator);
 
+		long timeRemaining = message.getTimeRemainingUntilDeadlineInMilliseconds();
+		if(timeRemaining != -1L) {
+			generator.writeFieldName("deadline-in");
+			generator.writeNumber(timeRemaining);
+		}
+
 		String body = message.getBody();
 		if(body != null) {
 			writeBodyField(generator, body);

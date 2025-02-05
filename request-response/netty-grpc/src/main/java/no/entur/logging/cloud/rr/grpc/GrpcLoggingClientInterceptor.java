@@ -279,7 +279,7 @@ public class GrpcLoggingClientInterceptor implements ClientInterceptor {
 						log.warn("Cannot format protobuf request message", e);
 					}
 
-					GrpcRequest requestMessage = new GrpcRequest(requestHeaders, null, path, body, "local", count);
+					GrpcRequest requestMessage = new GrpcRequest(requestHeaders, null, path, body, "local", count, -1L);
 
 					sink.requestMessage(requestMessage);
 				} else if (filter.isDisconnect()) {
