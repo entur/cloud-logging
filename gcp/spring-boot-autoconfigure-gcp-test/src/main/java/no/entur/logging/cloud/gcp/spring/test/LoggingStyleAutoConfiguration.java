@@ -13,11 +13,14 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(name = {"entur.logging.style"})
 public class LoggingStyleAutoConfiguration {
 
-    @Value("${entur.logging.style}") CompositeConsoleOutputType style;
+    @Value("${entur.logging.style}")
+    private CompositeConsoleOutputType style;
 
     @PostConstruct
     public void enforceStyle() {
-        CompositeConsoleOutputControl.setOutput(style);
+        if(style != null) {
+            CompositeConsoleOutputControl.setOutput(style);
+        }
     }
 
 }
