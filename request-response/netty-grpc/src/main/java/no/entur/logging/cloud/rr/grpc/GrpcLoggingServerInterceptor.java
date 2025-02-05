@@ -2,6 +2,8 @@ package no.entur.logging.cloud.rr.grpc;
 
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.MessageOrBuilder;
+import io.grpc.Context;
+import io.grpc.Deadline;
 import io.grpc.ForwardingServerCall;
 import io.grpc.ForwardingServerCallListener;
 import io.grpc.Grpc;
@@ -27,6 +29,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -255,6 +258,8 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
 
                         int count = requestCounter.incrementAndGet();
 
+                        long timeRemainingUntilDeadlineInMilliseconds = getTimeRemainingUntilDeadlineInMilliseconds();
+
                         String body = null;
                         try {
                             body = payloadJsonMapper.map(m, filter.getRequestBodyFilter());
@@ -263,7 +268,7 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
                             log.info("Cannot format protobuf request message", e);
                         }
 
-                        GrpcRequest requestMessage = new GrpcRequest(requestHeaders, remoteAddress, path, body, "remote", count);
+                        GrpcRequest requestMessage = new GrpcRequest(requestHeaders, remoteAddress, path, body, "remote", count, timeRemainingUntilDeadlineInMilliseconds);
 
                         sink.requestMessage(requestMessage);
                     } else if (filter.isDisconnect()) {
@@ -272,6 +277,17 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
                     }
 
                     super.onMessage(message);
+                }
+
+                private static long getTimeRemainingUntilDeadlineInMilliseconds() {
+                    Context requestContext = Context.current();
+                    if(requestContext != null) {
+                        Deadline deadline = requestContext.getDeadline();
+                        if (deadline != null) {
+                            return deadline.timeRemaining(TimeUnit.MILLISECONDS);
+                        }
+                    }
+                    return -1L;
                 }
             };
         }
