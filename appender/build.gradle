@@ -3,6 +3,14 @@ dependencies {
     api("org.slf4j:slf4j-api:${slf4jVersion}")
     api ("ch.qos.logback:logback-classic:${logbackVersion}")
     api ("ch.qos.logback:logback-core:${logbackVersion}")
+
+    // JUnit Jupiter API and TestEngine implementation
+    testImplementation("org.junit.jupiter:junit-jupiter:${junitJupiterVersion}")
+
+    testImplementation("org.mockito:mockito-core:${mockitoVersion}")
+
+    testImplementation("com.google.truth:truth:${googleTruthVersion}")
+    testImplementation("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
 }
 
 
