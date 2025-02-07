@@ -118,11 +118,18 @@ public class GcpWebOndemandLoggingAutoConfiguration {
         public HttpLoggingScopeFilter toFilter(String matcher, OndemandSuccess success, OndemandFailure failure, OndemandTroubleshoot troubleshoot) {
             HttpLoggingScopeFilter filter = new HttpLoggingScopeFilter();
 
-            Level alwaysLogLevel = toLevel(success.getLevel());
-            filter.setQueuePredicate((e) -> e.getLevel().toInt() < alwaysLogLevel.toInt());
+            Level successLevel = toLevel(success.getLevel());
+            Level failureLevel = toLevel(failure.getLevel());
+            if(failureLevel.toInt() >= successLevel.toInt()) {
+                throw new IllegalStateException("Expected on-demand logging failure level < success level. In other words, more logging when failure.");
+            }
+            // approach: check whether to ignore log event first, then check whether to queue or not (if not, print the statement at once).
 
-            Level optionallyLogLevel = toLevel(failure.getLevel());
-            filter.setIgnorePredicate((e) -> e.getLevel().toInt() < optionallyLogLevel.toInt());
+            // i.e. if even is not logged in a failure, it is never logged
+            filter.setIgnorePredicate((e) -> e.getLevel().toInt() < failureLevel.toInt());
+
+            // if not ignored, do we want to queue the log event?
+            filter.setQueuePredicate((e) -> e.getLevel().toInt() < successLevel.toInt());
 
             OndemandHttpRequestTrigger troubleshootHttpRequestTrigger = troubleshoot.getHttp();
 
@@ -134,10 +141,10 @@ public class GcpWebOndemandLoggingAutoConfiguration {
 
                 // troubleshooting: lower the success / failure level
                 Level troubleShootAlwaysLogLevel = toLevel(troubleshoot.getLevel());
-                int alwaysLogLevelWhenTroubleShooting = Math.min(alwaysLogLevel.toInt(), troubleShootAlwaysLogLevel.toInt());
+                int alwaysLogLevelWhenTroubleShooting = Math.min(successLevel.toInt(), troubleShootAlwaysLogLevel.toInt());
                 filter.setTroubleshootQueuePredicate((e) -> e.getLevel().toInt() < alwaysLogLevelWhenTroubleShooting);
 
-                int optionalLogLevelWhenTroubleShooting = Math.min(optionallyLogLevel.toInt(), troubleShootAlwaysLogLevel.toInt());
+                int optionalLogLevelWhenTroubleShooting = Math.min(failureLevel.toInt(), troubleShootAlwaysLogLevel.toInt());
                 filter.setTroubleshootIgnorePredicate((e) -> e.getLevel().toInt() < optionalLogLevelWhenTroubleShooting);
             } else {
                 filter.setTroubleshootQueuePredicate((e) -> false);
