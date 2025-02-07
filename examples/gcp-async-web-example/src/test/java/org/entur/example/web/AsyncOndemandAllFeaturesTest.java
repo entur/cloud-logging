@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		"entur.logging.http.ondemand.failure.logger.level=error",
 		"entur.logging.http.ondemand.troubleshoot.level=debug",
 		"entur.logging.http.ondemand.troubleshoot.http.headers[0].name=entur-debug-request",
+		"entur.logging.http.ondemand.flush-mode=LAZY",
 })
 
 public class AsyncOndemandAllFeaturesTest {

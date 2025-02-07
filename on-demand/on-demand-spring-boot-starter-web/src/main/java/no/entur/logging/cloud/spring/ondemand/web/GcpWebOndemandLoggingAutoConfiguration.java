@@ -140,12 +140,12 @@ public class GcpWebOndemandLoggingAutoConfiguration {
                 LOGGER.info("Configure {} troubleshooting {} logging for headers {}", matcher == null ? "default" : matcher, troubleshoot.getLevel().toString(), troubleshootHeaderNames);
 
                 // troubleshooting: lower the success / failure level
-                Level troubleShootAlwaysLogLevel = toLevel(troubleshoot.getLevel());
-                int alwaysLogLevelWhenTroubleShooting = Math.min(successLevel.toInt(), troubleShootAlwaysLogLevel.toInt());
-                filter.setTroubleshootQueuePredicate((e) -> e.getLevel().toInt() < alwaysLogLevelWhenTroubleShooting);
+                Level troubleShootLevel = toLevel(troubleshoot.getLevel());
+                int successLevelWhenTroubleShooting = Math.min(successLevel.toInt(), troubleShootLevel.toInt());
+                filter.setTroubleshootQueuePredicate((e) -> e.getLevel().toInt() < successLevelWhenTroubleShooting);
 
-                int optionalLogLevelWhenTroubleShooting = Math.min(failureLevel.toInt(), troubleShootAlwaysLogLevel.toInt());
-                filter.setTroubleshootIgnorePredicate((e) -> e.getLevel().toInt() < optionalLogLevelWhenTroubleShooting);
+                int failureLevelWhenTroubleShooting = Math.min(failureLevel.toInt(), troubleShootLevel.toInt());
+                filter.setTroubleshootIgnorePredicate((e) -> e.getLevel().toInt() < failureLevelWhenTroubleShooting);
             } else {
                 filter.setTroubleshootQueuePredicate((e) -> false);
                 filter.setTroubleshootIgnorePredicate((e) -> false);
