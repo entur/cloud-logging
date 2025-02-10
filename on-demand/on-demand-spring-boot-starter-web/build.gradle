@@ -14,6 +14,8 @@ dependencies {
 
     api ("org.codehaus.janino:janino:${janinoVersion}")
 
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"
+
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 
     testImplementation project(':gcp:spring-boot-autoconfigure-gcp')

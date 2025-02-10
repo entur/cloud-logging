@@ -1,0 +1,115 @@
+{
+  "properties": [
+    {
+      "name": "entur.logging.http.ondemand.success.level",
+      "type": "java.lang.String",
+      "defaultValue": "warn"
+    },
+    {
+      "name": "entur.logging.http.ondemand.failure.level",
+      "type": "java.lang.String",
+      "defaultValue": "info"
+    },
+    {
+      "name": "entur.logging.http.ondemand.logger.level",
+      "type": "java.lang.String",
+      "defaultValue": "error"
+    },
+    {
+      "name": "entur.logging.http.troubleshoot.level",
+      "type": "java.lang.String",
+      "defaultValue": "debug"
+    }
+  ],
+  "hints": [
+    {
+
+      "name": "entur.logging.http.ondemand.success.level",
+      "values": [
+        {
+          "value": "debug",
+          "description": "Debug level."
+        },
+        {
+          "value": "info",
+          "description": "Info level."
+        },
+        {
+          "value": "warn",
+          "description": "Warning level"
+        },
+        {
+          "value": "error",
+          "description": "Error level."
+        }
+      ]
+    },
+    {
+
+      "name": "entur.logging.http.ondemand.failure.level",
+      "values": [
+        {
+          "value": "debug",
+          "description": "Debug level."
+        },
+        {
+          "value": "info",
+          "description": "Info level."
+        },
+        {
+          "value": "warn",
+          "description": "Warning level"
+        },
+        {
+          "value": "error",
+          "description": "Error level."
+        }
+      ]
+    },
+    {
+
+      "name": "entur.logging.http.ondemand.logger.level",
+      "values": [
+        {
+          "value": "debug",
+          "description": "Debug level."
+        },
+        {
+          "value": "info",
+          "description": "Info level."
+        },
+        {
+          "value": "warn",
+          "description": "Warning level"
+        },
+        {
+          "value": "error",
+          "description": "Error level."
+        }
+      ]
+    },
+    {
+
+      "name": "entur.logging.http.troubleshoot.level",
+      "values": [
+        {
+          "value": "debug",
+          "description": "Debug level."
+        },
+        {
+          "value": "info",
+          "description": "Info level."
+        },
+        {
+          "value": "warn",
+          "description": "Warning level"
+        },
+        {
+          "value": "error",
+          "description": "Error level."
+        }
+      ]
+    }
+
+  ]
+}

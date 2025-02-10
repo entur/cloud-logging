@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "entur.logging.style",
+      "type": "no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputType"
+    }
+  ]
+}

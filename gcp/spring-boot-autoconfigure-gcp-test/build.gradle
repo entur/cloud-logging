@@ -18,8 +18,15 @@ dependencies {
     api ("org.entur.jackson:jackson-syntax-highlight:${jacksonSyntaxHighlightVersion}")
     api ("org.entur.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
 
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"
+
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 }
+
+tasks.named('compileJava') {
+    inputs.files(tasks.named('processResources'))
+}
+
 
 
 

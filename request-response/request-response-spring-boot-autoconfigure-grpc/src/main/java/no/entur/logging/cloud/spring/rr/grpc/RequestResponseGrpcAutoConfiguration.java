@@ -15,6 +15,7 @@ import no.entur.logging.cloud.rr.grpc.mapper.TypeRegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -25,14 +26,31 @@ import java.util.HashMap;
 @Configuration
 public class RequestResponseGrpcAutoConfiguration extends AbstractRequestResponseGrpcSinkAutoConfiguration {
 
-    @Value("${entur.logging.request-response.max-size}")
-    protected int maxSize;
+    @Value("${entur.logging.request-response.max-size:-1}")
+    private int maxSize;
 
-    @Value("${entur.logging.request-response.max-body-size}")
-    protected int maxBodySize;
+    @Value("${entur.logging.request-response.max-body-size:-1}")
+    private int maxBodySize;
+
+    @Autowired
+    protected GrpcLoggingCloudProperties grpcLoggingCloudProperties;
 
     @Value("${entur.logging.request-response.grpc.client.interceptor-order:0}")
     private int clientInterceptorOrder;
+
+    protected int getMaxBodySize() {
+        if(maxBodySize == -1) {
+            return grpcLoggingCloudProperties.getMaxBodySize();
+        }
+        return Math.min(grpcLoggingCloudProperties.getMaxBodySize(), maxBodySize);
+    }
+
+    protected int getMaxSize() {
+        if(maxSize == -1) {
+            return grpcLoggingCloudProperties.getMaxSize();
+        }
+        return Math.min(grpcLoggingCloudProperties.getMaxSize(), maxSize);
+    }
 
     @Bean
     @ConditionalOnMissingBean(JsonFormat.TypeRegistry.class)
@@ -51,7 +69,8 @@ public class RequestResponseGrpcAutoConfiguration extends AbstractRequestRespons
     @ConditionalOnMissingBean(GrpcPayloadJsonMapper.class)
     public GrpcPayloadJsonMapper grpcPayloadJsonMapper(JsonFormat.TypeRegistry typeRegistry) {
         JsonFormat.Printer printer = JsonPrinterFactory.createPrinter(false, typeRegistry);
-        return new DefaultGrpcPayloadJsonMapper(printer, maxBodySize, maxBodySize / 2);
+        int max = getMaxBodySize();
+        return new DefaultGrpcPayloadJsonMapper(printer, max, max / 2);
     }
 
     @Bean

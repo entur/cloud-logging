@@ -51,8 +51,8 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
         Sink humanReadablePlainSink = new PrettyPrintingSink.Builder()
                 .withLogger(logger)
                 .withLogLevel(level)
-                .withMaxBodySize(maxBodySize)
-                .withMaxSize(maxSize)
+                .withMaxBodySize(getMaxBodySize())
+                .withMaxSize(getMaxSize())
                 .withSyntaxHighlighter(highlighter)
                 .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
                 .build();
@@ -60,8 +60,8 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
         Sink humanReadableJsonSink = PrettyPrintingOndemandLogLevelLogstashLogbackSink.newBuilder()
                 .withLogger(logger)
                 .withLogLevel(level)
-                .withMaxBodySize(maxBodySize)
-                .withMaxSize(maxSize)
+                .withMaxBodySize(getMaxBodySize())
+                .withMaxSize(getMaxSize())
                 .withValidateRequestJsonBodyWellformed(requestHttpMessageStateSupplierSource)
                 .withValidateResponseJsonBodyWellformed(responseHttpMessageStateSupplierSource)
                 .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
@@ -93,8 +93,8 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
         Sink humanReadablePlainSink = new PrettyPrintingSink.Builder()
                 .withLogger(logger)
                 .withLogLevel(level)
-                .withMaxBodySize(maxBodySize)
-                .withMaxSize(maxSize)
+                .withMaxBodySize(getMaxBodySize())
+                .withMaxSize(getMaxSize())
                 .withSyntaxHighlighter(highlighter)
                 .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
                 .build();
@@ -102,8 +102,8 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
         Sink humanReadableJsonSink = PrettyPrintingLogLevelLogstashLogbackSink.newBuilder()
                 .withLogger(logger)
                 .withLogLevel(level)
-                .withMaxBodySize(maxBodySize)
-                .withMaxSize(maxSize)
+                .withMaxBodySize(getMaxBodySize())
+                .withMaxSize(getMaxSize())
                 .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
                 .build();
 

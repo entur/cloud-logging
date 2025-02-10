@@ -116,11 +116,19 @@ public class GrpcOndemandLoggingAutoConfiguration {
         public GrpcLoggingScopeFilter toFilter(String serviceName, List<String> methodNames, OndemandSuccess success, OndemandFailure failure, OndemandTroubleshoot troubleshoot) {
             GrpcLoggingScopeFilter filter = new GrpcLoggingScopeFilter();
 
-            Level alwaysLogLevel = toLevel(success.getLevel());
-            filter.setQueuePredicate( (e) -> e.getLevel().toInt() < alwaysLogLevel.toInt());
+            Level successLevel = toLevel(success.getLevel());
+            Level failureLevel = toLevel(failure.getLevel());
+            if(failureLevel.toInt() >= successLevel.toInt()) {
+                throw new IllegalStateException("Expected on-demand logging failure level < success level. In other words, more logging when failure.");
+            }
 
-            Level optionallyLogLevel = toLevel(failure.getLevel());
-            filter.setIgnorePredicate( (e) -> e.getLevel().toInt() < optionallyLogLevel.toInt());
+            // approach: check whether to ignore log event first, then check whether to queue or not (if not, print the statement at once).
+
+            // i.e. if even is not logged in a failure, it is never logged
+            filter.setIgnorePredicate((e) -> e.getLevel().toInt() < failureLevel.toInt());
+
+            // if not ignored, do we want to queue the log event?
+            filter.setQueuePredicate((e) -> e.getLevel().toInt() < successLevel.toInt());
 
             OndemandGrpcRequestTrigger troubleshootHttpRequestTrigger = troubleshoot.getGrpc();
 
@@ -131,12 +139,12 @@ public class GrpcOndemandLoggingAutoConfiguration {
                 LOGGER.info("Configure GRPC {} troubleshooting {} logging for headers {}", methodNames.isEmpty() ? serviceName : serviceName + methodNames, troubleshoot.getLevel(), troubleshootHeaderNames);
 
                 // troubleshooting: lower the success / failure level
-                Level troubleShootAlwaysLogLevel = toLevel(troubleshoot.getLevel());
-                int alwaysLogLevelWhenTroubleShooting = Math.min(alwaysLogLevel.toInt(), troubleShootAlwaysLogLevel.toInt());
-                filter.setTroubleshootQueuePredicate((e) -> e.getLevel().toInt() < alwaysLogLevelWhenTroubleShooting);
+                Level troubleShootLevel = toLevel(troubleshoot.getLevel());
+                int successLevelWhenTroubleShooting = Math.min(successLevel.toInt(), troubleShootLevel.toInt());
+                filter.setTroubleshootQueuePredicate((e) -> e.getLevel().toInt() < successLevelWhenTroubleShooting);
 
-                int optionalLogLevelWhenTroubleShooting = Math.min(optionallyLogLevel.toInt(), troubleShootAlwaysLogLevel.toInt());
-                filter.setTroubleshootIgnorePredicate((e) -> e.getLevel().toInt() < optionalLogLevelWhenTroubleShooting);
+                int failureLevelWhenTroubleShooting = Math.min(failureLevel.toInt(), troubleShootLevel.toInt());
+                filter.setTroubleshootIgnorePredicate((e) -> e.getLevel().toInt() < failureLevelWhenTroubleShooting);
             } else {
                 filter.setGrpcHeaderPresentPredicate((e) -> false);
                 filter.setTroubleshootQueuePredicate((e) -> false);

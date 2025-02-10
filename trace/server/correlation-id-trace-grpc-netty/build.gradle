@@ -14,7 +14,6 @@ dependencies {
 
     api("io.grpc:grpc-netty:${grpcNettyVersion}")
     api("io.grpc:grpc-services:${grpcNettyVersion}")
-    api("io.grpc:grpc-services:${grpcNettyVersion}")
 
     // grpc dependencies
     api("io.netty:netty-codec-http2:${nettyVersion}")
