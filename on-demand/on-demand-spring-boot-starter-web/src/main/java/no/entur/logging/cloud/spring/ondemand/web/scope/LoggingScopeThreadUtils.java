@@ -2,6 +2,7 @@ package no.entur.logging.cloud.spring.ondemand.web.scope;
 
 import no.entur.logging.cloud.appender.scope.LoggingScope;
 
+import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 /**
@@ -39,5 +40,16 @@ public interface LoggingScopeThreadUtils {
      */
 
     <U> Supplier<U> with(Supplier<U> supplier);
+
+    /**
+     *
+     * Create wrapper callable which forwards the current scope
+     *
+     * @param callable job
+     * @return wrapped job
+     * @param <U> job output
+     */
+
+    <U> Callable<U> withCallable(Callable<U> callable);
 
 }

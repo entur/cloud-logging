@@ -1,5 +1,6 @@
 package no.entur.logging.cloud.spring.ondemand.web.scope;
 
+import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 /**
@@ -23,5 +24,10 @@ public class NoopLoggingScopeThreadUtils implements LoggingScopeThreadUtils {
     @Override
     public <U> Supplier<U> with(Supplier<U> supplier) {
         return supplier;
+    }
+
+    @Override
+    public <U> Callable<U> withCallable(Callable<U> callable) {
+        return callable;
     }
 }

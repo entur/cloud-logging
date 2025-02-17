@@ -264,6 +264,12 @@ public class GcpWebOndemandLoggingAutoConfiguration {
         public LoggingScopeThreadUtils loggingScopeThreadUtils() {
             return new NoopLoggingScopeThreadUtils();
         }
+
+        @Bean
+        @ConditionalOnMissingBean(LoggingScopeControls.class)
+        public LoggingScopeControls noopLoggingScopeControls() {
+            return new NoopLoggingScopeControls();
+        }
     }
 
 }
