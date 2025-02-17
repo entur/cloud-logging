@@ -41,7 +41,11 @@ public class ThreadLocalLoggingScopeFactory implements LoggingScopeFactory, Logg
     }
 
     public void setCurrentScope(LoggingScope scope) {
-        queues.set(scope);
+        if(scope == null) {
+            queues.remove();
+        } else {
+            queues.set(scope);
+        }
     }
 
     public void clearCurrentScope() {
