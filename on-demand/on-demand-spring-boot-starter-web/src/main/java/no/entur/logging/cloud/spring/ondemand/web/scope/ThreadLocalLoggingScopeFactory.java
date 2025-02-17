@@ -40,7 +40,7 @@ public class ThreadLocalLoggingScopeFactory implements LoggingScopeFactory, Logg
         queues.remove();
     }
 
-    public void setCurrentScope(LoggingScope scope) {
+    public void setCurrentScope(@jakarta.annotation.Nullable LoggingScope scope) {
         if(scope == null) {
             queues.remove();
         } else {
