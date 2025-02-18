@@ -2,6 +2,7 @@ package no.entur.logging.cloud.spring.ondemand.web.scope;
 
 import no.entur.logging.cloud.appender.scope.LoggingScope;
 
+import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 /**
@@ -56,6 +57,22 @@ public class DefaultLoggingScopeThreadUtils implements LoggingScopeThreadUtils {
             controls.setCurrentScope(currentScope);
             try {
                 return supplier.get();
+            } finally {
+                controls.clearCurrentScope();
+            }
+        };
+    }
+
+    @Override
+    public <U> Callable<U> withCallable(Callable<U> callable) {
+        LoggingScope currentScope = controls.getCurrentScope();
+        if(currentScope == null) {
+            return callable;
+        }
+        return (Callable) () -> {
+            controls.setCurrentScope(currentScope);
+            try {
+                return callable.call();
             } finally {
                 controls.clearCurrentScope();
             }
