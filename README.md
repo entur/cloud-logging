@@ -35,7 +35,6 @@ This library is mostly based on
  * Logback + Logback logstash
  * GRPC
    * [Ecosystem](https://github.com/grpc-ecosystem/grpc-spring)
-   * [Lognet](https://github.com/LogNet/grpc-spring-boot-starter) (deprecated due to lack of maintenance)
  * [Logbook](https://github.com/zalando/logbook)
 
 Supported web technologies are:
