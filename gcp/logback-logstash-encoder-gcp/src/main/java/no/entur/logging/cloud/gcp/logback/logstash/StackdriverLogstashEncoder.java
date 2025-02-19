@@ -7,7 +7,6 @@ import net.logstash.logback.composite.JsonProvider;
 import net.logstash.logback.composite.loggingevent.LogLevelJsonProvider;
 import net.logstash.logback.composite.loggingevent.LogLevelValueJsonProvider;
 import net.logstash.logback.composite.loggingevent.LoggingEventJsonProviders;
-import net.logstash.logback.composite.loggingevent.MdcJsonProvider;
 import net.logstash.logback.composite.loggingevent.MessageJsonProvider;
 import net.logstash.logback.composite.loggingevent.StackTraceJsonProvider;
 import net.logstash.logback.composite.loggingevent.TagsJsonProvider;
@@ -35,8 +34,6 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 		LoggingEventJsonProviders loggingEventJsonProviders = formatter.getProviders();
 		List<JsonProvider<ILoggingEvent>> providers = new ArrayList<>(loggingEventJsonProviders.getProviders());
 
-		boolean openTelemetry = detectOpenTelemetry(); // TODO check if open telemetry is on class path
-
 		for (JsonProvider<ILoggingEvent> jsonProvider : providers) {
 			if(jsonProvider instanceof MessageJsonProvider) {
 				loggingEventJsonProviders.removeProvider(jsonProvider);
@@ -52,11 +49,6 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 				// stackdriver supports the equivalent functionality as the log level value directly in queries
 				// see https://cloud.google.com/logging/docs/view/advanced-filters
 				loggingEventJsonProviders.removeProvider(jsonProvider);
-			} else if(jsonProvider instanceof MdcJsonProvider p) {
-				if(openTelemetry) {
-					loggingEventJsonProviders.removeProvider(jsonProvider);
-					loggingEventJsonProviders.addProvider(new StackdriverOpenTelemetryTraceMdcJsonProvider());
-				}
 			}
 		}
 
@@ -64,15 +56,6 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 		loggingEventJsonProviders.addProvider(new StackdriverMessageJsonProvider());
 		
 		return formatter;
-	}
-
-	private boolean detectOpenTelemetry() {
-		try {
-			Class.forName("io.opentelemetry.api.OpenTelemetry");
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
 	}
 
 }
