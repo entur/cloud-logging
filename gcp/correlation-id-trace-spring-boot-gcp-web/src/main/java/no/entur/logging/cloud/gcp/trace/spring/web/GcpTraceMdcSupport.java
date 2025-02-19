@@ -1,5 +1,6 @@
 package no.entur.logging.cloud.gcp.trace.spring.web;
 
+import no.entur.logging.cloud.trace.spring.web.CorrelationIdFilter;
 import org.slf4j.MDC;
 
 import java.io.Closeable;
@@ -13,16 +14,16 @@ import java.util.concurrent.ThreadLocalRandom;
  *
  */
 
-public class GcpCorrelationIdMdcSupport implements Closeable {
+public class GcpTraceMdcSupport implements Closeable {
 
-    public static final String REQUEST_ID_MDC_KEY = GcpCorrelationIdFilter.REQUEST_ID_MDC_KEY;
-    public static final String CORRELATION_ID_MDC_KEY = GcpCorrelationIdFilter.CORRELATION_ID_MDC_KEY;
+    public static final String REQUEST_ID_MDC_KEY = CorrelationIdFilter.REQUEST_ID_MDC_KEY;
+    public static final String CORRELATION_ID_MDC_KEY = CorrelationIdFilter.CORRELATION_ID_MDC_KEY;
 
-    public static final String TRACE_MDC_KEY = GcpCorrelationIdFilter.TRACE_MDC_KEY;
-    public static final String SPAN_ID_MDC_KEY = GcpCorrelationIdFilter.SPAN_ID_MDC_KEY;
+    public static final String TRACE_MDC_KEY = GcpTraceFilter.TRACE_MDC_KEY;
+    public static final String SPAN_ID_MDC_KEY = GcpTraceFilter.SPAN_ID_MDC_KEY;
 
-    public static GcpCorrelationIdMdcSupportBuilder newBuilder() {
-        return new GcpCorrelationIdMdcSupportBuilder();
+    public static GcpTraceMdcSupportBuilder newBuilder() {
+        return new GcpTraceMdcSupportBuilder();
     }
 
     @FunctionalInterface
@@ -31,19 +32,19 @@ public class GcpCorrelationIdMdcSupport implements Closeable {
     }
 
     public static String currentCorrelationId() {
-        return MDC.get(GcpCorrelationIdMdcSupport.CORRELATION_ID_MDC_KEY);
+        return MDC.get(GcpTraceMdcSupport.CORRELATION_ID_MDC_KEY);
     }
 
     public static String currentTrace() {
-        return MDC.get(GcpCorrelationIdMdcSupport.TRACE_MDC_KEY);
+        return MDC.get(GcpTraceMdcSupport.TRACE_MDC_KEY);
     }
 
     public static String currentSpanId() {
-        return MDC.get(GcpCorrelationIdMdcSupport.SPAN_ID_MDC_KEY);
+        return MDC.get(GcpTraceMdcSupport.SPAN_ID_MDC_KEY);
     }
 
     public static String currentRequestId() {
-        return MDC.get(GcpCorrelationIdMdcSupport.REQUEST_ID_MDC_KEY);
+        return MDC.get(GcpTraceMdcSupport.REQUEST_ID_MDC_KEY);
     }
 
     public static void get(Consumer wrap) {
@@ -81,7 +82,7 @@ public class GcpCorrelationIdMdcSupport implements Closeable {
     private final String trace;
     private final String spanId;
 
-    protected GcpCorrelationIdMdcSupport(String correlationId, String requestId, String trace, String spanId) {
+    protected GcpTraceMdcSupport(String correlationId, String requestId, String trace, String spanId) {
         this.correlationId = correlationId;
         this.requestId = requestId;
         this.trace = trace;

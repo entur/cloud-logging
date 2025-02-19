@@ -2,11 +2,11 @@ package no.entur.logging.cloud.gcp.trace.spring.web;
 
 import org.junit.jupiter.api.Test;
 
-import static no.entur.logging.cloud.gcp.trace.spring.web.GcpCorrelationIdMdcSupportBuilder.containsNumbersLowercaseLettersAndDashes;
+import static no.entur.logging.cloud.gcp.trace.spring.web.GcpTraceMdcSupportBuilder.containsNumbersLowercaseLettersAndDashes;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class GcpGcpCorrelationIdMdcSupportBuilderTest {
+public class GcpGcpTraceMdcSupportBuilderTest {
 
     @Test
     public void testPositive() {

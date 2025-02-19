@@ -3,6 +3,7 @@ dependencies {
     api("org.slf4j:slf4j-api:${slf4jVersion}")
     api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
     api("jakarta.servlet:jakarta.servlet-api:${servletVersion}")
+    api project(':trace:server:correlation-id-trace-spring-boot-web')
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 

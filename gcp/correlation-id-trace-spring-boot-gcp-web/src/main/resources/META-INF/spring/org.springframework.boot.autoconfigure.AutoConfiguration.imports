@@ -1,1 +1,1 @@
-no.entur.logging.cloud.gcp.trace.spring.web.GcpCorrelationIdAutoConfiguration
+no.entur.logging.cloud.gcp.trace.spring.web.GcpTraceAutoConfiguration

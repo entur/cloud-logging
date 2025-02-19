@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class GcpCorrelationIdMdcSupportBuilder {
+public class GcpTraceMdcSupportBuilder {
 
 	protected static final boolean[] VALUE_CHARACTERS;
 
@@ -40,35 +40,35 @@ public class GcpCorrelationIdMdcSupportBuilder {
 
 	protected boolean sanitize;
 
-	public GcpCorrelationIdMdcSupportBuilder() {
+	public GcpTraceMdcSupportBuilder() {
 	}
 
-	public GcpCorrelationIdMdcSupportBuilder withSpanId(String spanId) {
+	public GcpTraceMdcSupportBuilder withSpanId(String spanId) {
 		this.spanId = spanId;
 		return this;
 	}
 
-	public GcpCorrelationIdMdcSupportBuilder withTrace(String trace) {
+	public GcpTraceMdcSupportBuilder withTrace(String trace) {
 		this.trace = trace;
 		return this;
 	}
 
-	public GcpCorrelationIdMdcSupportBuilder withSanitize(boolean sanitize) {
+	public GcpTraceMdcSupportBuilder withSanitize(boolean sanitize) {
 		this.sanitize = sanitize;
 		return this;
 	}
 
-	public GcpCorrelationIdMdcSupportBuilder withCorrelationId(String value) {
+	public GcpTraceMdcSupportBuilder withCorrelationId(String value) {
 		this.correlationId = value;
 		return this;
 	}
 
-	public GcpCorrelationIdMdcSupportBuilder withRequestId(String value) {
+	public GcpTraceMdcSupportBuilder withRequestId(String value) {
 		this.requestId = value;
 		return this;
 	}
 
-	public GcpCorrelationIdMdcSupport build() {
+	public GcpTraceMdcSupport build() {
 		if (correlationId == null) {
 			correlationId = UUID.randomUUID().toString();
 		} else if(sanitize) {
@@ -96,7 +96,7 @@ public class GcpCorrelationIdMdcSupportBuilder {
 			spanId = sanitize(spanId); // TODO really just HEX characters
 		}
 
-		return new GcpCorrelationIdMdcSupport(correlationId, requestId, trace, spanId);
+		return new GcpTraceMdcSupport(correlationId, requestId, trace, spanId);
 	}
 
 	public static String sanitize(String inputValue) {
