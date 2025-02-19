@@ -138,7 +138,19 @@ testImplementation ("no.entur.logging.cloud:request-response-spring-boot-starter
 ```
 </details>
 
-By default [certain OpenAPI and actuator endpoints](../gcp/request-response-spring-boot-starter-gcp-web/src/main/resources/logbook.gcp.web.properties) are excluded. 
+Some default Logbook excludes are recommended: 
+
+```
+logbook:
+  predicate:
+    exclude:
+      - path: /actuator/**
+      - path: /favicon.*
+      - path: /v2/api-docs/**
+      - path: /v3/api-docs/**
+      - path: /metrics
+      - path: /swagger
+```
 
 Adjust the logger using
 
@@ -156,6 +168,7 @@ This feature adjusts the log level for individual web server requests, taking in
  * reduce log level (i.e. INFO) for
    * unexpected HTTP response codes
    * unexpected log statement levels (i.e. ERROR)
+   * unexpectedly long call duration
    * troubleshooting
 
 Import the on-demand Spring Boot starters:
@@ -267,30 +280,26 @@ For 'classic' one-line log output when running a server locally, additionally ad
   <summary>Gradle bootRun example</summary>
 
 ```groovy
-bootRun {
-    dependencies {
-        implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test")
-        implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test")
-    }
+tasks.register("logPlainly") {
+   dependencies {
+      implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test")
+      implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test")
+   }
 }
+
+tasks.withType(JavaExec).configureEach {
+   dependsOn("logPlainly")
+}
+```
+
+Then configure desired output by specifying `entur.logging.style`
+
+```
+entur.logging.style=humanReadablePlain|humanReadableJson|machineReadableJson
 ```
 
 </details>
 
-## Toggle output mode using profiles
-Add an event listener to set your preferred log output:
-
-```
-@Component
-@Profile("local")
-public class HumanReadableJsonApplicationListener implements ApplicationListener<ContextRefreshedEvent> {
-
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        CompositeConsoleOutputControl.useHumanReadableJsonEncoder();
-    }
-}
-```
 
 ## Troubleshooting
 

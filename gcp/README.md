@@ -65,7 +65,7 @@ Import the below artifacts:
 Add
 
 ```xml
-<cloud-logging.version>2.0.x</cloud-logging>
+<cloud-logging.version>4.0.x</cloud-logging.version>
 ```
 
 and
@@ -82,7 +82,7 @@ and
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
-<!-- request-respons support -->
+<!-- request-response support -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
     <artifactId>request-response-spring-boot-starter-gcp-web</artifactId>
@@ -97,7 +97,7 @@ and
 <!-- on-demand logging support -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>on-demand-spring-boot-starter-gcp-web</artifactId>
+    <artifactId>on-demand-spring-boot-starter-grpc</artifactId>
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
@@ -135,11 +135,11 @@ add
 ```groovy
 implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web:${cloudLoggingVersion}")
 testImplementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test:${cloudLoggingVersion}")
-// request response logging support
+// request-response logging support
 implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web:${cloudLoggingVersion}")
 testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test:${cloudLoggingVersion}")
 // on-demand logging support
-implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-gcp-web:${cloudLoggingVersion}")
+implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-web:${cloudLoggingVersion}")
 // metrics
 implementation("no.entur.logging.cloud:micrometer-gcp:${cloudLoggingVersion}")
 // logger with additional log levels
@@ -185,7 +185,8 @@ gRPC request-response-logging for local development, for additional coloring and
 ## on-demand-spring-boot-starter-gcp-grpc
 Selective (on-demand) logging for logging only interesting requests.
 
-Try the [configuration](on-demand-spring-boot-starter-gcp-grpc/src/main/java/no/entur/logging/cloud/gcp/spring/grpc/lognet/properties/OndemandProperties.java)
+See the [configuration properties](../on-demand/on-demand-spring-boot-starter-grpc/src/main/java/no/entur/logging/cloud/spring/ondemand/grpc/properties/OndemandProperties.java)
+
 ```
 entur.logging.grpc.ondemand.enabled=true
 ```
@@ -199,7 +200,7 @@ Import the below artifacts:
 Add
 
 ```xml
-<cloud-logging.version>2.0.x</cloud-logging>
+<cloud-logging.version>4.0.x</cloud-logging>
 ```
 
 and
@@ -207,31 +208,31 @@ and
 ```xml
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>spring-boot-starter-gcp-grpc</artifactId>
+    <artifactId>spring-boot-starter-gcp-grpc-ecosystem</artifactId>
     <version>${cloud-logging.version}</version>
 </dependency>
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>spring-boot-starter-gcp-grpc-test</artifactId>
+    <artifactId>spring-boot-starter-gcp-grpc-ecosystem-test</artifactId>
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
 <!-- request-response logging -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>request-response-spring-boot-starter-gcp-grpc</artifactId>
+    <artifactId>request-response-spring-boot-starter-gcp-grpc-ecosystem</artifactId>
     <version>${cloud-logging.version}</version>
 </dependency>
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>request-response-spring-boot-starter-gcp-grpc-test</artifactId>
+    <artifactId>request-response-spring-boot-starter-gcp-grpc-ecosystem-test</artifactId>
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
 <!-- on-demand logging -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>on-demand-spring-boot-starter-gcp-grpc</artifactId>
+    <artifactId>on-demand-spring-boot-starter-grpc</artifactId>
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
@@ -247,13 +248,13 @@ and
     <artifactId>api</artifactId>
     <version>${cloud-logging.version}</version>
 </dependency>
-// MDC support
+<!-- MDC support -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
     <artifactId>mdc-context-grpc-netty</artifactId>
     <version>${cloud-logging.version}</version>
 </dependency>
-// Correlation id + various interceptors
+<!-- Correlation id + various interceptors -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
     <artifactId>correlation-id-trace-grpc-netty</artifactId>
@@ -284,13 +285,13 @@ ext {
 add
 
 ```groovy
-implementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc:${cloudLoggingVersion}")
-testImplementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-test:${cloudLoggingVersion}")
-// requst-response logging
-implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc:${cloudLoggingVersion}")
-testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-test:${cloudLoggingVersion}")
+implementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-ecosystem:${cloudLoggingVersion}")
+testImplementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-ecosystem-test:${cloudLoggingVersion}")
+// request-response logging
+implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-ecosystem:${cloudLoggingVersion}")
+testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-ecosystem-test:${cloudLoggingVersion}")
 // on-demand logging support
-implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-gcp-grpc:${cloudLoggingVersion}")
+implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-grpc:${cloudLoggingVersion}")
 // metrics
 implementation("no.entur.logging.cloud:micrometer-gcp:${cloudLoggingVersion}")
 // logger with additional log levels
@@ -334,9 +335,4 @@ Avoid [OWASP dependency supressions](dependencycheck-root-suppression.xml) flagg
 See [test-logback-junit](../test/test-logback-junit) for basic JUnit test support.
  
 ## Examples:
-
-   * [gcp-grpc-example](../examples/gcp-grpc-example) Lognet gRPC example
-   * [gcp-web-example](../examples/gcp-web-example) Spring-flavoured REST example
-   * [gcp-web-grpc-example](../examples/gcp-web-example) Spring-flavoured REST example with gRPC context (read: for further gRPC calls).
-   * [gcp-grpc-without-test-artifacts-example](../examples/gcp-grpc-without-test-artifacts-example) Lognet gRPC example without test artifacts
-   * [gcp-web-without-test-artifacts-example](../examples/gcp-web-without-test-artifacts-example) Spring-flavoured REST example without test artifacts
+See [examples](../examples) for various examples.

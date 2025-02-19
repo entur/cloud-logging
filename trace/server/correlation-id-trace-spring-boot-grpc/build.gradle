@@ -8,6 +8,8 @@ dependencies {
 
     api "io.grpc:grpc-netty:${grpcNettyVersion}"
 
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"
+
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
     testImplementation project(":gcp:spring-boot-autoconfigure-gcp-test")
 

@@ -14,7 +14,6 @@ dependencies {
 
     api("io.grpc:grpc-netty:${grpcNettyVersion}")
     api("io.grpc:grpc-services:${grpcNettyVersion}")
-    api("io.grpc:grpc-services:${grpcNettyVersion}")
 
     // grpc dependencies
     api("io.netty:netty-codec-http2:${nettyVersion}")
@@ -44,10 +43,11 @@ dependencies {
         }
     }
 
-    api("javax.annotation:javax.annotation-api:1.3.2")
+    api("jakarta.annotation:jakarta.annotation-api:${annotationApiVersion}")
     api("com.google.api.grpc:proto-google-common-protos:$grpcCommonsVersion")
     api("com.google.protobuf:protobuf-java-util:${grpcProtobufVersion}")
 
+    testImplementation("javax.annotation:javax.annotation-api:1.3.2")
     testImplementation("com.google.truth:truth:${googleTruthVersion}")
     testImplementation("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
 

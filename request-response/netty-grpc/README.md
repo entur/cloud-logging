@@ -1,5 +1,3 @@
-Note: Work in progress
-
 # Logging for GRPC
 
 Request-response-logging for GRPC.

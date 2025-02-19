@@ -1,21 +1,33 @@
 package no.entur.logging.cloud.spring.ondemand.web.scope;
 
-import no.entur.logging.cloud.appender.scope.DefaultLoggingScope;
-import no.entur.logging.cloud.appender.scope.LoggingScope;
-import no.entur.logging.cloud.appender.scope.LoggingScopeFactory;
-import no.entur.logging.cloud.appender.scope.LoggingScopeProvider;
+import no.entur.logging.cloud.appender.scope.*;
 
 import java.util.function.Predicate;
 
-public class ThreadLocalLoggingScopeFactory implements LoggingScopeFactory, LoggingScopeProvider {
+public class ThreadLocalLoggingScopeFactory implements LoggingScopeFactory, LoggingScopeControls {
 
-    private final ThreadLocal<LoggingScope> queues = new ThreadLocal<>();
+    protected final ThreadLocal<LoggingScope> queues = new ThreadLocal<>();
+    protected final LoggingScopeFlushMode flushMode;
+
+    public ThreadLocalLoggingScopeFactory(LoggingScopeFlushMode flushMode) {
+        this.flushMode = flushMode;
+    }
 
     @Override
     public LoggingScope openScope(Predicate queuePredicate, Predicate ignorePredicate, Predicate logLevelFailurePredicate) {
-        DefaultLoggingScope scope = new DefaultLoggingScope(queuePredicate, ignorePredicate, logLevelFailurePredicate);
+        LoggingScope scope;
+        if(logLevelFailurePredicate == null) {
+            scope = new DefaultLoggingScope(queuePredicate, ignorePredicate, flushMode);
+        } else {
+            scope = new LogLevelLoggingScope(queuePredicate, ignorePredicate, logLevelFailurePredicate, flushMode);
+        }
         queues.set(scope);
         return scope;
+    }
+
+    @Override
+    public void reopenScope(LoggingScope scope) {
+        queues.set(scope);
     }
 
     @Override
@@ -25,6 +37,18 @@ public class ThreadLocalLoggingScopeFactory implements LoggingScopeFactory, Logg
 
     @Override
     public void closeScope(LoggingScope scope) {
+        queues.remove();
+    }
+
+    public void setCurrentScope(@jakarta.annotation.Nullable LoggingScope scope) {
+        if(scope == null) {
+            queues.remove();
+        } else {
+            queues.set(scope);
+        }
+    }
+
+    public void clearCurrentScope() {
         queues.remove();
     }
 }

@@ -2,6 +2,7 @@ package no.entur.logging.cloud.appender.scope;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Predicate;
 
@@ -11,43 +12,73 @@ import java.util.function.Predicate;
  */
 public class DefaultLoggingScope implements LoggingScope {
 
-    private final Predicate<ILoggingEvent> queuePredicate;
-    private final Predicate<ILoggingEvent> ignorePredicate;
+    // note: not ignored and not queued means it should be printed
+    protected final Predicate<ILoggingEvent> queuePredicate;
+    protected final Predicate<ILoggingEvent> ignorePredicate;
 
-    private final Predicate<ILoggingEvent> logLevelFailurePredicate;
+    protected final long timestamp = System.currentTimeMillis();
 
-    private boolean logLevelFailure = false;
+    protected boolean failure = false;
 
-    private ConcurrentLinkedQueue<ILoggingEvent> queue = new ConcurrentLinkedQueue<ILoggingEvent>();
+    protected final LoggingScopeFlushMode flushMode;
 
-    public DefaultLoggingScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate, Predicate<ILoggingEvent> logLevelFailurePredicate) {
+    protected ConcurrentLinkedQueue<ILoggingEvent> events = new ConcurrentLinkedQueue<ILoggingEvent>();
+
+    public DefaultLoggingScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate, LoggingScopeFlushMode flushMode) {
         this.queuePredicate = queuePredicate;
         this.ignorePredicate = ignorePredicate;
-        this.logLevelFailurePredicate = logLevelFailurePredicate;
+        this.flushMode = flushMode;
     }
 
-    public ConcurrentLinkedQueue<ILoggingEvent> getEvents() {
-        return queue;
+    @Override
+    public Queue<ILoggingEvent> getEvents() {
+        if(!failure) {
+            if (flushMode == LoggingScopeFlushMode.LAZY) {
+                // filter unwanted events
+                events.removeIf(queuePredicate);
+            } else {
+                // all events are unwanted; wanted events have already been logged
+                events.clear();
+            }
+        }
+        return events;
     }
 
+    @Override
     public boolean append(ILoggingEvent eventObject) {
         if(ignorePredicate.test(eventObject)) {
             return true;
         }
 
-        if(!logLevelFailure && logLevelFailurePredicate.test(eventObject)) {
-            logLevelFailure = true;
-        }
-
-        if(queuePredicate.test(eventObject)) {
-            queue.add(eventObject);
-
+        if(flushMode == LoggingScopeFlushMode.LAZY) {
+            // queue for later processing
+            events.add(eventObject);
             return true;
         }
+
+        if(!failure) {
+            if(queuePredicate.test(eventObject)) {
+                // log this event later or not at all
+                events.add(eventObject);
+                return true;
+            }
+        }
+        // log this event now
         return false;
     }
 
-    public boolean isLogLevelFailure() {
-        return logLevelFailure;
+    @Override
+    public boolean isFailure() {
+        return failure;
     }
+
+    @Override
+    public void failure() {
+        this.failure = true;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
 }

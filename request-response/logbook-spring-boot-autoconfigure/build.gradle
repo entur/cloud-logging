@@ -7,10 +7,14 @@ dependencies {
     api "org.zalando:logbook-spring-boot-starter:${logbookVersion}"
 
     api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
-    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 }
 
-
+tasks.named('compileJava') {
+    inputs.files(tasks.named('processResources'))
+}
 
 

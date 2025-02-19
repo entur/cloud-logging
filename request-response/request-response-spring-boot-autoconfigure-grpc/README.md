@@ -1,1 +1,1 @@
-# request-response-logging for grpc
+# request-response-logging common for both grpc implementations

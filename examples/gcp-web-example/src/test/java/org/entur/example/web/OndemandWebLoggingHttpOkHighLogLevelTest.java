@@ -24,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = {
 		"entur.logging.http.ondemand.enabled=true",
+		"entur.logging.http.ondemand.failure.http.enabled=false",
 		"entur.logging.http.ondemand.failure.logger.level=error",
 })
 public class OndemandWebLoggingHttpOkHighLogLevelTest {
@@ -45,6 +46,16 @@ public class OndemandWebLoggingHttpOkHighLogLevelTest {
 	}
 
 	@Test
+	public void useHumanReadablePlainEncoderExpectReducedLogging() {
+		MyEntity entity = new MyEntity();
+		entity.setName("Entur");
+		entity.setSecret("mySecret");
+
+		ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method/infoLoggingOnly", entity, MyEntity.class);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+	}
+
+	@Test
 	public void useHumanReadableJsonEncoderExpectFullLogging() {
 		MyEntity entity = new MyEntity();
 		entity.setName("Entur");
@@ -52,6 +63,20 @@ public class OndemandWebLoggingHttpOkHighLogLevelTest {
 
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
 			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method", entity, MyEntity.class);
+			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		}
+	}
+
+
+
+	@Test
+	public void useHumanReadableJsonEncoderExpectReducedLogging() throws InterruptedException {
+		MyEntity entity = new MyEntity();
+		entity.setName("Entur");
+		entity.setSecret("mySecret");
+
+		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
+			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method/infoLoggingOnly", entity, MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		}
 	}
@@ -68,5 +93,16 @@ public class OndemandWebLoggingHttpOkHighLogLevelTest {
 		}
 	}
 
+	@Test
+	public void useMachineReadableJsonEncoderExpectReducedLogging() throws InterruptedException {
+		MyEntity entity = new MyEntity();
+		entity.setName("Entur");
+		entity.setSecret("mySecret");
+
+		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
+			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method/infoLoggingOnly", entity, MyEntity.class);
+			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		}
+	}
 
 }

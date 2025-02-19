@@ -13,7 +13,7 @@ Features:
  * Plug and play logging scheme
    * Main scope (for production):
      * Machine-readable JSON
-   * Test scope (for local development). Log output can be toggeled at runtime:
+   * Test scope (for local development). Log output can be toggled at runtime:
      * Human-readable 'classic' (one-line + ANSI colors, enabled by default), or
      * Human-readable JSON (pretty-printed + ANSI colored), or
      * Machine-readable JSON (single line)
@@ -33,18 +33,19 @@ This library is mostly based on
 
  * SLF4J 2
  * Logback + Logback logstash
- * Lognet GRPC
- * Logbook
+ * GRPC
+   * [Ecosystem](https://github.com/grpc-ecosystem/grpc-spring)
+   * [Lognet](https://github.com/LogNet/grpc-spring-boot-starter) (deprecated due to lack of maintenance)
+ * [Logbook](https://github.com/zalando/logbook)
 
 Supported web technologies are:
 
  * Spring web
- * Spring + gRPC via Lognet
- * Micrometer
+ * Spring + gRPC
 
 Supported clouds:
 
- * GCP (stackdriver)
+ * GCP (Stackdriver)
  * Azure
 
 # License
@@ -64,7 +65,7 @@ Each Spring Boot starter has a corresponding Spring Boot test starter. The Sprin
 The above starters are implemented in two flavours:
 
  * Servlet-based web
- * Lognet gRPC
+ * Netty-based gRPC
 
 ## Getting started
 See [Getting started with gRPC](guides/gRPC.md) or [Getting started with servlet-based web](guides/web.md). Alternatively, go directly to the [examples](examples).
@@ -75,7 +76,9 @@ See [Getting started with gRPC](guides/gRPC.md) or [Getting started with servlet
  * Better define and tune request-response logging JSON format
     * Add support for other text formats
     
- 
+# See also
+
+ * [logback-logstash-syntax-highlighting-decorators](https://github.com/entur/logback-logstash-syntax-highlighting-decorators)
 
 
 

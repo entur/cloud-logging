@@ -52,32 +52,39 @@ public class CorrelationIdFilter implements Filter {
 
 	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
-		// spawn a correlation-id
-		HttpServletRequest request = (HttpServletRequest) servletRequest;
-		String inputValue = request.getHeader(CORRELATION_ID_HTTP_HEADER);
 
-		String correlationId;
-		if(inputValue == null) {
-			correlationId = UUID.randomUUID().toString();
-		} else {
-			correlationId = CorrelationIdMdcSupportBuilder.sanitize(inputValue);
+
+		String correlationId = getCorrelationId(servletRequest);
+		if(correlationId == null) {
+			// spawn a correlation-id
+			HttpServletRequest request = (HttpServletRequest) servletRequest;
+			String inputValue = request.getHeader(CORRELATION_ID_HTTP_HEADER);
+
+			if (inputValue == null) {
+				correlationId = UUID.randomUUID().toString();
+			} else {
+				correlationId = CorrelationIdMdcSupportBuilder.sanitize(inputValue);
+			}
+
+			setCorrelationId(request, correlationId);
+
+			// set correlation-id on response for tracking
+			HttpServletResponse response = (HttpServletResponse) servletResponse;
+			response.setHeader(CORRELATION_ID_HTTP_HEADER, correlationId);
 		}
-
-		setCorrelationId(request, correlationId);
-
-		// set correlation-id on response for tracking
-		HttpServletResponse response = (HttpServletResponse) servletResponse;
-		response.setHeader(CORRELATION_ID_HTTP_HEADER, correlationId);
 
 		// also add a request id for cases when the same service is invoked multiple times with
 		// the same correlation-id
-		String requestId = UUID.randomUUID().toString();
-		setRequestId(request, requestId);
+		String requestId = getRequestId(servletRequest);
+		if(requestId == null) {
+			requestId = UUID.randomUUID().toString();
+			setRequestId(servletRequest, requestId);
+		}
 
 		MDC.put(REQUEST_ID_MDC_KEY, requestId);
 		MDC.put(CORRELATION_ID_MDC_KEY, correlationId);
 		try {
-			chain.doFilter(request, response);
+			chain.doFilter(servletRequest, servletResponse);
 		} finally {
 			MDC.remove(REQUEST_ID_MDC_KEY);
 			MDC.remove(CORRELATION_ID_MDC_KEY);

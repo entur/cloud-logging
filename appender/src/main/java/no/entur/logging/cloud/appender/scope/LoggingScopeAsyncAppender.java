@@ -6,6 +6,7 @@ import org.slf4j.Marker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class LoggingScopeAsyncAppender extends MdcAsyncAppender implements LoggingScopeSink {
@@ -41,7 +42,7 @@ public class LoggingScopeAsyncAppender extends MdcAsyncAppender implements Loggi
     }
 
     public void write(LoggingScope scope) {
-        ConcurrentLinkedQueue<ILoggingEvent> events = scope.getEvents();
+        Queue<ILoggingEvent> events = scope.getEvents();
         for (ILoggingEvent eventObject : events) {
             postProcess(eventObject);
             put(eventObject);

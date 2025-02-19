@@ -10,14 +10,23 @@ dependencies {
     api ("org.codehaus.janino:commons-compiler:${janinoVersion}")
     api ("org.codehaus.janino:janino:${janinoVersion}")
 
+    api("jakarta.annotation:jakarta.annotation-api:${annotationApiVersion}")
+
     api("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
     api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
 
     api ("org.entur.jackson:jackson-syntax-highlight:${jacksonSyntaxHighlightVersion}")
     api ("org.entur.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
 
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"
+
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 }
+
+tasks.named('compileJava') {
+    inputs.files(tasks.named('processResources'))
+}
+
 
 
 
