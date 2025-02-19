@@ -9,6 +9,7 @@ import no.entur.logging.cloud.trace.spring.web.CorrelationIdFilter;
 import org.slf4j.MDC;
 
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -42,11 +43,24 @@ public class GcpTraceFilter implements Filter {
 		return (String) request.getAttribute(SPAN_ID_HTTP_REQUEST_KEY);
 	}
 
+	public static String getTrace(ServletRequest request) {
+		return (String) request.getAttribute(TRACE_HTTP_REQUEST_KEY);
+	}
+
+
 	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
-
-		String correlationId = CorrelationIdFilter.getCorrelationId(servletRequest);
-		setTrace(servletRequest, correlationId);
+		String trace = getTrace(servletRequest);
+		if(trace == null) {
+			// copy from correlation-id, if possible
+			String correlationId = CorrelationIdFilter.getCorrelationId(servletRequest);
+			if(correlationId != null) {
+				trace = correlationId;
+			} else {
+				trace = UUID.randomUUID().toString();
+			}
+			setTrace(servletRequest, trace);
+		}
 
 		String spanId = getSpanId(servletRequest);
 		if(spanId == null) {
@@ -57,7 +71,7 @@ public class GcpTraceFilter implements Filter {
 			setSpanId(servletRequest, spanId);
 		}
 
-		MDC.put(TRACE_MDC_KEY, correlationId);
+		MDC.put(TRACE_MDC_KEY, trace);
 		MDC.put(SPAN_ID_MDC_KEY, spanId);
 		try {
 			chain.doFilter(servletRequest, servletResponse);
