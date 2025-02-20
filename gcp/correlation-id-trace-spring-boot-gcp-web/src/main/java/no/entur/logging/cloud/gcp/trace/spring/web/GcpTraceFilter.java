@@ -57,9 +57,9 @@ public class GcpTraceFilter implements Filter {
 			// copy from correlation-id, if possible
 			String correlationId = CorrelationIdFilter.getCorrelationId(servletRequest);
 			if(correlationId != null) {
-				trace = "projects/prsnlstn/traces/" + correlationId;
+				trace = correlationId;
 			} else {
-				trace = "projects/prsnlstn/traces/" + UUID.randomUUID().toString();
+				trace = UUID.randomUUID().toString();
 			}
 			setTrace(servletRequest, trace);
 		}
