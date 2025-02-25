@@ -31,7 +31,6 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor, Or
 	public static class Builder {
 
 		private int order = Ordered.HIGHEST_PRECEDENCE;
-		private LoggingScopeSink sink;
 
 		private GrpcLoggingScopeFilters filters;
 
@@ -39,11 +38,6 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor, Or
 
 		public Builder withFactory(GrpcContextLoggingScopeFactory factory) {
 			this.factory = factory;
-			return this;
-		}
-
-		public Builder withSink(LoggingScopeSink sink) {
-			this.sink = sink;
 			return this;
 		}
 
@@ -58,20 +52,15 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor, Or
 		}
 
 		public GrpcLoggingScopeContextInterceptor build() {
-			if(sink == null) {
-				throw new IllegalStateException();
-			}
 			if(filters == null) {
 				throw new IllegalStateException();
 			}
 			if(factory == null) {
 				throw new IllegalStateException();
 			}
-			return new GrpcLoggingScopeContextInterceptor(sink, filters, factory, order);
+			return new GrpcLoggingScopeContextInterceptor(filters, factory, order);
 		}
 	}
-
-	private final LoggingScopeSink sink;
 
 	private final GrpcLoggingScopeFilters filters;
 
@@ -79,9 +68,8 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor, Or
 
 	private final GrpcContextLoggingScopeFactory factory;
 
-	protected GrpcLoggingScopeContextInterceptor(LoggingScopeSink sink, GrpcLoggingScopeFilters filters, GrpcContextLoggingScopeFactory factory, int order) {
+	protected GrpcLoggingScopeContextInterceptor(GrpcLoggingScopeFilters filters, GrpcContextLoggingScopeFactory factory, int order) {
 		// prefer to use builder
-		this.sink = sink;
 		this.filters = filters;
 		this.factory = factory;
 		this.order = order;

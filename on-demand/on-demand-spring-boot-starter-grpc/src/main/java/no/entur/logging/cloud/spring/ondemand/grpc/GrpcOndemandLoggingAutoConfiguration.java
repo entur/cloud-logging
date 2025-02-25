@@ -70,7 +70,6 @@ public class GrpcOndemandLoggingAutoConfiguration {
 
             GrpcLoggingScopeContextInterceptor interceptor = GrpcLoggingScopeContextInterceptor
                     .newBuilder()
-                    .withSink(appender)
                     .withFilters(filters)
                     .withOrder(properties.getInterceptorOrder())
                     .withFactory(grpcContextLoggingScopeFactory)
