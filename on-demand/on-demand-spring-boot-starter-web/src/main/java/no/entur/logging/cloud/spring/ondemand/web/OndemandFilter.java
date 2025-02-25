@@ -54,13 +54,11 @@ public class OndemandFilter extends HttpFilter {
         public void onStartAsync(AsyncEvent event) {
         }
     }
-    private final LoggingScopeSink sink;
     private final HttpLoggingScopeFilters filters;
 
     private final LoggingScopeFactory loggingScopeFactory;
 
-    public OndemandFilter(LoggingScopeSink sink, HttpLoggingScopeFilters filters, LoggingScopeFactory loggingScopeFactory) {
-        this.sink = sink;
+    public OndemandFilter(HttpLoggingScopeFilters filters, LoggingScopeFactory loggingScopeFactory) {
         this.filters = filters;
         this.loggingScopeFactory = loggingScopeFactory;
     }
@@ -141,7 +139,7 @@ public class OndemandFilter extends HttpFilter {
                 scope.failure();
             }
 
-            sink.write(scope);
+            scope.write();
         }
     }
 

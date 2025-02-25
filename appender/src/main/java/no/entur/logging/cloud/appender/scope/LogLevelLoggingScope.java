@@ -12,8 +12,8 @@ public class LogLevelLoggingScope extends DefaultLoggingScope {
 
     private final Predicate<ILoggingEvent> logLevelFailurePredicate;
 
-    public LogLevelLoggingScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate, Predicate<ILoggingEvent> logLevelFailurePredicate, LoggingScopeFlushMode flushMode) {
-        super(queuePredicate, ignorePredicate, flushMode);
+    public LogLevelLoggingScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate, Predicate<ILoggingEvent> logLevelFailurePredicate, LoggingScopeFlushMode flushMode, LoggingScopeSink sink) {
+        super(queuePredicate, ignorePredicate, flushMode, sink);
         this.logLevelFailurePredicate = logLevelFailurePredicate;
     }
 

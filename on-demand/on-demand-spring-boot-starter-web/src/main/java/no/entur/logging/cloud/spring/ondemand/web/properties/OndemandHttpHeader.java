@@ -1,8 +1,5 @@
 package no.entur.logging.cloud.spring.ondemand.web.properties;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class OndemandHttpHeader {
 
     private boolean enabled = true;

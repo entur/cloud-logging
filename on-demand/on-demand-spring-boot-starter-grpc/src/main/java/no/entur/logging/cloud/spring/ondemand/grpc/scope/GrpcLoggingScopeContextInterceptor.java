@@ -118,7 +118,7 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor, Or
 						scope.failure();
 					}
 
-					sink.write(scope);
+					scope.write();
 				} finally {
 					factory.closeScope(scope); // this is really a noop operation
 				}

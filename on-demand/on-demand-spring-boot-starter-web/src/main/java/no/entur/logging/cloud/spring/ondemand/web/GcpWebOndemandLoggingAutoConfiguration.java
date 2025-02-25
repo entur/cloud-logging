@@ -49,10 +49,16 @@ public class GcpWebOndemandLoggingAutoConfiguration {
 
         private final ThreadLocalLoggingScopeFactory factory;
         private OndemandProperties properties;
+        private LoggingScopeAsyncAppender appender;
+        private HttpLoggingScopeFilter defaultFilter;
 
         public OndemandConfiguration(OndemandProperties properties) {
             this.properties = properties;
-            this.factory = new ThreadLocalLoggingScopeFactory(properties.getFlushMode());
+            this.appender = getAppender();
+            this.factory = new ThreadLocalLoggingScopeFactory(properties.getFlushMode(), appender);
+            appender.addScopeProvider(factory);
+
+            this.defaultFilter = toFilter(null, properties.getSuccess(), properties.getFailure(), properties.getTroubleshoot());
         }
 
         @Bean
@@ -63,18 +69,18 @@ public class GcpWebOndemandLoggingAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean(LoggingScopeThreadUtils.class)
         public LoggingScopeThreadUtils loggingScopeThreadUtils(OndemandProperties properties) {
-            return new DefaultLoggingScopeThreadUtils(factory);
+
+            // XXX for background threads, reuse http log level limits
+            // this could be seperate configuration
+            return new DefaultLoggingScopeThreadUtils(factory, factory, defaultFilter.getQueuePredicate(), defaultFilter.getIgnorePredicate(), defaultFilter.getLogLevelFailurePredicate());
         }
 
         @Bean
         public FilterRegistrationBean<OndemandFilter> ondemandFilter() {
-            LoggingScopeAsyncAppender appender = getAppender();
-
             LOGGER.info("Enable on-demand HTTP logging filter");
 
             HttpLoggingScopeFilters filters = new HttpLoggingScopeFilters();
 
-            HttpLoggingScopeFilter defaultFilter = toFilter(null, properties.getSuccess(), properties.getFailure(), properties.getTroubleshoot());
             filters.setDefaultFilter(defaultFilter);
 
             List<OndemandPath> paths = properties.getPaths();
@@ -87,9 +93,7 @@ public class GcpWebOndemandLoggingAutoConfiguration {
                 filters.addFilter(requestMatcher, filter);
             }
 
-            OndemandFilter filter = new OndemandFilter(appender, filters, factory);
-
-            appender.addScopeProvider(factory);
+            OndemandFilter filter = new OndemandFilter(filters, factory);
 
             FilterRegistrationBean<OndemandFilter> registration = new FilterRegistrationBean<>();
             registration.setFilter(filter);

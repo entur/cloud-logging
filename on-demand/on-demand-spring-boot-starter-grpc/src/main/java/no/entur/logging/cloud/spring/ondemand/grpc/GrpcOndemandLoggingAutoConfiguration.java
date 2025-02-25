@@ -66,7 +66,7 @@ public class GrpcOndemandLoggingAutoConfiguration {
                 }
             }
 
-            GrpcContextLoggingScopeFactory grpcContextLoggingScopeFactory = new GrpcContextLoggingScopeFactory(properties.getFlushMode());
+            GrpcContextLoggingScopeFactory grpcContextLoggingScopeFactory = new GrpcContextLoggingScopeFactory(properties.getFlushMode(), appender);
 
             GrpcLoggingScopeContextInterceptor interceptor = GrpcLoggingScopeContextInterceptor
                     .newBuilder()
