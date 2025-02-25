@@ -95,7 +95,7 @@ public class DefaultLoggingScopeThreadUtils implements LoggingScopeThreadUtils {
     }
 
     @Override
-    public void wrapInNewScope(Consumer<LoggingScope> consumer) {
+    public void withNewScopeWriteManually(Consumer<LoggingScope> consumer) {
         LoggingScope loggingScope = factory.openScope(queuePredicate, ignorePredicate, logLevelFailurePredicate);
 
         controls.setCurrentScope(loggingScope);
@@ -107,7 +107,7 @@ public class DefaultLoggingScopeThreadUtils implements LoggingScopeThreadUtils {
     }
 
     @Override
-    public void wrapInNewScope(Runnable runnable) {
+    public void withNewScopeWriteAutomatically(Runnable runnable) {
         LoggingScope loggingScope = factory.openScope(queuePredicate, ignorePredicate, logLevelFailurePredicate);
 
         controls.setCurrentScope(loggingScope);

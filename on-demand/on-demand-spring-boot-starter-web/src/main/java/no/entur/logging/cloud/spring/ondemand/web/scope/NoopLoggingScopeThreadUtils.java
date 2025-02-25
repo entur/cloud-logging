@@ -46,12 +46,12 @@ public class NoopLoggingScopeThreadUtils implements LoggingScopeThreadUtils {
     }
 
     @Override
-    public void wrapInNewScope(Consumer<LoggingScope> consumer) {
+    public void withNewScopeWriteManually(Consumer<LoggingScope> consumer) {
         consumer.accept(NOOP_LOGGING_SCOPE);
     }
 
     @Override
-    public void wrapInNewScope(Runnable runnable) {
+    public void withNewScopeWriteAutomatically(Runnable runnable) {
         runnable.run();
     }
 

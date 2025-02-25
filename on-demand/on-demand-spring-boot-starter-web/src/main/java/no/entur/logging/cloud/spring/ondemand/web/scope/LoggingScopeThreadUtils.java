@@ -2,7 +2,6 @@ package no.entur.logging.cloud.spring.ondemand.web.scope;
 
 import no.entur.logging.cloud.appender.scope.LoggingScope;
 
-import java.io.Closeable;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -61,7 +60,7 @@ public interface LoggingScopeThreadUtils {
      * @param consumer job to wrap. The logging scope is not flushed when the method finishes; caller must flush by calling {@linkplain LoggingScope#write()}.
      */
 
-    void wrapInNewScope(Consumer<LoggingScope> consumer);
+    void withNewScopeWriteManually(Consumer<LoggingScope> consumer);
 
     /**
      *
@@ -71,5 +70,5 @@ public interface LoggingScopeThreadUtils {
      */
 
 
-    void wrapInNewScope(Runnable runnable);
+    void withNewScopeWriteAutomatically(Runnable runnable);
 }
