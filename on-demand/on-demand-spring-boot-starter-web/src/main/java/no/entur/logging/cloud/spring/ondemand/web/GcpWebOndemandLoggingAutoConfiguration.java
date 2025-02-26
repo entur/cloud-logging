@@ -210,12 +210,30 @@ public class GcpWebOndemandLoggingAutoConfiguration {
             }
 
             OndemandDurationTrigger duration = failure.getDuration();
-            if(duration.isEnabled() && duration.getAfter() != null) {
+            if(duration.isEnabled()) {
+
+                Duration before = duration.getBefore();
                 Duration after = duration.getAfter();
 
-                filter.setFailureDuration(after.toMillis());
+                boolean hasBefore = before != null;
+                boolean hasAfter = after != null;
 
-                LOGGER.info("Configure on-demand logging for {} http exchanges longer than {}ms ", matcher == null ? "default" : matcher, filter.getFailureDuration());
+                if(hasBefore && hasAfter) {
+                    long beforeMillis = before.toMillis();
+                    long afterMillis = after.toMillis();
+
+                    if(beforeMillis > afterMillis) {
+                        //  assume interval [after, before] => failure
+                        LOGGER.info("Configure on-demand logging for {} http exchanges with duration in interval {}ms to {}ms", matcher == null ? "default" : matcher, beforeMillis, afterMillis);
+                    } else {
+                        //  assume intervals [0, before] or [after, infinite] => failure
+                        LOGGER.info("Configure on-demand logging for {} http exchanges longer than {}ms or shorter than {}ms", matcher == null ? "default" : matcher, afterMillis, beforeMillis);
+                    }
+                } else if(hasBefore) {
+                    LOGGER.info("Configure on-demand logging for {} http exchanges shorter than {}ms ", matcher == null ? "default" : matcher, before.toMillis());
+                } else if(hasAfter) {
+                    LOGGER.info("Configure on-demand logging for {} http exchanges longer than {}ms ", matcher == null ? "default" : matcher, after.toMillis());
+                }
             }
 
             OndemandLogLevelTrigger logLevelTrigger = failure.getLogger();

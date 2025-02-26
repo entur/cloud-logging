@@ -10,7 +10,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import no.entur.logging.cloud.appender.scope.LoggingScope;
 import no.entur.logging.cloud.appender.scope.LoggingScopeFactory;
-import no.entur.logging.cloud.appender.scope.LoggingScopeSink;
 import no.entur.logging.cloud.spring.ondemand.web.scope.HttpLoggingScopeFilter;
 import no.entur.logging.cloud.spring.ondemand.web.scope.HttpLoggingScopeFilters;
 
@@ -135,7 +134,7 @@ public class OndemandFilter extends HttpFilter {
             if (filter.getHttpStatusFailurePredicate().test(servletResponse.getStatus())) {
                 // was there an error response
                 scope.failure();
-            } else if(filter.hasFailureDuration() && System.currentTimeMillis() - scope. getTimestamp() > filter.getFailureDuration()) {
+            } else if(filter.isFailureForDuration(System.currentTimeMillis() - scope. getTimestamp())) {
                 scope.failure();
             }
 
