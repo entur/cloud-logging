@@ -234,6 +234,8 @@ public class GcpWebOndemandLoggingAutoConfiguration {
                 } else if(hasAfter) {
                     LOGGER.info("Configure on-demand logging for {} http exchanges longer than {}ms ", matcher == null ? "default" : matcher, after.toMillis());
                 }
+
+                filter.setFailureDuration(before, after);
             }
 
             OndemandLogLevelTrigger logLevelTrigger = failure.getLogger();

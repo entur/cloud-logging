@@ -174,6 +174,8 @@ public class GrpcOndemandLoggingAutoConfiguration {
                 } else if(hasAfter) {
                     LOGGER.info("Configure {} on-demand logging for gRPC exchanges longer than {}ms ", methodNames.isEmpty() ? serviceName : serviceName + methodNames, after.toMillis());
                 }
+
+                filter.setFailureDuration(before, after);
             }
 
             OndemandGrpcResponseTrigger httpStatusCodeTrigger = failure.getGrpc();
