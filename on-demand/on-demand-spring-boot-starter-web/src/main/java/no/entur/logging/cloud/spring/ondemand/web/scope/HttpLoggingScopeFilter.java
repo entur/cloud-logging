@@ -105,7 +105,6 @@ public class HttpLoggingScopeFilter {
     }
 
     public boolean isFailureForDuration(long duration) {
-        System.out.println("Check " + duration + " " + (failureDuration != null && failureDuration.test(duration)));
         return failureDuration != null && failureDuration.test(duration);
     }
 
