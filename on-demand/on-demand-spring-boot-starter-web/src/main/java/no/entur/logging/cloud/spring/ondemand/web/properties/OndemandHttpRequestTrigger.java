@@ -1,11 +1,14 @@
 package no.entur.logging.cloud.spring.ondemand.web.properties;
 
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+
 import java.util.*;
 
 public class OndemandHttpRequestTrigger {
 
     private boolean enabled = true;
 
+    @NestedConfigurationProperty
     private List<OndemandHttpHeader> headers = new ArrayList<>();
 
     public List<OndemandHttpHeader> getHeaders() {
