@@ -202,14 +202,10 @@ allprojects {
         }
     }
 
-    // Tell idea to output to build/classes/main instead of /out/
     idea {
         module {
             downloadJavadoc = true
             downloadSources = true
-
-            outputDir file('build/classes/main')
-            testOutputDir file('build/classes/test')
         }
     }
     

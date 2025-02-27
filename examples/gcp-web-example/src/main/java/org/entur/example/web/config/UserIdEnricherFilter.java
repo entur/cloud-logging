@@ -6,14 +6,12 @@ import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.MDC;
 
 import java.io.IOException;
 
 // for testing
-public class ReturnHttp401AuthenticationHeaderFilter implements Filter {
+public class UserIdEnricherFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -22,16 +20,14 @@ public class ReturnHttp401AuthenticationHeaderFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        String customHeader = httpRequest.getHeader("Authorization");
-        if (customHeader != null && customHeader.equals("Bearer x.y.z")) {
-            httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+        // emulate a filter enriching the request
+        MDC.put("subject", "my-subject-id");
+        try {
+            chain.doFilter(request, response);
+        } finally {
+            MDC.remove("subject");
         }
-
-        chain.doFilter(request, response);
     }
 
     @Override
