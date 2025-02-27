@@ -18,6 +18,7 @@ public class DefaultLoggingScopeTest {
 
     private ILoggingEvent infoLoggingEvent = mock(ILoggingEvent.class);
     private ILoggingEvent debugLoggingEvent = mock(ILoggingEvent.class);
+    private LoggingScopeSink sink = mock(LoggingScopeSink.class);
 
     @BeforeEach
     public void init() {
@@ -30,21 +31,21 @@ public class DefaultLoggingScopeTest {
 
     @Test
     public void testIgnoreDebugEagerSuccess() {
-        DefaultLoggingScope eager = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.EAGER);
+        DefaultLoggingScope eager = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.EAGER, sink);
         eager.append(debugLoggingEvent);
         assertTrue(eager.getEvents().isEmpty());
     }
 
     @Test
     public void testIgnoreDebugLazySuccess() {
-        DefaultLoggingScope eager = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.LAZY);
+        DefaultLoggingScope eager = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.LAZY, sink);
         eager.append(debugLoggingEvent);
         assertTrue(eager.getEvents().isEmpty());
     }
 
     @Test
     public void testIgnoreDebugEagerFailure() {
-        DefaultLoggingScope lazy = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.EAGER);
+        DefaultLoggingScope lazy = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.EAGER, sink);
         lazy.failure();
         lazy.append(debugLoggingEvent);
         assertTrue(lazy.getEvents().isEmpty());
@@ -52,7 +53,7 @@ public class DefaultLoggingScopeTest {
 
     @Test
     public void testIgnoreDebugLazyFailure() {
-        DefaultLoggingScope lazy = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.LAZY);
+        DefaultLoggingScope lazy = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.LAZY, sink);
         lazy.failure();
         lazy.append(debugLoggingEvent);
         assertTrue(lazy.getEvents().isEmpty());
@@ -60,21 +61,21 @@ public class DefaultLoggingScopeTest {
 
     @Test
     public void testIgnoreInfoEagerSuccess() {
-        DefaultLoggingScope eager = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.EAGER);
+        DefaultLoggingScope eager = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.EAGER, sink);
         eager.append(infoLoggingEvent);
         assertTrue(eager.getEvents().isEmpty());
     }
 
     @Test
     public void testIgnoreInfoLazySuccess() {
-        DefaultLoggingScope eager = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.LAZY);
+        DefaultLoggingScope eager = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.LAZY, sink);
         eager.append(infoLoggingEvent);
         assertTrue(eager.getEvents().isEmpty());
     }
 
     @Test
     public void testKeepInfoEagerFailureCachesBefore() {
-        DefaultLoggingScope lazy = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.EAGER);
+        DefaultLoggingScope lazy = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.EAGER, sink);
         assertTrue(lazy.append(infoLoggingEvent)); // cached
         lazy.failure();
         assertFalse(lazy.getEvents().isEmpty());
@@ -82,7 +83,7 @@ public class DefaultLoggingScopeTest {
 
     @Test
     public void testKeepInfoEagerFailureNoCacheAfter() {
-        DefaultLoggingScope lazy = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.EAGER);
+        DefaultLoggingScope lazy = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.EAGER, sink);
         lazy.failure();
         assertFalse(lazy.append(infoLoggingEvent)); // not cached
         assertTrue(lazy.getEvents().isEmpty());
@@ -90,7 +91,7 @@ public class DefaultLoggingScopeTest {
 
     @Test
     public void testKeepInfoLazyFailureCachesBefore() {
-        DefaultLoggingScope lazy = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.LAZY);
+        DefaultLoggingScope lazy = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.LAZY, sink);
         lazy.append(infoLoggingEvent);
         lazy.failure();
         assertFalse(lazy.getEvents().isEmpty());
@@ -98,7 +99,7 @@ public class DefaultLoggingScopeTest {
 
     @Test
     public void testKeepInfoLazyFailureCachesAfter() {
-        DefaultLoggingScope lazy = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.LAZY);
+        DefaultLoggingScope lazy = new DefaultLoggingScope(infoPredicate, debugPredicate, LoggingScopeFlushMode.LAZY, sink);
         lazy.failure();
         lazy.append(infoLoggingEvent);
         assertFalse(lazy.getEvents().isEmpty());

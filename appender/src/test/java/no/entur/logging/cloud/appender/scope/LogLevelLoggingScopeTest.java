@@ -22,6 +22,8 @@ public class LogLevelLoggingScopeTest {
     private ILoggingEvent infoLoggingEvent = mock(ILoggingEvent.class);
     private ILoggingEvent debugLoggingEvent = mock(ILoggingEvent.class);
 
+    private LoggingScopeSink sink = mock(LoggingScopeSink.class);
+
     @BeforeEach
     public void init() {
         warnLoggingEvent = mock(ILoggingEvent.class);
@@ -36,21 +38,21 @@ public class LogLevelLoggingScopeTest {
 
     @Test
     public void testIgnoreDebugEagerSuccess() {
-        LogLevelLoggingScope eager = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.EAGER);
+        LogLevelLoggingScope eager = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.EAGER, sink);
         eager.append(debugLoggingEvent);
         assertTrue(eager.getEvents().isEmpty());
     }
 
     @Test
     public void testIgnoreDebugLazySuccess() {
-        LogLevelLoggingScope eager = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.LAZY);
+        LogLevelLoggingScope eager = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.LAZY, sink);
         eager.append(debugLoggingEvent);
         assertTrue(eager.getEvents().isEmpty());
     }
 
     @Test
     public void testIgnoreDebugEagerFailure() {
-        LogLevelLoggingScope lazy = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.EAGER);
+        LogLevelLoggingScope lazy = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.EAGER, sink);
         lazy.failure();
         lazy.append(debugLoggingEvent);
         assertTrue(lazy.getEvents().isEmpty());
@@ -58,7 +60,7 @@ public class LogLevelLoggingScopeTest {
 
     @Test
     public void testIgnoreDebugLazyFailure() {
-        LogLevelLoggingScope lazy = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.LAZY);
+        LogLevelLoggingScope lazy = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.LAZY, sink);
         lazy.failure();
         lazy.append(debugLoggingEvent);
         assertTrue(lazy.getEvents().isEmpty());
@@ -66,21 +68,21 @@ public class LogLevelLoggingScopeTest {
 
     @Test
     public void testIgnoreInfoEagerSuccess() {
-        LogLevelLoggingScope eager = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.EAGER);
+        LogLevelLoggingScope eager = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.EAGER, sink);
         eager.append(infoLoggingEvent);
         assertTrue(eager.getEvents().isEmpty());
     }
 
     @Test
     public void testIgnoreInfoLazySuccess() {
-        LogLevelLoggingScope eager = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.LAZY);
+        LogLevelLoggingScope eager = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.LAZY, sink);
         eager.append(infoLoggingEvent);
         assertTrue(eager.getEvents().isEmpty());
     }
 
     @Test
     public void testKeepInfoEagerFailureCachesBefore() {
-        LogLevelLoggingScope lazy = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.EAGER);
+        LogLevelLoggingScope lazy = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.EAGER, sink);
         assertTrue(lazy.append(infoLoggingEvent)); // cached
         lazy.failure();
         assertFalse(lazy.getEvents().isEmpty());
@@ -88,7 +90,7 @@ public class LogLevelLoggingScopeTest {
 
     @Test
     public void testKeepInfoEagerFailureNoCacheAfter() {
-        LogLevelLoggingScope lazy = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.EAGER);
+        LogLevelLoggingScope lazy = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.EAGER, sink);
         lazy.failure();
         assertFalse(lazy.append(infoLoggingEvent)); // not cached
         assertTrue(lazy.getEvents().isEmpty());
@@ -96,7 +98,7 @@ public class LogLevelLoggingScopeTest {
 
     @Test
     public void testKeepInfoLazyFailureCachesBefore() {
-        LogLevelLoggingScope lazy = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.LAZY);
+        LogLevelLoggingScope lazy = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.LAZY, sink);
         lazy.append(infoLoggingEvent);
         lazy.failure();
         assertFalse(lazy.getEvents().isEmpty());
@@ -104,7 +106,7 @@ public class LogLevelLoggingScopeTest {
 
     @Test
     public void testKeepInfoLazyFailureCachesAfter() {
-        LogLevelLoggingScope lazy = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.LAZY);
+        LogLevelLoggingScope lazy = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.LAZY, sink);
         lazy.failure();
         lazy.append(infoLoggingEvent);
         assertFalse(lazy.getEvents().isEmpty());
@@ -112,7 +114,7 @@ public class LogLevelLoggingScopeTest {
 
     @Test
     public void testLogLevelNoTriggersFailure() {
-        LogLevelLoggingScope lazy = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.LAZY);
+        LogLevelLoggingScope lazy = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.LAZY, sink);
 
         lazy.append(debugLoggingEvent);
         lazy.append(infoLoggingEvent);
@@ -121,7 +123,7 @@ public class LogLevelLoggingScopeTest {
 
     @Test
     public void testLogLevelTriggersFailure() {
-        LogLevelLoggingScope lazy = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.LAZY);
+        LogLevelLoggingScope lazy = new LogLevelLoggingScope(infoPredicate, debugPredicate, logLevelFailurePredicate, LoggingScopeFlushMode.LAZY, sink);
 
         lazy.append(warnLoggingEvent);
         assertTrue(lazy.isFailure());

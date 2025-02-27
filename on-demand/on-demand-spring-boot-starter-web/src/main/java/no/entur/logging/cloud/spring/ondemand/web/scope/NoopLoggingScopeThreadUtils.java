@@ -1,6 +1,11 @@
 package no.entur.logging.cloud.spring.ondemand.web.scope;
 
+import no.entur.logging.cloud.appender.scope.LoggingScope;
+
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -10,6 +15,15 @@ import java.util.function.Supplier;
  */
 
 public class NoopLoggingScopeThreadUtils implements LoggingScopeThreadUtils {
+
+    private static final NoopLoggingScope NOOP_LOGGING_SCOPE = new NoopLoggingScope();
+
+    private static final Closeable NOOP_CLOSABLE = new Closeable() {
+        @Override
+        public void close() throws IOException {
+            // do nothing
+        }
+    };
 
     @Override
     public void failure() {
@@ -30,4 +44,15 @@ public class NoopLoggingScopeThreadUtils implements LoggingScopeThreadUtils {
     public <U> Callable<U> withCallable(Callable<U> callable) {
         return callable;
     }
+
+    @Override
+    public void withNewScopeWriteManually(Consumer<LoggingScope> consumer) {
+        consumer.accept(NOOP_LOGGING_SCOPE);
+    }
+
+    @Override
+    public void withNewScopeWriteAutomatically(Runnable runnable) {
+        runnable.run();
+    }
+
 }

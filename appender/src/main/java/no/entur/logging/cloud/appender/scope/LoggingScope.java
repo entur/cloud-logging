@@ -26,5 +26,19 @@ public interface LoggingScope {
 
     void failure();
 
+    /**
+     * Get the logging scope creation timestamp.
+     *
+     * @return
+     */
+
     long getTimestamp();
+
+    /**
+     *
+     * Flush the current events. This will result in the relevant log statements being written.
+     *
+     */
+
+    void write();
 }

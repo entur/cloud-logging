@@ -9,9 +9,11 @@ import java.util.function.Predicate;
 public class GrpcContextLoggingScopeFactory implements LoggingScopeFactory<LoggingScope>, LoggingScopeProvider {
 
     protected final LoggingScopeFlushMode flushMode;
+    protected final LoggingScopeSink sink;
 
-    public GrpcContextLoggingScopeFactory(LoggingScopeFlushMode flushMode) {
+    public GrpcContextLoggingScopeFactory(LoggingScopeFlushMode flushMode, LoggingScopeSink sink) {
         this.flushMode = flushMode;
+        this.sink = sink;
 
     }
 
@@ -19,9 +21,9 @@ public class GrpcContextLoggingScopeFactory implements LoggingScopeFactory<Loggi
     public LoggingScope openScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate, Predicate<ILoggingEvent> logLevelFailurePredicate) {
         LoggingScope scope;
         if(logLevelFailurePredicate == null) {
-            scope = new DefaultLoggingScope(queuePredicate, ignorePredicate, flushMode);
+            scope = new DefaultLoggingScope(queuePredicate, ignorePredicate, flushMode, sink);
         } else {
-            scope = new LogLevelLoggingScope(queuePredicate, ignorePredicate, logLevelFailurePredicate, flushMode);
+            scope = new LogLevelLoggingScope(queuePredicate, ignorePredicate, logLevelFailurePredicate, flushMode, sink);
         }
 
         return scope;

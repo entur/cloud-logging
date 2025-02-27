@@ -2,6 +2,7 @@ package no.entur.logging.cloud.spring.ondemand.web.properties;
 
 import no.entur.logging.cloud.appender.scope.LoggingScopeFlushMode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.core.Ordered;
 
 import java.util.ArrayList;
@@ -11,10 +12,14 @@ import java.util.List;
 public class OndemandProperties {
 
     private boolean enabled;
+
+    @NestedConfigurationProperty
     private OndemandSuccess success = new OndemandSuccess();
 
+    @NestedConfigurationProperty
     private OndemandFailure failure = new OndemandFailure();
 
+    @NestedConfigurationProperty
     private OndemandTroubleshoot troubleshoot = new OndemandTroubleshoot();
 
     public OndemandProperties() {
@@ -26,6 +31,7 @@ public class OndemandProperties {
 
     private String filterUrlPatterns = "/*";
 
+    @NestedConfigurationProperty
     private List<OndemandPath> paths = new ArrayList<>();
 
     private LoggingScopeFlushMode flushMode = LoggingScopeFlushMode.EAGER;

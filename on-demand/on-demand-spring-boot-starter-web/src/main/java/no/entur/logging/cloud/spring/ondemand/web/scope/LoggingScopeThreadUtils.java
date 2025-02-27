@@ -3,6 +3,7 @@ package no.entur.logging.cloud.spring.ondemand.web.scope;
 import no.entur.logging.cloud.appender.scope.LoggingScope;
 
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -52,4 +53,22 @@ public interface LoggingScopeThreadUtils {
 
     <U> Callable<U> withCallable(Callable<U> callable);
 
+    /**
+     *
+     * Create new scope, i.e. for running background jobs and so on
+     *
+     * @param consumer job to wrap. The logging scope is not flushed when the method finishes; caller must flush by calling {@linkplain LoggingScope#write()}.
+     */
+
+    void withNewScopeWriteManually(Consumer<LoggingScope> consumer);
+
+    /**
+     *
+     * Create new scope, i.e. for running background jobs and so on
+     *
+     * @param runnable job to wrap. The logging scope is flushed when the method finishes.
+     */
+
+
+    void withNewScopeWriteAutomatically(Runnable runnable);
 }

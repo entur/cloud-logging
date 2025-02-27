@@ -1,13 +1,19 @@
 package no.entur.logging.cloud.spring.ondemand.web.properties;
 
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+
 public class OndemandPath {
 
 	private boolean enabled = true;
 	private String matcher;
 
+	@NestedConfigurationProperty
 	private OndemandSuccess success = new OndemandSuccess();
+
+	@NestedConfigurationProperty
 	private OndemandFailure failure = new OndemandFailure();
 
+	@NestedConfigurationProperty
 	private OndemandTroubleshoot troubleshoot = new OndemandTroubleshoot();
 
 	public boolean isEnabled() {
