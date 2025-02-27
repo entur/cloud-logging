@@ -21,6 +21,7 @@ public class WebSecurityConfig {
 					}
 				);
 				http.addFilterBefore(new ReturnHttp401AuthenticationHeaderFilter(), UsernamePasswordAuthenticationFilter.class);
+				http.addFilterBefore(new UserIdEnricherFilter(), UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
 }

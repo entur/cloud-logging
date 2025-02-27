@@ -13,6 +13,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.HttpURLConnection;
@@ -23,6 +24,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@TestPropertySource(properties = {
+	"logbook.secure-filter.enabled=false"
+})
+
+
+
 public class WebLoggingFormatHttp401Test {
 
 	@LocalServerPort
@@ -32,7 +39,7 @@ public class WebLoggingFormatHttp401Test {
 	public void useHumanReadablePlainEncoderTest() throws Exception {
 		URL url = new URL("http://localhost:" + randomServerPort +"/api/secured/endpoint");
 		HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-		urlConnection.setRequestProperty("Authentication", "Bearer x.y.z");
+		urlConnection.setRequestProperty("Authorization", "Bearer x.y.z");
 		assertEquals(401, urlConnection.getResponseCode());
 	}
 
@@ -42,8 +49,10 @@ public class WebLoggingFormatHttp401Test {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
 			URL url = new URL("http://localhost:" + randomServerPort +"/api/secured/endpoint");
 			HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-			urlConnection.setRequestProperty("Authentication", "Bearer x.y.z");
+			urlConnection.setRequestProperty("Authorization", "Bearer x.y.z");
 			assertEquals(401, urlConnection.getResponseCode());
+
+			Thread.sleep(1000);
 		}
 	}
 
@@ -52,7 +61,7 @@ public class WebLoggingFormatHttp401Test {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
 			URL url = new URL("http://localhost:" + randomServerPort +"/api/secured/endpoint");
 			HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-			urlConnection.setRequestProperty("Authentication", "Bearer x.y.z");
+			urlConnection.setRequestProperty("Authorization", "Bearer x.y.z");
 			assertEquals(401, urlConnection.getResponseCode());
 		}
 	}
