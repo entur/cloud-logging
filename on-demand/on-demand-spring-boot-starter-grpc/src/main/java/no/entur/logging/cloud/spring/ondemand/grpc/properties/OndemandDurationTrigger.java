@@ -6,6 +6,7 @@ public class OndemandDurationTrigger {
 
     private boolean enabled = true;
     private Duration after;
+    private Duration before;
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
@@ -21,5 +22,13 @@ public class OndemandDurationTrigger {
 
     public Duration getAfter() {
         return after;
+    }
+
+    public Duration getBefore() {
+        return before;
+    }
+
+    public void setBefore(Duration before) {
+        this.before = before;
     }
 }

@@ -9,6 +9,8 @@ import org.springframework.core.Ordered;
 @Configuration
 public class CorrelationIdAutoConfiguration {
 
+    public static final int ORDER = Ordered.HIGHEST_PRECEDENCE + 100;
+
     @Bean
     public FilterRegistrationBean<CorrelationIdFilter> tracingServletFilter() {
         FilterRegistrationBean<CorrelationIdFilter> registration = new FilterRegistrationBean<>();
@@ -21,7 +23,7 @@ public class CorrelationIdAutoConfiguration {
          * the object with the lowest value has the highest priority (somewhat
          * analogous to Servlet {@code load-on-startup} values).
          */
-        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 100); // so before security (spring security at -100, see property spring.security.filter.order)
+        registration.setOrder(ORDER); // so before security (spring security at -100, see property spring.security.filter.order)
         registration.addUrlPatterns("/*");
         return registration;
 

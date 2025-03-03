@@ -1,8 +1,14 @@
 package no.entur.logging.cloud.spring.ondemand.web.scope;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import no.entur.logging.cloud.appender.scope.LoggingScope;
+import no.entur.logging.cloud.appender.scope.LoggingScopeFactory;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -14,9 +20,18 @@ import java.util.function.Supplier;
 public class DefaultLoggingScopeThreadUtils implements LoggingScopeThreadUtils {
 
     protected final LoggingScopeControls controls;
+    protected final LoggingScopeFactory factory;
 
-    public DefaultLoggingScopeThreadUtils(LoggingScopeControls controls) {
+    protected final Predicate<ILoggingEvent> queuePredicate;
+    protected final Predicate<ILoggingEvent> ignorePredicate;
+    protected final Predicate<ILoggingEvent> logLevelFailurePredicate;
+
+    public DefaultLoggingScopeThreadUtils(LoggingScopeControls controls, LoggingScopeFactory factory, Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate, Predicate<ILoggingEvent> logLevelFailurePredicate) {
         this.controls = controls;
+        this.factory = factory;
+        this.queuePredicate = queuePredicate;
+        this.ignorePredicate = ignorePredicate;
+        this.logLevelFailurePredicate = logLevelFailurePredicate;
     }
 
     /**
@@ -78,5 +93,32 @@ public class DefaultLoggingScopeThreadUtils implements LoggingScopeThreadUtils {
             }
         };
     }
+
+    @Override
+    public void withNewScopeWriteManually(Consumer<LoggingScope> consumer) {
+        LoggingScope loggingScope = factory.openScope(queuePredicate, ignorePredicate, logLevelFailurePredicate);
+
+        controls.setCurrentScope(loggingScope);
+        try {
+            consumer.accept(loggingScope);
+        } finally {
+            controls.clearCurrentScope();
+        }
+    }
+
+    @Override
+    public void withNewScopeWriteAutomatically(Runnable runnable) {
+        LoggingScope loggingScope = factory.openScope(queuePredicate, ignorePredicate, logLevelFailurePredicate);
+
+        controls.setCurrentScope(loggingScope);
+        try {
+            runnable.run();
+        } finally {
+            loggingScope.write();
+
+            controls.clearCurrentScope();
+        }
+    }
+
 
 }

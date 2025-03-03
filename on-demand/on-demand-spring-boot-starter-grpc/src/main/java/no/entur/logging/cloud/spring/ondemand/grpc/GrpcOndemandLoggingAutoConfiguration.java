@@ -66,11 +66,10 @@ public class GrpcOndemandLoggingAutoConfiguration {
                 }
             }
 
-            GrpcContextLoggingScopeFactory grpcContextLoggingScopeFactory = new GrpcContextLoggingScopeFactory(properties.getFlushMode());
+            GrpcContextLoggingScopeFactory grpcContextLoggingScopeFactory = new GrpcContextLoggingScopeFactory(properties.getFlushMode(), appender);
 
             GrpcLoggingScopeContextInterceptor interceptor = GrpcLoggingScopeContextInterceptor
                     .newBuilder()
-                    .withSink(appender)
                     .withFilters(filters)
                     .withOrder(properties.getInterceptorOrder())
                     .withFactory(grpcContextLoggingScopeFactory)
@@ -152,12 +151,31 @@ public class GrpcOndemandLoggingAutoConfiguration {
             }
 
             OndemandDurationTrigger duration = failure.getDuration();
-            if(duration.isEnabled() && duration.getAfter() != null) {
+            if(duration.isEnabled()) {
+                Duration before = duration.getBefore();
                 Duration after = duration.getAfter();
 
-                filter.setFailureDuration(after.toMillis());
+                boolean hasBefore = before != null;
+                boolean hasAfter = after != null;
 
-                LOGGER.info("Configure {} on-demand logging for http exchanges longer than {} ms ", methodNames.isEmpty() ? serviceName : serviceName + methodNames, filter.getFailureDuration());
+                if(hasBefore && hasAfter) {
+                    long beforeMillis = before.toMillis();
+                    long afterMillis = after.toMillis();
+
+                    if(beforeMillis > afterMillis) {
+                        //  assume interval [after, before] => failure
+                        LOGGER.info("Configure {} on-demand logging for gRPC exchanges with duration in interval {}ms to {}ms", methodNames.isEmpty() ? serviceName : serviceName + methodNames, beforeMillis, afterMillis);
+                    } else {
+                        //  assume intervals [0, before] or [after, infinite] => failure
+                        LOGGER.info("Configure {} on-demand logging for gRPC exchanges longer than {}ms or shorter than {}ms", methodNames.isEmpty() ? serviceName : serviceName + methodNames, afterMillis, beforeMillis);
+                    }
+                } else if(hasBefore) {
+                    LOGGER.info("Configure {} on-demand logging for gRPC exchanges shorter than {}ms ", methodNames.isEmpty() ? serviceName : serviceName + methodNames, before.toMillis());
+                } else if(hasAfter) {
+                    LOGGER.info("Configure {} on-demand logging for gRPC exchanges longer than {}ms ", methodNames.isEmpty() ? serviceName : serviceName + methodNames, after.toMillis());
+                }
+
+                filter.setFailureDuration(before, after);
             }
 
             OndemandGrpcResponseTrigger httpStatusCodeTrigger = failure.getGrpc();

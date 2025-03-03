@@ -1,5 +1,7 @@
 package no.entur.logging.cloud.spring.ondemand.web.properties;
 
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+
 /**
  *
  * Troubleshooting only works for requests, i.e. debugging is assumed to hold so much data that
@@ -11,6 +13,7 @@ public class OndemandTroubleshoot {
 
     private String level = "debug";
 
+    @NestedConfigurationProperty
     private OndemandHttpRequestTrigger http = new OndemandHttpRequestTrigger();
 
     public void setLevel(String level) {

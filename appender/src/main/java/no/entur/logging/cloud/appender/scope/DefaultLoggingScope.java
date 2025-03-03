@@ -22,12 +22,15 @@ public class DefaultLoggingScope implements LoggingScope {
 
     protected final LoggingScopeFlushMode flushMode;
 
+    protected final LoggingScopeSink sink;
+
     protected ConcurrentLinkedQueue<ILoggingEvent> events = new ConcurrentLinkedQueue<ILoggingEvent>();
 
-    public DefaultLoggingScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate, LoggingScopeFlushMode flushMode) {
+    public DefaultLoggingScope(Predicate<ILoggingEvent> queuePredicate, Predicate<ILoggingEvent> ignorePredicate, LoggingScopeFlushMode flushMode, LoggingScopeSink sink) {
         this.queuePredicate = queuePredicate;
         this.ignorePredicate = ignorePredicate;
         this.flushMode = flushMode;
+        this.sink = sink;
     }
 
     @Override
@@ -81,4 +84,7 @@ public class DefaultLoggingScope implements LoggingScope {
         return timestamp;
     }
 
+    public void write() {
+        sink.write(this);
+    }
 }

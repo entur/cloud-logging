@@ -6,6 +6,7 @@ dependencies {
     api project(':gcp:spring-boot-autoconfigure-gcp')
 
     api project(':trace:server:correlation-id-trace-spring-boot-web')
+    api project(':gcp:correlation-id-trace-spring-boot-gcp-web')
 
     api("org.slf4j:slf4j-api:${slf4jVersion}")
     api ("org.codehaus.janino:commons-compiler:${janinoVersion}")

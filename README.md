@@ -21,7 +21,12 @@ Features:
      * Logbook style output (i.e. inlined in JSON log statements)
      * Additional ANSI coloring for test scope
  * Selective 'on-demand' logging for unexpected web server behaviour
-     * capture full logs for problematic requests (i.e. not only WARN or ERROR, but also all sibling INFO log statements)
+     * capture full logs for problematic requests (i.e. not only WARN or ERROR, but also all sibling INFO log statements). Triggers:
+        * HTTP status code
+        * Log level (i.e. if ERROR logged, also log sibling INFO statements)
+        * Call duration
+        * Header present
+        * Manual signalling
      * reduce cost of logging considerably
  * Unit testing
    * Always assert against machine-readable JSON 'under the hood', regardless what is printed to console during local development

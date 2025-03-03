@@ -2,8 +2,10 @@ package no.entur.logging.cloud.spring.ondemand.web.scope;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
+import java.time.Duration;
 import java.util.Enumeration;
 import java.util.function.IntPredicate;
+import java.util.function.LongPredicate;
 import java.util.function.Predicate;
 
 public class HttpLoggingScopeFilter {
@@ -19,7 +21,8 @@ public class HttpLoggingScopeFilter {
     private IntPredicate httpStatusFailurePredicate;
 
     private Predicate<Enumeration<String>> httpHeaderPresentPredicate;
-    private long failureDuration = -1L; // in milliseconds
+
+    private LongPredicate failureDuration;
 
     public IntPredicate getHttpStatusFailurePredicate() {
         return httpStatusFailurePredicate;
@@ -77,15 +80,32 @@ public class HttpLoggingScopeFilter {
         return troubleshootQueuePredicate;
     }
 
-    public void setFailureDuration(long failureDuration) {
-        this.failureDuration = failureDuration;
+    public void setFailureDuration(Duration before, Duration after) {
+        boolean hasBefore = before != null;
+        boolean hasAfter = after != null;
+
+        if(hasBefore && hasAfter) {
+            long beforeMillis = before.toMillis();
+            long afterMillis = after.toMillis();
+
+            if(beforeMillis > afterMillis) {
+                //  assume interval [after, before] => failure
+                failureDuration = (time) -> afterMillis < time && time < beforeMillis;
+            } else {
+                //  assume intervals [0, before] or [after, infinite] => failure
+                failureDuration = (time) -> time < beforeMillis || afterMillis < time;
+            }
+        } else if(hasBefore) {
+            long beforeMillis = before.toMillis();
+            failureDuration = (time) -> time < beforeMillis;
+        } else if(hasAfter) {
+            long afterMillis = after.toMillis();
+            failureDuration = (time) -> time > afterMillis;
+        }
     }
 
-    public long getFailureDuration() {
-        return failureDuration;
+    public boolean isFailureForDuration(long duration) {
+        return failureDuration != null && failureDuration.test(duration);
     }
 
-    public boolean hasFailureDuration() {
-        return failureDuration != -1L;
-    }
 }

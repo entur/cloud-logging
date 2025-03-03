@@ -1,9 +1,12 @@
 package no.entur.logging.cloud.spring.ondemand.web.properties;
 
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+
 public class OndemandHttpResponseTrigger {
 
     private boolean enabled = true;
 
+    @NestedConfigurationProperty
     private OndemandHttpStatus statusCode = new OndemandHttpStatus();
 
     public void setStatusCode(OndemandHttpStatus statusCode) {

@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+import static jakarta.servlet.DispatcherType.ASYNC;
 import static jakarta.servlet.DispatcherType.ERROR;
 import static jakarta.servlet.DispatcherType.REQUEST;
 
@@ -40,7 +41,7 @@ public class LogbookWebAutoConfiguration {
         public FilterRegistrationBean<HttpMessageStateFilter> httpMessageStateFilter(OndemandProperties properties) {
             FilterRegistrationBean<HttpMessageStateFilter> registration = new FilterRegistrationBean<>();
             registration.setFilter(new HttpMessageStateFilter());
-            registration.setDispatcherTypes(REQUEST, ERROR);
+            registration.setDispatcherTypes(REQUEST, ASYNC, ERROR);
             registration.setOrder(properties.getFilterOrder() - 1);
             registration.addUrlPatterns(properties.getFilterUrlPatterns());
             return registration;
