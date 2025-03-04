@@ -47,7 +47,7 @@ configure(jvmProjects()) {
     apply plugin: 'com.github.ben-manes.versions'
 
     ext {
-        junitJupiterVersion = '5.11.4'
+        junitJupiterVersion = '5.12.0'
         mockitoVersion = '5.14.2'
         logbackLogstashVersion = '8.0'
         slf4jVersion = '2.0.16'
