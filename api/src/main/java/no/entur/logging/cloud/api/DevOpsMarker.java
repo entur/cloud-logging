@@ -204,6 +204,18 @@ public class DevOpsMarker implements Marker {
 		return sb.toString();
 	}
 
+	public static DevOpsLevel searchSeverityMarker(List<Marker> markers) {
+		for (Marker marker : markers) {
+			if (marker instanceof DevOpsMarker) {
+				DevOpsMarker devOpsMarker = (DevOpsMarker) marker;
+
+				return devOpsMarker.getDevOpsLevel();
+			}
+		}
+
+		return null;
+	}
+
 	public static DevOpsLevel searchSeverityMarker(Marker marker) {
 		if (marker instanceof DevOpsMarker) {
 			DevOpsMarker devOpsMarker = (DevOpsMarker) marker;
