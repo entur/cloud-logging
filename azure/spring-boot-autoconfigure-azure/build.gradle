@@ -3,6 +3,7 @@ dependencies {
     api project(':azure:micrometer-azure')
     api project(':micrometer')
     api project(':appender')
+    api project(':on-demand:on-demand-spring-boot-autoconfigure')
 
     api project(':trace:server:correlation-id-trace-spring-boot-web')
 
