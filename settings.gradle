@@ -40,7 +40,7 @@ include 'request-response:request-response-spring-boot-autoconfigure-web', 'requ
 include 'bom'
 
 // GCP
-include 'examples:gcp-web-example', 'examples:gcp-async-web-example', 'examples:gcp-web-without-test-artifacts-example'
+include 'examples:gcp-web-example', 'examples:gcp-async-web-example', 'examples:gcp-web-without-test-artifacts-example', 'examples:gcp-web-without-test-or-ondemand-artifacts-example'
 include 'examples:gcp-grpc-ecosystem-example'
 // Azure
 include 'examples:azure-web-example', 'examples:azure-grpc-ecosystem-example', 'examples:gcp-grpc-ecosystem-without-test-artifacts-example'
