@@ -3,8 +3,6 @@ package no.entur.logging.cloud.spring.ondemand.grpc;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
 import io.grpc.Status;
 import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import no.entur.logging.cloud.appender.scope.predicate.HigherOrEqualToLogLevelPredicate;
@@ -39,7 +37,7 @@ public class GrpcOndemandLoggingAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean(GrpcLoggingScopeContextInterceptor.class)
         public GrpcLoggingScopeContextInterceptor grpcLoggingScopeContextInterceptor(OndemandProperties properties) {
-            LoggingScopeAsyncAppender appender = getAppender();
+            LoggingScopeAsyncAppender appender = LoggingScopeAsyncAppender.get();
 
             LOGGER.info("Configure on-demand GRPC logging");
 
@@ -95,21 +93,6 @@ public class GrpcOndemandLoggingAutoConfiguration {
                 default:
                     throw new IllegalStateException("Level [" + level + "] not recognized.");
             }
-        }
-
-        private static LoggingScopeAsyncAppender getAppender() {
-            Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-            Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders();
-            if(!appenderIterator.hasNext()) {
-                throw new IllegalStateException("No on-demand log appenders configured, expected at least one which is implementing " + LoggingScopeAsyncAppender.class.getName());
-            }
-            while (appenderIterator.hasNext()) {
-                Appender<ILoggingEvent> appender = appenderIterator.next();
-                if (appender instanceof LoggingScopeAsyncAppender) {
-                    return (LoggingScopeAsyncAppender) appender;
-                }
-            }
-            throw new IllegalStateException("Expected on-demand log appender implementing " + LoggingScopeAsyncAppender.class.getName());
         }
 
         public GrpcLoggingScopeFilter toFilter(String serviceName, List<String> methodNames, OndemandSuccess success, OndemandFailure failure, OndemandTroubleshoot troubleshoot) {

@@ -2,6 +2,7 @@
 dependencies {
     api project(':appender')
     api project(':api')
+    api project(':on-demand:on-demand-spring-boot-autoconfigure')
 
     api("org.slf4j:slf4j-api:${slf4jVersion}")
 

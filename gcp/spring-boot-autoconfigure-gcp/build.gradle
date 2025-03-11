@@ -3,6 +3,7 @@ dependencies {
     api project(':gcp:micrometer-gcp')
     api project(':micrometer')
     api project(':appender')
+    api project(':on-demand:on-demand-spring-boot-autoconfigure')
 
     api project(':trace:server:correlation-id-trace-spring-boot-web')
 
