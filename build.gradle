@@ -76,7 +76,7 @@ configure(jvmProjects()) {
 
         jsonAssertVersion = '0.8.0'
         jsonPathVersion = '2.9.0'
-        jsonSmartVersion = '2.5.1'
+        jsonSmartVersion = '2.5.2'
     }
 
     test {
