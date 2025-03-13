@@ -65,7 +65,7 @@ configure(jvmProjects()) {
         jacksonSyntaxHighlightVersion = '1.1.0'
         logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.1.0'
         commonsIoVersion = '2.18.0'
-        commonsTextVersion = '1.12.0'
+        commonsTextVersion = '1.13.0'
         annotationApiVersion = '2.1.1'
 
         grpcNettyVersion = '1.70.0'
