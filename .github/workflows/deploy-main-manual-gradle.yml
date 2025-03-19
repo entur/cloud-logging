@@ -1,16 +1,25 @@
-name: Validate, build and deploy
+name: Deploy to Maven Central from main
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      version-increment:
+        description: 'Version-increment'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 jobs:
-  gradle-build-and-release:
-    uses: entur/abt-gha-public/.github/workflows/gradle-release-sona.yml@main
+  deploy-tag-gradle:
+    uses: entur/abt-gha-public/.github/workflows/gradle-open-source-increment-version-and-release-to-maven-central.yml@v1.0.0
     secrets: inherit
+    with: 
+      version-increment: ${{ inputs.version-increment }}
 
   post-failure-to-slack:
-    needs: gradle-build-and-release
+    needs: deploy-tag-gradle
     if: failure()
     uses: entur/gha-slack/.github/workflows/post.yml@v2
     with:
@@ -19,11 +28,12 @@ jobs:
     secrets: inherit
 
   post-success-to-slack:
-    needs: gradle-build-and-release
+    needs: deploy-tag-gradle
     if: success()
     uses: entur/gha-slack/.github/workflows/post.yml@v2
     with:
       channel_id: ${{ vars.CHANNEL_ID}}
       message: "🟢 Gradle artifact deploy success for ${{ github.repository }}\n ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
     secrets: inherit
+
 
