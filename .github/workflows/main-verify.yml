@@ -1,0 +1,31 @@
+name: Verify main
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  verify-main-gradle:
+    uses: entur/abt-gha-public/.github/workflows/gradle-open-source-verify.yml@v1.0.0
+
+  gradle-build:
+    if: "contains(github.event.head_commit.message, '[skip-release]')"
+    uses: entur/abt-gha-public/.github/workflows/gradle-open-source-verify.yml@openSource
+
+  post-failure-to-slack:
+    needs: verify-main-gradle
+    if: failure()
+    uses: entur/gha-slack/.github/workflows/post.yml@v2
+    with:
+      channel_id: ${{ vars.CHANNEL_ID }}
+      message: "🔴 Gradle build failed for ${{ github.repository }}\n ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+    secrets: inherit
+
+  post-success-to-slack:
+    needs: verify-main-gradle
+    if: success()
+    uses: entur/gha-slack/.github/workflows/post.yml@v2
+    with:
+      channel_id: ${{ vars.CHANNEL_ID}}
+      message: "🟢 Gradle build success for ${{ github.repository }}\n ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+    secrets: inherit
