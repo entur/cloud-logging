@@ -9,7 +9,7 @@ Then import the cloud-logging BOM:
 Add
 
 ```xml
-<cloud-logging.version>2.0.x</cloud-logging>
+<cloud-logging.version>x.y.z</cloud-logging>
 ```
 
 and
@@ -35,7 +35,7 @@ For
 
 ```groovy
 ext {
-   cloudLoggingVersion = '2.0.x'
+   cloudLoggingVersion = 'x.y.z'
 }
 ```
 
@@ -300,6 +300,8 @@ entur.logging.style=humanReadablePlain|humanReadableJson|machineReadableJson
 
 </details>
 
+## Recommended additions
+Add `Prometheus` via [io.micrometer:micrometer-registry-prometheus](https://mvnrepository.com/artifact/io.micrometer/micrometer-registry-prometheus).
 
 ## Troubleshooting
 
