@@ -168,19 +168,6 @@ public class GcpWebOndemandLoggingAutoConfiguration {
 
                     filter.setHttpStatusFailurePredicate(new HttpStatusAtLeastPredicate(equalOrHigherThan));
                 } else if(equalOrHigherThan != -1) {
-
-                    for (Integer integer : notEqualTo) {
-                        if(integer < equalOrHigherThan) {
-                            throw new IllegalStateException("Not-equal-to " + integer + " is already included in higher-or-equal-to " + equalOrHigherThan);
-                        }
-                    }
-
-                    for (Integer integer : equalTo) {
-                        if(integer >= equalOrHigherThan) {
-                            throw new IllegalStateException("Equal-to " + integer + " is already included in higher-or-equal-to " + equalOrHigherThan);
-                        }
-                    }
-
                     LOGGER.info("Configure {} on-demand logging for status codes at least " + equalOrHigherThan + ", excluding " + notEqualTo + " or including " + equalTo + ")", matcher == null ? "default" : matcher);
 
                     filter.setHttpStatusFailurePredicate(new HttpStatusAtLeastOrNotPredicate(statusCode.getEqualOrHigherThan(), equalTo, notEqualTo));
