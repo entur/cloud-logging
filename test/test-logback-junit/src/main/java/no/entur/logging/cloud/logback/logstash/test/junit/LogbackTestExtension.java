@@ -1,7 +1,6 @@
 package no.entur.logging.cloud.logback.logstash.test.junit;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
@@ -21,8 +20,10 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
+import org.slf4j.helpers.SubstituteLogger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +40,7 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 	// Also we do not want multiple appenders if using multiple MDC sources; this avoid wrapping
 	// logging events to get the extra MDC fields just for test support.
 
-	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(LogbackTestExtension.class);
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(LogbackTestExtension.class);
 
 	public static final int toLevelInteger(DevOpsLevel devOpsLevel) {
 		switch(devOpsLevel) {
@@ -111,7 +112,7 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 
 		private Level level;
 
-		private Logger logger;
+		private  ch.qos.logback.classic.Logger logger;
 
 		public Entry(String name, ListAppender appender, Level level) {
 			this.name = name;
@@ -161,7 +162,8 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 		} else {
 			for (Entry entry : entries) {
 				if(entry.logger == null) {
-					entry.logger = (Logger) LoggerFactory.getLogger(entry.name);
+					Logger l = LoggerFactory.getLogger(entry.name);
+					entry.logger = toLogbackLogger(l);
 					entry.logger.addAppender(entry.appender);
 					// if set to false, there is no log output
 					entry.logger.setAdditive(true); // https://examples.javacodegeeks.com/enterprise-java/logback/logback-additivity-example/
@@ -170,6 +172,16 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 				entry.appender.start();
 			}
 		}
+	}
+
+	protected static ch.qos.logback.classic.Logger toLogbackLogger(Logger l) {
+		if(l instanceof ch.qos.logback.classic.Logger s) {
+			return s;
+		}
+		if(l instanceof SubstituteLogger s) {
+			return toLogbackLogger(s.delegate());
+		}
+		throw new IllegalStateException("Expected " + ch.qos.logback.classic.Logger.class.getName() + " logger, got " + l.getClass().getName());
 	}
 
 	@Override
@@ -390,7 +402,7 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 	}
 
 	protected boolean connect() {
-		Logger logger = LOGGER.getLoggerContext().getLogger(Logger.ROOT_LOGGER_NAME);
+		ch.qos.logback.classic.Logger logger = toLogbackLogger(LOGGER).getLoggerContext().getLogger(Logger.ROOT_LOGGER_NAME);
 
 		Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders();
 		while (appenderIterator.hasNext()) {
@@ -405,7 +417,7 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 	}
 
 	protected void disconnect() {
-		Logger logger = LOGGER.getLoggerContext().getLogger(Logger.ROOT_LOGGER_NAME);
+		ch.qos.logback.classic.Logger logger = toLogbackLogger(LOGGER).getLoggerContext().getLogger(Logger.ROOT_LOGGER_NAME);
 
 		Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders();
 		while (appenderIterator.hasNext()) {
@@ -418,7 +430,7 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 
 
 	protected CompositeJsonEncoder getEncoder() {
-		Logger logger = LOGGER.getLoggerContext().getLogger(Logger.ROOT_LOGGER_NAME);
+		ch.qos.logback.classic.Logger logger = toLogbackLogger(LOGGER).getLoggerContext().getLogger(Logger.ROOT_LOGGER_NAME);
 
 		CompositeJsonEncoder compositeJsonEncoder = searchMachineReadableJsonEncoder(logger.iteratorForAppenders());
 		if(compositeJsonEncoder != null) {
