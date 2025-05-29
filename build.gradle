@@ -52,7 +52,7 @@ configure(jvmProjects()) {
         logbackLogstashVersion = '8.0'
         slf4jVersion = '2.0.17'
         googleTruthVersion = '1.4.4'
-        logbackVersion = '1.5.16'
+        logbackVersion = '1.5.18'
         jacksonVersion = '2.19.0'
         jacksonDatabindVersion = '2.18.3'
         nettyTcnativeBoringsslStaticVersion = '2.0.70.Final'
