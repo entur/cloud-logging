@@ -47,18 +47,18 @@ configure(jvmProjects()) {
     apply plugin: 'com.github.ben-manes.versions'
 
     ext {
-        junitJupiterVersion = '5.11.4'
-        mockitoVersion = '5.17.0'
-        logbackLogstashVersion = '8.0'
+        junitJupiterVersion = '5.13.1'
+        mockitoVersion = '5.18.0'
+        logbackLogstashVersion = '8.1'
         slf4jVersion = '2.0.17'
         googleTruthVersion = '1.4.4'
         logbackVersion = '1.5.18'
         jacksonVersion = '2.19.0'
-        jacksonDatabindVersion = '2.18.3'
-        nettyTcnativeBoringsslStaticVersion = '2.0.70.Final'
+        jacksonDatabindVersion = '2.19.0'
+        nettyTcnativeBoringsslStaticVersion = '2.0.72.Final'
         nettyVersion = '4.1.119.Final'
-        micrometerVersion = '1.14.4'
-        springBootVersion = '3.4.3' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
+        micrometerVersion = '1.15.0'
+        springBootVersion = '3.5.0' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
         janinoVersion = '3.1.12'
         servletVersion = '6.0.0' // jakarta
         logbookVersion = '3.12.1'
@@ -68,10 +68,10 @@ configure(jvmProjects()) {
         commonsTextVersion = '1.13.1'
         annotationApiVersion = '2.1.1'
 
-        grpcNettyVersion = '1.70.0'
+        grpcNettyVersion = '1.73.0'
         grpcVersion = '1.73.0'
-        grpcCommonsVersion = '2.57.0'
-        grpcProtobufVersion = '3.25.5'
+        grpcCommonsVersion = '2.58.0'
+        grpcProtobufVersion = '3.25.8'
         ecosystemGrpcVersion = '3.1.0.RELEASE'
 
         jsonAssertVersion = '0.8.0'
