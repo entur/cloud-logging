@@ -254,8 +254,8 @@ abstract class ProtobufAlignmentRule implements ComponentMetadataRule {
 }
 
 task clean {
-    project.delete(files(getBuildDir()) {
-    })
+    //project.delete(files(getBuildDir()) {
+    //})
 }
 
 apply plugin: 'org.jreleaser'
