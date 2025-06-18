@@ -157,7 +157,7 @@ configure(libraryProjects()) {
 
         repositories {
             maven {
-                url = layout.buildDirectory.dir('staging-deploy')
+                url = "${rootDir}/build/staging-deploy"
             }
         }
     }
