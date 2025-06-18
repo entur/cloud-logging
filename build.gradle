@@ -3,7 +3,7 @@ plugins {
     id 'com.github.ben-manes.versions' version '0.51.0' apply false
     id 'org.owasp.dependencycheck' version '12.1.1' apply false
     id "org.sonarqube" version "6.2.0.5505"
-    id('io.github.gradle-nexus.publish-plugin') version '1.3.0'
+    id 'org.jreleaser' version '1.18.0' apply false
 }
 
 // Split projects into buildable: examples and libraries. 
@@ -106,7 +106,7 @@ configure(jvmProjects()) {
 // projects which should be published
 configure(libraryProjects()) {
     apply plugin: 'maven-publish'
-    apply plugin: 'signing'
+    apply plugin: 'org.jreleaser'
 
     java {
         withSourcesJar()
@@ -156,21 +156,47 @@ configure(libraryProjects()) {
             }
         }
 
-        if(project.hasProperty("signing.gnupg.keyName")) {
-            signing {
-                useGpgCmd()
-
-                // set
-                // signing.gnupg.keyName=xxx
-                // signing.gnupg.passphrase=yyy
-                // via command line or global gradle properties
-                // then run
-                // w17 build publishToSonatype --info --stacktrace
-
-                sign(publishing.publications)
+        repositories {
+            maven {
+                url = layout.buildDirectory.dir('staging-deploy')
             }
         }
+    }
 
+    jreleaser {
+        signing {
+            active = 'ALWAYS'
+            armored = true
+        }
+        deploy {
+            maven {
+                mavenCentral {
+                    release {
+                        active = 'RELEASE'
+                        url = 'https://central.sonatype.com/api/v1/publisher'
+                        stagingRepository('build/staging-deploy')
+                    }
+                }
+                nexus2 {
+                    snapshot {
+                        active = 'SNAPSHOT'
+                        applyMavenCentralRules = true
+                        snapshotSupported = true
+                        closeRepository = true
+                        releaseRepository = true
+                        url = "https://ossrh-staging-api.central.sonatype.com/service/local"
+                        snapshotUrl = 'https://central.sonatype.com/repository/maven-snapshots/'
+                        stagingRepository('build/staging-deploy')
+                    }
+                }
+            }
+        }
+        release {
+            github {
+                skipTag = false // Skip creating a new github tag?
+                skipRelease = true // Skip creating a new github release?
+            }
+        }
     }
 
 }
@@ -260,14 +286,6 @@ abstract class ProtobufAlignmentRule implements ComponentMetadataRule {
         }
     }
 }
-
-nexusPublishing {
-    repositories {
-        sonatype {
-        }
-    }
-}
-
 
 
 
