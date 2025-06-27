@@ -198,7 +198,9 @@ public class GrpcLoggingClientInterceptor implements ClientInterceptor {
 									log.info("Cannot format protobuf response message", e);
 								}
 
-								GrpcResponse responseMessage = new GrpcResponse(responseHeaders, remoteAddress, path, body, "remote", count, Status.Code.OK);
+								long duration = System.currentTimeMillis() - timestamp;
+
+								GrpcResponse responseMessage = new GrpcResponse(responseHeaders, remoteAddress, path, body, "remote", count, Status.Code.OK, duration);
 
 								sink.responseMessage(responseMessage);
 							} else if (filter.isDisconnect()) {
@@ -229,7 +231,9 @@ public class GrpcLoggingClientInterceptor implements ClientInterceptor {
 									Map<String, Object> headers = toHeaders(status, trailers, filter.getResponseMetadataFilter());
 									int count = responseCounter.incrementAndGet();
 
-									GrpcResponse responseMessage = new GrpcResponse(headers, remoteAddress, path, null, "remote", count, status.getCode());
+									long duration = System.currentTimeMillis() - timestamp;
+
+									GrpcResponse responseMessage = new GrpcResponse(headers, remoteAddress, path, null, "remote", count, status.getCode(), duration);
 
 									sink.responseMessage(responseMessage);
 								}

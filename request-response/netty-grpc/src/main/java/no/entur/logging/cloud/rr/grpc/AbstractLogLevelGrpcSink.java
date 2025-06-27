@@ -35,6 +35,10 @@ public abstract class AbstractLogLevelGrpcSink implements GrpcSink {
         messageBuilder.append(response.getUri());
         messageBuilder.append(" #");
         messageBuilder.append(response.getNumber());
+        messageBuilder.append(" in ");
+        messageBuilder.append(response.getDuration());
+        messageBuilder.append("ms");
+
     }
 
     protected void connectMessage(GrpcConnect request, StringBuilder messageBuilder) {
