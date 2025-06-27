@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '3.5.0'
+    id 'org.springframework.boot' version '3.5.3'
     id "com.google.protobuf" version "0.9.5"
 }
 
@@ -31,9 +31,8 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 
-    // JUnit Jupiter API and TestEngine implementation
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+    // added due to grpc plugin dependency resolution problem
+    testImplementation "org.junit.platform:junit-platform-launcher:1${junitJupiterVersion.substring(1)}"
 
     testImplementation ("com.google.truth:truth:${googleTruthVersion}")
     testImplementation ("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")

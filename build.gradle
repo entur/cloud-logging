@@ -53,12 +53,12 @@ configure(jvmProjects()) {
         slf4jVersion = '2.0.17'
         googleTruthVersion = '1.4.4'
         logbackVersion = '1.5.18'
-        jacksonVersion = '2.19.0'
+        jacksonVersion = '2.19.1'
         jacksonDatabindVersion = '2.19.1'
         nettyTcnativeBoringsslStaticVersion = '2.0.72.Final'
-        nettyVersion = '4.2.2.Final'
-        micrometerVersion = '1.15.0'
-        springBootVersion = '3.5.0' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
+        nettyVersion = '4.1.122.Final'
+        micrometerVersion = '1.15.1'
+        springBootVersion = '3.5.3' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
         janinoVersion = '3.1.12'
         servletVersion = '6.0.0' // jakarta
         logbookVersion = '3.12.1'
@@ -70,7 +70,7 @@ configure(jvmProjects()) {
 
         grpcNettyVersion = '1.73.0'
         grpcVersion = '1.73.0'
-        grpcCommonsVersion = '2.58.0'
+        grpcCommonsVersion = '2.59.0'
         grpcProtobufVersion = '3.25.8'
         ecosystemGrpcVersion = '3.1.0.RELEASE'
 
@@ -89,6 +89,7 @@ configure(jvmProjects()) {
         components.all(LogbackAlignmentRule)
         components.all(GrpcAlignmentRule)
         components.all(ProtobufAlignmentRule)
+        components.all(JunitAlignmentRule)
 
         // JUnit Jupiter API and TestEngine implementation
         testImplementation("org.junit.jupiter:junit-jupiter:${junitJupiterVersion}")
@@ -252,6 +253,18 @@ abstract class ProtobufAlignmentRule implements ComponentMetadataRule {
         }
     }
 }
+
+abstract class JunitAlignmentRule implements ComponentMetadataRule {
+    void execute(ComponentMetadataContext ctx) {
+        ctx.details.with {
+            if (id.group.startsWith("org.junit.jupiter ")) {
+                belongsTo("org.junit.jupiter:junit-virtual-platform:${id.version}")
+            }
+        }
+    }
+}
+
+
 
 task clean {
     //project.delete(files(getBuildDir()) {

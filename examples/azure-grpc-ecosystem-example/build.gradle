@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '3.5.0'
+    id 'org.springframework.boot' version '3.5.3'
     id "com.google.protobuf" version "0.9.5"
 }
 
@@ -28,17 +28,17 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter:${springBootVersion}")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
 
+    // added due to grpc plugin dependency resolution problem
+    testImplementation "org.junit.platform:junit-platform-launcher:1${junitJupiterVersion.substring(1)}"
+
     testImplementation project(":azure:spring-boot-starter-azure-grpc-ecosystem-test")
     testImplementation project(':azure:request-response-spring-boot-starter-azure-grpc-ecosystem-test')
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 
-    // JUnit Jupiter API and TestEngine implementation
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
-
     testImplementation project(":test:test-logback-junit")
     testImplementation ("com.google.truth:truth:${googleTruthVersion}")
     testImplementation ("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
+
 }
 
 sourceSets {
