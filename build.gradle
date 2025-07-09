@@ -124,7 +124,6 @@ configure(libraryProjects()) {
 
                 groupId = "$group"
                 artifactId = project.name
-                version = project.hasProperty('version') ? "$version" : "0.0.0-SNAPSHOT"
 
                 if(project.ext.has('artifactId')) {
                     System.out.println("Publishing " + project.name + " with artifact-id " + project.ext.artifactId)

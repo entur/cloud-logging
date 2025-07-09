@@ -1,6 +1,5 @@
 apply plugin: 'java-platform'
 apply plugin: 'maven-publish'
-apply plugin: 'signing'
 
 dependencies {
     constraints {
@@ -19,7 +18,6 @@ publishing {
 
             groupId = "$group"
             artifactId = project.name
-            version = "$version"
 
             pom {
                 name = project.name
@@ -50,18 +48,9 @@ publishing {
         }
     }
 
-    if (project.hasProperty("signing.gnupg.keyName")) {
-        signing {
-            useGpgCmd()
-
-            // set
-            // signing.gnupg.keyName=xxx
-            // signing.gnupg.passphrase=yyy
-            // via command line or global gradle properties
-            // then run
-            // w17 build publishToSonatype --info --stacktrace
-
-            sign(publishing.publications)
+    repositories {
+        maven {
+            url = stagingRepositoryPath
         }
     }
 
