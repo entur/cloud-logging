@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Configuration;
 public class GcpGrpcTraceAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingClass("io.opentelemetry.api.OpenTelemetry")
     @ConditionalOnBean(OrderedCorrelationIdGrpcMdcContextServerInterceptor.class)
     @ConditionalOnMissingBean(OrderedTraceIdGrpcMdcContextServerInterceptor.class)
     public OrderedTraceIdGrpcMdcContextServerInterceptor orderedTraceIdGrpcMdcContextServerInterceptor(OrderedCorrelationIdGrpcMdcContextServerInterceptor interceptor) {

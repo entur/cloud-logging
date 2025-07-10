@@ -38,9 +38,11 @@ public class OrderedTraceIdGrpcMdcContextServerInterceptor implements ServerInte
         if(grpcMdcContext == null) {
             return next.startCall(call, headers);
         }
-        String correlationId = grpcMdcContext.get(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY);
 
+        // this interceptor runs after the CorrelationId interceptor, so there should always be a value here
         if(!grpcMdcContext.containsKey(TRACE_MDC_KEY)) {
+            String correlationId = grpcMdcContext.get(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY);
+
             grpcMdcContext.put(TRACE_MDC_KEY, correlationId);
         }
 
