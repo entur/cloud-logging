@@ -122,3 +122,5 @@ Desktop.ini
 .merge_file*
 /.gradle/
 /build/
+
+.profileconfig.json

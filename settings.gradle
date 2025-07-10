@@ -16,6 +16,7 @@ include 'gcp:logback-logstash-encoder-gcp', 'gcp:spring-boot-autoconfigure-gcp',
 include 'gcp:spring-boot-starter-gcp-web', 'gcp:spring-boot-starter-gcp-web-test', 'gcp:spring-boot-starter-gcp-grpc-ecosystem-test', 'gcp:spring-boot-starter-gcp-grpc-ecosystem'
 include 'gcp:spring-boot-autoconfigure-gcp-test', 'gcp:request-response-spring-boot-starter-gcp-web', 'gcp:request-response-spring-boot-starter-gcp-web-test'
 include 'gcp:request-response-spring-boot-starter-gcp-grpc-ecosystem', 'gcp:request-response-spring-boot-starter-gcp-grpc-ecosystem-test'
+include 'gcp:correlation-id-trace-spring-boot-gcp-grpc'
 
 include 'gcp:micrometer-gcp'
 include 'gcp:logbook-spring-boot-autoconfigure-gcp'
