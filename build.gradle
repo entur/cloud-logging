@@ -62,7 +62,7 @@ configure(jvmProjects()) {
         janinoVersion = '3.1.12'
         servletVersion = '6.0.0' // jakarta
         logbookVersion = '3.12.2'
-        jacksonSyntaxHighlightVersion = '1.1.0'
+        jacksonSyntaxHighlightVersion = '1.1.1'
         logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.1.0'
         commonsIoVersion = '2.19.0'
         commonsTextVersion = '1.13.1'
