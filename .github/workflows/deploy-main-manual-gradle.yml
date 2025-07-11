@@ -13,12 +13,11 @@ on:
 
 jobs:
   deploy-tag-gradle:
-    uses: entur/gha-maven-central/.github/workflows/gradle-publish.yml@v1.2.1
+    uses: entur/gha-maven-central/.github/workflows/gradle-publish.yml@v1
     secrets: inherit
     with:
       next_version: ${{ inputs.version-increment }}
       version_strategy: tag
-      version_tag_prefix: release-
 
   post-failure-to-slack:
     needs: deploy-tag-gradle
