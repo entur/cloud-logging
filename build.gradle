@@ -70,7 +70,7 @@ configure(jvmProjects()) {
 
         grpcNettyVersion = '1.73.0'
         grpcVersion = '1.73.0'
-        grpcCommonsVersion = '2.59.0'
+        grpcCommonsVersion = '2.59.1'
         grpcProtobufVersion = '3.25.8'
         ecosystemGrpcVersion = '3.1.0.RELEASE'
 
