@@ -64,7 +64,7 @@ configure(jvmProjects()) {
         logbookVersion = '3.12.2'
         jacksonSyntaxHighlightVersion = '1.1.1'
         logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.1.0'
-        commonsIoVersion = '2.19.0'
+        commonsIoVersion = '2.20.0'
         commonsTextVersion = '1.13.1'
         annotationApiVersion = '2.1.1'
 
