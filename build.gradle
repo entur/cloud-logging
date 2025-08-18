@@ -57,7 +57,7 @@ configure(jvmProjects()) {
         jacksonDatabindVersion = '2.19.2'
         nettyTcnativeBoringsslStaticVersion = '2.0.72.Final'
         nettyVersion = '4.1.124.Final'
-        micrometerVersion = '1.15.1'
+        micrometerVersion = '1.15.3'
         springBootVersion = '3.5.4' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
         janinoVersion = '3.1.12'
         servletVersion = '6.0.0' // jakarta
