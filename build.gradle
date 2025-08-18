@@ -1,6 +1,6 @@
 
 plugins {
-    id 'com.github.ben-manes.versions' version '0.52.0' apply false
+    id 'com.github.ben-manes.versions' version '0.52.0' apply false // ./gradlew dependencyUpdates
     id 'org.owasp.dependencycheck' version '12.1.3' apply false
     id "org.sonarqube" version "6.2.0.5505"
     id 'org.jreleaser' version '1.19.0' apply false
@@ -48,29 +48,29 @@ configure(jvmProjects()) {
 
     ext {
         junitJupiterVersion = '5.12.2'
-        mockitoVersion = '5.18.0'
+        mockitoVersion = '5.19.0'
         logbackLogstashVersion = '8.1'
         slf4jVersion = '2.0.17'
         googleTruthVersion = '1.4.4'
         logbackVersion = '1.5.18'
-        jacksonVersion = '2.19.1'
-        jacksonDatabindVersion = '2.19.1'
+        jacksonVersion = '2.19.2'
+        jacksonDatabindVersion = '2.19.2'
         nettyTcnativeBoringsslStaticVersion = '2.0.72.Final'
-        nettyVersion = '4.1.122.Final'
+        nettyVersion = '4.1.124.Final'
         micrometerVersion = '1.15.1'
-        springBootVersion = '3.5.3' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
+        springBootVersion = '3.5.4' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
         janinoVersion = '3.1.12'
         servletVersion = '6.0.0' // jakarta
         logbookVersion = '3.12.2'
         jacksonSyntaxHighlightVersion = '1.1.1'
-        logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.1.0'
+        logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.1.1'
         commonsIoVersion = '2.20.0'
         commonsTextVersion = '1.13.1'
         annotationApiVersion = '2.1.1'
 
-        grpcNettyVersion = '1.73.0'
-        grpcVersion = '1.73.0'
-        grpcCommonsVersion = '2.59.1'
+        grpcNettyVersion = '1.74.0'
+        grpcVersion = '1.74.0'
+        grpcCommonsVersion = '2.60.0'
         grpcProtobufVersion = '3.25.8'
         ecosystemGrpcVersion = '3.1.0.RELEASE'
 
@@ -102,6 +102,18 @@ configure(jvmProjects()) {
         testImplementation("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
     }
 
+    // from https://github.com/ben-manes/gradle-versions-plugin?tab=readme-ov-file#rejectversionsif-and-componentselection
+    def isNonStable = { String version ->
+        def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { ita -> version.toUpperCase().contains(ita) }
+        def regex = /^[0-9,.v-]+(-r)?$/
+        return !stableKeyword && !(version ==~ regex)
+    }
+
+    tasks.named("dependencyUpdates").configure {
+        rejectVersionIf {
+            isNonStable(it.candidate.version)
+        }
+    }
 }
 
 ext.stagingRepositoryPath = "${rootDir.getCanonicalFile()}/build/staging-deploy"
@@ -205,6 +217,7 @@ allprojects {
         mavenLocal()
         mavenCentral()
     }
+
 }
 
 gradle.projectsEvaluated {
@@ -307,4 +320,3 @@ jreleaser {
         }
     }
 }
-
