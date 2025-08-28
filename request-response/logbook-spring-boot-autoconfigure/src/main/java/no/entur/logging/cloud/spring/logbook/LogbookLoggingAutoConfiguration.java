@@ -4,12 +4,15 @@ import no.entur.logging.cloud.logbook.DefaultRemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupplierSource;
 import no.entur.logging.cloud.logbook.ondemand.state.ResponseHttpMessageStateSupplierSource;
+import no.entur.logging.cloud.spring.logbook.properties.FormatProperties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.zalando.logbook.Sink;
@@ -20,6 +23,7 @@ import org.zalando.logbook.autoconfigure.LogbookAutoConfiguration;
 })
 
 @Configuration
+@EnableConfigurationProperties(value = { FormatProperties.class })
 public class LogbookLoggingAutoConfiguration extends AbstractLogbookLoggingAutoConfiguration {
 
     @Bean
@@ -31,12 +35,16 @@ public class LogbookLoggingAutoConfiguration extends AbstractLogbookLoggingAutoC
 
     @Bean
     @ConditionalOnMissingBean(Sink.class)
-    @ConditionalOnBean({RequestHttpMessageStateSupplierSource.class, ResponseHttpMessageStateSupplierSource.class, RemoteHttpMessageContextSupplier.class})
-    public Sink asyncSink(RequestHttpMessageStateSupplierSource requestHttpMessageStateSupplierSource, ResponseHttpMessageStateSupplierSource responseHttpMessageStateSupplierSource, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
+    @ConditionalOnBean({ RequestHttpMessageStateSupplierSource.class, ResponseHttpMessageStateSupplierSource.class,
+            RemoteHttpMessageContextSupplier.class })
+    public Sink asyncSink(RequestHttpMessageStateSupplierSource requestHttpMessageStateSupplierSource,
+            ResponseHttpMessageStateSupplierSource responseHttpMessageStateSupplierSource,
+            RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
 
-        return createAsyncMachineReadableSink(logger, level, requestHttpMessageStateSupplierSource, responseHttpMessageStateSupplierSource, remoteHttpMessageContextSupplier);
+        return createAsyncMachineReadableSink(logger, level, requestHttpMessageStateSupplierSource,
+                responseHttpMessageStateSupplierSource, remoteHttpMessageContextSupplier);
     }
 
     // ignore HttpLogFormatter and HttpLogWriter

@@ -9,6 +9,8 @@ import org.entur.jackson.jsh.SyntaxHighlighter;
 import org.entur.jackson.jsh.SyntaxHighlightingJsonGenerator;
 import no.entur.logging.cloud.logbook.AbstractLogLevelSink;
 import no.entur.logging.cloud.logbook.AbstractSinkBuilder;
+import no.entur.logging.cloud.logbook.MessageComposer;
+
 import org.slf4j.Marker;
 import org.zalando.logbook.ContentType;
 import org.zalando.logbook.Correlation;
@@ -36,31 +38,43 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
         }
 
         public PrettyPrintingSink build() {
-            if(logger == null) {
+            if (logger == null) {
                 throw new IllegalStateException("Expected logger");
             }
-            if(level == null) {
+            if (level == null) {
                 throw new IllegalStateException("Expected log level");
             }
-            if(syntaxHighlighter == null) {
+            if (syntaxHighlighter == null) {
                 throw new IllegalStateException("Expected Json syntax highlighter level");
             }
-            if(jsonFactory == null) {
+            if (jsonFactory == null) {
                 jsonFactory = new JsonFactory();
             }
+            if (server == null) {
+                throw new IllegalStateException("Expected message composer for server");
+            }
+            if (client == null) {
+                throw new IllegalStateException("Expected message composer for client");
+            }
 
-            // TODO what about max size here? Max size is really a function of the logging backend, but getting the same during testing as in production makes most sense
+            // TODO what about max size here? Max size is really a function of the logging
+            // backend, but getting the same during testing as in production makes most
+            // sense
 
-            return new PrettyPrintingSink(logEnabledToBooleanSupplier(), loggerToBiConsumer(), jsonFactory, syntaxHighlighter);
+            return new PrettyPrintingSink(logEnabledToBooleanSupplier(), loggerToBiConsumer(), jsonFactory,
+                    syntaxHighlighter, server, client);
         }
 
     }
+
     protected final JsonFactory jsonFactory;
 
     protected final SyntaxHighlighter syntaxHighlighter;
 
-    public PrettyPrintingSink(BooleanSupplier logLevelEnabled, BiConsumer<Marker, String> logConsumer, JsonFactory jsonFactory, SyntaxHighlighter syntaxHighlighter) {
-        super(logLevelEnabled, logConsumer);
+    public PrettyPrintingSink(BooleanSupplier logLevelEnabled, BiConsumer<Marker, String> logConsumer,
+            JsonFactory jsonFactory, SyntaxHighlighter syntaxHighlighter, MessageComposer server,
+            MessageComposer client) {
+        super(logLevelEnabled, logConsumer, server, client);
         this.jsonFactory = jsonFactory;
         this.syntaxHighlighter = syntaxHighlighter;
     }
@@ -76,14 +90,15 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
         boolean isJson = ContentType.isJsonMediaType(contentType);
         boolean isXml = isXmlMediaType(contentType);
 
-        if(isJson || isXml) {
+        if (isJson || isXml) {
             final String body = request.getBodyAsString();
             writeBody(body, contentType, messageBuilder);
         }
     }
 
     @Override
-    protected void responseMessage(Correlation correlation, HttpRequest request, HttpResponse response, StringBuilder messageBuilder) throws IOException {
+    protected void responseMessage(Correlation correlation, HttpRequest request, HttpResponse response,
+            StringBuilder messageBuilder) throws IOException {
         super.responseMessage(correlation, request, response, messageBuilder);
 
         messageBuilder.append('\n');
@@ -93,7 +108,7 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
         boolean isJson = ContentType.isJsonMediaType(contentType);
         boolean isXml = isXmlMediaType(contentType);
 
-        if(isJson || isXml) {
+        if (isJson || isXml) {
             final String body = response.getBodyAsString();
             writeBody(body, contentType, messageBuilder);
         }
@@ -131,7 +146,7 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
             output.append('\n');
 
             boolean isJson = ContentType.isJsonMediaType(contentType);
-            if(isJson) {
+            if (isJson) {
                 output.append(prettyPrint(body));
             } else {
                 output.append(body);
@@ -145,11 +160,10 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
 
         if (body != null && body.length() > 0) {
             try (
-                JsonParser parser = jsonFactory.createParser(body);
-                StringWriter writer = new StringWriter(body.length() * 2);
-                JsonGenerator generator = jsonFactory.createGenerator(writer);
-            ) {
-                JsonGenerator jsonGenerator = new SyntaxHighlightingJsonGenerator(generator, syntaxHighlighter,true);
+                    JsonParser parser = jsonFactory.createParser(body);
+                    StringWriter writer = new StringWriter(body.length() * 2);
+                    JsonGenerator generator = jsonFactory.createGenerator(writer);) {
+                JsonGenerator jsonGenerator = new SyntaxHighlightingJsonGenerator(generator, syntaxHighlighter, true);
                 while (parser.nextToken() != null) {
                     jsonGenerator.copyCurrentEvent(parser);
                 }
