@@ -23,7 +23,7 @@ public class MessageComposer {
         this.query = query;
     }
 
-    private static boolean isNotStandardPort(final String scheme, final int port) {
+    static boolean isNotStandardPort(final String scheme, final int port) {
         return ("http".equals(scheme) && port != 80) ||
                 ("https".equals(scheme) && port != 443);
     }
