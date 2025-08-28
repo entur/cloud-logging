@@ -7,6 +7,12 @@ import java.io.IOException;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
+/**
+ *
+ * Request-response log message composer.
+ *
+ */
+
 public class MessageComposer {
 
     protected boolean scheme;

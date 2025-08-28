@@ -17,9 +17,9 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = {
-        "entur.logging.request-response.format.server.scheme=false",
-        "entur.logging.request-response.format.server.host=false",
-        "entur.logging.request-response.format.server.port=false"
+        "entur.logging.request-response.format.server.message.scheme=false",
+        "entur.logging.request-response.format.server.message.host=false",
+        "entur.logging.request-response.format.server.message.port=false"
 })
 public class WebLoggingMessageFormatTest {
 

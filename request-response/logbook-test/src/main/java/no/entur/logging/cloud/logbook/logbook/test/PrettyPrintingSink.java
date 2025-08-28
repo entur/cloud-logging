@@ -50,11 +50,11 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
             if (jsonFactory == null) {
                 jsonFactory = new JsonFactory();
             }
-            if (server == null) {
-                throw new IllegalStateException("MessageComposer for server messages is required but was not provided");
-            }
             if (client == null) {
-                throw new IllegalStateException("MessageComposer for client messages is required but was not provided");
+                throw new IllegalStateException("Expected client message composer");
+            }
+            if (server == null) {
+                throw new IllegalStateException("Expected server message composer");
             }
 
             // TODO what about max size here? Max size is really a function of the logging

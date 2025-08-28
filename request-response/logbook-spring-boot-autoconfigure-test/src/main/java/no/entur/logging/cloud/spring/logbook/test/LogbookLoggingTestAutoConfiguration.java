@@ -58,7 +58,7 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
                 .withMaxSize(getMaxSize())
                 .withSyntaxHighlighter(highlighter)
                 .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
-                .withMessageComposers(format.getServer().toComposer(), format.getClient().toComposer())
+                .withMessageComposers(format.getServer().getMessage().toComposer(), format.getClient().getMessage().toComposer())
                 .build();
 
         Sink humanReadableJsonSink = PrettyPrintingOndemandLogLevelLogstashLogbackSink.newBuilder()
@@ -69,7 +69,7 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
                 .withValidateRequestJsonBodyWellformed(requestHttpMessageStateSupplierSource)
                 .withValidateResponseJsonBodyWellformed(responseHttpMessageStateSupplierSource)
                 .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
-                .withMessageComposers(format.getServer().toComposer(), format.getClient().toComposer())
+                .withMessageComposers(format.getServer().getMessage().toComposer(), format.getClient().getMessage().toComposer())
                 .build();
 
         return CompositeSink.newBuilder()
@@ -102,7 +102,7 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
                 .withMaxSize(getMaxSize())
                 .withSyntaxHighlighter(highlighter)
                 .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
-                .withMessageComposers(format.getServer().toComposer(), format.getClient().toComposer())
+                .withMessageComposers(format.getServer().getMessage().toComposer(), format.getClient().getMessage().toComposer())
                 .build();
 
         Sink humanReadableJsonSink = PrettyPrintingLogLevelLogstashLogbackSink.newBuilder()
@@ -111,7 +111,7 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
                 .withMaxBodySize(getMaxBodySize())
                 .withMaxSize(getMaxSize())
                 .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
-                .withMessageComposers(format.getServer().toComposer(), format.getClient().toComposer())
+                .withMessageComposers(format.getServer().getMessage().toComposer(), format.getClient().getMessage().toComposer())
                 .build();
 
         return CompositeSink.newBuilder()

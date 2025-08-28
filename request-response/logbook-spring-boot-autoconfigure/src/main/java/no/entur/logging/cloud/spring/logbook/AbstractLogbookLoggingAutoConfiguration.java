@@ -55,7 +55,7 @@ public class AbstractLogbookLoggingAutoConfiguration {
                 .withMaxBodySize(getMaxBodySize())
                 .withMaxSize(getMaxSize())
                 .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
-                .withMessageComposers(format.getServer().toComposer(), format.getClient().toComposer())
+                .withMessageComposers(format.getServer().getMessage().toComposer(), format.getClient().getMessage().toComposer())
                 .build();
     }
 
@@ -71,7 +71,7 @@ public class AbstractLogbookLoggingAutoConfiguration {
                 .withValidateRequestJsonBodyWellformed(validateRequestJsonBodyWellformed)
                 .withValidateResponseJsonBodyWellformed(validateResponseJsonBodyWellformed)
                 .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
-                .withMessageComposers(format.getServer().toComposer(), format.getClient().toComposer())
+                .withMessageComposers(format.getServer().getMessage().toComposer(), format.getClient().getMessage().toComposer())
                 .build();
     }
 

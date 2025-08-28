@@ -48,6 +48,12 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
             if (level == null) {
                 throw new IllegalStateException("Expected log level");
             }
+            if (client == null) {
+                throw new IllegalStateException("Expected client message composer");
+            }
+            if (server == null) {
+                throw new IllegalStateException("Expected server message composer");
+            }
             if (jsonFactory == null) {
                 jsonFactory = new JsonFactory();
             }

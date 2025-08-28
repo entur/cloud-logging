@@ -4,22 +4,22 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "entur.logging.request-response.format")
 public class FormatProperties {
-	private MessageProperties server = new MessageProperties();
-	private MessageProperties client = new MessageProperties();
+	private ServerFormatProperties server = new ServerFormatProperties();
+	private ClientFormatProperties client = new ClientFormatProperties();
 
-	public MessageProperties getServer() {
+	public ServerFormatProperties getServer() {
 		return server;
 	}
 
-	public void setServer(MessageProperties server) {
+	public void setServer(ServerFormatProperties server) {
 		this.server = server;
 	}
 
-	public MessageProperties getClient() {
+	public ClientFormatProperties getClient() {
 		return client;
 	}
 
-	public void setClient(MessageProperties client) {
+	public void setClient(ClientFormatProperties client) {
 		this.client = client;
 	}
 }

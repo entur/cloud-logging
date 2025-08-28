@@ -2,11 +2,17 @@ package no.entur.logging.cloud.spring.logbook.properties;
 
 import no.entur.logging.cloud.logbook.MessageComposer;
 
-public class MessageProperties {
+public class MessageFormatProperties {
+
+    /** Include URI protocol / scheme */
     protected boolean scheme = true;
+    /** Include URI host */
     protected boolean host = true;
+    /** Include URI port */
     protected boolean port = true;
+    /** Include URI path */
     protected boolean path = true;
+    /** Include URI query */
     protected boolean query = true;
 
     public boolean isScheme() {
