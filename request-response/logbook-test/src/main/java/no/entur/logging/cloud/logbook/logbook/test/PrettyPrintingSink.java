@@ -50,8 +50,10 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
             if (jsonFactory == null) {
                 jsonFactory = new JsonFactory();
             }
+            if (server == null) {
                 throw new IllegalStateException("MessageComposer for server messages is required but was not provided");
             }
+            if (client == null) {
                 throw new IllegalStateException("MessageComposer for client messages is required but was not provided");
             }
 
