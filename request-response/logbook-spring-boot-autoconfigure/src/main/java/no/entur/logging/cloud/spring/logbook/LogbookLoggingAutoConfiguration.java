@@ -27,7 +27,7 @@ import java.util.List;
 })
 
 @Configuration
-@EnableConfigurationProperties(LogbookProperties.class)
+@EnableConfigurationProperties(value = { FormatProperties.class, LogbookProperties.class})
 public class LogbookLoggingAutoConfiguration extends AbstractLogbookLoggingAutoConfiguration {
 
     public LogbookLoggingAutoConfiguration(LogbookProperties properties, @Value("${entur.logging.request-response.logbook.default-excludes:true}") boolean defaultExcludes) {
