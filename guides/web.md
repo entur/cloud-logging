@@ -155,6 +155,64 @@ logbook:
 
 See [Logbook](https://github.com/zalando/logbook) for additional configuration options.
 
+#### Simplify request-response message
+By default the protocol + host is included in the request-response message: 
+
+```
+GET https://may.app.host/v1/ticket-distribution-groups?orderId=eq%3AG3TUR9&page=1
+...
+200 OK https://may.app.host/v1/ticket-distribution-groups?orderId=eq%3AG3HUR9&page=1 (in 50 ms)
+```
+
+this can be simplified to
+
+```
+GET /v1/ticket-distribution-groups
+...
+200 GET /v1/ticket-distribution-groups (in 50 ms)
+```
+
+<details>
+  <summary>using some additional configuration.</summary>
+
+Incoming calls:
+
+```yml
+entur:
+  logging:
+    request-response:
+      format:
+        server:
+          message:
+            scheme: false
+            host: false
+            port: false
+            path: false
+            query: false
+```
+
+and/or for outgoing calls:
+
+```yml
+entur:
+  logging:
+    request-response:
+      format:
+        client:
+          message:
+            scheme: false
+            host: false
+            port: false
+            path: false
+            query: false
+```
+
+</details>
+
+
+
+
+
 ### On-demand logging
 This feature adjusts the log level for individual web server requests, taking into account actual behaviour. 
 

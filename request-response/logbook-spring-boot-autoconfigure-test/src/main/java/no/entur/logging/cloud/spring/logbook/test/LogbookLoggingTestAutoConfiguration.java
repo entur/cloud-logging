@@ -1,6 +1,5 @@
 package no.entur.logging.cloud.spring.logbook.test;
 
-
 import org.entur.jackson.jsh.AnsiSyntaxHighlight;
 import org.entur.jackson.jsh.DefaultSyntaxHighlighter;
 import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
@@ -33,12 +32,16 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
 
     @Bean
     @ConditionalOnMissingBean(Sink.class)
-    @ConditionalOnBean({RequestHttpMessageStateSupplierSource.class, ResponseHttpMessageStateSupplierSource.class, RemoteHttpMessageContextSupplier.class})
-    public Sink asyncSink(RequestHttpMessageStateSupplierSource requestHttpMessageStateSupplierSource, ResponseHttpMessageStateSupplierSource responseHttpMessageStateSupplierSource, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
+    @ConditionalOnBean({ RequestHttpMessageStateSupplierSource.class, ResponseHttpMessageStateSupplierSource.class,
+            RemoteHttpMessageContextSupplier.class })
+    public Sink asyncSink(RequestHttpMessageStateSupplierSource requestHttpMessageStateSupplierSource,
+            ResponseHttpMessageStateSupplierSource responseHttpMessageStateSupplierSource,
+            RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
 
-        Sink machineReadableSink = createAsyncMachineReadableSink(logger, level, requestHttpMessageStateSupplierSource, responseHttpMessageStateSupplierSource, remoteHttpMessageContextSupplier);
+        Sink machineReadableSink = createAsyncMachineReadableSink(logger, level, requestHttpMessageStateSupplierSource,
+                responseHttpMessageStateSupplierSource, remoteHttpMessageContextSupplier);
 
         // emulate default intellij color scheme
         DefaultSyntaxHighlighter highlighter = DefaultSyntaxHighlighter.newBuilder()
@@ -55,6 +58,7 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
                 .withMaxSize(getMaxSize())
                 .withSyntaxHighlighter(highlighter)
                 .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
+                .withMessageComposers(format.getServer().getMessage().toComposer(), format.getClient().getMessage().toComposer())
                 .build();
 
         Sink humanReadableJsonSink = PrettyPrintingOndemandLogLevelLogstashLogbackSink.newBuilder()
@@ -65,6 +69,7 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
                 .withValidateRequestJsonBodyWellformed(requestHttpMessageStateSupplierSource)
                 .withValidateResponseJsonBodyWellformed(responseHttpMessageStateSupplierSource)
                 .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
+                .withMessageComposers(format.getServer().getMessage().toComposer(), format.getClient().getMessage().toComposer())
                 .build();
 
         return CompositeSink.newBuilder()
@@ -76,7 +81,7 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
 
     @Bean
     @ConditionalOnMissingBean(Sink.class)
-    public Sink sink(RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier ) {
+    public Sink sink(RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
 
@@ -97,6 +102,7 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
                 .withMaxSize(getMaxSize())
                 .withSyntaxHighlighter(highlighter)
                 .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
+                .withMessageComposers(format.getServer().getMessage().toComposer(), format.getClient().getMessage().toComposer())
                 .build();
 
         Sink humanReadableJsonSink = PrettyPrintingLogLevelLogstashLogbackSink.newBuilder()
@@ -105,6 +111,7 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
                 .withMaxBodySize(getMaxBodySize())
                 .withMaxSize(getMaxSize())
                 .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
+                .withMessageComposers(format.getServer().getMessage().toComposer(), format.getClient().getMessage().toComposer())
                 .build();
 
         return CompositeSink.newBuilder()
@@ -113,6 +120,5 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
                 .withHumanReadableJsonSink(humanReadableJsonSink)
                 .build();
     }
-
 
 }

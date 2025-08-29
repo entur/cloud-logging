@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.logbook;
 
 import com.fasterxml.jackson.core.JsonFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 import org.slf4j.event.Level;
@@ -21,6 +22,9 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
     protected int maxSize = -1;
     protected int maxBodySize = -1;
 
+    protected MessageComposer server;
+    protected MessageComposer client;
+
     protected RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier;
 
     public B withLogger(Logger logger) {
@@ -35,6 +39,12 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
 
     public B withRemoteHttpMessageContextSupplier(RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
         this.remoteHttpMessageContextSupplier = remoteHttpMessageContextSupplier;
+        return (B) this;
+    }
+
+    public B withMessageComposers(MessageComposer server, MessageComposer client) {
+        this.server = server;
+        this.client = client;
         return (B) this;
     }
 
@@ -79,11 +89,11 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
             case (TRACE_INT):
                 return logger::trace;
             case (DEBUG_INT):
-                return  logger::debug;
+                return logger::debug;
             case (INFO_INT):
                 return logger::info;
             case (WARN_INT):
-                return  logger::warn;
+                return logger::warn;
             case (ERROR_INT):
                 return logger::error;
             default:
@@ -91,6 +101,5 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
         }
 
     }
-
 
 }

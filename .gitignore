@@ -23,7 +23,7 @@ build
 *.pydevproject
 .project
 .metadata
-/bin/**
+**/bin/**
 /tmp/**
 /tmp/**/*
 *.tmp
@@ -39,6 +39,7 @@ local.properties
 
 # External tool builders
 .externalToolBuilders/**
+**.factorypath
 
 # Locally stored "Eclipse launch configurations"
 *.launch

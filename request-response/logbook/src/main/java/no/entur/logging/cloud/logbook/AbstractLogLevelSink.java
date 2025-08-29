@@ -18,7 +18,7 @@ public abstract class AbstractLogLevelSink implements Sink {
         String contentTypeWithoutEncoding;
         // text/xml;charset=UTF-8
         int index = contentType.indexOf(';');
-        if(index == -1) {
+        if (index == -1) {
             contentTypeWithoutEncoding = contentType;
         } else {
             contentTypeWithoutEncoding = contentType.substring(0, index).trim();
@@ -26,8 +26,9 @@ public abstract class AbstractLogLevelSink implements Sink {
 
         final String lowerCasedContentType = contentTypeWithoutEncoding.toLowerCase();
 
-        boolean isApplicationOrText = lowerCasedContentType.startsWith("application/") || lowerCasedContentType.startsWith("text/");
-        if(!isApplicationOrText) {
+        boolean isApplicationOrText = lowerCasedContentType.startsWith("application/")
+                || lowerCasedContentType.startsWith("text/");
+        if (!isApplicationOrText) {
             return false;
         }
 
@@ -38,35 +39,37 @@ public abstract class AbstractLogLevelSink implements Sink {
 
     protected final BiConsumer<Marker, String> logConsumer;
 
-    public AbstractLogLevelSink(BooleanSupplier logLevelEnabled, BiConsumer<Marker, String> logConsumer) {
+    protected final MessageComposer server;
+    protected final MessageComposer client;
+
+    public AbstractLogLevelSink(BooleanSupplier logLevelEnabled, BiConsumer<Marker, String> logConsumer,
+            MessageComposer server, MessageComposer client) {
         this.logLevelEnabled = logLevelEnabled;
         this.logConsumer = logConsumer;
+        this.server = server;
+        this.client = client;
     }
 
-    @Override public boolean isActive() {
+    @Override
+    public boolean isActive() {
         return logLevelEnabled.getAsBoolean();
     }
 
     protected void requestMessage(HttpRequest request, StringBuilder messageBuilder) throws IOException {
-        messageBuilder.append(request.getMethod());
-        messageBuilder.append(' ');
-        messageBuilder.append(request.getRequestUri());
+        if (request.getOrigin() == Origin.LOCAL) {
+            client.requestMessage(request, messageBuilder);
+        } else {
+            server.requestMessage(request, messageBuilder);
+        }
     }
 
-    protected void responseMessage(Correlation correlation, HttpRequest request, HttpResponse response, StringBuilder messageBuilder) throws IOException {
-        final String requestUri = request.getRequestUri();
-        messageBuilder.append(response.getStatus());
-        final String reasonPhrase = response.getReasonPhrase();
-        if (reasonPhrase != null) {
-            messageBuilder.append(' ');
-            messageBuilder.append(reasonPhrase);
+    protected void responseMessage(Correlation correlation, HttpRequest request, HttpResponse response,
+            StringBuilder messageBuilder) throws IOException {
+        if (request.getOrigin() == Origin.LOCAL) {
+            client.responseMessage(correlation, request, response, messageBuilder);
+        } else {
+            server.responseMessage(correlation, request, response, messageBuilder);
         }
-        messageBuilder.append(' ');
-        messageBuilder.append(requestUri);
-
-        messageBuilder.append(" (in ");
-        messageBuilder.append(correlation.getDuration().toMillis());
-        messageBuilder.append(" ms)");
     }
 
     @Override
@@ -74,7 +77,7 @@ public abstract class AbstractLogLevelSink implements Sink {
         Marker marker = createRequestMarker(request);
         StringBuilder stringBuilder = new StringBuilder(256);
         requestMessage(request, stringBuilder);
-        logConsumer.accept (marker, stringBuilder.toString());
+        logConsumer.accept(marker, stringBuilder.toString());
     }
 
     public void write(Correlation correlation, final HttpRequest request, HttpResponse response) throws IOException {
