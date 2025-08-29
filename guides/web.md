@@ -138,25 +138,19 @@ testImplementation ("no.entur.logging.cloud:request-response-spring-boot-starter
 ```
 </details>
 
-Some default Logbook excludes are recommended: 
-
-```
-logbook:
-  predicate:
-    exclude:
-      - path: /actuator/**
-      - path: /favicon.*
-      - path: /v2/api-docs/**
-      - path: /v3/api-docs/**
-      - path: /metrics
-      - path: /swagger
-```
-
 Adjust the logger using
 
 ```
 entur.logging.request-response.logger.level=INFO
 entur.logging.request-response.logger.name=no.entur.logging.cloud
+```
+
+Some Logbook excludes ([actuator, openapi](https://github.com/entur/cloud-logging/blob/main/request-response/logbook-spring-boot-autoconfigure/src/main/java/no/entur/logging/cloud/spring/logbook/LogbookLoggingAutoConfiguration.java)) are included by default. Add more using
+
+```yml
+logbook:
+   exclude:
+      - /too/much/data/here
 ```
 
 See [Logbook](https://github.com/zalando/logbook) for additional configuration options.
