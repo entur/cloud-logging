@@ -147,11 +147,10 @@ entur.logging.request-response.logger.name=no.entur.logging.cloud
 
 Some Logbook excludes ([actuator, openapi](https://github.com/entur/cloud-logging/blob/main/request-response/logbook-spring-boot-autoconfigure/src/main/java/no/entur/logging/cloud/spring/logbook/LogbookLoggingAutoConfiguration.java)) are included by default. Add more using
 
-```
+```yml
 logbook:
-  predicate:
-    exclude:
-      - path: /too/much/data/here
+   exclude:
+      - /too/much/data/here
 ```
 
 See [Logbook](https://github.com/zalando/logbook) for additional configuration options.
