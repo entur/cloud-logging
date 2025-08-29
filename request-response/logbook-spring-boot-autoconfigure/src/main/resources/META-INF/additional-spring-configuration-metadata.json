@@ -17,7 +17,12 @@
     {
       "name": "entur.logging.request-response.max-body-size",
       "type": "java.lang.Integer"
+    },
+    {
+      "name": "entur.logging.request-response.logbook.default-excludes",
+      "type": "java.lang.Boolean"
     }
+
 
   ]
 }
