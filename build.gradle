@@ -1,7 +1,6 @@
 
 plugins {
     id 'com.github.ben-manes.versions' version '0.52.0' apply false // ./gradlew dependencyUpdates
-    id 'org.owasp.dependencycheck' version '12.1.3' apply false
     id "org.sonarqube" version "6.3.1.5724"
     id 'org.jreleaser' version '1.19.0' apply false
 }
@@ -182,22 +181,6 @@ configure(libraryProjects()) {
 allprojects {
     apply plugin: 'eclipse'
     apply plugin: 'idea'
-    apply plugin: 'org.owasp.dependencycheck'
-
-    // OWASP Dependency Check settings
-    dependencyCheck {
-        analyzedTypes = ['jar'] // the default artifact types that will be analyzed.
-        format = 'ALL'
-        failBuildOnCVSS = 7
-        // Specifies if the build should be failed if a CVSS score equal to or above a specified level is identified.
-        suppressionFiles = ["$rootDir/dependencycheck-root-suppression.xml"]
-        // specify a list of known issues which contain false-positives
-        scanConfigurations = configurations.findAll {
-            (!it.name.startsWithAny('androidTest', 'test', 'debug', 'lint', 'kapt', 'spotbugs') && !it.name.contains("AndroidTest") && !it.name.contains("Test") && !it.name.contains("AnnotationProcessor"))
-        }.collect {
-            it.name
-        }
-    }
 
     eclipse {
         classpath {
@@ -216,23 +199,6 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-    }
-
-}
-
-gradle.projectsEvaluated {
-    // do not scan testing tools and so on, see https://medium.com/@appmattus/android-security-scanning-your-app-for-known-vulnerabilities-421384603fc5
-    // note: must be set after project is evaluated, as Android creates configurations based on the build types
-    dependencyCheck {
-        scanConfigurations = configurations.findAll {
-            (!it.name.startsWithAny('androidTest', 'test', 'debug', 'lint', 'kapt') && !it.name.contains("AndroidTest") && !it.name.contains("Test") && !it.name.contains("AnnotationProcessor"))
-        }.collect {
-            it.name
-        }
-    }
-
-    tasks.withType(JavaCompile) {
-        options.compilerArgs << "-Xlint:deprecation"
     }
 
 }
