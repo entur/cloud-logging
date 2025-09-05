@@ -60,7 +60,7 @@ configure(jvmProjects()) {
         micrometerVersion = '1.15.3'
         janinoVersion = '3.1.12'
         servletVersion = '6.0.0' // jakarta
-        logbookVersion = '3.12.2'
+        logbookVersion = '3.12.3'
         jacksonSyntaxHighlightVersion = '1.1.1'
         logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.1.1'
         commonsIoVersion = '2.20.0'
