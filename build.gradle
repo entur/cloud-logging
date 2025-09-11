@@ -51,7 +51,7 @@ configure(jvmProjects()) {
         mockitoVersion = '5.19.0'
         logbackLogstashVersion = '8.1'
         slf4jVersion = '2.0.17'
-        googleTruthVersion = '1.4.4'
+        googleTruthVersion = '1.4.5'
         logbackVersion = '1.5.18'
         jacksonVersion = '2.19.2'
         jacksonDatabindVersion = '2.19.2'
