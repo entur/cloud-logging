@@ -223,7 +223,6 @@ To forward correlation id + add MDC-style context to log statements within gRPC 
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
     <artifactId>spring-boot-autoconfigure-gcp-grpc-mdc</artifactId>
-    <scope>test</scope>
 </dependency>
 ```
 
