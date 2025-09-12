@@ -209,9 +209,41 @@ entur:
 
 </details>
 
+### gRPC client MDC support
+To forward correlation id + add MDC-style context to log statements within gRPC interceptors (via `Scope`), add artifacts 
 
+<details>
+  <summary>Gradle gRPC MDC coordinates</summary>
 
+```xml
+<dependency>
+    <groupId>no.entur.logging.cloud</groupId>
+    <artifactId>correlation-id-trace-grpc-netty</artifactId>
+</dependency>
+<dependency>
+    <groupId>no.entur.logging.cloud</groupId>
+    <artifactId>spring-boot-autoconfigure-gcp-grpc-mdc</artifactId>
+    <scope>test</scope>
+</dependency>
+```
 
+</details>
+
+or
+
+<details>
+  <summary>Gradle gRPC MDC coordinates</summary>
+
+```groovy
+implementation ("no.entur.logging.cloud:correlation-id-trace-grpc-netty")
+implementation ("no.entur.logging.cloud:spring-boot-autoconfigure-gcp-grpc-mdc")
+```
+</details>
+
+and 
+
+ * use the `CopyCorrelationIdFromGrpcMdcContextToRequestClientInterceptor` client interceptor, 
+ * wrap the call(s) in a `GrpcMdcContext` (or `CorrelationIdGrpcMdcContext`).
 
 ### On-demand logging
 This feature adjusts the log level for individual web server requests, taking into account actual behaviour. 
