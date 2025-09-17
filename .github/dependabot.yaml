@@ -11,5 +11,4 @@ updates:
     directory: ".github/workflows"
     schedule:
       interval: "daily"
-    minimum-package-age:
-      default-days: 5
+
