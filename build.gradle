@@ -1,6 +1,6 @@
 
 plugins {
-    id 'com.github.ben-manes.versions' version '0.52.0' apply false // ./gradlew dependencyUpdates
+    id 'com.github.ben-manes.versions' version '0.53.0' apply false // ./gradlew dependencyUpdates
     id "org.sonarqube" version "6.3.1.5724"
     id 'org.jreleaser' version '1.20.0' apply false
 }
