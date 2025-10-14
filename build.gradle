@@ -57,7 +57,7 @@ configure(jvmProjects()) {
         jacksonDatabindVersion = '2.19.2'
         nettyTcnativeBoringsslStaticVersion = '2.0.73.Final'
         nettyVersion = '4.1.124.Final'
-        micrometerVersion = '1.15.3'
+        micrometerVersion = '1.15.5'
         janinoVersion = '3.1.12'
         servletVersion = '6.0.0' // jakarta
         logbookVersion = '3.12.3'
