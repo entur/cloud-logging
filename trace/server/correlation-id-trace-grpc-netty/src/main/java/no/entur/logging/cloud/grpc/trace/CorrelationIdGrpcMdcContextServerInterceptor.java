@@ -118,7 +118,7 @@ public class CorrelationIdGrpcMdcContextServerInterceptor extends CorrelationIdR
 
 	private String getCorrelationId(Metadata m) {
 		String header = m.get(CorrelationIdGrpcMdcContext.CORRELATION_ID_HEADER_KEY);
-		if (header != null && !header.isBlank() && !header.equals("null")) {
+		if (header != null && !header.isBlank()) {
 			return sanitize(header);
 		}
 		return null;
