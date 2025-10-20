@@ -55,7 +55,7 @@ configure(jvmProjects()) {
         logbackVersion = '1.5.19'
         jacksonVersion = '2.19.2'
         jacksonDatabindVersion = '2.19.2'
-        nettyTcnativeBoringsslStaticVersion = '2.0.73.Final'
+        nettyTcnativeBoringsslStaticVersion = '2.0.74.Final'
         nettyVersion = '4.1.124.Final'
         micrometerVersion = '1.15.5'
         janinoVersion = '3.1.12'
