@@ -67,7 +67,7 @@ configure(jvmProjects()) {
         commonsTextVersion = '1.14.0'
         annotationApiVersion = '2.1.1'
 
-        grpcNettyVersion = '1.75.0'
+        grpcNettyVersion = '1.76.0'
         grpcVersion = '1.76.0'
         grpcCommonsVersion = '2.61.3'
         grpcProtobufVersion = '4.32.1'
