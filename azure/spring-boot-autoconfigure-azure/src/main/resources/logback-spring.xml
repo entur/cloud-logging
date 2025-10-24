@@ -7,7 +7,12 @@
     <springProperty name="entur.logging.http.ondemand.enabled" source="entur.logging.http.ondemand.enabled"/>
     <springProperty name="entur.logging.grpc.ondemand.enabled" source="entur.logging.grpc.ondemand.enabled"/>
 
-    <if condition='(isDefined("entur.logging.http.ondemand.enabled") &#038;&#038; property("entur.logging.http.ondemand.enabled").equals("true")) || (isDefined("entur.logging.grpc.ondemand.enabled") &#038;&#038; property("entur.logging.grpc.ondemand.enabled").equals("true"))'>
+    <!-- https://logback.qos.ch/manual/configuration.html#conditional -->
+    <condition class="no.entur.logging.cloud.appender.condition.AnyTrueBooleanPropertyCondition">
+        <keys>entur.logging.http.ondemand.enabled,entur.logging.grpc.ondemand.enabled</keys>
+    </condition>
+
+    <if>
         <then>
             <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender">
                 <discardingThreshold>0</discardingThreshold>
