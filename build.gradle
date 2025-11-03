@@ -49,7 +49,7 @@ configure(jvmProjects()) {
         springBootVersion = '3.5.7' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
         junitJupiterVersion = '5.12.2'
         mockitoVersion = '5.20.0'
-        logbackLogstashVersion = '8.1'
+        logbackLogstashVersion = '9.0'
         slf4jVersion = '2.0.17'
         googleTruthVersion = '1.4.5'
         logbackVersion = '1.5.20'
