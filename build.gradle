@@ -54,7 +54,7 @@ configure(jvmProjects()) {
         googleTruthVersion = '1.4.5'
         logbackVersion = '1.5.20'
         jacksonVersion = '2.19.2'
-        jacksonDatabindVersion = '2.19.2'
+        jacksonDatabindVersion = '2.20.1'
         nettyTcnativeBoringsslStaticVersion = '2.0.74.Final'
         nettyVersion = '4.1.128.Final'
         micrometerVersion = '1.15.5'
