@@ -47,7 +47,7 @@ configure(jvmProjects()) {
 
     ext {
         springBootVersion = '3.5.7' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
-        junitJupiterVersion = '5.12.2'
+        junitJupiterVersion = '6.0.1'
         mockitoVersion = '5.20.0'
         logbackLogstashVersion = '8.1'
         slf4jVersion = '2.0.17'
