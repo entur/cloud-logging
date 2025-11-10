@@ -7,11 +7,11 @@ dependencies {
 
     api "org.zalando:logbook-spring-boot-starter:${logbookVersion}"
 
-    api ("org.slf4j:slf4j-api:${slf4jVersion}")
-    api ("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
-    api ("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
+    api ("org.slf4j:slf4j-api")
+    api ("org.springframework.boot:spring-boot-autoconfigure")
+    api ("org.springframework.boot:spring-boot-starter-logging")
 
     compileOnly project(":on-demand:on-demand-spring-boot-starter-web")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

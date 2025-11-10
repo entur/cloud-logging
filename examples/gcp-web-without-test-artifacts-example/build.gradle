@@ -13,14 +13,14 @@ dependencies {
     implementation project(":gcp:spring-boot-starter-gcp-web");
     implementation project(":gcp:request-response-spring-boot-starter-gcp-web");
 
-    implementation("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
-    implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-web")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     // JUnit Jupiter API and TestEngine implementation
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
 
     testImplementation ("com.google.truth:truth:${googleTruthVersion}")
     testImplementation ("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")

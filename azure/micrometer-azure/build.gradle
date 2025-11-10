@@ -5,8 +5,8 @@ dependencies {
     api project(':appender')
     api project(':azure:logback-logstash-encoder-azure')
 
-    api("org.slf4j:slf4j-api:${slf4jVersion}")
-    api ("io.micrometer:micrometer-core:${micrometerVersion}")
+    api("org.slf4j:slf4j-api")
+    api ("io.micrometer:micrometer-core")
 
 }
 

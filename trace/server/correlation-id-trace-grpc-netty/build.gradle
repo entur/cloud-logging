@@ -8,9 +8,9 @@ dependencies {
 
     api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
 
-    api("com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}")
-    api("com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}")
-    api("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
+    api("com.fasterxml.jackson.core:jackson-databind")
+    api("com.fasterxml.jackson.core:jackson-annotations")
+    api("com.fasterxml.jackson.core:jackson-core")
 
     api("io.grpc:grpc-netty:${grpcNettyVersion}")
     api("io.grpc:grpc-services:${grpcNettyVersion}")
@@ -26,22 +26,10 @@ dependencies {
     api("io.grpc:grpc-protobuf:$grpcVersion")
 
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
-    api("org.slf4j:slf4j-api:") {
-        version {
-            strictly slf4jVersion
-        }
-    }
-
-    api("ch.qos.logback:logback-classic:") {
-        version {
-            strictly logbackVersion
-        }
-    }
-    api("ch.qos.logback:logback-core:") {
-        version {
-            strictly logbackVersion
-        }
-    }
+    // Versions managed by Spring Boot BOM
+    api("org.slf4j:slf4j-api")
+    api("ch.qos.logback:logback-classic")
+    api("ch.qos.logback:logback-core")
 
     api("jakarta.annotation:jakarta.annotation-api:${annotationApiVersion}")
     api("com.google.api.grpc:proto-google-common-protos:$grpcCommonsVersion")

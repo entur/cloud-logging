@@ -4,16 +4,16 @@ dependencies {
     api project(':appender')
     api project(':micrometer')
 
-    api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
+    api("org.springframework.boot:spring-boot-autoconfigure")
 
-    api ("ch.qos.logback:logback-classic:${logbackVersion}")
-    api ("ch.qos.logback:logback-core:${logbackVersion}")
+    api ("ch.qos.logback:logback-classic")
+    api ("ch.qos.logback:logback-core")
 
-    api("org.slf4j:slf4j-api:${slf4jVersion}")
-    api ("io.micrometer:micrometer-core:${micrometerVersion}")
+    api("org.slf4j:slf4j-api")
+    api ("io.micrometer:micrometer-core")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
-    testImplementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-web")
 
 
 }

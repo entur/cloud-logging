@@ -6,21 +6,21 @@ dependencies {
 
     api project(":test:test-logback")
 
-    api ("org.slf4j:slf4j-api:${slf4jVersion}")
+    api ("org.slf4j:slf4j-api")
     api ("org.codehaus.janino:commons-compiler:${janinoVersion}")
     api ("org.codehaus.janino:janino:${janinoVersion}")
 
     api("jakarta.annotation:jakarta.annotation-api:${annotationApiVersion}")
 
-    api("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
-    api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
+    api("org.springframework.boot:spring-boot-starter-logging")
+    api("org.springframework.boot:spring-boot-autoconfigure")
 
     api ("org.entur.jackson:jackson-syntax-highlight:${jacksonSyntaxHighlightVersion}")
     api ("org.entur.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
 
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 tasks.named('compileJava') {
