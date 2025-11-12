@@ -1,6 +1,6 @@
 
 dependencies {
-    api("org.slf4j:slf4j-api:${slf4jVersion}")
+    api("org.slf4j:slf4j-api")
     api project(':appender')
     api project(':request-response:logbook-filter')
     api("org.zalando:logbook-api:${logbookVersion}")
@@ -9,7 +9,7 @@ dependencies {
     api "commons-io:commons-io:${commonsIoVersion}"
 
     api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
-    api("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
+    api("com.fasterxml.jackson.core:jackson-core")
 
     api("org.apache.commons:commons-text:${commonsTextVersion}")
 

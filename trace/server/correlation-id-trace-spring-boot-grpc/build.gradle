@@ -3,14 +3,14 @@ dependencies {
     api project(':trace:mdc-context-grpc-netty')
     api project(':trace:server:correlation-id-trace-grpc-netty')
 
-    api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
-    api("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
+    api("org.springframework.boot:spring-boot-autoconfigure")
+    api("org.springframework.boot:spring-boot-starter-logging")
 
     api "io.grpc:grpc-netty:${grpcNettyVersion}"
 
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation project(":gcp:spring-boot-autoconfigure-gcp-test")
 
 }

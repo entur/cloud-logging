@@ -1,17 +1,17 @@
 
 dependencies {
-    api("org.slf4j:slf4j-api:${slf4jVersion}")
+    api("org.slf4j:slf4j-api")
     api("org.zalando:logbook-api:${logbookVersion}")
     api("org.zalando:logbook-api:${logbookVersion}")
 
-    api("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
-    api("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+    api("com.fasterxml.jackson.core:jackson-core")
+    api("com.fasterxml.jackson.core:jackson-databind")
     api "commons-io:commons-io:${commonsIoVersion}"
 
     // JUnit Jupiter API and TestEngine implementation
-    testImplementation("org.junit.jupiter:junit-jupiter:${junitJupiterVersion}")
+    testImplementation("org.junit.jupiter:junit-jupiter")
 
-    testImplementation("org.mockito:mockito-core:${mockitoVersion}")
+    testImplementation("org.mockito:mockito-core")
 
     testImplementation("com.google.truth:truth:${googleTruthVersion}")
     testImplementation("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")

@@ -2,8 +2,8 @@
 dependencies {
     api (project(":request-response:logbook-spring-boot-autoconfigure"))
 
-    api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
-    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    api("org.springframework.boot:spring-boot-autoconfigure")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 
 }
 

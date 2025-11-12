@@ -8,13 +8,13 @@ dependencies {
     api ("org.entur.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
 
     api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
-    api ("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
+    api ("com.fasterxml.jackson.core:jackson-core")
 
-    api("org.slf4j:slf4j-api:${slf4jVersion}")
-    api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
+    api("org.slf4j:slf4j-api")
+    api("org.springframework.boot:spring-boot-autoconfigure")
     implementation project(path: ':request-response:netty-grpc-test')
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 
 }
 
