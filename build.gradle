@@ -76,32 +76,10 @@ configure(libraryProjects()) {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 
-    // Use dependency constraints to apply Spring Boot BOM versions without adding it as a dependency
-    configurations.all {
-        resolutionStrategy.dependencySubstitution {
-            // This applies version constraints from Spring Boot BOM without making it a direct dependency
-        }
-    }
-
     dependencies {
-        // Import Spring Boot BOM for version management in the build
-        // This won't appear in published pom.xml for library projects
-        implementation(platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}"))
-    }
-
-    // Modify the published pom to exclude the platform dependency from dependencyManagement
-    afterEvaluate {
-        publishing {
-            publications.withType(MavenPublication) {
-                pom.withXml {
-                    // Remove the dependencyManagement section that contains the Spring Boot BOM
-                    def dependencyManagement = asNode().dependencyManagement
-                    if (dependencyManagement) {
-                        asNode().remove(dependencyManagement[0])
-                    }
-                }
-            }
-        }
+        // Use api(platform(...)) to enforce Spring Boot BOM versions for all dependency configurations
+        // This ensures both api and implementation dependencies get pinned versions
+        api(platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}"))
     }
 }
 
