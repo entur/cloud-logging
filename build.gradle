@@ -173,6 +173,25 @@ configure(libraryProjects()) {
                         url = 'https://github.com/entur/cloud-logging'
                         connection = 'git@github.com:entur/cloud-logging.git'
                     }
+                    
+                    // Resolve and add versions from platform to all dependencies
+                    withXml {
+                        def dependenciesNode = asNode().dependencies[0]
+                        if (dependenciesNode) {
+                            dependenciesNode.dependency.each { dep ->
+                                if (!dep.version) {
+                                    def group = dep.groupId.text()
+                                    def artifact = dep.artifactId.text()
+                                    def resolvedVersion = project.configurations.runtimeClasspath.resolvedConfiguration
+                                        .resolvedArtifacts.find { it.moduleVersion.id.group == group && it.moduleVersion.id.name == artifact }
+                                        ?.moduleVersion?.id?.version
+                                    if (resolvedVersion) {
+                                        dep.appendNode('version', resolvedVersion)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
