@@ -2,7 +2,7 @@
 dependencies {
     api("org.slf4j:slf4j-api")
     api("org.springframework.boot:spring-boot-autoconfigure")
-    api("jakarta.servlet:jakarta.servlet-api:${servletVersion}")
+    api("jakarta.servlet:jakarta.servlet-api")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 

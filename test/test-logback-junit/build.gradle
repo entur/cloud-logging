@@ -7,12 +7,12 @@ dependencies {
     api ("ch.qos.logback:logback-classic")
     api ("ch.qos.logback:logback-core")
 
-    api("net.minidev:json-smart:${jsonSmartVersion}")
+    api("net.minidev:json-smart")
     api("org.junit.jupiter:junit-jupiter-api")
     api("com.toomuchcoding.jsonassert:jsonassert:${jsonAssertVersion}") {
         exclude group: 'net.minidev', module: 'json-smart'
     }
-    api("com.jayway.jsonpath:json-path:${jsonPathVersion}") {
+    api("com.jayway.jsonpath:json-path") {
         exclude group: 'net.minidev', module: 'json-smart'
     }
 
