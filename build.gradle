@@ -176,6 +176,13 @@ configure(libraryProjects()) {
                     
                     // Resolve and add versions from platform to all dependencies
                     withXml {
+                        // Remove the dependencyManagement section since we're adding explicit versions
+                        def dependencyManagement = asNode().dependencyManagement
+                        if (dependencyManagement) {
+                            asNode().remove(dependencyManagement[0])
+                        }
+                        
+                        // Add explicit versions to all dependencies
                         def dependenciesNode = asNode().dependencies[0]
                         if (dependenciesNode) {
                             dependenciesNode.dependency.each { dep ->
