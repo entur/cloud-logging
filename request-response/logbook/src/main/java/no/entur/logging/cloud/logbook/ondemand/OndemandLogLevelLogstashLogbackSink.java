@@ -73,7 +73,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
             try {
                 byte[] body = request.getBody();
                 if (body != null && body.length > 0) {
-                    if (request.getOrigin().equals("local")) {
+                    if (request.getOrigin() == Origin.LOCAL) {
                         // trust our own data to be wellformed
                         if (body.length < maxBodySize) {
                             writer = new LocalHttpMessageBodyWriter(body);
@@ -131,7 +131,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
             try {
                 byte[] body = response.getBody();
                 if (body != null && body.length > 0) {
-                    if (response.getOrigin().equals("local")) {
+                    if (response.getOrigin() == Origin.LOCAL) {
                         // trust our own data to be wellformed
                         if (body.length < maxBodySize) {
                             writer = new LocalHttpMessageBodyWriter(body);
