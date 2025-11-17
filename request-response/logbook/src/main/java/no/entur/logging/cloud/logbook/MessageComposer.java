@@ -70,7 +70,7 @@ public class MessageComposer {
             String query = request.getQuery();
             if(query != null && !query.isEmpty()) {
                 messageBuilder.append('?');
-                messageBuilder.append(request.getQuery());
+                messageBuilder.append(query);
             }
         }
     }
@@ -78,7 +78,7 @@ public class MessageComposer {
     public void requestMessage(HttpRequest request, StringBuilder messageBuilder) throws IOException {
         String method = request.getMethod();
         if(method != null) {
-            messageBuilder.append(request.getMethod());
+            messageBuilder.append(method);
             messageBuilder.append(' ');
         }
         constructMessage(request, messageBuilder);

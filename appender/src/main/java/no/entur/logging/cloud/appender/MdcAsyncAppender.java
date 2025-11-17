@@ -28,19 +28,24 @@ public class MdcAsyncAppender extends AsyncAppender {
             MDCAdapter mdcAdapter = MDC.getMDCAdapter();
             for (Map.Entry<String, String> entry : mdc.entrySet()) {
                 String key = entry.getKey();
-                String value = entry.getValue();
-                if(key != null && value != null) {
-                    mdcAdapter.put(key, value);
+                if(key == null) {
+                    continue;
                 }
+                String value = entry.getValue();
+                if(value == null) {
+                    continue;
+                }
+                mdcAdapter.put(key, value);
             }
             try {
                 super.preprocess(eventObject);
             } finally {
                 for (Map.Entry<String, String> entry : mdc.entrySet()) {
                     String key = entry.getKey();
-                    if(key != null) {
-                        mdcAdapter.remove(key);
+                    if(key == null) {
+                        continue;
                     }
+                    mdcAdapter.remove(key);
                 }
             }
         }
