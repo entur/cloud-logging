@@ -136,7 +136,7 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
             try {
                 byte[] body = response.getBody();
                 if (body != null && body.length > 0) {
-                    if (response.getOrigin().equals("local")) {
+                    if (response.getOrigin() == Origin.LOCAL) {
                         // trust our own data to be wellformed
                         if (body.length > maxBodySize) {
                             writer = new PrettyPrintingLocalHttpMessageBodyWriter(body);
