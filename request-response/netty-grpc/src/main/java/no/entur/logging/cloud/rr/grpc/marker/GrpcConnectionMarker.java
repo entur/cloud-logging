@@ -48,26 +48,37 @@ public abstract class GrpcConnectionMarker<T extends GrpcMessage> extends Logsta
 		generator.writeString(origin);
 
 		Map<String, ?> headers = message.getHeaders();
+		generator.writeFieldName("headers");
+		generator.writeStartObject();
+
 		if(headers != null) {
-			generator.writeFieldName("headers");
-			generator.writeStartObject();
-			
 			for (Entry<String, ?> entry : headers.entrySet()) {
-				generator.writeFieldName(entry.getKey());
-				
-				Object value = entry.getValue();
-				if(value instanceof List) {
-					generator.writeObject(value);
-				} else {
+
+				String key = entry.getKey();
+				if(key != null && !key.isEmpty()) {
+					generator.writeFieldName(key.toLowerCase());
 					generator.writeStartArray();
-					generator.writeObject(value);
+
+					Object value = entry.getValue();
+					if(value != null) {
+						if (value instanceof List) {
+							List<Object> values = (List) value;
+							if (values != null) {
+								for (Object listValue : values) {
+									generator.writeObject(listValue);
+								}
+							}
+						} else {
+							generator.writeObject(value);
+						}
+					}
 					generator.writeEndArray();
 				}
 			}
 		
-			generator.writeEndObject();
 		}
-		
+		generator.writeEndObject();
+
 	}
 	
 	

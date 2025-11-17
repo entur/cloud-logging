@@ -4,6 +4,7 @@ import org.zalando.logbook.*;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
@@ -36,12 +37,18 @@ public class MessageComposer {
 
     protected void constructMessage(HttpRequest request, StringBuilder messageBuilder) throws IOException {
         if (scheme) {
-            messageBuilder.append(request.getScheme());
-            messageBuilder.append(':');
+            String schemeValue = request.getScheme();
+            if(schemeValue != null && !schemeValue.isEmpty()) {
+                messageBuilder.append(request.getScheme());
+                messageBuilder.append(':');
+            }
         }
         if (host) {
-            messageBuilder.append("//");
-            messageBuilder.append(request.getHost());
+            String hostValue = request.getHost();
+            if(hostValue != null && !hostValue.isEmpty()) {
+                messageBuilder.append("//");
+                messageBuilder.append(hostValue);
+            }
         }
         if (port) {
             request.getPort().ifPresent(p -> {
@@ -51,27 +58,37 @@ public class MessageComposer {
             });
         }
         if (path) {
-            if (!request.getPath().startsWith("/")) {
-                messageBuilder.append('/');
+            String pathValue = request.getPath();
+            if(pathValue != null && !pathValue.isEmpty()) {
+                if (!pathValue.startsWith("/")) {
+                    messageBuilder.append('/');
+                }
+                messageBuilder.append(pathValue);
             }
-            messageBuilder.append(request.getPath());
         }
-        if (query && request.getQuery() != null && !request.getQuery().isEmpty()) {
-            messageBuilder.append('?');
-            messageBuilder.append(request.getQuery());
+        if (query) {
+            String query = request.getQuery();
+            if(query != null && !query.isEmpty()) {
+                messageBuilder.append('?');
+                messageBuilder.append(request.getQuery());
+            }
         }
     }
 
     public void requestMessage(HttpRequest request, StringBuilder messageBuilder) throws IOException {
-        messageBuilder.append(request.getMethod());
-        messageBuilder.append(' ');
+        String method = request.getMethod();
+        if(method != null) {
+            messageBuilder.append(request.getMethod());
+            messageBuilder.append(' ');
+        }
         constructMessage(request, messageBuilder);
     }
 
     public void responseMessage(Correlation correlation, HttpRequest request, HttpResponse response,
             StringBuilder messageBuilder) throws IOException {
         messageBuilder.append(response.getStatus());
-        final String reasonPhrase = response.getReasonPhrase();
+
+        String reasonPhrase = response.getReasonPhrase();
         if (reasonPhrase != null) {
             messageBuilder.append(' ');
             messageBuilder.append(reasonPhrase);
@@ -79,8 +96,11 @@ public class MessageComposer {
         messageBuilder.append(' ');
         constructMessage(request, messageBuilder);
 
-        messageBuilder.append(" (in ");
-        messageBuilder.append(correlation.getDuration().toMillis());
-        messageBuilder.append(" ms)");
+        Duration duration = correlation.getDuration();
+        if(duration != null) {
+            messageBuilder.append(" (in ");
+            messageBuilder.append(duration.toMillis());
+            messageBuilder.append(" ms)");
+        }
     }
 }

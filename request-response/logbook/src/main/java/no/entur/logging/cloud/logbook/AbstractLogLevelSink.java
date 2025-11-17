@@ -1,5 +1,7 @@
 package no.entur.logging.cloud.logbook;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.zalando.logbook.*;
 
@@ -9,6 +11,8 @@ import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
 public abstract class AbstractLogLevelSink implements Sink {
+
+    private final static Logger logger = LoggerFactory.getLogger(AbstractLogLevelSink.class);
 
     public static boolean isXmlMediaType(@Nullable final String contentType) {
         if (contentType == null) {
@@ -74,17 +78,25 @@ public abstract class AbstractLogLevelSink implements Sink {
 
     @Override
     public void write(final Precorrelation precorrelation, final HttpRequest request) throws IOException {
-        Marker marker = createRequestMarker(request);
-        StringBuilder stringBuilder = new StringBuilder(256);
-        requestMessage(request, stringBuilder);
-        logConsumer.accept(marker, stringBuilder.toString());
+        try {
+            Marker marker = createRequestMarker(request);
+            StringBuilder stringBuilder = new StringBuilder(256);
+            requestMessage(request, stringBuilder);
+            logConsumer.accept(marker, stringBuilder.toString());
+        } catch(Throwable e) {
+            logger.warn("Unexpected problem writing request message", e);
+        }
     }
 
     public void write(Correlation correlation, final HttpRequest request, HttpResponse response) throws IOException {
-        Marker marker = createResponseMarker(correlation, response);
-        StringBuilder stringBuilder = new StringBuilder(256);
-        responseMessage(correlation, request, response, stringBuilder);
-        logConsumer.accept(marker, stringBuilder.toString());
+        try {
+            Marker marker = createResponseMarker(correlation, response);
+            StringBuilder stringBuilder = new StringBuilder(256);
+            responseMessage(correlation, request, response, stringBuilder);
+            logConsumer.accept(marker, stringBuilder.toString());
+        } catch(Throwable e) {
+            logger.warn("Unexpected problem writing response message", e);
+        }
     }
 
     protected Marker createResponseMarker(Correlation correlation, HttpResponse response) {

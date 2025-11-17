@@ -27,13 +27,20 @@ public class MdcAsyncAppender extends AsyncAppender {
             // ILoggingEvent#prepareForDeferredProcessing() has not been called
             MDCAdapter mdcAdapter = MDC.getMDCAdapter();
             for (Map.Entry<String, String> entry : mdc.entrySet()) {
-                mdcAdapter.put(entry.getKey(), entry.getValue());
+                String key = entry.getKey();
+                String value = entry.getValue();
+                if(key != null && value != null) {
+                    mdcAdapter.put(key, value);
+                }
             }
             try {
                 super.preprocess(eventObject);
             } finally {
                 for (Map.Entry<String, String> entry : mdc.entrySet()) {
-                    mdcAdapter.remove(entry.getKey());
+                    String key = entry.getKey();
+                    if(key != null) {
+                        mdcAdapter.remove(key);
+                    }
                 }
             }
         }
