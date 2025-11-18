@@ -15,8 +15,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import static jakarta.servlet.DispatcherType.ASYNC;
 import static jakarta.servlet.DispatcherType.ERROR;
@@ -75,4 +80,23 @@ public class LogbookWebAutoConfiguration {
         }
 
     }
+
+    /**
+     *
+     * Add last-ditch-effort controller advice due to logbook warning:
+     * Beware: The ERROR dispatch is not supported. You're strongly advised to produce error responses within the REQUEST or ASNYC dispatch.
+     *
+     */
+
+    @ControllerAdvice
+    @ConditionalOnProperty(name = {"entur.logging.request-response.http.server.controller-advice.throwable.enabled"}, havingValue = "true", matchIfMissing = true)
+    public static class ThrowableControllerAdvice {
+
+        @ExceptionHandler(Throwable.class)
+        @ResponseBody
+        private ResponseEntity throwable(Throwable e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
 }
