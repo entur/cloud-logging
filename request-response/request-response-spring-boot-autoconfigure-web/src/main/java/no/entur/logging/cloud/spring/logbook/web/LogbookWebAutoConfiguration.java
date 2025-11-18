@@ -22,6 +22,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import static jakarta.servlet.DispatcherType.ASYNC;
 import static jakarta.servlet.DispatcherType.ERROR;
@@ -89,8 +92,8 @@ public class LogbookWebAutoConfiguration {
      */
 
     @ControllerAdvice
-    @ConditionalOnProperty(name = {"entur.logging.request-response.http.server.controller-advice.throwable.enabled"}, havingValue = "true", matchIfMissing = true)
-    public static class ThrowableControllerAdvice {
+    @ConditionalOnProperty(name = {"entur.logging.request-response.http.server.controller-advice.enabled"}, havingValue = "true", matchIfMissing = true)
+    public static class ThrowableControllerAdvice extends ResponseEntityExceptionHandler {
 
         @ExceptionHandler(Throwable.class)
         @ResponseBody
@@ -98,5 +101,4 @@ public class LogbookWebAutoConfiguration {
             return ResponseEntity.internalServerError().build();
         }
     }
-
 }
