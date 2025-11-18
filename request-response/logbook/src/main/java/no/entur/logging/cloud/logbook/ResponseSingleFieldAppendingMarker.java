@@ -2,20 +2,22 @@ package no.entur.logging.cloud.logbook;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import org.zalando.logbook.HttpResponse;
+import org.zalando.logbook.Origin;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Locale;
 
 public class ResponseSingleFieldAppendingMarker extends AbstractSingleFieldAppendingMarker<HttpResponse> {
 
     public static final String MARKER_NAME = ResponseSingleFieldAppendingMarker.MARKER_NAME_PREFIX + "RESPONSE";
 
-    private final long duration;
+    private final Duration duration;
     private String origin;
     private String protocol;
     private int status;
 
-    public ResponseSingleFieldAppendingMarker(HttpResponse response, long duration, String body, boolean wellformed) {
+    public ResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body, boolean wellformed) {
         super(MARKER_NAME, response, body, wellformed);
         this.duration = duration;
     }
@@ -24,7 +26,11 @@ public class ResponseSingleFieldAppendingMarker extends AbstractSingleFieldAppen
     protected void prepareForDeferredProcessing(HttpResponse message) {
         super.prepareForDeferredProcessing(message);
 
-        origin = message.getOrigin().name().toLowerCase(Locale.ROOT);
+        Origin origin = message.getOrigin();
+        if(origin != null) {
+            this.origin = origin.name().toLowerCase(Locale.ROOT);
+        }
+
         protocol = message.getProtocolVersion();
         status = message.getStatus();
     }
@@ -35,7 +41,9 @@ public class ResponseSingleFieldAppendingMarker extends AbstractSingleFieldAppen
 
         generator.writeStringField("origin", origin);
         generator.writeStringField("type", "response");
-        generator.writeNumberField("duration", duration);
+        if(duration != null) {
+            generator.writeNumberField("duration", duration.toMillis());
+        }
         generator.writeStringField("protocol", protocol);
         generator.writeNumberField("status", status);
 

@@ -10,6 +10,7 @@ import org.slf4j.Marker;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
 
+import java.time.Duration;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
@@ -64,9 +65,9 @@ public class PrettyPrintingLogLevelLogstashLogbackSink extends AbstractLogLevelL
     }
 
     @Override
-    protected Marker newResponseSingleFieldAppendingMarker(HttpResponse response, long millis, String body,
-            boolean wellformed) {
-        return new PrettyPrintingResponseSingleFieldAppendingMarker(response, millis, body, wellformed);
+    protected Marker newResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body,
+                                                           boolean wellformed) {
+        return new PrettyPrintingResponseSingleFieldAppendingMarker(response, duration, body, wellformed);
     }
 
 }

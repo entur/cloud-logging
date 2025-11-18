@@ -2,6 +2,7 @@ package no.entur.logging.cloud.logbook;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import org.zalando.logbook.HttpRequest;
+import org.zalando.logbook.Origin;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -29,7 +30,10 @@ public class RequestSingleFieldAppendingMarker extends AbstractSingleFieldAppend
     protected void prepareForDeferredProcessing(HttpRequest message) {
         super.prepareForDeferredProcessing(message);
 
-        origin = message.getOrigin().name().toLowerCase(Locale.ROOT);
+        Origin origin = message.getOrigin();
+        if(origin != null) {
+            this.origin = origin.name().toLowerCase(Locale.ROOT);
+        }
         protocol = message.getProtocolVersion();
         remote = message.getRemote();
         method = message.getMethod();
