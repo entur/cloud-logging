@@ -39,12 +39,16 @@ public class ResponseSingleFieldAppendingMarker extends AbstractSingleFieldAppen
     protected void writeFieldValue(JsonGenerator generator) throws IOException {
         generator.writeStartObject();
 
-        generator.writeStringField("origin", origin);
+        if(origin != null) {
+            generator.writeStringField("origin", origin);
+        }
         generator.writeStringField("type", "response");
         if(duration != null) {
             generator.writeNumberField("duration", duration.toMillis());
         }
-        generator.writeStringField("protocol", protocol);
+        if(protocol != null) {
+            generator.writeStringField("protocol", protocol);
+        }
         generator.writeNumberField("status", status);
 
         writeHeaders(generator);

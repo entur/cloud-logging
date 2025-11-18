@@ -31,11 +31,18 @@ public abstract class GrpcConnectionMarker<T extends GrpcMessage> extends Logsta
 	}
 	
 	protected void writeFields(JsonGenerator generator) throws IOException {
-		generator.writeFieldName("uri");
-		generator.writeString(message.getUri());
 
-		generator.writeFieldName("type");
-		generator.writeString(message.getType());
+        String uri = message.getUri();
+        if(uri != null) {
+            generator.writeFieldName("uri");
+            generator.writeString(uri);
+        }
+
+        String type = message.getType();
+        if(type != null) {
+            generator.writeFieldName("type");
+            generator.writeString(type);
+        }
 
 		String remote = message.getRemote();
 		if(remote != null) {
@@ -44,8 +51,10 @@ public abstract class GrpcConnectionMarker<T extends GrpcMessage> extends Logsta
 		}
 
 		String origin = message.getOrigin();
-		generator.writeFieldName("origin");
-		generator.writeString(origin);
+        if(origin != null) {
+            generator.writeFieldName("origin");
+            generator.writeString(origin);
+        }
 
 		Map<String, ?> headers = message.getHeaders();
 		generator.writeFieldName("headers");

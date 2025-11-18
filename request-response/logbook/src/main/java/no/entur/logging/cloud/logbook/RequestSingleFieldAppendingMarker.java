@@ -48,15 +48,31 @@ public class RequestSingleFieldAppendingMarker extends AbstractSingleFieldAppend
     protected void writeFieldValue(JsonGenerator generator) throws IOException {
         generator.writeStartObject();
 
-        generator.writeStringField("origin", origin);
+        if(origin != null) {
+            generator.writeStringField("origin", origin);
+        }
         generator.writeStringField("type", "request");
-        generator.writeStringField("protocol", protocol);
-        generator.writeStringField("remote", remote);
-        generator.writeStringField("method", method);
-        generator.writeStringField("uri", uri);
-        generator.writeStringField("host", host);
-        generator.writeStringField("path", path);
-        generator.writeStringField("scheme", scheme);
+        if(protocol != null) {
+            generator.writeStringField("protocol", protocol);
+        }
+        if(remote != null) {
+            generator.writeStringField("remote", remote);
+        }
+        if(method != null) {
+            generator.writeStringField("method", method);
+        }
+        if(uri != null) {
+            generator.writeStringField("uri", uri);
+        }
+        if(host != null) {
+            generator.writeStringField("host", host);
+        }
+        if(path != null) {
+            generator.writeStringField("path", path);
+        }
+        if(scheme != null) {
+            generator.writeStringField("scheme", scheme);
+        }
         if(port.isEmpty()) {
             generator.writeNumberField("port", 80);
         } else {
