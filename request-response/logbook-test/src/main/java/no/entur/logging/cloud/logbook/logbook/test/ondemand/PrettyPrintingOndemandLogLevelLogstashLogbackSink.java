@@ -14,7 +14,6 @@ import org.zalando.logbook.ContentType;
 import org.zalando.logbook.Correlation;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
-import org.zalando.logbook.Origin;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -86,7 +85,7 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
             try {
                 byte[] body = request.getBody();
                 if (body != null && body.length > 0) {
-                    if (request.getOrigin() == Origin.LOCAL) {
+                    if (request.getOrigin().equals("local")) {
                         // trust our own data to be wellformed
                         if (body.length > maxBodySize) {
                             writer = new PrettyPrintingLocalHttpMessageBodyWriter(body);
@@ -136,7 +135,7 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
             try {
                 byte[] body = response.getBody();
                 if (body != null && body.length > 0) {
-                    if (response.getOrigin() == Origin.LOCAL) {
+                    if (response.getOrigin().equals("local")) {
                         // trust our own data to be wellformed
                         if (body.length > maxBodySize) {
                             writer = new PrettyPrintingLocalHttpMessageBodyWriter(body);

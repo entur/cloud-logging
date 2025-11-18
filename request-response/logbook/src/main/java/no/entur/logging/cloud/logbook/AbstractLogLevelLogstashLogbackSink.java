@@ -8,7 +8,6 @@ import org.zalando.logbook.ContentType;
 import org.zalando.logbook.Correlation;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
-import org.zalando.logbook.Origin;
 
 import javax.annotation.Nullable;
 
@@ -67,10 +66,10 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
             return newRequestSingleFieldAppendingMarker(request, bodyAsString, false);
         }
 
-        String body;
+        String body = null;
         boolean wellformed;
 
-        if (request.getOrigin() == Origin.LOCAL) {
+        if (request.getOrigin().equals("local")) {
             // trust data from ourselves to be wellformed
             if (bodyAsString.length() > maxSize) {
                 try {
@@ -144,10 +143,10 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
                     false);
         }
 
-        String body;
+        String body = null;
         boolean wellformed;
 
-        if (response.getOrigin() == Origin.LOCAL) {
+        if (response.getOrigin().equals("local")) {
             // trust data from ourselves to be wellformed
             if (bodyAsString.length() > maxSize) {
                 try {
