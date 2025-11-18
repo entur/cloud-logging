@@ -19,7 +19,7 @@ public class MaxSizeJsonFilterTest {
     private final MaxSizeJsonFilter filter = new MaxSizeJsonFilter(MAX_BODY_SIZE, new JsonFactory());
 
     @Test
-    public void testFilterTooBig() throws Exception {
+    public void testFilterTooBig() throws IOException {
         String s = generateLongJson(2 * MAX_BODY_SIZE);
 
         assertTrue(s.length() > MAX_BODY_SIZE);
@@ -31,7 +31,7 @@ public class MaxSizeJsonFilterTest {
     }
 
     @Test
-    public void testFilterNotTooBig() throws Exception {
+    public void testFilterNotTooBig() throws IOException {
         String s = generateLongJson(MAX_BODY_SIZE / 2);
 
         assertFalse(s.length() > MAX_BODY_SIZE);
