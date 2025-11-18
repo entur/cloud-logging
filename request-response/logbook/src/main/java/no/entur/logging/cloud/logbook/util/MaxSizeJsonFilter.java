@@ -27,7 +27,7 @@ public class MaxSizeJsonFilter {
         this.factory = jsonFactory;
     }
 
-    public String transform(String body) throws IOException {
+    public String transform(String body) {
         StringBuilder output = new StringBuilder(maxBodySize + 128);
         try (
                 final JsonParser parser = factory.createParser(body);
@@ -39,11 +39,12 @@ public class MaxSizeJsonFilter {
             generator.flush();
             return writer.toString();
         } catch (Exception e) {
-            throw new IOException(e);
+            // NO-OP
         }
+        return null;
     }
 
-    public String transform(byte[] body) throws IOException {
+    public String transform(byte[] body) {
         StringBuilder output = new StringBuilder(maxBodySize + 128);
         try (
                 final JsonParser parser = factory.createParser(body);
@@ -55,8 +56,9 @@ public class MaxSizeJsonFilter {
             generator.flush();
             return writer.toString();
         } catch (Exception e) {
-            throw new IOException(e);
+            // NO-OP
         }
+        return null;
     }
 
     public void process(final JsonParser parser, JsonGenerator generator, LongSupplier outputSizeSupplier) throws IOException {
