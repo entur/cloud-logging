@@ -14,6 +14,8 @@ public abstract class AbstractOndemandSingleFieldAppendingMarker<T extends HttpM
 
     protected String contentType;
     protected Map<String, List<String>> headers;
+
+    // can be null
     protected HttpMessageBodyWriter httpMessageBodyWriter;
 
     public AbstractOndemandSingleFieldAppendingMarker(String markerName, T message, HttpMessageBodyWriter httpMessageBodyWriter) {
@@ -33,7 +35,9 @@ public abstract class AbstractOndemandSingleFieldAppendingMarker<T extends HttpM
     }
 
     public void performPostProcessing() {
-        httpMessageBodyWriter.prepareResult();
+        if(httpMessageBodyWriter != null) {
+            httpMessageBodyWriter.prepareResult();
+        }
     }
 
     protected void writeBody(JsonGenerator generator) {
