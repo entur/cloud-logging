@@ -26,8 +26,6 @@ public class ErrorWebLoggingFormatTest {
 
 		ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/thrown/error", entity, MyEntity.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-
-        // check that there is a response message
 	}
 
 }
