@@ -39,7 +39,9 @@ public class ResponseOndemandSingleFieldAppendingMarker extends AbstractOndemand
     protected void writeFieldValue(JsonGenerator generator) throws IOException {
         generator.writeStartObject();
 
-        generator.writeStringField("origin", origin);
+        if(origin != null) {
+            generator.writeStringField("origin", origin);
+        }
         generator.writeStringField("type", "response");
         if(duration != null) {
             generator.writeNumberField("duration", duration.toMillis());
