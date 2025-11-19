@@ -46,7 +46,9 @@ public class ResponseOndemandSingleFieldAppendingMarker extends AbstractOndemand
         if(duration != null) {
             generator.writeNumberField("duration", duration.toMillis());
         }
-        generator.writeStringField("protocol", protocol);
+        if(protocol != null) {
+            generator.writeStringField("protocol", protocol);
+        }
         generator.writeNumberField("status", status);
 
         writeHeaders(generator);
