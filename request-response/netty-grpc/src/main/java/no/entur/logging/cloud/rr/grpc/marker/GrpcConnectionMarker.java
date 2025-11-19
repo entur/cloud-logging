@@ -72,10 +72,8 @@ public abstract class GrpcConnectionMarker<T extends GrpcMessage> extends Logsta
 					if(value != null) {
 						if (value instanceof List) {
 							List<Object> values = (List) value;
-							if (values != null) {
-								for (Object listValue : values) {
-									generator.writeObject(listValue);
-								}
+							for (Object listValue : values) {
+								generator.writeObject(listValue);
 							}
 						} else {
 							generator.writeObject(value);
