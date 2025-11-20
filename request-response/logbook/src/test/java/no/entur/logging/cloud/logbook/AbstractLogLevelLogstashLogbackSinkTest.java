@@ -17,7 +17,7 @@ import static org.mockito.Mockito.*;
 
 public class AbstractLogLevelLogstashLogbackSinkTest {
 
-    public class MockLogLevelLogstashLogbackSink extends AbstractLogLevelLogstashLogbackSink {
+    public static class MockLogLevelLogstashLogbackSink extends AbstractLogLevelLogstashLogbackSink {
 
         public MockLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, JsonFactory jsonFactory, int maxSize, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier, MessageComposer server, MessageComposer client) {
             super(logConsumer, logLevelEnabled, jsonFactory, maxSize, remoteHttpMessageContextSupplier, server, client);
