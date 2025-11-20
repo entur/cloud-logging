@@ -11,6 +11,8 @@ import org.zalando.logbook.HttpResponse;
 import org.zalando.logbook.Origin;
 
 import javax.annotation.Nullable;
+
+import java.time.Duration;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
@@ -117,28 +119,28 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
         boolean isXml = isXmlMediaType(contentType);
 
         if (!isJson && !isXml) {
-            return newResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), null, false);
+            return newResponseSingleFieldAppendingMarker(response, correlation.getDuration(), null, false);
         }
 
         String bodyAsString;
         try {
             bodyAsString = response.getBodyAsString();
         } catch (Exception e) {
-            return newResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), null, false);
+            return newResponseSingleFieldAppendingMarker(response, correlation.getDuration(), null, false);
         }
 
         if (bodyAsString == null || bodyAsString.length() == 0) {
-            return newResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), null, false);
+            return newResponseSingleFieldAppendingMarker(response, correlation.getDuration(), null, false);
         }
 
         if (!isJson) {
             if (bodyAsString.length() > maxSize) {
                 // TODO add filter
                 String truncatedBody = bodyAsString.substring(0, maxSize);
-                return newResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(),
+                return newResponseSingleFieldAppendingMarker(response, correlation.getDuration(),
                         truncatedBody, false);
             }
-            return new ResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), bodyAsString,
+            return new ResponseSingleFieldAppendingMarker(response, correlation.getDuration(), bodyAsString,
                     false);
         }
 
@@ -181,9 +183,9 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
                 }
             }
         }
-        return newResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), body, wellformed);
+        return newResponseSingleFieldAppendingMarker(response, correlation.getDuration(), body, wellformed);
     }
 
-    protected abstract Marker newResponseSingleFieldAppendingMarker(HttpResponse response, long millis, String body,
-            boolean wellformed);
+    protected abstract Marker newResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body,
+                                                                    boolean wellformed);
 }

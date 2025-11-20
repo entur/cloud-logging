@@ -178,7 +178,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
             }
         }
 
-        return new ResponseOndemandSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), writer);
+        return new ResponseOndemandSingleFieldAppendingMarker(response, correlation.getDuration(), writer);
     }
 
 }

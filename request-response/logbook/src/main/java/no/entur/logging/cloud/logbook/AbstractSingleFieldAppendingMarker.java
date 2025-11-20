@@ -63,13 +63,23 @@ public abstract class AbstractSingleFieldAppendingMarker<T extends HttpMessage> 
     protected void writeHeaders(JsonGenerator generator) throws IOException {
         generator.writeFieldName("headers");
         generator.writeStartObject();
-        for (Map.Entry<String, List<String>> stringListEntry : headers.entrySet()) {
-            generator.writeFieldName(stringListEntry.getKey().toLowerCase());
-            generator.writeStartArray();
-            for(String value : stringListEntry.getValue()) {
-                generator.writeString(value);
+        if(headers != null) {
+            for (Map.Entry<String, List<String>> stringListEntry : headers.entrySet()) {
+
+                String key = stringListEntry.getKey();
+                if(key != null && !key.isEmpty()) {
+                    generator.writeFieldName(key.toLowerCase());
+                    generator.writeStartArray();
+
+                    List<String> values = stringListEntry.getValue();
+                    if(values != null) {
+                        for (String value : values) {
+                            generator.writeString(value);
+                        }
+                    }
+                    generator.writeEndArray();
+                }
             }
-            generator.writeEndArray();
         }
         generator.writeEndObject();
     }
