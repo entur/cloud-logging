@@ -2,7 +2,7 @@
 plugins {
     id 'com.github.ben-manes.versions' version '0.53.0' apply false // ./gradlew dependencyUpdates
     id "org.sonarqube" version "7.0.1.6134"
-    id 'org.jreleaser' version '1.21.0' apply false
+    id 'org.jreleaser' version '1.20.0' apply false
 }
 
 // Define version variables at root level so they're available everywhere
@@ -59,8 +59,11 @@ def jvmProjects() {
 configure(exampleProjects()) {
     apply plugin: 'java'
 
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17) // Specify desired Java version (e.g., Java 17)
+        }
+    }
 
     dependencies {
         // Use Spring Boot BOM for dependency management
@@ -71,8 +74,11 @@ configure(exampleProjects()) {
 configure(libraryProjects()) {
     apply plugin: 'java-library'
 
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17) // Specify desired Java version (e.g., Java 17)
+        }
+    }
 
     dependencies {
         // Use api(platform(...)) to enforce Spring Boot BOM versions for all dependency configurations
