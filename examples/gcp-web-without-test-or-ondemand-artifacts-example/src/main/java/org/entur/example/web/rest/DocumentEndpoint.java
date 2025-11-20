@@ -45,6 +45,22 @@ public class DocumentEndpoint {
 		return new ResponseEntity(HttpStatus.NOT_FOUND);
 	}
 
+    @PostMapping("/some/thrown/error")
+    public ResponseEntity throwErrorMethod(@RequestBody MyEntity entity) throws InterruptedException {
+        System.out.flush();
+        System.out.println("System out before endpoint logging");
+
+        logger.trace("This message should be ignored / trace");
+        logger.debug("This message should be ignored / debug");
+        logger.info("This message should be delayed / info");
+        logger.warn("This message should be logged / warn");
+        logger.error("This message should be logged / error");
+
+        Thread.sleep(1000);
+        System.out.println("System out after endpoint logging + 1000ms");
+
+        throw new NullPointerException("MOCK");
+    }
 
 
 }
