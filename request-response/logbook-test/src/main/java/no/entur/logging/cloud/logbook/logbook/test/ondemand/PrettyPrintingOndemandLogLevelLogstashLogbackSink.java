@@ -175,7 +175,7 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
             }
         }
 
-        return new ResponseOndemandSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), writer);
+        return new ResponseOndemandSingleFieldAppendingMarker(response, correlation.getDuration(), writer);
     }
 
 }

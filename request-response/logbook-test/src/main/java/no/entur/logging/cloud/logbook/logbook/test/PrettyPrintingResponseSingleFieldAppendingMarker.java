@@ -8,11 +8,12 @@ import no.entur.logging.cloud.logbook.ResponseSingleFieldAppendingMarker;
 import org.zalando.logbook.HttpResponse;
 
 import java.io.IOException;
+import java.time.Duration;
 
 public class PrettyPrintingResponseSingleFieldAppendingMarker extends ResponseSingleFieldAppendingMarker {
 
 
-    public PrettyPrintingResponseSingleFieldAppendingMarker(HttpResponse response, long duration, String body, boolean wellformed) {
+    public PrettyPrintingResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body, boolean wellformed) {
         super(response, duration, body, wellformed);
     }
 

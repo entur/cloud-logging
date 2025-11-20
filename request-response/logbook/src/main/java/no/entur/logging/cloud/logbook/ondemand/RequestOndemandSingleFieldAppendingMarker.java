@@ -3,6 +3,7 @@ package no.entur.logging.cloud.logbook.ondemand;
 import com.fasterxml.jackson.core.JsonGenerator;
 import net.logstash.logback.marker.SingleFieldAppendingMarker;
 import org.zalando.logbook.HttpRequest;
+import org.zalando.logbook.Origin;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -30,7 +31,10 @@ public class RequestOndemandSingleFieldAppendingMarker extends AbstractOndemandS
     protected void prepareForDeferredProcessing(HttpRequest message) {
         super.prepareForDeferredProcessing(message);
 
-        origin = message.getOrigin().name().toLowerCase(Locale.ROOT);
+        Origin origin = message.getOrigin();
+        if(origin != null) {
+            this.origin = origin.name().toLowerCase(Locale.ROOT);
+        }
         protocol = message.getProtocolVersion();
         remote = message.getRemote();
         method = message.getMethod();
