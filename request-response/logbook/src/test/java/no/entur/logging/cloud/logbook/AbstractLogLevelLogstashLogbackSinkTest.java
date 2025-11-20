@@ -10,6 +10,7 @@ import org.zalando.logbook.HttpResponse;
 import org.zalando.logbook.Origin;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
@@ -29,7 +30,7 @@ public class AbstractLogLevelLogstashLogbackSinkTest {
         }
 
         @Override
-        protected Marker newResponseSingleFieldAppendingMarker(HttpResponse response, long millis, String body, boolean wellformed) {
+        protected Marker newResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body, boolean wellformed) {
             return mock(Marker.class);
         }
     }
