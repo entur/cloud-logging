@@ -8,6 +8,8 @@ import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateSupplier;
 import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupplierSource;
 import no.entur.logging.cloud.logbook.ondemand.state.ResponseHttpMessageStateSupplierSource;
 import no.entur.logging.cloud.spring.logbook.LogbookLoggingAutoConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -16,7 +18,11 @@ import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import static jakarta.servlet.DispatcherType.ASYNC;
 import static jakarta.servlet.DispatcherType.ERROR;
@@ -74,5 +80,26 @@ public class LogbookWebAutoConfiguration {
             return new HttpMessageStateFilterMvcRegistrations();
         }
 
+    }
+
+    /**
+     *
+     * Add last-ditch-effort controller advice due to logbook warning:
+     * Beware: The ERROR dispatch is not supported. You're strongly advised to produce error responses within the REQUEST or ASYNC dispatch.
+     *
+     */
+
+    @ControllerAdvice
+    @ConditionalOnProperty(name = {"entur.logging.request-response.http.server.controller-advice.enabled"}, havingValue = "true", matchIfMissing = true)
+    public static class ThrowableControllerAdvice extends ResponseEntityExceptionHandler {
+
+        private final static Logger LOGGER = LoggerFactory.getLogger(ThrowableControllerAdvice.class);
+
+        @ExceptionHandler(Throwable.class)
+        @ResponseBody
+        public ResponseEntity<?> throwable(Throwable e) {
+            LOGGER.error("Uncaught throwable", e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }
