@@ -8,8 +8,6 @@ import ch.qos.logback.core.spi.FilterReply;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
-import io.micrometer.core.lang.NonNullApi;
-import io.micrometer.core.lang.NonNullFields;
 import no.entur.logging.cloud.api.DevOpsLevel;
 import no.entur.logging.cloud.api.DevOpsMarker;
 import no.entur.logging.cloud.micrometer.LoggingEventMetrics;
@@ -17,8 +15,7 @@ import org.slf4j.Marker;
 
 import java.util.List;
 
-@NonNullApi
-@NonNullFields
+@org.jspecify.annotations.NullMarked
 public class StackdriverMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
 
     protected final Counter alertCounter;

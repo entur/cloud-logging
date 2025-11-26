@@ -2,18 +2,12 @@ package org.entur.example.web;
 
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControlClosable;
-import org.entur.example.web.rest.MyEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.springframework.test.web.servlet.client.RestTestClient;
 
 /**
  *
@@ -31,26 +25,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 })
 public class OndemandWebLoggingSlowResponseTest {
 
-	@LocalServerPort
-	private int randomServerPort;
-	
-	@Autowired
-	private TestRestTemplate restTemplate;
+    @Autowired
+    private RestTestClient restTestClient;
 
 	@Test
 	public void useHumanReadablePlainEncoderExpectFullLogging() {
 		Long wait = 600L;
 
-		ResponseEntity<MyEntity> response = restTemplate.getForEntity("/api/document/some/slow/method?wait="+wait, MyEntity.class);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        restTestClient.get().uri("/api/document/some/slow/method?wait="+wait).exchange().expectStatus().isOk();
 	}
 
 	@Test
 	public void useHumanReadablePlainEncoderExpectReducedLogging() {
 		Long wait = 100L;
 
-		ResponseEntity<MyEntity> response = restTemplate.getForEntity("/api/document/some/slow/method?wait="+wait, MyEntity.class);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        restTestClient.get().uri("/api/document/some/slow/method?wait="+wait).exchange().expectStatus().isOk();
 	}
 
 
@@ -59,8 +48,7 @@ public class OndemandWebLoggingSlowResponseTest {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
 			Long wait = 600L;
 
-			ResponseEntity<MyEntity> response = restTemplate.getForEntity("/api/document/some/slow/method?wait="+wait, MyEntity.class);
-			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            restTestClient.get().uri("/api/document/some/slow/method?wait="+wait).exchange().expectStatus().isOk();
 		}
 	}
 
@@ -70,8 +58,7 @@ public class OndemandWebLoggingSlowResponseTest {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
 			Long wait = 100L;
 
-			ResponseEntity<MyEntity> response = restTemplate.getForEntity("/api/document/some/slow/method?wait="+wait, MyEntity.class);
-			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            restTestClient.get().uri("/api/document/some/slow/method?wait="+wait).exchange().expectStatus().isOk();
 		}
 	}
 
@@ -80,8 +67,7 @@ public class OndemandWebLoggingSlowResponseTest {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
 			Long wait = 600L;
 
-			ResponseEntity<MyEntity> response = restTemplate.getForEntity("/api/document/some/slow/method?wait="+wait, MyEntity.class);
-			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            restTestClient.get().uri("/api/document/some/slow/method?wait="+wait).exchange().expectStatus().isOk();
 		}
 	}
 
@@ -90,8 +76,7 @@ public class OndemandWebLoggingSlowResponseTest {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
 			Long wait = 100L;
 
-			ResponseEntity<MyEntity> response = restTemplate.getForEntity("/api/document/some/slow/method?wait="+wait, MyEntity.class);
-			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            restTestClient.get().uri("/api/document/some/slow/method?wait="+wait).exchange().expectStatus().isOk();
 		}
 	}
 
