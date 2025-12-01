@@ -23,7 +23,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.time.Duration;
@@ -86,7 +86,7 @@ public class GcpWebOndemandLoggingAutoConfiguration {
                     continue;
                 }
                 HttpLoggingScopeFilter filter = toFilter(path.getMatcher(), path.getSuccess(), path.getFailure(), path.getTroubleshoot());
-                RequestMatcher requestMatcher = AntPathRequestMatcher.antMatcher(path.getMatcher());
+                RequestMatcher requestMatcher = PathPatternRequestMatcher.withDefaults().matcher(path.getMatcher());
                 filters.addFilter(requestMatcher, filter);
             }
 

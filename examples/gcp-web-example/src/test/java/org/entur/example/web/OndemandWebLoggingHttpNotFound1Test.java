@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.client.RestTestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,11 +28,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 })
 public class OndemandWebLoggingHttpNotFound1Test {
 
-	@LocalServerPort
-	private int randomServerPort;
-	
-	@Autowired
-	private TestRestTemplate restTemplate;
+    @Autowired
+    private RestTestClient restTestClient;
 
 	@Test
 	public void useHumanReadablePlainEncoderExpectFullLogging() {
@@ -40,8 +37,7 @@ public class OndemandWebLoggingHttpNotFound1Test {
 		entity.setName("Entur");
 		entity.setSecret("mySecret");
 
-		ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/error", entity, MyEntity.class);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        restTestClient.post().uri("/api/document/some/error").contentType(MediaType.APPLICATION_JSON).body(entity).exchange().expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
 	}
 
 	@Test 
@@ -51,8 +47,7 @@ public class OndemandWebLoggingHttpNotFound1Test {
 			entity.setName("Entur");
 			entity.setSecret("mySecret");
 
-			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/error", entity, MyEntity.class);
-			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            restTestClient.post().uri("/api/document/some/error").contentType(MediaType.APPLICATION_JSON).body(entity).exchange().expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
 		}
 	}
 
@@ -63,8 +58,7 @@ public class OndemandWebLoggingHttpNotFound1Test {
 			entity.setName("Entur");
 			entity.setSecret("mySecret");
 
-			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/error", entity, MyEntity.class);
-			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            restTestClient.post().uri("/api/document/some/error").contentType(MediaType.APPLICATION_JSON).body(entity).exchange().expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
 		}
 	}
 

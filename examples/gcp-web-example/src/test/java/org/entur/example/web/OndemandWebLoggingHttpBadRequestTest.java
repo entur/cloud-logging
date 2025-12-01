@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -16,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.client.RestTestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,44 +31,31 @@ import static org.assertj.core.api.Assertions.assertThat;
 })
 public class OndemandWebLoggingHttpBadRequestTest {
 
-	@LocalServerPort
-	private int randomServerPort;
-	
-	@Autowired
-	private TestRestTemplate restTemplate;
+    @Autowired
+    private RestTestClient restTestClient;
 
 	@Test
 	public void useHumanReadablePlainEncoderExpectFullLoggingWithoutWellformedBody() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		HttpEntity<String> request = new HttpEntity<>("{invalid json which does not break the log statement syntax}", headers);
+        String body = "{invalid json which does not break the log statement syntax}";
 
-		ResponseEntity<MyEntity> response = restTemplate.exchange("/api/document/some/error", HttpMethod.POST, request, MyEntity.class);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        restTestClient.post().uri("/api/document/some/error").contentType(MediaType.APPLICATION_JSON).body(body).exchange().expectStatus().isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
 	@Test
 	public void useHumanReadableJsonEncoderExpectFullLoggingWithoutWellformedBody() {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_JSON);
-			HttpEntity<String> request = new HttpEntity<>("{invalid json which does not break the log statement syntax}", headers);
+            String body = "{invalid json which does not break the log statement syntax}";
 
-			ResponseEntity<MyEntity> response = restTemplate.exchange("/api/document/some/error", HttpMethod.POST, request, MyEntity.class);
-			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            restTestClient.post().uri("/api/document/some/error").contentType(MediaType.APPLICATION_JSON).body(body).exchange().expectStatus().isEqualTo(HttpStatus.BAD_REQUEST);
 		}
 	}
 
 	@Test
 	public void useMachineReadableJsonEncoderExpectFullLoggingWithoutWellformedBody() throws InterruptedException {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
+            String body = "{invalid json which does not break the log statement syntax}";
 
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_JSON);
-			HttpEntity<String> request = new HttpEntity<>("{invalid json which does not break the log statement syntax}", headers);
-
-			ResponseEntity<MyEntity> response = restTemplate.exchange("/api/document/some/error", HttpMethod.POST, request, MyEntity.class);
-			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            restTestClient.post().uri("/api/document/some/error").contentType(MediaType.APPLICATION_JSON).body(body).exchange().expectStatus().isEqualTo(HttpStatus.BAD_REQUEST);
 		}
 	}
 
