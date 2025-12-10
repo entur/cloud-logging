@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -115,5 +116,17 @@ public class DocumentEndpoint {
 		return entity;
 	}
 
+    @PostMapping(value = "/some/authorizationDenied", produces = "application/json")
+    public ResponseEntity<String> authorizationDeniedException(@RequestBody MyEntity entity) throws IOException {
+        logger.info("Hello entity with secret / info");
+        throw new AuthorizationDeniedException("Access Denied", () -> false);
+    }
+
+
+    @PostMapping(value = "/some/nullpointer", produces = "application/json")
+    public ResponseEntity<String> nullPointerException(@RequestBody MyEntity entity) throws IOException {
+        logger.info("Hello entity with secret / info");
+        throw new NullPointerException();
+    }
 
 }
