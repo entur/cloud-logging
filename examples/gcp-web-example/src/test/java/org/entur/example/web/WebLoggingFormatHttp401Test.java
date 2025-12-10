@@ -28,6 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 	"logbook.secure-filter.enabled=false"
 })
 
+
+
 public class WebLoggingFormatHttp401Test {
 
 	@LocalServerPort
