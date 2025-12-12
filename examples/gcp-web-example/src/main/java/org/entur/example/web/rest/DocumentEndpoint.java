@@ -124,7 +124,7 @@ public class DocumentEndpoint {
 
 
     @PostMapping(value = "/some/nullpointer", produces = "application/json")
-    public ResponseEntity<String> nullPointerException(@RequestBody MyEntity entity) throws IOException {
+    public ResponseEntity<String> nullPointerException(@RequestBody MyEntity entity) {
         logger.info("Hello entity with secret / info");
         throw new NullPointerException();
     }
