@@ -18,7 +18,10 @@ import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -84,8 +87,13 @@ public class LogbookWebAutoConfiguration {
 
     /**
      *
-     * Add last-ditch-effort controller advice due to logbook warning:
+     * Adding controller-advice so to have a last-ditch-effort controller advice - for Throwable. From Logbook docs:
      * Beware: The ERROR dispatch is not supported. You're strongly advised to produce error responses within the REQUEST or ASYNC dispatch.
+     * <br><br>
+     * But this also means that we capture some common exceptions, so adding explicit handlers for those as well.
+     * Ideally we did not have to do this in a logging library, but this seems like the most practical solution.
+     * <br><br>
+     * Disable the controller advice if you want to add your own handling.
      *
      */
 
@@ -95,10 +103,25 @@ public class LogbookWebAutoConfiguration {
 
         private final static Logger LOGGER = LoggerFactory.getLogger(ThrowableControllerAdvice.class);
 
+        @ExceptionHandler(AccessDeniedException.class)
+        @ResponseBody
+        public ResponseEntity<?> accessDeniedException(AccessDeniedException e) {
+            LOGGER.info("Returning access denied", e);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        @ExceptionHandler(AuthenticationException.class)
+        @ResponseBody
+        public ResponseEntity<?> authenticationException(AuthenticationException e) {
+            LOGGER.info("Returning unauthorized", e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         @ExceptionHandler(Throwable.class)
         @ResponseBody
         public ResponseEntity<?> throwable(Throwable e) {
-            LOGGER.error("Uncaught throwable", e);
+            // error log level because this should have been handled by a more specific exception-handler
+            LOGGER.error("Returning internal server error", e);
             return ResponseEntity.internalServerError().build();
         }
     }
