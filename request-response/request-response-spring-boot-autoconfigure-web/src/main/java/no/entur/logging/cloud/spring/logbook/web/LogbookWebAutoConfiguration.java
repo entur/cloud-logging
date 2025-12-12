@@ -91,7 +91,7 @@ public class LogbookWebAutoConfiguration {
      * Adding controller-advice so to have a last-ditch-effort controller advice - for Throwable. From Logbook docs:
      * Beware: The ERROR dispatch is not supported. You're strongly advised to produce error responses within the REQUEST or ASYNC dispatch.
      * <br><br>
-     * But this also means that we capture some common exceptions that, so adding explicit handler for those as well.
+     * But this also means that we capture some common exceptions, so adding explicit handlers for those as well.
      * Ideally we did not have to do this in a logging library, but this seems like the most practical solution.
      * <br><br>
      * Disable the controller advice if you want to add your own handling.
