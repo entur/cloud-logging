@@ -117,7 +117,7 @@ public class DocumentEndpoint {
 	}
 
     @PostMapping(value = "/some/authorizationDenied", produces = "application/json")
-    public ResponseEntity<String> authorizationDeniedException(@RequestBody MyEntity entity) throws IOException {
+    public ResponseEntity<String> authorizationDeniedException(@RequestBody MyEntity entity) {
         logger.info("Hello entity with secret / info");
         throw new AuthorizationDeniedException("Access Denied", () -> false);
     }
