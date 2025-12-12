@@ -86,6 +86,18 @@ public class LogbookWebAutoConfiguration {
 
     }
 
+    /**
+     *
+     * Adding controller-advice so to have a last-ditch-effort controller advice - for Throwable. From Logbook docs:
+     * Beware: The ERROR dispatch is not supported. You're strongly advised to produce error responses within the REQUEST or ASYNC dispatch.
+     * <br><br>
+     * But this also means that we capture some common exceptions that, so adding explicit handler for those as well.
+     * Ideally we did not have to do this in a logging library, but this seems like the most practical solution.
+     * <br><br>
+     * Disable the controller advice if you want to add your own handling.
+     *
+     */
+
     @ControllerAdvice
     @ConditionalOnProperty(name = {"entur.logging.request-response.http.server.controller-advice.enabled"}, havingValue = "true", matchIfMissing = true)
     public static class ThrowableControllerAdvice extends ResponseEntityExceptionHandler {
@@ -105,13 +117,6 @@ public class LogbookWebAutoConfiguration {
             LOGGER.info("Returning unauthorized", e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        /**
-         *
-         * Add last-ditch-effort controller advice due to logbook warning:
-         * Beware: The ERROR dispatch is not supported. You're strongly advised to produce error responses within the REQUEST or ASYNC dispatch.
-         *
-         */
 
         @ExceptionHandler(Throwable.class)
         @ResponseBody
