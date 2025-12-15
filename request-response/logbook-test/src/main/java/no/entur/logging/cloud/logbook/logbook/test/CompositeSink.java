@@ -143,7 +143,6 @@ public class CompositeSink implements Sink {
 
     protected void writeMachineReadableJsonEncoder(Correlation precorrelation, HttpRequest request, HttpResponse response) throws IOException {
         machineReadableJsonSink.write(precorrelation, request, response);
-
     }
 
 }
