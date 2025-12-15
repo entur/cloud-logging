@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.client.RestTestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ErrorWebLoggingFormatTest {
 
 	@Autowired
-	private TestRestTemplate restTemplate;
+	private RestTestClient restTestClient;
 
 	@Test
 	public void useMachineReadableJsonEncoder() {
@@ -23,8 +23,7 @@ public class ErrorWebLoggingFormatTest {
 		entity.setName("Entur");
 		entity.setSecret("mySecret");
 
-		ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/thrown/error", entity, MyEntity.class);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        restTestClient.post().uri("/api/document/some/thrown/error").contentType(MediaType.APPLICATION_JSON).body(entity).exchange().expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 }
