@@ -1,0 +1,40 @@
+name: Deploy to Maven Central from legacy branch
+on:
+  workflow_dispatch:
+    inputs:
+      version-increment:
+        description: 'Version-increment'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+
+jobs:
+  deploy-tag-gradle:
+    uses: entur/gha-maven-central/.github/workflows/gradle-publish.yml@v1
+    secrets: inherit
+    with:
+      next_version: ${{ inputs.version-increment }}
+      version_strategy: tag
+      version_tag_prefix: legacy-v
+
+  post-failure-to-slack:
+    needs: deploy-tag-gradle
+    if: failure()
+    uses: entur/gha-slack/.github/workflows/post.yml@v3
+    with:
+      channel_id: ${{ vars.CHANNEL_ID }}
+      message: "🔴 Gradle artifact deploy failed for ${{ github.repository }}\n ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+    secrets: inherit
+
+  post-success-to-slack:
+    needs: deploy-tag-gradle
+    if: success()
+    uses: entur/gha-slack/.github/workflows/post.yml@v3
+    with:
+      channel_id: ${{ vars.CHANNEL_ID}}
+      message: "🟢 Gradle artifact deploy success for ${{ github.repository }}\n ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+    secrets: inherit
+
+
