@@ -25,7 +25,7 @@ ext {
     nettyTcnativeBoringsslStaticVersion = '2.0.74.Final'
 
     grpcNettyVersion = '1.77.0'
-    grpcVersion = '1.77.0'
+    grpcVersion = '1.78.0'
     grpcCommonsVersion = '2.63.2'
     grpcProtobufVersion = '4.33.2'
     ecosystemGrpcVersion = '3.1.0.RELEASE'
