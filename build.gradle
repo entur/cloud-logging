@@ -321,7 +321,7 @@ jreleaser {
         github {
             skipTag = false // Skip creating a new github tag?
             skipRelease = true // Skip creating a new github release?
-            tagName = 'v'
+            tagName = "v${version}"
         }
     }
 }
