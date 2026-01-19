@@ -7,7 +7,7 @@ import org.springframework.core.Ordered;
 import java.util.ArrayList;
 import java.util.List;
 
-@ConfigurationProperties(prefix = "no.entur.logging.grpc.ondemand")
+@ConfigurationProperties(prefix = "entur.logging.grpc.ondemand")
 public class OndemandProperties {
 
     private boolean enabled;

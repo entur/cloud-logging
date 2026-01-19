@@ -16,7 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @ActiveProfiles("ondemand")
-@TestPropertySource(properties = {"entur.logging.grpc.ondemand.enabled=true"})
+@TestPropertySource(properties = {
+		"entur.logging.grpc.ondemand.enabled=true",
+		"entur.logging.grpc.ondemand.failure.logger.enabled=false",
+})
 @DirtiesContext
 public class SpringOndemandGrpcLoggingFormatTest extends SpringAbstractGrpcTest {
 
