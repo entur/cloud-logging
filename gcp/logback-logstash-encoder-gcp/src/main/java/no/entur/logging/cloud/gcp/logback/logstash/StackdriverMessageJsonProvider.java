@@ -3,7 +3,7 @@ package no.entur.logging.cloud.gcp.logback.logstash;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.StackTraceElementProxy;
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 import net.logstash.logback.composite.JsonWritingUtils;
 import net.logstash.logback.composite.loggingevent.MessageJsonProvider;
 
@@ -12,7 +12,7 @@ import java.io.IOException;
 public class StackdriverMessageJsonProvider extends MessageJsonProvider {
 
 	@Override
-	public void writeTo(JsonGenerator generator, ILoggingEvent event) throws IOException {
+	public void writeTo(JsonGenerator generator, ILoggingEvent event) {
 		IThrowableProxy throwableProxy = event.getThrowableProxy();
 		if (throwableProxy != null) {
 			String formattedMessage = event.getFormattedMessage();

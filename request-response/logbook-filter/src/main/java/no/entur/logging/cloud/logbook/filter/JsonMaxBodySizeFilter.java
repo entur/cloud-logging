@@ -1,14 +1,13 @@
 package no.entur.logging.cloud.logbook.filter;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonStreamContext;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.MappingJsonFactory;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.zalando.logbook.BodyFilter;
 import org.zalando.logbook.ContentType;
+import tools.jackson.core.TokenStreamContext;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.util.function.LongSupplier;
@@ -28,11 +27,11 @@ public class JsonMaxBodySizeFilter implements BodyFilter {
         return new JsonMaxBodySizeFilter(maxBodySize);
     }
 
-    private JsonFactory factory;
+    private JsonMapper mapper;
 
     public JsonMaxBodySizeFilter(int maxBodySize) {
         this.maxBodySize = maxBodySize;
-        this.factory = new MappingJsonFactory();
+        this.mapper = JsonMapper.builder().build();
     }
 
     @Override
@@ -44,11 +43,11 @@ public class JsonMaxBodySizeFilter implements BodyFilter {
         if(body.length() > maxBodySize) {
             StringBuilder output = new StringBuilder(maxBodySize);
             try (
-                    final JsonParser parser = factory.createParser(body);
+                    final JsonParser parser = mapper.createParser(body);
                     StringBuilderWriter writer = new StringBuilderWriter(maxBodySize + 128);
-                    JsonGenerator generator = factory.createGenerator(writer);
+                    JsonGenerator generator = mapper.createGenerator(writer);
             ) {
-                process(parser, generator, () -> generator.getOutputBuffered() + output.length());
+                process(parser, generator, () -> generator.streamWriteOutputBuffered() + output.length());
 
                 generator.flush();
                 return writer.toString();
@@ -75,7 +74,7 @@ public class JsonMaxBodySizeFilter implements BodyFilter {
             if(nextToken == null) {
                 break;
             }
-            if(nextToken == JsonToken.FIELD_NAME) {
+            if(nextToken == JsonToken.PROPERTY_NAME) {
                 fieldName = parser.currentName();
 
                 continue;
@@ -101,11 +100,11 @@ public class JsonMaxBodySizeFilter implements BodyFilter {
             if(outputSize + size >= maxSize) {
                 // write notification
 
-                JsonStreamContext ctxt = generator.getOutputContext();
+                TokenStreamContext ctxt = generator.streamWriteContext();
                 if (ctxt.inArray()) {
                     generator.writeString("Logger: " + message);
                 } else if (ctxt.inObject()) {
-                    generator.writeStringField("Logger", message);
+                    generator.writeStringProperty("Logger", message);
                 }
 
                 generator.close();
@@ -114,7 +113,7 @@ public class JsonMaxBodySizeFilter implements BodyFilter {
             }
 
             if(fieldName != null) {
-                generator.writeFieldName(fieldName);
+                generator.writeName(fieldName);
                 fieldName = null;
             }
 

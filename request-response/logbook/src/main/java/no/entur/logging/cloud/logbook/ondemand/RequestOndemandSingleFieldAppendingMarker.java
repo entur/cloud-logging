@@ -1,6 +1,6 @@
 package no.entur.logging.cloud.logbook.ondemand;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 import net.logstash.logback.marker.SingleFieldAppendingMarker;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.Origin;
@@ -46,22 +46,22 @@ public class RequestOndemandSingleFieldAppendingMarker extends AbstractOndemandS
     }
 
     @Override
-    protected void writeFieldValue(JsonGenerator generator) throws IOException {
+    protected void writeFieldValue(JsonGenerator generator) {
         generator.writeStartObject();
 
-        generator.writeStringField("origin", origin);
-        generator.writeStringField("type", "request");
-        generator.writeStringField("protocol", protocol);
-        generator.writeStringField("remote", remote);
-        generator.writeStringField("method", method);
-        generator.writeStringField("uri", uri);
-        generator.writeStringField("host", host);
-        generator.writeStringField("path", path);
-        generator.writeStringField("scheme", scheme);
+        generator.writeStringProperty("origin", origin);
+        generator.writeStringProperty("type", "request");
+        generator.writeStringProperty("protocol", protocol);
+        generator.writeStringProperty("remote", remote);
+        generator.writeStringProperty("method", method);
+        generator.writeStringProperty("uri", uri);
+        generator.writeStringProperty("host", host);
+        generator.writeStringProperty("path", path);
+        generator.writeStringProperty("scheme", scheme);
         if(port.isEmpty()) {
-            generator.writeNumberField("port", 80);
+            generator.writeNumberProperty("port", 80);
         } else {
-            generator.writeNumberField("port", port.get());
+            generator.writeNumberProperty("port", port.get());
         }
 
         writeHeaders(generator);

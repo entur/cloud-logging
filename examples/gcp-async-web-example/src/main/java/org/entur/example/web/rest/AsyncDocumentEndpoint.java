@@ -1,7 +1,6 @@
 package org.entur.example.web.rest;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 import no.entur.logging.cloud.spring.ondemand.web.scope.LoggingScopeThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tools.jackson.core.json.JsonFactory;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
@@ -120,9 +120,9 @@ public class AsyncDocumentEndpoint {
 		JsonGenerator generator = factory.createGenerator(writer);
 
 		generator.writeStartObject();
-		generator.writeStringField("start", "here");
-		generator.writeStringField("longValue", generateLongString(64*1024));
-		generator.writeStringField("end", "here");
+		generator.writeStringProperty("start", "here");
+		generator.writeStringProperty("longValue", generateLongString(64*1024));
+		generator.writeStringProperty("end", "here");
 		generator.writeEndObject();
 
 		generator.flush();

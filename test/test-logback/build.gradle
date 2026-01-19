@@ -7,7 +7,7 @@ dependencies {
     api ("ch.qos.logback:logback-classic")
     api ("ch.qos.logback:logback-core")
 
-    api ("org.entur.jackson:jackson-syntax-highlight:${jacksonSyntaxHighlightVersion}")
+    api ("org.entur.jackson:jackson-tools-syntax-highlight:${jacksonSyntaxHighlightVersion}")
     api ("org.entur.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
 
     // junit

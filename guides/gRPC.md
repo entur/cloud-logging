@@ -56,11 +56,11 @@ Add the spring-boot-starter artifact coordinates to your project.
 ```xml
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>spring-boot-starter-gcp-grpc-ecosystem</artifactId>
+    <artifactId>spring-boot-starter-gcp-grpc-spring</artifactId>
 </dependency>
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>spring-boot-starter-gcp-grpc-ecosystem-test</artifactId>
+    <artifactId>spring-boot-starter-gcp-grpc-spring-test</artifactId>
     <scope>test</scope>
 </dependency>
 ```
@@ -73,8 +73,8 @@ or
   <summary>Gradle Spring Boot Starter coordinates</summary>
 
 ```groovy
-implementation ("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-ecosystem")
-testImplementation ("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-ecosystem-test")
+implementation ("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-spring")
+testImplementation ("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-spring-test")
 ```
 </details>
 
@@ -114,11 +114,11 @@ Import the request-response Spring Boot starters:
 ```xml
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>request-response-spring-boot-starter-gcp-grpc-ecosystem</artifactId>
+    <artifactId>request-response-spring-boot-starter-gcp-grpc-spring</artifactId>
 </dependency>
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>request-response-spring-boot-starter-gcp-grpc-ecosystem-test</artifactId>
+    <artifactId>request-response-spring-boot-starter-gcp-grpc-spring-test</artifactId>
     <scope>test</scope>
 </dependency>
 ```
@@ -131,8 +131,8 @@ or
   <summary>Gradle Spring Boot Starter coordinates</summary>
 
 ```groovy
-implementation ("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-ecosystem")
-testImplementation ("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-ecosystem-test")
+implementation ("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-spring")
+testImplementation ("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-spring-test")
 ```
 </details>
 
@@ -227,8 +227,8 @@ For 'classic' one-line log output when running a server locally, additionally ad
 ```groovy
 tasks.register("logPlainly") {
    dependencies {
-      implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-ecosystem-test")
-      implementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-ecosystem-test")
+      implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-spring-test")
+      implementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-spring-test")
    }
 }
 

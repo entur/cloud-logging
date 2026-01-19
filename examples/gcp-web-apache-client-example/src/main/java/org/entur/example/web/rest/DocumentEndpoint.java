@@ -1,9 +1,5 @@
 package org.entur.example.web.rest;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -14,21 +10,11 @@ import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.ByteArrayOutputStream;
-import java.io.CharArrayWriter;
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
+import tools.jackson.databind.json.JsonMapper;
 
 @RestController
 @RequestMapping("/api/document")
@@ -39,7 +25,7 @@ public class DocumentEndpoint {
 	@Autowired
 	private CloseableHttpClient httpclient;
 
-	private ObjectMapper mapper = new ObjectMapper();
+	private JsonMapper mapper = JsonMapper.builder().build();
 
 	@PostMapping("/some/method")
 	public MyEntity someMessage(@RequestBody MyEntity entity, HttpServletRequest request) throws Exception {

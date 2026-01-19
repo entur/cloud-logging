@@ -1,6 +1,6 @@
 package no.entur.logging.cloud.rr.grpc.marker;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 import no.entur.logging.cloud.rr.grpc.message.GrpcResponse;
 
 import java.io.IOException;
@@ -14,8 +14,8 @@ public class GrpcResponseMarker extends GrpcConnectionMarker<GrpcResponse> {
 	}
 
 	@Override
-	protected void writeFields(JsonGenerator generator) throws IOException {
-		generator.writeFieldName("status");
+	protected void writeFields(JsonGenerator generator) {
+		generator.writeName("status");
 		generator.writeNumber(message.getStatusCode().value());
 
 		super.writeFields(generator);
@@ -26,8 +26,8 @@ public class GrpcResponseMarker extends GrpcConnectionMarker<GrpcResponse> {
 		}
 	}
 
-	protected void writeBodyField(JsonGenerator generator, String body) throws IOException {
-		generator.writeFieldName("body");
+	protected void writeBodyField(JsonGenerator generator, String body) {
+		generator.writeName("body");
 		generator.writeRawValue(body);
 	}
 

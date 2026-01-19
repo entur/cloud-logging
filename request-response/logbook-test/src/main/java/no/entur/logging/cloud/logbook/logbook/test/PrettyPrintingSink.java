@@ -1,12 +1,10 @@
 package no.entur.logging.cloud.logbook.logbook.test;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import no.entur.logging.cloud.logbook.AbstractLogLevelLogstashLogbackSink;
-import org.entur.jackson.jsh.AnsiSyntaxHighlight;
-import org.entur.jackson.jsh.SyntaxHighlighter;
-import org.entur.jackson.jsh.SyntaxHighlightingJsonGenerator;
+import org.entur.jackson.tools.jsh.AnsiSyntaxHighlight;
+import org.entur.jackson.tools.jsh.SyntaxHighlighter;
+import org.entur.jackson.tools.jsh.SyntaxHighlightingJsonGenerator;
+import org.entur.jackson.tools.jsh.SyntaxHighlightingPrettyPrinter;
+import tools.jackson.core.JsonGenerator;
 import no.entur.logging.cloud.logbook.AbstractLogLevelSink;
 import no.entur.logging.cloud.logbook.AbstractSinkBuilder;
 import no.entur.logging.cloud.logbook.MessageComposer;
@@ -16,6 +14,9 @@ import org.zalando.logbook.ContentType;
 import org.zalando.logbook.Correlation;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -47,8 +48,11 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
             if (syntaxHighlighter == null) {
                 throw new IllegalStateException("Expected Json syntax highlighter level");
             }
-            if (jsonFactory == null) {
-                jsonFactory = new JsonFactory();
+            if (jsonMapper == null) {
+                jsonMapper = JsonMapper.builder()
+                        .defaultPrettyPrinter(new SyntaxHighlightingPrettyPrinter(syntaxHighlighter))
+                        .configure(SerializationFeature.INDENT_OUTPUT, true)
+                        .build();
             }
             if (client == null) {
                 throw new IllegalStateException("Expected client message composer");
@@ -61,21 +65,21 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
             // backend, but getting the same during testing as in production makes most
             // sense
 
-            return new PrettyPrintingSink(logEnabledToBooleanSupplier(), loggerToBiConsumer(), jsonFactory,
+            return new PrettyPrintingSink(logEnabledToBooleanSupplier(), loggerToBiConsumer(), jsonMapper,
                     syntaxHighlighter, server, client);
         }
 
     }
 
-    protected final JsonFactory jsonFactory;
+    protected final JsonMapper jsonMapper;
 
     protected final SyntaxHighlighter syntaxHighlighter;
 
     public PrettyPrintingSink(BooleanSupplier logLevelEnabled, BiConsumer<Marker, String> logConsumer,
-            JsonFactory jsonFactory, SyntaxHighlighter syntaxHighlighter, MessageComposer server,
+                              JsonMapper jsonMapper, SyntaxHighlighter syntaxHighlighter, MessageComposer server,
             MessageComposer client) {
         super(logLevelEnabled, logConsumer, server, client);
-        this.jsonFactory = jsonFactory;
+        this.jsonMapper = jsonMapper;
         this.syntaxHighlighter = syntaxHighlighter;
     }
 
@@ -160,16 +164,19 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
 
         if (body != null && body.length() > 0) {
             try (
-                    JsonParser parser = jsonFactory.createParser(body);
+                    JsonParser parser = jsonMapper.createParser(body);
                     StringWriter writer = new StringWriter(body.length() * 2);
-                    JsonGenerator generator = jsonFactory.createGenerator(writer);) {
-                JsonGenerator jsonGenerator = new SyntaxHighlightingJsonGenerator(generator, syntaxHighlighter, true);
+                    JsonGenerator generator = jsonMapper.createGenerator(writer);) {
+
+                SyntaxHighlightingPrettyPrinter prettyPrinter = (SyntaxHighlightingPrettyPrinter)generator.getPrettyPrinter();
+
+                JsonGenerator jsonGenerator = new SyntaxHighlightingJsonGenerator(generator, prettyPrinter, prettyPrinter.getObjectIndenter(), prettyPrinter.getArrayIndenter(), prettyPrinter.getSyntaxHighlighter());
                 while (parser.nextToken() != null) {
                     jsonGenerator.copyCurrentEvent(parser);
                 }
                 jsonGenerator.flush();
                 return writer.toString();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 // ignore, keep payload as-is
             }
         }

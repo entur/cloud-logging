@@ -1,7 +1,11 @@
 package no.entur.logging.cloud.logbook.ondemand;
 
-import com.fasterxml.jackson.core.*;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateResult;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.TokenStreamContext;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
@@ -12,12 +16,12 @@ public class MaxSizeLocalHttpMessageBodyWriter implements HttpMessageBodyWriter 
 
     protected final byte[] input;
     protected final int maxSize;
-    protected final JsonFactory jsonFactory;
+    protected final JsonMapper jsonMapper;
 
     protected HttpMessageStateResult output;
 
-    public MaxSizeLocalHttpMessageBodyWriter(JsonFactory jsonFactory, byte[] input, int maxSize) {
-        this.jsonFactory = jsonFactory;
+    public MaxSizeLocalHttpMessageBodyWriter(JsonMapper jsonMapper, byte[] input, int maxSize) {
+        this.jsonMapper = jsonMapper;
         this.input = input;
         this.maxSize = maxSize;
     }
@@ -47,20 +51,20 @@ public class MaxSizeLocalHttpMessageBodyWriter implements HttpMessageBodyWriter 
         HttpMessageStateResult output = this.output;
 
         if(output.isWellformed()) {
-            generator.writeFieldName("body");
+            generator.writeName("body");
             generator.writeRawValue(output.getBody());
         } else {
-            generator.writeStringField("body", output.getBody());
+            generator.writeStringProperty("body", output.getBody());
         }
     }
 
     protected String filterMaxSize(byte[] body, int max) {
         try (
-                JsonParser parser = jsonFactory.createParser(body);
+                JsonParser parser = jsonMapper.createParser(body);
                 CharArrayWriter writer = new CharArrayWriter(max);
-                JsonGenerator generator = jsonFactory.createGenerator(writer);
+                JsonGenerator generator = jsonMapper.createGenerator(writer);
         ) {
-            process(parser, generator, () -> generator.getOutputBuffered() + writer.size(), max);
+            process(parser, generator, () -> generator.streamWriteOutputBuffered() + writer.size(), max);
 
             generator.flush();
             return writer.toString();
@@ -85,7 +89,7 @@ public class MaxSizeLocalHttpMessageBodyWriter implements HttpMessageBodyWriter 
             if(nextToken == null) {
                 break;
             }
-            if(nextToken == JsonToken.FIELD_NAME) {
+            if(nextToken == JsonToken.PROPERTY_NAME) {
                 fieldName = parser.currentName();
 
                 continue;
@@ -111,11 +115,11 @@ public class MaxSizeLocalHttpMessageBodyWriter implements HttpMessageBodyWriter 
             if(outputSize + size >= limit) {
                 // write notification
 
-                JsonStreamContext ctxt = generator.getOutputContext();
+                TokenStreamContext ctxt = generator.streamWriteContext();
                 if (ctxt.inArray()) {
                     generator.writeString("Logger: " + message);
                 } else if (ctxt.inObject()) {
-                    generator.writeStringField("Logger", message);
+                    generator.writeStringProperty("Logger", message);
                 }
 
                 generator.close();
@@ -124,7 +128,7 @@ public class MaxSizeLocalHttpMessageBodyWriter implements HttpMessageBodyWriter 
             }
 
             if(fieldName != null) {
-                generator.writeFieldName(fieldName);
+                generator.writeName(fieldName);
                 fieldName = null;
             }
 

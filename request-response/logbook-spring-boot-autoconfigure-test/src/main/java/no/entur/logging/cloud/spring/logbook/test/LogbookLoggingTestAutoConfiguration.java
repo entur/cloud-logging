@@ -1,7 +1,5 @@
 package no.entur.logging.cloud.spring.logbook.test;
 
-import org.entur.jackson.jsh.AnsiSyntaxHighlight;
-import org.entur.jackson.jsh.DefaultSyntaxHighlighter;
 import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupplierSource;
 import no.entur.logging.cloud.logbook.ondemand.state.ResponseHttpMessageStateSupplierSource;
@@ -11,6 +9,8 @@ import no.entur.logging.cloud.logbook.logbook.test.PrettyPrintingSink;
 import no.entur.logging.cloud.logbook.logbook.test.ondemand.PrettyPrintingOndemandLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.spring.logbook.AbstractLogbookLoggingAutoConfiguration;
 import no.entur.logging.cloud.spring.logbook.LogbookLoggingAutoConfiguration;
+import org.entur.jackson.tools.jsh.AnsiSyntaxHighlight;
+import org.entur.jackson.tools.jsh.DefaultSyntaxHighlighter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;

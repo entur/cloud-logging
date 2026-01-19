@@ -1,13 +1,11 @@
 package no.entur.logging.cloud.logbook.filter;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.MappingJsonFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JsonGenerator;
 import org.zalando.logbook.BodyFilter;
 import org.zalando.logbook.ContentType;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.StringWriter;
 import java.util.function.Predicate;
@@ -26,11 +24,11 @@ public class JsonMaxValueLengthBodyFilter implements BodyFilter {
         return new JsonMaxValueLengthBodyFilter(maxFieldLength);
     }
 
-    private JsonFactory factory;
+    private JsonMapper mapper;
 
     public JsonMaxValueLengthBodyFilter(int maxFieldLength) {
         this.maxFieldLength = maxFieldLength;
-        this.factory = new MappingJsonFactory();
+        this.mapper = JsonMapper.builder().build();
     }
 
     @Override
@@ -40,9 +38,9 @@ public class JsonMaxValueLengthBodyFilter implements BodyFilter {
 
     public String filter(final String body) {
         try (
-                final JsonParser parser = factory.createParser(body);
+                final JsonParser parser = mapper.createParser(body);
                 StringWriter writer = new StringWriter(body.length());
-                JsonGenerator generator = factory.createGenerator(writer);
+                JsonGenerator generator = mapper.createGenerator(writer);
         ) {
             JsonToken nextToken;
 
@@ -50,9 +48,9 @@ public class JsonMaxValueLengthBodyFilter implements BodyFilter {
                 if (nextToken == JsonToken.VALUE_STRING) {
                     String valueAsString = parser.getValueAsString();
                     if(valueAsString.length() > maxFieldLength) {
-                        generator.writeObject(valueAsString.substring(0, maxFieldLength)+"[filtered by logger]");
+                        generator.writePOJO(valueAsString.substring(0, maxFieldLength)+"[filtered by logger]");
                     } else {
-                        generator.writeObject(valueAsString);
+                        generator.writePOJO(valueAsString);
                     }
                 }
                 else {

@@ -1,9 +1,13 @@
 package no.entur.logging.cloud.logbook.logbook.test.ondemand;
 
-import com.fasterxml.jackson.core.*;
 import no.entur.logging.cloud.logbook.ondemand.HttpMessageBodyWriter;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateResult;
 import no.entur.logging.cloud.logbook.util.MaxSizeJsonFilter;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.PrettyPrinter;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -12,12 +16,12 @@ public class PrettyPrintingLocalMaxSizeHttpMessageBodyWriter implements HttpMess
 
     protected final byte[] input;
     protected final int maxSize;
-    protected final JsonFactory jsonFactory;
+    protected final JsonMapper jsonMapper;
 
     protected HttpMessageStateResult output;
 
-    public PrettyPrintingLocalMaxSizeHttpMessageBodyWriter(JsonFactory jsonFactory, byte[] input, int maxSize) {
-        this.jsonFactory = jsonFactory;
+    public PrettyPrintingLocalMaxSizeHttpMessageBodyWriter(JsonMapper jsonMapper, byte[] input, int maxSize) {
+        this.jsonMapper = jsonMapper;
         this.input = input;
         this.maxSize = maxSize;
     }
@@ -47,13 +51,13 @@ public class PrettyPrintingLocalMaxSizeHttpMessageBodyWriter implements HttpMess
         HttpMessageStateResult output = this.output;
 
         if(output.isWellformed()) {
-            generator.writeFieldName("body");
+            generator.writeName("body");
 
             PrettyPrinter prettyPrinter = generator.getPrettyPrinter();
             if (prettyPrinter == null) {
                 generator.writeRawValue(new String(input, StandardCharsets.UTF_8));
             } else {
-                final JsonFactory factory = generator.getCodec().getFactory();
+                JsonFactory factory = jsonMapper.tokenStreamFactory();
 
                 // append to existing tree event by event
                 try (final JsonParser parser = factory.createParser(input)) {
@@ -63,12 +67,12 @@ public class PrettyPrintingLocalMaxSizeHttpMessageBodyWriter implements HttpMess
                 }
             }
         } else {
-            generator.writeStringField("body", output.getBody());
+            generator.writeStringProperty("body", output.getBody());
         }
     }
 
     protected String filterMaxSize(byte[] body) {
-        MaxSizeJsonFilter filter = new MaxSizeJsonFilter(maxSize, jsonFactory);
+        MaxSizeJsonFilter filter = new MaxSizeJsonFilter(maxSize, jsonMapper);
 
         try {
             return filter.transform(body);
