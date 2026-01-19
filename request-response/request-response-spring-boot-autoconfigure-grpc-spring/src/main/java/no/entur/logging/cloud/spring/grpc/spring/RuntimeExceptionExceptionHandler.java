@@ -1,8 +1,7 @@
-package no.entur.logging.cloud.spring.grpc.ecosystem;
+package no.entur.logging.cloud.spring.grpc.spring;
 
 import io.grpc.Status;
 import io.grpc.StatusException;
-import io.grpc.StatusRuntimeException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.Ordered;
 import org.springframework.grpc.server.exception.GrpcExceptionHandler;

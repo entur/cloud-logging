@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.gcp.spring.gcp.grpc.ecosystem.test;
+package no.entur.logging.cloud.gcp.spring.gcp.grpc.spring.test;
 
 import no.entur.logging.cloud.api.DevOpsLogger;
 import no.entur.logging.cloud.api.DevOpsLoggerFactory;

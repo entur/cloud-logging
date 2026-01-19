@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.azure.spring.grpc.ecosystem;
+package no.entur.logging.cloud.gcp.spring.gcp.grpc.spring;
 
 import no.entur.logging.cloud.spring.rr.grpc.GrpcLoggingCloudProperties;
 import no.entur.logging.cloud.spring.rr.grpc.RequestResponseGrpcAutoConfiguration;
@@ -8,15 +8,14 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @AutoConfigureBefore(RequestResponseGrpcAutoConfiguration.class)
-public class RequestResponseAzureGrpcEcosystemAutoConfiguration {
+public class RequestResponseGcpGrpcSpringAutoConfiguration {
 
     @Bean
     public GrpcLoggingCloudProperties grpcLoggingCloudProperties() {
         GrpcLoggingCloudProperties c = new GrpcLoggingCloudProperties();
         // subtract a few kb for headers and other wrapping
-        c.setMaxBodySize(16384 - 2 * 1024);
-        c.setMaxSize(16384);
+        c.setMaxBodySize(131072 - 2 * 1024);
+        c.setMaxSize(131072);
         return c;
     }
-
 }

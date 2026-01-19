@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.gcp.spring.gcp.grpc.ecosystem.test;
+package no.entur.logging.cloud.gcp.spring.gcp.grpc.spring.test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

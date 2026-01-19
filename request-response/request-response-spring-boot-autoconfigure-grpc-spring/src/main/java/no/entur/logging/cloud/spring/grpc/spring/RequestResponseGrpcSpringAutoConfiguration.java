@@ -1,23 +1,17 @@
-package no.entur.logging.cloud.spring.grpc.ecosystem;
+package no.entur.logging.cloud.spring.grpc.spring;
 
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcServerLoggingFilters;
 import no.entur.logging.cloud.rr.grpc.mapper.GrpcMetadataJsonMapper;
 import no.entur.logging.cloud.rr.grpc.mapper.GrpcPayloadJsonMapper;
 import no.entur.logging.cloud.spring.rr.grpc.OrderedGrpcLoggingServerInterceptor;
-import no.entur.logging.cloud.spring.rr.grpc.RequestResponseGrpcExceptionHandlerInterceptor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.grpc.server.autoconfigure.GrpcServerFactoryAutoConfiguration;
 import org.springframework.boot.grpc.server.autoconfigure.exception.GrpcExceptionHandlerAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.grpc.server.exception.GrpcExceptionHandlerInterceptor;
 
 /**
  *

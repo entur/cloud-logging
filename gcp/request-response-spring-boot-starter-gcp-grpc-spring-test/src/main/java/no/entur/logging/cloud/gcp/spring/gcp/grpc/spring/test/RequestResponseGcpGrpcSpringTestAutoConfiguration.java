@@ -1,5 +1,6 @@
-package no.entur.logging.cloud.azure.spring.grpc.ecosystem.test;
+package no.entur.logging.cloud.gcp.spring.gcp.grpc.spring.test;
 
+import no.entur.logging.cloud.gcp.spring.gcp.grpc.spring.RequestResponseGcpGrpcSpringAutoConfiguration;
 import no.entur.logging.cloud.spring.rr.grpc.AbstractRequestResponseGrpcSinkAutoConfiguration;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;
 import no.entur.logging.cloud.rr.grpc.test.CompositeSink;
@@ -16,11 +17,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @AutoConfigureBefore(value = {
-        no.entur.logging.cloud.azure.spring.grpc.ecosystem.RequestResponseAzureGrpcEcosystemAutoConfiguration.class,
+        RequestResponseGcpGrpcSpringAutoConfiguration.class,
 })
 
 @Configuration
-public class RequestResponseAzureGrpcEcosystemTestAutoConfiguration extends AbstractRequestResponseGrpcSinkAutoConfiguration {
+public class RequestResponseGcpGrpcSpringTestAutoConfiguration extends AbstractRequestResponseGrpcSinkAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(GrpcSink.class)

@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.spring.grpc.ecosystem;
+package no.entur.logging.cloud.spring.grpc.spring;
 
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;

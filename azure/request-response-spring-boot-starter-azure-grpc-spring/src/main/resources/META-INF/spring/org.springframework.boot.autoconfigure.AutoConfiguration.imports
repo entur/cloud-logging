@@ -1,1 +1,1 @@
-no.entur.logging.cloud.azure.spring.grpc.ecosystem.RequestResponseAzureGrpcEcosystemAutoConfiguration
+no.entur.logging.cloud.azure.spring.grpc.spring.RequestResponseAzureGrpcSpringAutoConfiguration

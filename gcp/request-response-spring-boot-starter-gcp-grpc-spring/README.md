@@ -1,1 +1,1 @@
-# request-response-logging for GCP + Ecosystem
+# request-response-logging for GCP + Spring GRPC
