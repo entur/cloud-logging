@@ -36,7 +36,7 @@ public class MaxSizeJsonFilter {
         ) {
             process(parser, generator, () -> generator.getOutputBuffered() + output.length());
 
-            generator.flush();
+            generator.close();
             return writer.toString();
         } catch (Exception e) {
             // NO-OP
@@ -53,7 +53,7 @@ public class MaxSizeJsonFilter {
         ) {
             process(parser, generator, () -> generator.getOutputBuffered() + output.length());
 
-            generator.flush();
+            generator.close();
             return writer.toString();
         } catch (Exception e) {
             // NO-OP
@@ -109,8 +109,6 @@ public class MaxSizeJsonFilter {
                     generator.writeStringField("Logger", message);
                 }
 
-                generator.close();
-
                 break;
             }
 
@@ -123,7 +121,6 @@ public class MaxSizeJsonFilter {
 
             inputOffset = nextInputOffset;
         }
-        generator.flush();
     }
 
 }

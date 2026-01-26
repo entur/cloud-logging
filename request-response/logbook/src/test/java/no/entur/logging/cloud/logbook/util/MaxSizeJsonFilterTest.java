@@ -41,6 +41,24 @@ public class MaxSizeJsonFilterTest {
         assertEquals(s, transform);
     }
 
+    @Test
+    public void testFilterTooBigInvalidJson() throws IOException {
+        JsonValidator jsonValidator = new JsonValidator(new JsonFactory());
+
+        String s = generateLongJson(2 * MAX_BODY_SIZE);
+
+        String invalidJson = s.substring(0, s.length() - 1);
+        assertFalse(jsonValidator.isWellformedJson(invalidJson));
+
+        assertTrue(invalidJson.length() > MAX_BODY_SIZE);
+
+        String transform = filter.transform(invalidJson);
+
+        assertTrue(transform.length() <= MAX_BODY_SIZE);
+
+        assertTrue(jsonValidator.isWellformedJson(transform));
+    }
+
     private String generateLongJson(int size) throws IOException {
         JsonFactory factory = new JsonFactory();
 

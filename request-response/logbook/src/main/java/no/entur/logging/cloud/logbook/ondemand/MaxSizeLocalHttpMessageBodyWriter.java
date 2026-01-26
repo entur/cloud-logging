@@ -62,7 +62,7 @@ public class MaxSizeLocalHttpMessageBodyWriter implements HttpMessageBodyWriter 
         ) {
             process(parser, generator, () -> generator.getOutputBuffered() + writer.size(), max);
 
-            generator.flush();
+            generator.close();
             return writer.toString();
         } catch (Exception e) {
             // NO-OP
@@ -118,8 +118,6 @@ public class MaxSizeLocalHttpMessageBodyWriter implements HttpMessageBodyWriter 
                     generator.writeStringField("Logger", message);
                 }
 
-                generator.close();
-
                 break;
             }
 
@@ -132,7 +130,6 @@ public class MaxSizeLocalHttpMessageBodyWriter implements HttpMessageBodyWriter 
 
             inputOffset = nextInputOffset;
         }
-        generator.flush();
     }
 
 }

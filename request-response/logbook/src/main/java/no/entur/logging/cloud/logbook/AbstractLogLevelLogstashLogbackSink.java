@@ -9,7 +9,6 @@ import org.zalando.logbook.Correlation;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
 
-import javax.annotation.Nullable;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
@@ -53,7 +52,8 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
             return newRequestSingleFieldAppendingMarker(request, null, false);
         }
 
-        if (!isJson) {
+        // add sanity check for JSON content, even if mimetype does match
+        if (!isJson || !smellsLikeJson(bodyAsString)) {
             if(bodyAsString.length() > maxSize) {
                 // TODO add filter
                 String truncatedBody = bodyAsString.substring(0, maxSize);
@@ -127,7 +127,8 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
             return newResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), null, false);
         }
 
-        if (!isJson) {
+        // add sanity check for JSON content, even if mimetype does match
+        if (!isJson || !smellsLikeJson(bodyAsString)) {
             if(bodyAsString.length() > maxSize) {
                 // TODO add filter
                 String truncatedBody = bodyAsString.substring(0, maxSize);
@@ -176,6 +177,26 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
             }
         }
         return newResponseSingleFieldAppendingMarker(response, correlation.getDuration().toMillis(), body, wellformed);
+    }
+
+    public static boolean smellsLikeJson(String body) {
+        if(body == null) {
+            return false;
+        }
+        if(body.length() <= 1) {
+            return false;
+        }
+
+        char start = body.charAt(0);
+        char end = body.charAt(body.length() - 1);
+
+        if (start != '{' && start != '[') {
+            return false;
+        }
+        if (end != '}' && start != ']') {
+            return false;
+        }
+        return true;
     }
 
     protected abstract Marker newResponseSingleFieldAppendingMarker(HttpResponse response, long millis, String body, boolean wellformed);
