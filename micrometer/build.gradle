@@ -2,11 +2,11 @@
 dependencies {
     api project(':api')
 
-    api ("ch.qos.logback:logback-classic:${logbackVersion}")
-    api ("ch.qos.logback:logback-core:${logbackVersion}")
+    api ("ch.qos.logback:logback-classic")
+    api ("ch.qos.logback:logback-core")
 
-    api("org.slf4j:slf4j-api:${slf4jVersion}")
-    api ("io.micrometer:micrometer-core:${micrometerVersion}")
+    api("org.slf4j:slf4j-api")
+    api ("io.micrometer:micrometer-core")
 
 }
 

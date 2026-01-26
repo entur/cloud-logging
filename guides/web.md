@@ -9,7 +9,7 @@ Then import the cloud-logging BOM:
 Add
 
 ```xml
-<cloud-logging.version>2.0.x</cloud-logging>
+<cloud-logging.version>x.y.z</cloud-logging>
 ```
 
 and
@@ -35,7 +35,7 @@ For
 
 ```groovy
 ext {
-   cloudLoggingVersion = '2.0.x'
+   cloudLoggingVersion = 'x.y.z'
 }
 ```
 
@@ -56,6 +56,7 @@ Add the spring-boot-starter artifact coordinates to your project.
   <summary>Maven Spring Boot Starter coordinates</summary>
 
 ```xml
+<!-- both must be added -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
     <artifactId>spring-boot-starter-gcp-web</artifactId>
@@ -75,30 +76,11 @@ or
   <summary>Gradle Spring Boot Starter coordinates</summary>
 
 ```groovy
+// both must be added
 implementation ("no.entur.logging.cloud:spring-boot-starter-gcp-web")
 testImplementation ("no.entur.logging.cloud:spring-boot-starter-gcp-web-test")
 ```
 </details>
-
-Verify configuration by toggling between output modes in a unit test:
-
-```
-try (Closeable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
-    // your logging here
-}
-```
-
-For additional error levels, try the [DevOpsLogger](../api):
-
-```
-DevOpsLogger LOGGER = DevOpsLoggerFactory.getLogger(MyClass.class);
-
-// ... your code here
-
-LOGGER.errorTellMeTomorrow("Error statement");
-LOGGER.errorInterruptMyDinner("Critical statement");
-LOGGER.errorWakeMeUpRightNow("Alert statement");
-```
 
 Configure log levels via Spring, i.e. `application.properties` like
 
@@ -107,13 +89,14 @@ logging.level.root=INFO
 logging.level.my.package=WARN
 ```
 
-### Request-response logging 
+### Optional: Request-response logging 
 Import the request-response Spring Boot starters:
 
 <details>
   <summary>Maven Spring Boot Starter coordinates</summary>
 
 ```xml
+<!-- both must be added -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
     <artifactId>request-response-spring-boot-starter-gcp-web</artifactId>
@@ -133,35 +116,83 @@ or
   <summary>Gradle Spring Boot Starter coordinates</summary>
 
 ```groovy
+// both must be added
 implementation ("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web")
 testImplementation ("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test")
 ```
 </details>
 
-Some default Logbook excludes are recommended: 
+Some Logbook excludes ([actuator, openapi](https://github.com/entur/cloud-logging/blob/main/request-response/logbook-spring-boot-autoconfigure/src/main/java/no/entur/logging/cloud/spring/logbook/LogbookLoggingAutoConfiguration.java)) are included by default. Add more using
 
-```
+```yml
 logbook:
-  predicate:
-    exclude:
-      - path: /actuator/**
-      - path: /favicon.*
-      - path: /v2/api-docs/**
-      - path: /v3/api-docs/**
-      - path: /metrics
-      - path: /swagger
-```
-
-Adjust the logger using
-
-```
-entur.logging.request-response.logger.level=INFO
-entur.logging.request-response.logger.name=no.entur.logging.cloud
+   exclude:
+      - /too/much/data/here
 ```
 
 See [Logbook](https://github.com/zalando/logbook) for additional configuration options.
 
-### On-demand logging
+<details>
+  <summary>Adjust request-response message.</summary>
+By default the protocol + host is included in the request-response message: 
+
+```
+GET https://may.app.host/v1/ticket-distribution-groups?orderId=eq%3AG3TUR9&page=1
+...
+200 OK https://may.app.host/v1/ticket-distribution-groups?orderId=eq%3AG3HUR9&page=1 (in 50 ms)
+```
+
+this can be simplified to
+
+```
+GET /v1/ticket-distribution-groups
+...
+200 GET /v1/ticket-distribution-groups (in 50 ms)
+```
+
+Incoming calls:
+
+```yml
+entur:
+  logging:
+    request-response:
+      format:
+        server:
+          message:
+            scheme: false
+            host: false
+            port: false
+            path: false
+            query: false
+```
+
+and/or for outgoing calls:
+
+```yml
+entur:
+  logging:
+    request-response:
+      format:
+        client:
+          message:
+            scheme: false
+            host: false
+            port: false
+            path: false
+            query: false
+```
+
+</details>
+
+<details>
+  <summary>Adjust request-response logger name.</summary>
+```
+entur.logging.request-response.logger.level=INFO
+entur.logging.request-response.logger.name=no.entur.logging.cloud
+```
+</details>
+
+### Optional: On-demand logging
 This feature adjusts the log level for individual web server requests, taking into account actual behaviour. 
 
  * increase log level for happy-cases (i.e. WARN or ERROR), otherwise  
@@ -259,22 +290,93 @@ entur.logging.http.ondemand.troubleshoot.http.headers[0].name=x-debug-this-reque
 
 which allows for additional logging in the precense of certain HTTP headers.
 
-## Opting out
-Some included features can be removed by excluding the corresponding artifacts:
+### Toggle log output-format during testing
+Toggling between output modes in a unit test:
 
- * micrometer
-   * micrometer
-   * micrometer-gcp
- * correlation id tracing
-   * correlation-id-trace-spring-boot-web
+```
+try (Closeable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
+    // your logging here
+}
+```
 
-## Running applications locally
+### Additional log levels
+For additional error levels, try the [DevOpsLogger](../api):
+
+```
+DevOpsLogger LOGGER = DevOpsLoggerFactory.getLogger(MyClass.class);
+
+// ... your code here
+
+LOGGER.errorTellMeTomorrow("Error statement");
+LOGGER.errorInterruptMyDinner("Critical statement");
+LOGGER.errorWakeMeUpRightNow("Alert statement");
+```
+
+<details>
+  <summary>Logger API coordinates</summary>
+
+```xml
+<dependency>
+    <groupId>no.entur.logging.cloud</groupId>
+    <artifactId>api</artifactId>
+</dependency>
+```
+
+</details>
+
+or
+
+<details>
+  <summary>Gradle Spring Boot Starter coordinates</summary>
+
+```groovy
+implementation ("no.entur.logging.cloud:api")
+```
+</details>
+
+### gRPC client MDC support
+To forward correlation id + add MDC-style context to log statements within gRPC interceptors (via `Scope`), add artifacts
+
+<details>
+  <summary>Gradle gRPC MDC coordinates</summary>
+
+```xml
+<dependency>
+    <groupId>no.entur.logging.cloud</groupId>
+    <artifactId>correlation-id-trace-grpc-netty</artifactId>
+</dependency>
+<dependency>
+    <groupId>no.entur.logging.cloud</groupId>
+    <artifactId>spring-boot-autoconfigure-gcp-grpc-mdc</artifactId>
+</dependency>
+```
+
+</details>
+
+or
+
+<details>
+  <summary>Gradle gRPC MDC coordinates</summary>
+
+```groovy
+implementation ("no.entur.logging.cloud:correlation-id-trace-grpc-netty")
+implementation ("no.entur.logging.cloud:spring-boot-autoconfigure-gcp-grpc-mdc")
+```
+</details>
+
+and
+
+* use the `CopyCorrelationIdFromGrpcMdcContextToRequestClientInterceptor` client interceptor,
+* wrap the call(s) in a `GrpcMdcContext` (or `CorrelationIdGrpcMdcContext`).
+
+
+### Running applications locally
 For 'classic' one-line log output when running a server locally, additionally add the logging test artifacts to the main scope during local execution only.
 
- * Maven: Use profiles
- * Gradle:
-   * Use configurations, and/or
-   * add dependencies directly to task
+* Maven: Use profiles
+* Gradle:
+    * Use configurations, and/or
+    * add dependencies directly to task
 
 <details>
   <summary>Gradle bootRun example</summary>
@@ -300,6 +402,9 @@ entur.logging.style=humanReadablePlain|humanReadableJson|machineReadableJson
 
 </details>
 
+
+### Recommended additions
+Add `Prometheus` via [io.micrometer:micrometer-registry-prometheus](https://mvnrepository.com/artifact/io.micrometer/micrometer-registry-prometheus).
 
 ## Troubleshooting
 

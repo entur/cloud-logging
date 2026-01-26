@@ -5,12 +5,12 @@ dependencies {
     api project(':request-response:netty-grpc')
     api project(':request-response:request-response-spring-boot-autoconfigure-grpc')
 
-    api ("org.slf4j:slf4j-api:${slf4jVersion}")
-    api ("org.springframework.boot:spring-boot-starter:${springBootVersion}")
-    api ("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
-    api ("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
+    api ("org.slf4j:slf4j-api")
+    api ("org.springframework.boot:spring-boot-starter")
+    api ("org.springframework.boot:spring-boot-autoconfigure")
+    api ("org.springframework.boot:spring-boot-starter-logging")
 
     api("net.devh:grpc-server-spring-boot-starter:${ecosystemGrpcVersion}")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

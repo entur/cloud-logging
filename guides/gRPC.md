@@ -285,6 +285,9 @@ entur.logging.style=humanReadablePlain|humanReadableJson|machineReadableJson
 
 </details>
 
+## Recommended additions
+Add `Prometheus` via [io.micrometer:micrometer-registry-prometheus](https://mvnrepository.com/artifact/io.micrometer/micrometer-registry-prometheus).
+
 ## Troubleshooting
 
 ### request-response logging not working

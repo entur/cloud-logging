@@ -1,0 +1,16 @@
+
+dependencies {
+    api project(':trace:mdc-context-grpc-netty')
+    api project(':trace:server:correlation-id-trace-grpc-netty')
+    api project(':trace:server:correlation-id-trace-spring-boot-grpc')
+
+    api("org.springframework.boot:spring-boot-autoconfigure")
+
+    api "io.grpc:grpc-netty:${grpcNettyVersion}"
+
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"
+}
+
+
+
+

@@ -60,7 +60,7 @@ public class CorrelationIdFilter implements Filter {
 			HttpServletRequest request = (HttpServletRequest) servletRequest;
 			String inputValue = request.getHeader(CORRELATION_ID_HTTP_HEADER);
 
-			if (inputValue == null) {
+			if (inputValue == null || inputValue.equals("null") || inputValue.isBlank()) {
 				correlationId = UUID.randomUUID().toString();
 			} else {
 				correlationId = CorrelationIdMdcSupportBuilder.sanitize(inputValue);

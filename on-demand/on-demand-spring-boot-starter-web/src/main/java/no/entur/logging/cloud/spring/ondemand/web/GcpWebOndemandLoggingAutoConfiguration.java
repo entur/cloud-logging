@@ -3,8 +3,6 @@ package no.entur.logging.cloud.spring.ondemand.web;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
 import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import no.entur.logging.cloud.appender.scope.predicate.HigherOrEqualToLogLevelPredicate;
 import no.entur.logging.cloud.appender.scope.predicate.LoggerNamePrefixHigherOrEqualToLogLevelPredicate;
@@ -29,7 +27,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.time.Duration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -54,7 +51,7 @@ public class GcpWebOndemandLoggingAutoConfiguration {
 
         public OndemandConfiguration(OndemandProperties properties) {
             this.properties = properties;
-            this.appender = getAppender();
+            this.appender = LoggingScopeAsyncAppender.get();
             this.factory = new ThreadLocalLoggingScopeFactory(properties.getFlushMode(), appender);
             appender.addScopeProvider(factory);
 
@@ -102,21 +99,6 @@ public class GcpWebOndemandLoggingAutoConfiguration {
             registration.setOrder(properties.getFilterOrder());
             registration.addUrlPatterns(properties.getFilterUrlPatterns());
             return registration;
-        }
-
-        private static LoggingScopeAsyncAppender getAppender() {
-            Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-            Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders();
-            if(!appenderIterator.hasNext()) {
-                throw new IllegalStateException("No on-demand log appenders configured, expected at least one which is implementing " + LoggingScopeAsyncAppender.class.getName());
-            }
-            while (appenderIterator.hasNext()) {
-                Appender<ILoggingEvent> appender = appenderIterator.next();
-                if (appender instanceof LoggingScopeAsyncAppender) {
-                    return (LoggingScopeAsyncAppender) appender;
-                }
-            }
-            throw new IllegalStateException("Expected on-demand log appender implementing " + LoggingScopeAsyncAppender.class.getName());
         }
 
         public HttpLoggingScopeFilter toFilter(String matcher, OndemandSuccess success, OndemandFailure failure, OndemandTroubleshoot troubleshoot) {
@@ -186,19 +168,6 @@ public class GcpWebOndemandLoggingAutoConfiguration {
 
                     filter.setHttpStatusFailurePredicate(new HttpStatusAtLeastPredicate(equalOrHigherThan));
                 } else if(equalOrHigherThan != -1) {
-
-                    for (Integer integer : notEqualTo) {
-                        if(integer < equalOrHigherThan) {
-                            throw new IllegalStateException("Not-equal-to " + integer + " is already included in higher-or-equal-to " + equalOrHigherThan);
-                        }
-                    }
-
-                    for (Integer integer : equalTo) {
-                        if(integer >= equalOrHigherThan) {
-                            throw new IllegalStateException("Equal-to " + integer + " is already included in higher-or-equal-to " + equalOrHigherThan);
-                        }
-                    }
-
                     LOGGER.info("Configure {} on-demand logging for status codes at least " + equalOrHigherThan + ", excluding " + notEqualTo + " or including " + equalTo + ")", matcher == null ? "default" : matcher);
 
                     filter.setHttpStatusFailurePredicate(new HttpStatusAtLeastOrNotPredicate(statusCode.getEqualOrHigherThan(), equalTo, notEqualTo));
@@ -274,6 +243,7 @@ public class GcpWebOndemandLoggingAutoConfiguration {
                     throw new IllegalStateException("Level [" + level + "] not recognized.");
             }
         }
+
 
     }
 

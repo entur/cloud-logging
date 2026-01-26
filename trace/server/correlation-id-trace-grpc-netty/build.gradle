@@ -1,6 +1,6 @@
 
 plugins {
-    id "com.google.protobuf" version "0.9.4"
+    id "com.google.protobuf" version "0.9.6"
 }
 
 dependencies {
@@ -8,16 +8,16 @@ dependencies {
 
     api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
 
-    api("com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}")
-    api("com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}")
-    api("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
+    api("com.fasterxml.jackson.core:jackson-databind")
+    api("com.fasterxml.jackson.core:jackson-annotations")
+    api("com.fasterxml.jackson.core:jackson-core")
 
     api("io.grpc:grpc-netty:${grpcNettyVersion}")
     api("io.grpc:grpc-services:${grpcNettyVersion}")
 
     // grpc dependencies
-    api("io.netty:netty-codec-http2:${nettyVersion}")
-    api("io.netty:netty-handler-proxy:${nettyVersion}")
+    api("io.netty:netty-codec-http2")
+    api("io.netty:netty-handler-proxy")
 
     api("io.netty:netty-tcnative-boringssl-static:${nettyTcnativeBoringsslStaticVersion}")
 
@@ -26,24 +26,12 @@ dependencies {
     api("io.grpc:grpc-protobuf:$grpcVersion")
 
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
-    api("org.slf4j:slf4j-api:") {
-        version {
-            strictly slf4jVersion
-        }
-    }
+    // Versions managed by Spring Boot BOM
+    api("org.slf4j:slf4j-api")
+    api("ch.qos.logback:logback-classic")
+    api("ch.qos.logback:logback-core")
 
-    api("ch.qos.logback:logback-classic:") {
-        version {
-            strictly logbackVersion
-        }
-    }
-    api("ch.qos.logback:logback-core:") {
-        version {
-            strictly logbackVersion
-        }
-    }
-
-    api("jakarta.annotation:jakarta.annotation-api:${annotationApiVersion}")
+    api("jakarta.annotation:jakarta.annotation-api")
     api("com.google.api.grpc:proto-google-common-protos:$grpcCommonsVersion")
     api("com.google.protobuf:protobuf-java-util:${grpcProtobufVersion}")
 

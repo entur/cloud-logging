@@ -1,14 +1,41 @@
 
 plugins {
-    id 'com.github.ben-manes.versions' version '0.51.0' apply false
-    id 'org.owasp.dependencycheck' version '10.0.4' apply false
-    id "org.sonarqube" version "5.1.0.4882"
-    id('io.github.gradle-nexus.publish-plugin') version '1.3.0'
+    id 'com.github.ben-manes.versions' version '0.53.0' apply false // ./gradlew dependencyUpdates
+    id "org.sonarqube" version "7.2.2.6593"
+    id 'org.jreleaser' version '1.22.0' apply false
+}
+
+// Define version variables at root level so they're available everywhere
+ext {
+    springBootVersion = '3.5.9' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
+    // The following versions are managed by Spring Boot BOM (no need to define here):
+    // junitJupiterVersion, mockitoVersion, slf4jVersion, logbackVersion, 
+    // jacksonVersion, jacksonDatabindVersion, micrometerVersion, janinoVersion,
+    // servletVersion (jakarta-servlet), annotationApiVersion (jakarta-annotation),
+    // nettyVersion, jsonPathVersion
+    
+    // Versions NOT in Spring Boot BOM - we manage these ourselves:
+    googleTruthVersion = '1.4.5'
+    logbackLogstashVersion = '8.1'
+    logbookVersion = '3.12.3'
+    jacksonSyntaxHighlightVersion = '1.1.1'
+    logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.1.1'
+    commonsIoVersion = '2.21.0'
+    commonsTextVersion = '1.15.0'
+    nettyTcnativeBoringsslStaticVersion = '2.0.74.Final'
+
+    grpcNettyVersion = '1.78.0'
+    grpcVersion = '1.78.0'
+    grpcCommonsVersion = '2.64.1'
+    grpcProtobufVersion = '4.33.4'
+    ecosystemGrpcVersion = '3.1.0.RELEASE'
+
+    jsonAssertVersion = '0.8.0'
 }
 
 // Split projects into buildable: examples and libraries. 
 // This omits 'wrapper' directories. See also settings.gradle
- 
+
 def buildProjects() {
     subprojects.findAll { new File(it.projectDir, 'build.gradle').file }
 }
@@ -32,54 +59,36 @@ def jvmProjects() {
 configure(exampleProjects()) {
     apply plugin: 'java'
 
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17) // Specify desired Java version (e.g., Java 17)
+        }
+    }
+
+    dependencies {
+        // Use Spring Boot BOM for dependency management
+        implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    }
 }
 
 configure(libraryProjects()) {
     apply plugin: 'java-library'
 
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17) // Specify desired Java version (e.g., Java 17)
+        }
+    }
+
+    dependencies {
+        // Use api(platform(...)) to enforce Spring Boot BOM versions for all dependency configurations
+        // This ensures both api and implementation dependencies get pinned versions
+        api(platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}"))
+    }
 }
 
 configure(jvmProjects()) {
     apply plugin: 'com.github.ben-manes.versions'
-
-    ext {
-        junitJupiterVersion = '5.11.2'
-        mockitoVersion = '5.14.2'
-        logbackLogstashVersion = '8.0'
-        slf4jVersion = '2.0.16'
-        googleTruthVersion = '1.4.4'
-        logbackVersion = '1.5.12'
-        jacksonVersion = '2.18.1'
-        jacksonDatabindVersion = '2.18.1'
-        nettyTcnativeBoringsslStaticVersion = '2.0.69.Final'
-        nettyVersion = '4.1.116.Final'
-        micrometerVersion = '1.14.1'
-        springBootVersion = '3.3.7' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
-        janinoVersion = '3.1.12'
-        servletVersion = '6.0.0' // jakarta
-        logbookVersion = '3.10.0'
-        jacksonSyntaxHighlightVersion = '1.1.0'
-        logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.1.0'
-        commonsIoVersion = '2.18.0'
-        commonsTextVersion = '1.12.0'
-        annotationApiVersion = '2.1.1'
-
-        grpcNettyVersion = '1.68.1'
-        grpcVersion = '1.68.1'
-        grpcCommonsVersion = '2.49.0'
-        grpcProtobufVersion = '3.25.5'
-        ecosystemGrpcVersion = '3.1.0.RELEASE'
-
-        jsonAssertVersion = '0.8.0'
-        jsonPathVersion = '2.9.0'
-        jsonSmartVersion = '2.5.1'
-
-        lognetVersion = '5.1.5'
-    }
 
     test {
         useJUnitPlatform {
@@ -91,22 +100,39 @@ configure(jvmProjects()) {
         components.all(LogbackAlignmentRule)
         components.all(GrpcAlignmentRule)
         components.all(ProtobufAlignmentRule)
+        components.all(JunitAlignmentRule)
 
-        // JUnit Jupiter API and TestEngine implementation
-        testImplementation("org.junit.jupiter:junit-jupiter:${junitJupiterVersion}")
+        // JUnit Jupiter API and TestEngine implementation - versions managed by BOM
+        testImplementation("org.junit.jupiter:junit-jupiter")
 
-        testImplementation("org.mockito:mockito-core:${mockitoVersion}")
+        // https://stackoverflow.com/questions/79640685/cannot-build-project-after-upgrading-spring-boot-to-3-5
+        testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+        testImplementation("org.mockito:mockito-core")
 
         testImplementation("com.google.truth:truth:${googleTruthVersion}")
         testImplementation("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
     }
 
+    // from https://github.com/ben-manes/gradle-versions-plugin?tab=readme-ov-file#rejectversionsif-and-componentselection
+    def isNonStable = { String version ->
+        def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { ita -> version.toUpperCase().contains(ita) }
+        def regex = /^[0-9,.v-]+(-r)?$/
+        return !stableKeyword && !(version ==~ regex)
+    }
+
+    tasks.named("dependencyUpdates").configure {
+        rejectVersionIf {
+            isNonStable(it.candidate.version)
+        }
+    }
 }
+
+ext.stagingRepositoryPath = "${rootDir.getCanonicalFile()}/build/staging-deploy"
+System.out.println("Staging repository is " + ext.stagingRepositoryPath)
 
 // projects which should be published
 configure(libraryProjects()) {
     apply plugin: 'maven-publish'
-    apply plugin: 'signing'
 
     java {
         withSourcesJar()
@@ -121,7 +147,6 @@ configure(libraryProjects()) {
 
                 groupId = "$group"
                 artifactId = project.name
-                version = "$version"
 
                 if(project.ext.has('artifactId')) {
                     System.out.println("Publishing " + project.name + " with artifact-id " + project.ext.artifactId)
@@ -152,25 +177,41 @@ configure(libraryProjects()) {
                         url = 'https://github.com/entur/cloud-logging'
                         connection = 'git@github.com:entur/cloud-logging.git'
                     }
+                    
+                    // Resolve and add versions from platform to all dependencies
+                    withXml {
+                        // Remove the dependencyManagement section since we're adding explicit versions
+                        def dependencyManagement = asNode().dependencyManagement
+                        if (dependencyManagement) {
+                            asNode().remove(dependencyManagement[0])
+                        }
+                        
+                        // Add explicit versions to all dependencies
+                        def dependenciesNode = asNode().dependencies[0]
+                        if (dependenciesNode) {
+                            dependenciesNode.dependency.each { dep ->
+                                if (!dep.version) {
+                                    def group = dep.groupId.text()
+                                    def artifact = dep.artifactId.text()
+                                    def resolvedVersion = project.configurations.runtimeClasspath.resolvedConfiguration
+                                        .resolvedArtifacts.find { it.moduleVersion.id.group == group && it.moduleVersion.id.name == artifact }
+                                        ?.moduleVersion?.id?.version
+                                    if (resolvedVersion) {
+                                        dep.appendNode('version', resolvedVersion)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        if(project.hasProperty("signing.gnupg.keyName")) {
-            signing {
-                useGpgCmd()
-
-                // set
-                // signing.gnupg.keyName=xxx
-                // signing.gnupg.passphrase=yyy
-                // via command line or global gradle properties
-                // then run
-                // w17 build publishToSonatype --info --stacktrace
-
-                sign(publishing.publications)
+        repositories {
+            maven {
+                url = stagingRepositoryPath
             }
         }
-
     }
 
 }
@@ -178,22 +219,6 @@ configure(libraryProjects()) {
 allprojects {
     apply plugin: 'eclipse'
     apply plugin: 'idea'
-    apply plugin: 'org.owasp.dependencycheck'
-
-    // OWASP Dependency Check settings
-    dependencyCheck {
-        analyzedTypes = ['jar'] // the default artifact types that will be analyzed.
-        format = 'ALL'
-        failBuildOnCVSS = 7
-        // Specifies if the build should be failed if a CVSS score equal to or above a specified level is identified.
-        suppressionFiles = ["$rootDir/dependencycheck-root-suppression.xml"]
-        // specify a list of known issues which contain false-positives
-        scanConfigurations = configurations.findAll {
-            (!it.name.startsWithAny('androidTest', 'test', 'debug', 'lint', 'kapt', 'spotbugs') && !it.name.contains("AndroidTest") && !it.name.contains("Test") && !it.name.contains("AnnotationProcessor"))
-        }.collect {
-            it.name
-        }
-    }
 
     eclipse {
         classpath {
@@ -212,22 +237,6 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-    }
-}
-
-gradle.projectsEvaluated {
-    // do not scan testing tools and so on, see https://medium.com/@appmattus/android-security-scanning-your-app-for-known-vulnerabilities-421384603fc5
-    // note: must be set after project is evaluated, as Android creates configurations based on the build types
-    dependencyCheck {
-        scanConfigurations = configurations.findAll {
-            (!it.name.startsWithAny('androidTest', 'test', 'debug', 'lint', 'kapt') && !it.name.contains("AndroidTest") && !it.name.contains("Test") && !it.name.contains("AnnotationProcessor"))
-        }.collect {
-            it.name
-        }
-    }
-
-    tasks.withType(JavaCompile) {
-        options.compilerArgs << "-Xlint:deprecation"
     }
 
 }
@@ -261,13 +270,58 @@ abstract class ProtobufAlignmentRule implements ComponentMetadataRule {
     }
 }
 
-nexusPublishing {
-    repositories {
-        sonatype {
+abstract class JunitAlignmentRule implements ComponentMetadataRule {
+    void execute(ComponentMetadataContext ctx) {
+        ctx.details.with {
+            if (id.group.startsWith("org.junit.jupiter ")) {
+                belongsTo("org.junit.jupiter:junit-virtual-platform:${id.version}")
+            }
         }
     }
 }
 
 
 
+task clean {
+    //project.delete(files(getBuildDir()) {
+    //})
+}
 
+apply plugin: 'org.jreleaser'
+
+jreleaser {
+    signing {
+        active = 'ALWAYS'
+        armored = true
+    }
+    deploy {
+        maven {
+            mavenCentral {
+                release {
+                    active = 'RELEASE'
+                    url = 'https://central.sonatype.com/api/v1/publisher'
+                    stagingRepository(stagingRepositoryPath)
+                }
+            }
+            nexus2 {
+                snapshot {
+                    active = 'SNAPSHOT'
+                    applyMavenCentralRules = true
+                    snapshotSupported = true
+                    closeRepository = true
+                    releaseRepository = true
+                    url = "https://ossrh-staging-api.central.sonatype.com/service/local"
+                    snapshotUrl = 'https://central.sonatype.com/repository/maven-snapshots/'
+                    stagingRepository(stagingRepositoryPath)
+                }
+            }
+        }
+    }
+    release {
+        github {
+            skipTag = false // Skip creating a new github tag?
+            skipRelease = true // Skip creating a new github release?
+            tagName = "v${version}"
+        }
+    }
+}

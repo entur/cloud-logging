@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '3.3.7'
+    id 'org.springframework.boot' version '3.5.7'
 }
 
 test {
@@ -13,17 +13,17 @@ dependencies {
     implementation project(":azure:spring-boot-starter-azure-web");
     implementation project(":azure:request-response-spring-boot-starter-azure-web");
 
-    implementation("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
-    implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-web")
 
     testImplementation project(":azure:spring-boot-starter-azure-web-test");
     testImplementation project(":azure:request-response-spring-boot-starter-azure-web-test");
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     // JUnit Jupiter API and TestEngine implementation
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
 
     testImplementation ("com.google.truth:truth:${googleTruthVersion}")
     testImplementation ("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")

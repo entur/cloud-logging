@@ -8,20 +8,20 @@ dependencies {
     api project(':micrometer')
     api project(':azure:spring-boot-autoconfigure-azure')
 
-    api("org.slf4j:slf4j-api:${slf4jVersion}")
+    api("org.slf4j:slf4j-api")
 
-    api ("org.codehaus.janino:commons-compiler:${janinoVersion}")
-    api ("org.codehaus.janino:commons-compiler-jdk:${janinoVersion}")
-    api ("org.codehaus.janino:janino:${janinoVersion}")
+    api ("org.codehaus.janino:commons-compiler")
+    api ("org.codehaus.janino:commons-compiler-jdk")
+    api ("org.codehaus.janino:janino")
 
-    api("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
-    api("org.springframework.boot:spring-boot-starter-logging:${springBootVersion}")
+    api("org.springframework.boot:spring-boot-autoconfigure")
+    api("org.springframework.boot:spring-boot-starter-logging")
 
     api("net.devh:grpc-server-spring-boot-starter:${ecosystemGrpcVersion}")
 
     api "io.grpc:grpc-netty:${grpcNettyVersion}"
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation project(":azure:spring-boot-autoconfigure-azure-test")
 
 }
