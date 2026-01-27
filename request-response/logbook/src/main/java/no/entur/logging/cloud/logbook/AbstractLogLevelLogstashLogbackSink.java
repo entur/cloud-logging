@@ -60,7 +60,7 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
 
         // add sanity check for JSON content, even if mimetype does match
         if (!isJson || !smellsLikeJson(bodyAsString)) {
-            if( bodyAsString.length() > maxSize) {
+            if (bodyAsString.length() > maxSize) {
                 // TODO add filter
                 String truncatedBody = bodyAsString.substring(0, maxSize);
                 return newRequestSingleFieldAppendingMarker(request, truncatedBody, false);
@@ -72,7 +72,7 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
         boolean wellformed;
 
         if (request.getOrigin() == Origin.LOCAL) {
-            // trust data from ourselves to be wellformed
+            // trust data from ourselves to be wellformed and not pretty-printed
             if (bodyAsString.length() > maxSize) {
                 try {
                     body = maxSizeJsonFilter.transform(bodyAsString);

@@ -20,15 +20,15 @@ public class MaxSizeJsonFilter {
     }
 
     private JsonFactory factory;
-    private final int maxBodySize;
+    private final int maxSize;
 
-    public MaxSizeJsonFilter(int maxBodySize, JsonFactory jsonFactory) {
-        this.maxBodySize = maxBodySize;
+    public MaxSizeJsonFilter(int maxSize, JsonFactory jsonFactory) {
+        this.maxSize = maxSize;
         this.factory = jsonFactory;
     }
 
     public String transform(String body) throws IOException {
-        StringBuilder output = new StringBuilder(maxBodySize + 128);
+        StringBuilder output = new StringBuilder(maxSize + 128);
         try (
                 final JsonParser parser = factory.createParser(body);
                 StringBuilderWriter writer = new StringBuilderWriter(output);
@@ -44,7 +44,7 @@ public class MaxSizeJsonFilter {
     }
 
     public String transform(byte[] body) throws IOException {
-        StringBuilder output = new StringBuilder(maxBodySize + 128);
+        StringBuilder output = new StringBuilder(maxSize + 128);
         try (
                 final JsonParser parser = factory.createParser(body);
                 StringBuilderWriter writer = new StringBuilderWriter(output);
@@ -60,9 +60,9 @@ public class MaxSizeJsonFilter {
     }
 
     public void process(final JsonParser parser, JsonGenerator generator, LongSupplier outputSizeSupplier) throws IOException {
-        String message = "Max body size of " + maxBodySize + " reached, rest of the document has been filtered.";
+        String message = "Max body size of " + maxSize + " reached, rest of the document has been filtered.";
 
-        final long maxSize = this.maxBodySize - message.length() - 8;
+        final long maxSize = this.maxSize - message.length() - 8;
 
         // do not write field name if field value is too long
         String fieldName = null;
@@ -121,4 +121,7 @@ public class MaxSizeJsonFilter {
         }
     }
 
+    public int getMaxSize() {
+        return maxSize;
+    }
 }
