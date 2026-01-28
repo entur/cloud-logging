@@ -80,7 +80,6 @@ public class MaxSizeJsonFilterTest {
         return writer.toString();
     }
 
-
     private String generateLongString(int length) {
         StringBuilder builder = new StringBuilder(length);
 

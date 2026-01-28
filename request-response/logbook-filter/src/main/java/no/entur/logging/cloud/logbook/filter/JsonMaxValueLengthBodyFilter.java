@@ -64,7 +64,7 @@ public class JsonMaxValueLengthBodyFilter implements BodyFilter {
         } catch (Exception e) {
             // NO-OP
         }
-        return body;
+        return null;
     }
 
 

@@ -199,14 +199,15 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
         }
 
         char start = body.charAt(0);
-        char end = body.charAt(body.length() - 1);
-
         if (start != '{' && start != '[') {
             return false;
         }
-        if (end != '}' && start != ']') {
+
+        char end = body.charAt(body.length() - 1);
+        if (end != '}' && end != ']') {
             return false;
         }
+
         return true;
     }
 
