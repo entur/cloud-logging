@@ -14,6 +14,8 @@ import java.time.Duration;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class AbstractLogLevelLogstashLogbackSinkTest {
@@ -111,7 +113,7 @@ public class AbstractLogLevelLogstashLogbackSinkTest {
 
         StringBuilder builder = new StringBuilder();
         builder.append("{");
-        for(int i = 0; i < 2 * 1024; i++) {
+        for (int i = 0; i < 2 * 1024; i++) {
             builder.append(" ");
         }
         builder.append("}");
@@ -133,7 +135,7 @@ public class AbstractLogLevelLogstashLogbackSinkTest {
 
         StringBuilder builder = new StringBuilder();
         builder.append("{");
-        for(int i = 0; i < 2 * 1024; i++) {
+        for (int i = 0; i < 2 * 1024; i++) {
             builder.append(" ");
         }
         builder.append("}");
@@ -155,7 +157,7 @@ public class AbstractLogLevelLogstashLogbackSinkTest {
 
         StringBuilder builder = new StringBuilder();
         builder.append("{");
-        for(int i = 0; i < 2 * 1024; i++) {
+        for (int i = 0; i < 2 * 1024; i++) {
             builder.append("a");
         }
         builder.append("}");
@@ -170,7 +172,7 @@ public class AbstractLogLevelLogstashLogbackSinkTest {
 
         verify(spy).newRequestSingleFieldAppendingMarker(eq(request), eq(json.substring(0, 1024)), eq(false));
     }
-    
+
     private MockLogLevelLogstashLogbackSink createSink() {
         BiConsumer<Marker, String> logConsumer = mock(BiConsumer.class);
         int maxSize = 1024;
@@ -186,4 +188,17 @@ public class AbstractLogLevelLogstashLogbackSinkTest {
         return spy(sink);
     }
 
+    @Test
+    public void testJsonSmell() throws IOException {
+        assertTrue(AbstractLogLevelLogstashLogbackSink.smellsLikeJson("{}"));
+        assertTrue(AbstractLogLevelLogstashLogbackSink.smellsLikeJson("[]"));
+        assertTrue(AbstractLogLevelLogstashLogbackSink.smellsLikeJson(" {}"));
+        assertTrue(AbstractLogLevelLogstashLogbackSink.smellsLikeJson(" []"));
+        assertTrue(AbstractLogLevelLogstashLogbackSink.smellsLikeJson("{}\n"));
+        assertTrue(AbstractLogLevelLogstashLogbackSink.smellsLikeJson("[]\n"));
+
+        assertFalse(AbstractLogLevelLogstashLogbackSink.smellsLikeJson("<html/>"));
+        assertFalse(AbstractLogLevelLogstashLogbackSink.smellsLikeJson("true"));
+
+   }
 }

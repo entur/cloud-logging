@@ -62,9 +62,9 @@ public class JsonMaxValueLengthBodyFilter implements BodyFilter {
             generator.flush();
             return writer.toString();
         } catch (Exception e) {
-            // NO-OP
+            // ignore
         }
-        return body;
+        return null;
     }
 
 
