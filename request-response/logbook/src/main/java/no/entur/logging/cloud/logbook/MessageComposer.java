@@ -16,13 +16,15 @@ import java.util.function.BooleanSupplier;
 
 public class MessageComposer {
 
+    protected String prefix;
     protected boolean scheme;
     protected boolean host;
     protected boolean port;
     protected boolean path;
     protected boolean query;
 
-    public MessageComposer(boolean scheme, boolean host, boolean port, boolean path, boolean query) {
+    public MessageComposer(String prefix, boolean scheme, boolean host, boolean port, boolean path, boolean query) {
+        this.prefix = prefix;
         this.scheme = scheme;
         this.host = host;
         this.port = port;
@@ -36,6 +38,9 @@ public class MessageComposer {
     }
 
     protected void constructMessage(HttpRequest request, StringBuilder messageBuilder) throws IOException {
+        if (prefix != null) {
+            messageBuilder.append(prefix);
+        }
         if (scheme) {
             String schemeValue = request.getScheme();
             if(schemeValue != null && !schemeValue.isEmpty()) {
