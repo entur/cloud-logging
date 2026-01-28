@@ -47,7 +47,7 @@ public class JsonMaxBodySizeFilter implements BodyFilter {
             try {
                 return maxBodyFilter.transform(body);
             } catch (Exception e) {
-                // NO-OP
+                // ignore
                 return null;
             }
         }

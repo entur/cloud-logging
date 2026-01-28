@@ -6,7 +6,6 @@ import no.entur.logging.cloud.logbook.util.MaxSizeJsonFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.function.LongSupplier;
 
 public class MaxSizeLocalHttpMessageBodyWriter implements HttpMessageBodyWriter {
 
