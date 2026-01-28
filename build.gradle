@@ -7,7 +7,7 @@ plugins {
 
 // Define version variables at root level so they're available everywhere
 ext {
-    springBootVersion = '3.5.9' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
+    springBootVersion = '4.0.2' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
     // The following versions are managed by Spring Boot BOM (no need to define here):
     // junitJupiterVersion, mockitoVersion, slf4jVersion, logbackVersion, 
     // jacksonVersion, jacksonDatabindVersion, micrometerVersion, janinoVersion,
