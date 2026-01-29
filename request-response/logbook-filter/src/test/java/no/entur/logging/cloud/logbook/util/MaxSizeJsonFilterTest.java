@@ -2,12 +2,11 @@ package no.entur.logging.cloud.logbook.util;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
-import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -41,6 +40,24 @@ public class MaxSizeJsonFilterTest {
         assertEquals(s, transform);
     }
 
+    @Test
+    public void testFilterTooBigInvalidJson() throws IOException {
+        JsonValidator jsonValidator = new JsonValidator(new JsonFactory());
+
+        String s = generateLongJson(2 * MAX_BODY_SIZE);
+
+        String invalidJson = s.substring(0, s.length() - 1);
+        Assertions.assertFalse(jsonValidator.isWellformedJson(invalidJson));
+
+        assertTrue(invalidJson.length() > MAX_BODY_SIZE);
+
+        String transform = filter.transform(invalidJson);
+
+        assertTrue(transform.length() <= MAX_BODY_SIZE);
+
+        Assertions.assertTrue(jsonValidator.isWellformedJson(transform));
+    }
+
     private String generateLongJson(int size) throws IOException {
         JsonFactory factory = new JsonFactory();
 
@@ -62,7 +79,6 @@ public class MaxSizeJsonFilterTest {
 
         return writer.toString();
     }
-
 
     private String generateLongString(int length) {
         StringBuilder builder = new StringBuilder(length);
