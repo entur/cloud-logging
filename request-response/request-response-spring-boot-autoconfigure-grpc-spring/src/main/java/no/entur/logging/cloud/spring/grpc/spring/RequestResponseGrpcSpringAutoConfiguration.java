@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 @AutoConfigureBefore(GrpcExceptionHandlerAutoConfiguration.class)
 public class RequestResponseGrpcSpringAutoConfiguration {
 
-    @Value("${entur.logging.request-response.grpc.server.interceptor-order:5175}")
+    @Value("${entur.logging.request-response.grpc.server.interceptor-order:300}")
     private int serverInterceptorOrder;
 
     @Bean

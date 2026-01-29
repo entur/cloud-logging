@@ -12,7 +12,7 @@ public class OndemandProperties {
 
     private boolean enabled;
 
-    private int interceptorOrder = Ordered.HIGHEST_PRECEDENCE;
+    private int interceptorOrder = 100;
 
     private OndemandSuccess success = new OndemandSuccess();
 

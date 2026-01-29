@@ -13,7 +13,7 @@ ext {
     // jacksonVersion, jacksonDatabindVersion, micrometerVersion, janinoVersion,
     // servletVersion (jakarta-servlet), annotationApiVersion (jakarta-annotation),
     // nettyVersion, jsonPathVersion
-    
+
     // Versions NOT in Spring Boot BOM - we manage these ourselves:
     googleTruthVersion = '1.4.5'
     logbackLogstashVersion = '9.0'

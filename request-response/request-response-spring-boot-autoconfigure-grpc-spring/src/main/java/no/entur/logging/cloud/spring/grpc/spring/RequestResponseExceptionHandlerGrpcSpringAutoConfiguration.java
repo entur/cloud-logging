@@ -21,12 +21,12 @@ import org.springframework.grpc.server.exception.GrpcExceptionHandlerInterceptor
 @AutoConfigureAfter(GrpcExceptionHandlerAutoConfiguration.class)
 public class RequestResponseExceptionHandlerGrpcSpringAutoConfiguration {
 
-    @Value("${entur.logging.request-response.grpc.server.exception-handler.interceptor-order:0}")
+    @Value("${entur.logging.request-response.grpc.server.exception-handler.interceptor-order:400}")
     private int exceptionInterceptorOrder;
 
     @Bean
     @ConditionalOnProperty(name = {"entur.logging.request-response.grpc.server.exception-handler.enabled"}, havingValue = "true", matchIfMissing = true)
-    public RequestResponseGrpcExceptionHandlerInterceptor requestResponseGRpcExceptionHandlerInterceptor(GrpcExceptionHandlerInterceptor interceptor) {
+    public RequestResponseGrpcExceptionHandlerInterceptor requestResponseGrpcExceptionHandlerInterceptor(GrpcExceptionHandlerInterceptor interceptor) {
         return new RequestResponseGrpcExceptionHandlerInterceptor(interceptor, exceptionInterceptorOrder);
     }
 

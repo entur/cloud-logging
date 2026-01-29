@@ -30,7 +30,7 @@ public class GrpcLoggingScopeContextInterceptor implements ServerInterceptor, Or
 
 	public static class Builder {
 
-		private int order = Ordered.HIGHEST_PRECEDENCE;
+		private int order = 100;
 
 		private GrpcLoggingScopeFilters filters;
 

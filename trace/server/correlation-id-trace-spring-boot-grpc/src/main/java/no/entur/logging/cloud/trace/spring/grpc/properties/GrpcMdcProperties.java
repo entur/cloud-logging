@@ -11,7 +11,7 @@ public class GrpcMdcProperties {
 
     private boolean response = true;
 
-    private int interceptorOrder;
+    private int interceptorOrder = 200;
 
     public int getInterceptorOrder() {
         return interceptorOrder;
