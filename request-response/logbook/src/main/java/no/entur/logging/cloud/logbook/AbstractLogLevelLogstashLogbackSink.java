@@ -58,7 +58,8 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
             return newRequestSingleFieldAppendingMarker(request, null, false);
         }
 
-        if (!isJson) {
+        // add sanity check for JSON content, even if mimetype does match
+        if (!isJson || !smellsLikeJson(bodyAsString)) {
             if (bodyAsString.length() > maxSize) {
                 // TODO add filter
                 String truncatedBody = bodyAsString.substring(0, maxSize);
@@ -71,7 +72,7 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
         boolean wellformed;
 
         if (request.getOrigin() == Origin.LOCAL) {
-            // trust data from ourselves to be wellformed
+            // trust data from ourselves to be wellformed and not pretty-printed
             if (bodyAsString.length() > maxSize) {
                 try {
                     body = maxSizeJsonFilter.transform(bodyAsString);
@@ -133,8 +134,9 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
             return newResponseSingleFieldAppendingMarker(response, correlation.getDuration(), null, false);
         }
 
-        if (!isJson) {
-            if (bodyAsString.length() > maxSize) {
+        // add sanity check for JSON content, even if mimetype does match
+        if (!isJson || !smellsLikeJson(bodyAsString)) {
+            if(bodyAsString.length() > maxSize) {
                 // TODO add filter
                 String truncatedBody = bodyAsString.substring(0, maxSize);
                 return newResponseSingleFieldAppendingMarker(response, correlation.getDuration(),
@@ -188,4 +190,57 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
 
     protected abstract Marker newResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body,
                                                                     boolean wellformed);
+
+    /**
+     *
+     * We only check for arrays and objects, while technically more values can be valid JSON.
+     *
+     * @param body input
+     * @return true if array or object start + end
+     */
+
+    public static boolean smellsLikeJson(String body) {
+        if(body == null) {
+            return false;
+        }
+        if(body.length() <= 1) {
+            return false;
+        }
+
+        int start = findFirstNonWhitespaceCharacter(body);
+        int end = findLastNonWhitespaceCharacter(body);
+
+        if (start == '{' && end == '}') {
+            return true;
+        }
+
+        if (start == '[' && end == ']') {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static int findFirstNonWhitespaceCharacter(String body) {
+        for(int i = 0; i < body.length(); i++) {
+            char c = body.charAt(i);
+            if (!Character.isWhitespace(c)) {
+                return c;
+            }
+        }
+
+        return -1;
+    }
+
+    private static int findLastNonWhitespaceCharacter(String body) {
+        for(int i = body.length() - 1; i >= 0; i--) {
+            char c = body.charAt(i);
+            if (!Character.isWhitespace(c)) {
+                return c;
+            }
+        }
+
+        return -1;
+    }
+
 }

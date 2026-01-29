@@ -74,7 +74,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                 byte[] body = request.getBody();
                 if (body != null && body.length > 0) {
                     if (request.getOrigin() == Origin.LOCAL) {
-                        // trust our own data to be wellformed
+                        // trust our own data to be wellformed and not pretty-printed
                         if (body.length < maxBodySize) {
                             writer = new LocalHttpMessageBodyWriter(body);
                         } else {
@@ -101,7 +101,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                         }
                     }
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 // ignore
             }
         } else if (AbstractLogLevelLogstashLogbackSink.isXmlMediaType(request.getContentType())) {
@@ -115,7 +115,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                         writer = new StringHttpMessageBodyWriter(bodyAsString);
                     }
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 // ignore
             }
         }
@@ -132,7 +132,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                 byte[] body = response.getBody();
                 if (body != null && body.length > 0) {
                     if (response.getOrigin() == Origin.LOCAL) {
-                        // trust our own data to be wellformed
+                        // trust our own data to be wellformed and not pretty-printed
                         if (body.length < maxBodySize) {
                             writer = new LocalHttpMessageBodyWriter(body);
                         } else {
@@ -159,7 +159,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                         }
                     }
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 // ignore
             }
         } else if (AbstractLogLevelLogstashLogbackSink.isXmlMediaType(response.getContentType())) {
@@ -173,7 +173,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                         writer = new StringHttpMessageBodyWriter(bodyAsString);
                     }
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 // ignore
             }
         }

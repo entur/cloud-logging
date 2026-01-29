@@ -24,15 +24,15 @@ public class MaxSizeJsonFilter {
     }
 
     private JsonMapper jsonMapper;
-    private final int maxBodySize;
+    private final int maxSize;
 
-    public MaxSizeJsonFilter(int maxBodySize, JsonMapper jsonMapper) {
-        this.maxBodySize = maxBodySize;
+    public MaxSizeJsonFilter(int maxSize, JsonMapper jsonMapper) {
+        this.maxSize = maxSize;
         this.jsonMapper = jsonMapper;
     }
 
     public String transform(String body) throws IOException {
-        StringBuilder output = new StringBuilder(maxBodySize + 128);
+        StringBuilder output = new StringBuilder(maxSize + 128);
         try (
                 final JsonParser parser = jsonMapper.createParser(body);
                 StringBuilderWriter writer = new StringBuilderWriter(output);
@@ -40,7 +40,7 @@ public class MaxSizeJsonFilter {
         ) {
             process(parser, generator, () -> generator.streamWriteOutputBuffered() + output.length());
 
-            generator.flush();
+            generator.close();
             return writer.toString();
         } catch (Exception e) {
             throw new IOException(e);
@@ -48,7 +48,7 @@ public class MaxSizeJsonFilter {
     }
 
     public String transform(byte[] body) throws IOException {
-        StringBuilder output = new StringBuilder(maxBodySize + 128);
+        StringBuilder output = new StringBuilder(maxSize + 128);
         try (
                 final JsonParser parser = jsonMapper.createParser(body);
                 StringBuilderWriter writer = new StringBuilderWriter(output);
@@ -56,7 +56,7 @@ public class MaxSizeJsonFilter {
         ) {
             process(parser, generator, () -> generator.streamWriteOutputBuffered() + output.length());
 
-            generator.flush();
+            generator.close();
             return writer.toString();
         } catch (Exception e) {
             throw new IOException(e);
@@ -64,9 +64,9 @@ public class MaxSizeJsonFilter {
     }
 
     public void process(final JsonParser parser, JsonGenerator generator, LongSupplier outputSizeSupplier) throws IOException {
-        String message = "Max body size of " + maxBodySize + " reached, rest of the document has been filtered.";
+        String message = "Max body size of " + maxSize + " reached, rest of the document has been filtered.";
 
-        final long maxSize = this.maxBodySize - message.length() - 8;
+        final long maxSize = this.maxSize - message.length() - 8;
 
         // do not write field name if field value is too long
         String fieldName = null;
@@ -111,8 +111,6 @@ public class MaxSizeJsonFilter {
                     generator.writeStringProperty("Logger", message);
                 }
 
-                generator.close();
-
                 break;
             }
 
@@ -125,7 +123,9 @@ public class MaxSizeJsonFilter {
 
             inputOffset = nextInputOffset;
         }
-        generator.flush();
     }
 
+    public int getMaxSize() {
+        return maxSize;
+    }
 }
