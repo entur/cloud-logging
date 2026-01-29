@@ -122,6 +122,13 @@ testImplementation ("no.entur.logging.cloud:request-response-spring-boot-starter
 ```
 </details>
 
+Please note:
+
+ * Logging invalid JSON or making too long log statements might have unexpected consequences for fluentbit handling in GCP kubernetes.
+ * For request-response-logging, this library assumes that locally produced JSON has valid syntax and is without pretty-printing. 
+    * This assumption is made so to avoid the processing overhead of unnecessarily parsing JSON documents known to be valid.
+    * If this assumption for some reason does not hold, use a BodyFilter to compensate.
+
 Some Logbook excludes ([actuator, openapi](https://github.com/entur/cloud-logging/blob/main/request-response/logbook-spring-boot-autoconfigure/src/main/java/no/entur/logging/cloud/spring/logbook/LogbookLoggingAutoConfiguration.java)) are included by default. Add more using
 
 ```yml
@@ -288,7 +295,7 @@ entur.logging.http.ondemand.troubleshoot.level=debug
 entur.logging.http.ondemand.troubleshoot.http.headers[0].name=x-debug-this-request
 ```
 
-which allows for additional logging in the precense of certain HTTP headers.
+which allows for additional logging in the presence of certain HTTP headers.
 
 ### Toggle log output-format during testing
 Toggling between output modes in a unit test:
