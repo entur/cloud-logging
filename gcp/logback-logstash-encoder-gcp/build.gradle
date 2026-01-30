@@ -7,7 +7,7 @@ dependencies {
     api ("ch.qos.logback:logback-core")
 
     api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
-    api("com.fasterxml.jackson.core:jackson-core")
+    api("tools.jackson.core:jackson-core")
 
 
 }

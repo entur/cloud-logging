@@ -8,10 +8,10 @@ import org.springframework.core.Ordered;
 
 /**
  *
- * This interceptor duplicates the ecosystem exception interceptor so to handle all errors before the request-response logging
+ * This interceptor duplicates the spring exception interceptor so to handle all errors before the request-response logging
  * while still having error handling earlier in the interceptor chain (i.e. for handling authentication errors and so on).<br><br>
  *
- * This is useful when doing request-response between authentication and controller while using the ecosystem exception handling.
+ * This is useful when doing request-response between authentication and controller while using the spring exception handling.
  */
 
 public class RequestResponseGrpcExceptionHandlerInterceptor implements ServerInterceptor, Ordered {

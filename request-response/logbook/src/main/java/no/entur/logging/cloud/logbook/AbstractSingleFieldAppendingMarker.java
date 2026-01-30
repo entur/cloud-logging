@@ -1,6 +1,6 @@
 package no.entur.logging.cloud.logbook;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 import net.logstash.logback.marker.SingleFieldAppendingMarker;
 import org.zalando.logbook.ContentType;
 import org.zalando.logbook.HttpMessage;
@@ -40,14 +40,14 @@ public abstract class AbstractSingleFieldAppendingMarker<T extends HttpMessage> 
                     if (wellformed) {
                         writeWellformedBody(generator);
                     } else {
-                        generator.writeStringField("body", body);
+                        generator.writeStringProperty("body", body);
                     }
                 } catch (Exception e) {
                     // should never happen, this is probably going to blow up somewhere else
                 }
             } else {
                 try {
-                    generator.writeStringField("body", body);
+                    generator.writeStringProperty("body", body);
                 } catch (Exception e) {
                     // should never happen, this is probably going to blow up somewhere else
                 }
@@ -55,20 +55,20 @@ public abstract class AbstractSingleFieldAppendingMarker<T extends HttpMessage> 
         }
     }
 
-    protected void writeWellformedBody(JsonGenerator generator) throws IOException {
-        generator.writeFieldName("body");
+    protected void writeWellformedBody(JsonGenerator generator) {
+        generator.writeName("body");
         generator.writeRawValue(body);
     }
 
-    protected void writeHeaders(JsonGenerator generator) throws IOException {
-        generator.writeFieldName("headers");
+    protected void writeHeaders(JsonGenerator generator) {
+        generator.writeName("headers");
         generator.writeStartObject();
         if(headers != null) {
             for (Map.Entry<String, List<String>> stringListEntry : headers.entrySet()) {
 
                 String key = stringListEntry.getKey();
                 if(key != null && !key.isEmpty()) {
-                    generator.writeFieldName(key.toLowerCase());
+                    generator.writeName(key.toLowerCase());
                     generator.writeStartArray();
 
                     List<String> values = stringListEntry.getValue();

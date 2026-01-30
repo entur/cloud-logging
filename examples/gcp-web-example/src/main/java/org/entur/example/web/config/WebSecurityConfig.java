@@ -16,7 +16,6 @@ public class WebSecurityConfig {
 				.csrf( c -> c.disable() )
 				.authorizeHttpRequests((authorize) -> {
 					authorize.requestMatchers("/api/secured/endpoint").fullyAuthenticated();
-
 					authorize.anyRequest().permitAll();
 					}
 				);

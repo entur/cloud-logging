@@ -17,11 +17,7 @@ public class OrderedGrpcLoggingServerInterceptor extends GrpcLoggingServerInterc
             GrpcServerLoggingFilters filters,
             GrpcMetadataJsonMapper metadataJsonMapper,
             GrpcPayloadJsonMapper payloadJsonMapper,
-
-            @Value("${entur.logging.request-response.grpc.interceptor-order:0}")
-            int order
-
-    ) {
+            int order) {
         super(sink, filters, metadataJsonMapper, payloadJsonMapper);
         this.order = order;
     }

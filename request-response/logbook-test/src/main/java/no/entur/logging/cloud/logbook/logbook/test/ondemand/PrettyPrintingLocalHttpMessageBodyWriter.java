@@ -1,10 +1,11 @@
 package no.entur.logging.cloud.logbook.logbook.test.ondemand;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.PrettyPrinter;
 import no.entur.logging.cloud.logbook.ondemand.HttpMessageBodyWriter;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.PrettyPrinter;
+import tools.jackson.core.TokenStreamFactory;
+import tools.jackson.core.json.JsonFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -24,13 +25,13 @@ public class PrettyPrintingLocalHttpMessageBodyWriter implements HttpMessageBody
 
     @Override
     public void writeBody(JsonGenerator generator) throws IOException {
-        generator.writeFieldName("body");
+        generator.writeName("body");
 
         PrettyPrinter prettyPrinter = generator.getPrettyPrinter();
         if (prettyPrinter == null) {
             generator.writeRawValue(new String(input, StandardCharsets.UTF_8));
         } else {
-            final JsonFactory factory = generator.getCodec().getFactory();
+            final TokenStreamFactory factory = generator.objectWriteContext().tokenStreamFactory();
 
             // append to existing tree event by event
             try (final JsonParser parser = factory.createParser(input)) {

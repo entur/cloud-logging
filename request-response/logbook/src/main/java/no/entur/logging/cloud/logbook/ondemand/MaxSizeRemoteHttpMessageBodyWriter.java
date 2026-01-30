@@ -1,9 +1,9 @@
 package no.entur.logging.cloud.logbook.ondemand;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageState;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateResult;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateSupplier;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.nio.charset.StandardCharsets;
 
@@ -11,8 +11,8 @@ public class MaxSizeRemoteHttpMessageBodyWriter extends MaxSizeLocalHttpMessageB
 
     protected final HttpMessageStateSupplier httpMessageStateSupplier;
 
-    public MaxSizeRemoteHttpMessageBodyWriter(JsonFactory jsonFactory, byte[] input, int maxSize, HttpMessageStateSupplier httpMessageStateSupplier) {
-        super(jsonFactory, input, maxSize);
+    public MaxSizeRemoteHttpMessageBodyWriter(JsonMapper jsonMapper, byte[] input, int maxSize, HttpMessageStateSupplier httpMessageStateSupplier) {
+        super(jsonMapper, input, maxSize);
         this.httpMessageStateSupplier = httpMessageStateSupplier;
     }
 

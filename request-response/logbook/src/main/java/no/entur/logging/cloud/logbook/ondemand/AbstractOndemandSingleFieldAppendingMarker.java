@@ -1,6 +1,6 @@
 package no.entur.logging.cloud.logbook.ondemand;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 import net.logstash.logback.marker.SingleFieldAppendingMarker;
 import no.entur.logging.cloud.appender.scope.LoggingScopePostProcessing;
 import org.zalando.logbook.ContentType;
@@ -60,15 +60,15 @@ public abstract class AbstractOndemandSingleFieldAppendingMarker<T extends HttpM
     }
 
 
-    protected void writeHeaders(JsonGenerator generator) throws IOException {
-        generator.writeFieldName("headers");
+    protected void writeHeaders(JsonGenerator generator) {
+        generator.writeName("headers");
         generator.writeStartObject();
         if(headers != null) {
             for (Map.Entry<String, List<String>> stringListEntry : headers.entrySet()) {
 
                 String key = stringListEntry.getKey();
                 if(key != null && !key.isEmpty()) {
-                    generator.writeFieldName(key.toLowerCase());
+                    generator.writeName(key.toLowerCase());
                     generator.writeStartArray();
 
                     List<String> values = stringListEntry.getValue();

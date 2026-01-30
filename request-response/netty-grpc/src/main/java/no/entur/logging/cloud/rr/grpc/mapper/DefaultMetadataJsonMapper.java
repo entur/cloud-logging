@@ -1,6 +1,6 @@
 package no.entur.logging.cloud.rr.grpc.mapper;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
@@ -72,7 +72,7 @@ public class DefaultMetadataJsonMapper implements GrpcMetadataJsonMapper {
         }
 
         @Override
-        public void serialize(RawString value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+        public void serialize(RawString value, com.fasterxml.jackson.core.JsonGenerator gen, SerializerProvider provider) throws IOException {
             gen.writeRaw(value.getString());
         }
     }

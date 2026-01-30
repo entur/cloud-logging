@@ -1,12 +1,13 @@
 package no.entur.logging.cloud.logbook.logbook.test.ondemand;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.PrettyPrinter;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageState;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateResult;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateSupplier;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.PrettyPrinter;
+import tools.jackson.core.TokenStreamFactory;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -17,12 +18,12 @@ public class PrettyPrintingRemoteHttpMessageBodyWriter extends PrettyPrintingLoc
     protected final HttpMessageStateSupplier httpMessageStateSupplier;
 
     protected volatile HttpMessageStateResult output;
-    protected final JsonFactory jsonFactory;
+    protected final JsonMapper jsonMapper;
 
-    public PrettyPrintingRemoteHttpMessageBodyWriter(JsonFactory jsonFactory, byte[] input, HttpMessageStateSupplier httpMessageStateSupplier) {
+    public PrettyPrintingRemoteHttpMessageBodyWriter(JsonMapper jsonMapper, byte[] input, HttpMessageStateSupplier httpMessageStateSupplier) {
         super(input);
 
-        this.jsonFactory = jsonFactory;
+        this.jsonMapper = jsonMapper;
         this.httpMessageStateSupplier = httpMessageStateSupplier;
     }
 
@@ -50,28 +51,28 @@ public class PrettyPrintingRemoteHttpMessageBodyWriter extends PrettyPrintingLoc
             this.output = output = createResult();
         }
         if(output.isWellformed()) {
-            generator.writeFieldName("body");
+            generator.writeName("body");
 
             PrettyPrinter prettyPrinter = generator.getPrettyPrinter();
             if (prettyPrinter == null) {
                 generator.writeRawValue(output.getBody());
             } else {
-                final JsonFactory factory = generator.getCodec().getFactory();
+                final TokenStreamFactory factory = generator.objectWriteContext().tokenStreamFactory();
 
                 // append to existing tree event by event
-                try (final JsonParser parser = factory.createParser(output.getBody())) {
+                try (final JsonParser parser = jsonMapper.createParser(output.getBody())) {
                     while (parser.nextToken() != null) {
                         generator.copyCurrentEvent(parser);
                     }
                 }
             }
         } else {
-            generator.writeStringField("body", output.getBody());
+            generator.writeStringProperty("body", output.getBody());
         }
     }
 
     protected boolean isWellformedJson() {
-        try (JsonParser parser = jsonFactory.createParser(new ByteArrayInputStream(input))) {
+        try (JsonParser parser = jsonMapper.createParser(new ByteArrayInputStream(input))) {
             while(parser.nextToken() != null);
         } catch(Exception e) {
             return false;

@@ -2,8 +2,6 @@ package no.entur.logging.cloud.micrometer;
 
 import ch.qos.logback.classic.LoggerContext;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.lang.NonNullApi;
-import io.micrometer.core.lang.NonNullFields;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
@@ -15,8 +13,6 @@ import static java.util.Collections.emptyList;
  * Logback driver with extra log levels. Originally copied from LogbackMetrics class in micrometer-core.
  * 
  */
-@NonNullApi
-@NonNullFields
 public class DevOpsLogbackMetrics extends io.micrometer.core.instrument.binder.logging.LogbackMetrics { // extend since there is no interface type
 	private final LoggerContext loggerContext;
 	private final Map<MeterRegistry, DevOpsMetricsTurboFilter> metricsTurboFilters = new ConcurrentHashMap<>();

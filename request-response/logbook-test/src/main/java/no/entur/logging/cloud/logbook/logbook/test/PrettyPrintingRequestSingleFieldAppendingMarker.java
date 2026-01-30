@@ -1,15 +1,11 @@
 package no.entur.logging.cloud.logbook.logbook.test;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.PrettyPrinter;
+import tools.jackson.core.JsonGenerator;
 import no.entur.logging.cloud.logbook.RequestSingleFieldAppendingMarker;
 import org.zalando.logbook.HttpRequest;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.function.BooleanSupplier;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.PrettyPrinter;
+import tools.jackson.core.TokenStreamFactory;
 
 public class PrettyPrintingRequestSingleFieldAppendingMarker extends RequestSingleFieldAppendingMarker {
 
@@ -18,13 +14,13 @@ public class PrettyPrintingRequestSingleFieldAppendingMarker extends RequestSing
     }
 
     @Override
-    protected void writeWellformedBody(JsonGenerator generator) throws IOException {
+    protected void writeWellformedBody(JsonGenerator generator) {
         final PrettyPrinter prettyPrinter = generator.getPrettyPrinter();
-        generator.writeFieldName("body");
+        generator.writeName("body");
         if (prettyPrinter == null) {
             generator.writeRawValue(body);
         } else {
-            final JsonFactory factory = generator.getCodec().getFactory();
+            final TokenStreamFactory factory = generator.objectWriteContext().tokenStreamFactory();
 
             // append to existing tree event by event
             try (final JsonParser parser = factory.createParser(body)) {

@@ -1,15 +1,13 @@
 package no.entur.logging.cloud.logbook.filter;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonStreamContext;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.MappingJsonFactory;
-import no.entur.logging.cloud.logbook.util.MaxSizeJsonFilter;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.json.JsonMapper;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.zalando.logbook.BodyFilter;
 import org.zalando.logbook.ContentType;
+import no.entur.logging.cloud.logbook.util.MaxSizeJsonFilter;
 
 import java.io.IOException;
 import java.util.function.LongSupplier;
@@ -34,7 +32,9 @@ public class JsonMaxBodySizeFilter implements BodyFilter {
 
     public JsonMaxBodySizeFilter(int maxBodySize) {
         this.maxBodySize = maxBodySize;
-        this.maxBodyFilter = new MaxSizeJsonFilter(maxBodySize, new MappingJsonFactory());
+
+        JsonMapper mapper = JsonMapper.builder().build();
+        this.maxBodyFilter = new MaxSizeJsonFilter(maxBodySize, mapper);
     }
 
     @Override

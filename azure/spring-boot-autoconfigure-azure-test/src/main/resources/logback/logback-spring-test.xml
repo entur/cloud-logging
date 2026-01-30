@@ -55,7 +55,7 @@
 				TODO this seems to add an extract space after the last newline,
 				but as this is just the human readable format, this is not important.
 			 -->
-			<jsonGeneratorDecorator class="org.entur.decorators.SyntaxHighlightingDecorator">
+			<decorator class="org.entur.decorators.SyntaxHighlightingMapperBuilderDecorator">
 				<syntaxHighlighterFactory class="no.entur.logging.cloud.azure.spring.test.LogSeveritySyntaxHighlighterFactory">
 					<!-- Emulate intellij color scheme: Settings | Editor | Color Scheme | JSON. -->
 					<stringValue>green</stringValue>
@@ -63,7 +63,8 @@
 					<numberValue>blue</numberValue>
 					<fieldName>magenta</fieldName>
 				</syntaxHighlighterFactory>
-			</jsonGeneratorDecorator>
+			</decorator>
+			<decorator class="org.entur.decorators.SyntaxHighlightingJsonGeneratorDecorator"/>
 		</humanReadableJsonEncoder>
 		<machineReadableJsonEncoder class="no.entur.logging.cloud.azure.logback.logstash.AzureLogstashEncoder">
 			<!-- note: this encoder will be used to evaluate assertions against log statements -->

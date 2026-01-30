@@ -1,11 +1,10 @@
 package no.entur.logging.cloud.rr.grpc.test;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import org.entur.jackson.jsh.AnsiSyntaxHighlight;
-import org.entur.jackson.jsh.SyntaxHighlighter;
-import org.entur.jackson.jsh.SyntaxHighlightingJsonGenerator;
+import org.entur.jackson.tools.jsh.AnsiSyntaxHighlight;
+import org.entur.jackson.tools.jsh.SyntaxHighlighter;
+import org.entur.jackson.tools.jsh.SyntaxHighlightingJsonGenerator;
+import org.entur.jackson.tools.jsh.SyntaxHighlightingPrettyPrinter;
+import tools.jackson.core.JsonGenerator;
 import no.entur.logging.cloud.rr.grpc.AbstractSinkBuilder;
 import no.entur.logging.cloud.rr.grpc.LogbackLogstashGrpcSink;
 import no.entur.logging.cloud.rr.grpc.message.GrpcConnect;
@@ -13,6 +12,11 @@ import no.entur.logging.cloud.rr.grpc.message.GrpcDisconnect;
 import no.entur.logging.cloud.rr.grpc.message.GrpcRequest;
 import no.entur.logging.cloud.rr.grpc.message.GrpcResponse;
 import org.slf4j.Marker;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.PrettyPrinter;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -44,19 +48,24 @@ public class PrettyPrintingGrpcSink extends LogbackLogstashGrpcSink {
                 throw new IllegalStateException("Expected Json syntax highlighter level");
             }
 
-            return new PrettyPrintingGrpcSink(logEnabledToBooleanSupplier(), loggerToBiConsumer(), new JsonFactory(), syntaxHighlighter);
+            JsonMapper mapper = JsonMapper.builder().defaultPrettyPrinter(new SyntaxHighlightingPrettyPrinter(syntaxHighlighter))
+                    .configure(SerializationFeature.INDENT_OUTPUT, true)
+                    .build();
+
+            return new PrettyPrintingGrpcSink(logEnabledToBooleanSupplier(), loggerToBiConsumer(), mapper, syntaxHighlighter);
         }
 
     }
+
     protected final BiConsumer<Marker, String> logConsumer;
-    protected final JsonFactory jsonFactory;
+    protected final JsonMapper mapper;
 
     protected final SyntaxHighlighter syntaxHighlighter;
 
-    public PrettyPrintingGrpcSink(BooleanSupplier logLevelEnabled, BiConsumer<Marker, String> logConsumer, JsonFactory jsonFactory, SyntaxHighlighter syntaxHighlighter) {
+    public PrettyPrintingGrpcSink(BooleanSupplier logLevelEnabled, BiConsumer<Marker, String> logConsumer, JsonMapper mapper, SyntaxHighlighter syntaxHighlighter) {
         super(logConsumer, logLevelEnabled);
         this.logConsumer = logConsumer;
-        this.jsonFactory = jsonFactory;
+        this.mapper = mapper;
         this.syntaxHighlighter = syntaxHighlighter;
     }
 
@@ -167,11 +176,13 @@ public class PrettyPrintingGrpcSink extends LogbackLogstashGrpcSink {
 
         if (body != null && body.length() > 0) {
             try (
-                JsonParser parser = jsonFactory.createParser(body);
-                StringWriter writer = new StringWriter(body.length() * 2);
-                JsonGenerator generator = jsonFactory.createGenerator(writer);
+                    JsonParser parser = mapper.createParser(body);
+                    StringWriter writer = new StringWriter(body.length() * 2);
+                    JsonGenerator generator = mapper.createGenerator(writer);
             ) {
-                JsonGenerator jsonGenerator = new SyntaxHighlightingJsonGenerator(generator, syntaxHighlighter,true);
+                SyntaxHighlightingPrettyPrinter prettyPrinter = (SyntaxHighlightingPrettyPrinter) generator.getPrettyPrinter();
+
+                JsonGenerator jsonGenerator = new SyntaxHighlightingJsonGenerator(generator, prettyPrinter, prettyPrinter.getObjectIndenter(), prettyPrinter.getArrayIndenter(), prettyPrinter.getSyntaxHighlighter());
                 while (parser.nextToken() != null) {
                     jsonGenerator.copyCurrentEvent(parser);
                 }

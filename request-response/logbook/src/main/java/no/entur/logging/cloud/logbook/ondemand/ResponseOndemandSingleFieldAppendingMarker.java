@@ -1,6 +1,6 @@
 package no.entur.logging.cloud.logbook.ondemand;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 import net.logstash.logback.marker.SingleFieldAppendingMarker;
 import org.zalando.logbook.HttpResponse;
 import org.zalando.logbook.Origin;
@@ -36,20 +36,20 @@ public class ResponseOndemandSingleFieldAppendingMarker extends AbstractOndemand
     }
 
     @Override
-    protected void writeFieldValue(JsonGenerator generator) throws IOException {
+    protected void writeFieldValue(JsonGenerator generator) {
         generator.writeStartObject();
 
         if(origin != null) {
-            generator.writeStringField("origin", origin);
+            generator.writeStringProperty("origin", origin);
         }
-        generator.writeStringField("type", "response");
+        generator.writeStringProperty("type", "response");
         if(duration != null) {
-            generator.writeNumberField("duration", duration.toMillis());
+            generator.writeNumberProperty("duration", duration.toMillis());
         }
         if(protocol != null) {
-            generator.writeStringField("protocol", protocol);
+            generator.writeStringProperty("protocol", protocol);
         }
-        generator.writeNumberField("status", status);
+        generator.writeNumberProperty("status", status);
 
         writeHeaders(generator);
         writeBody(generator);

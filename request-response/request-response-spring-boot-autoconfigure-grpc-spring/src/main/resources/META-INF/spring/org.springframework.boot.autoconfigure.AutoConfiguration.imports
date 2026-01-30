@@ -1,0 +1,2 @@
+no.entur.logging.cloud.spring.grpc.spring.RequestResponseGrpcSpringAutoConfiguration
+no.entur.logging.cloud.spring.grpc.spring.RequestResponseExceptionHandlerGrpcSpringAutoConfiguration

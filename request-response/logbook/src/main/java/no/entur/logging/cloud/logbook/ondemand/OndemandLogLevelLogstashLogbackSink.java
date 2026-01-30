@@ -1,6 +1,5 @@
 package no.entur.logging.cloud.logbook.ondemand;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import no.entur.logging.cloud.logbook.AbstractLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.DefaultRemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.MessageComposer;
@@ -10,6 +9,7 @@ import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupp
 import no.entur.logging.cloud.logbook.ondemand.state.ResponseHttpMessageStateSupplierSource;
 import org.slf4j.Marker;
 import org.zalando.logbook.*;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -44,24 +44,24 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
             if (level == null) {
                 throw new IllegalStateException("Expected log level");
             }
-            if (jsonFactory == null) {
-                jsonFactory = new JsonFactory();
+            if (jsonMapper == null) {
+                jsonMapper = JsonMapper.builder().build();
             }
             if (remoteHttpMessageContextSupplier == null) {
                 remoteHttpMessageContextSupplier = new DefaultRemoteHttpMessageContextSupplier();
             }
             return new OndemandLogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(),
-                    jsonFactory, requestBodyWellformedDecisionSupplier, responseBodyWellformedDecisionSupplier,
+                    jsonMapper, requestBodyWellformedDecisionSupplier, responseBodyWellformedDecisionSupplier,
                     maxBodySize, maxSize, remoteHttpMessageContextSupplier, server, client);
         }
     }
 
     public OndemandLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled,
-            JsonFactory jsonFactory, RequestHttpMessageStateSupplierSource requestHttpMessageStateSupplierSource,
+                                               JsonMapper jsonMapper, RequestHttpMessageStateSupplierSource requestHttpMessageStateSupplierSource,
             ResponseHttpMessageStateSupplierSource responseHttpMessageStateSupplierSource, int maxBodySize, int maxSize,
             RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier, MessageComposer server,
             MessageComposer client) {
-        super(logConsumer, logLevelEnabled, jsonFactory, requestHttpMessageStateSupplierSource,
+        super(logConsumer, logLevelEnabled, jsonMapper, requestHttpMessageStateSupplierSource,
                 responseHttpMessageStateSupplierSource, maxBodySize, maxSize, remoteHttpMessageContextSupplier, server,
                 client);
     }
@@ -78,7 +78,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                         if (body.length < maxBodySize) {
                             writer = new LocalHttpMessageBodyWriter(body);
                         } else {
-                            writer = new MaxSizeLocalHttpMessageBodyWriter(jsonFactory, body, maxBodySize);
+                            writer = new MaxSizeLocalHttpMessageBodyWriter(jsonMapper, body, maxBodySize);
                         }
                     } else {
                         boolean verify = remoteHttpMessageContextSupplier.verifyJsonSyntax(request);
@@ -86,9 +86,9 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                             HttpMessageStateSupplier httpMessageStateSupplier = requestHttpMessageStateSupplierSource
                                     .get();
                             if (body.length < maxBodySize) {
-                                writer = new RemoteHttpMessageBodyWriter(jsonFactory, body, httpMessageStateSupplier);
+                                writer = new RemoteHttpMessageBodyWriter(jsonMapper, body, httpMessageStateSupplier);
                             } else {
-                                writer = new MaxSizeRemoteHttpMessageBodyWriter(jsonFactory, body, maxSize,
+                                writer = new MaxSizeRemoteHttpMessageBodyWriter(jsonMapper, body, maxSize,
                                         httpMessageStateSupplier);
                             }
                         } else {
@@ -96,7 +96,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                             if (body.length < maxBodySize) {
                                 writer = new LocalHttpMessageBodyWriter(body);
                             } else {
-                                writer = new MaxSizeLocalHttpMessageBodyWriter(jsonFactory, body, maxBodySize);
+                                writer = new MaxSizeLocalHttpMessageBodyWriter(jsonMapper, body, maxBodySize);
                             }
                         }
                     }
@@ -136,7 +136,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                         if (body.length < maxBodySize) {
                             writer = new LocalHttpMessageBodyWriter(body);
                         } else {
-                            writer = new MaxSizeLocalHttpMessageBodyWriter(jsonFactory, body, maxBodySize);
+                            writer = new MaxSizeLocalHttpMessageBodyWriter(jsonMapper, body, maxBodySize);
                         }
                     } else {
                         boolean verify = remoteHttpMessageContextSupplier.verifyJsonSyntax(response);
@@ -144,9 +144,9 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                             HttpMessageStateSupplier httpMessageStateSupplier = responseHttpMessageStateSupplierSource
                                     .get();
                             if (body.length < maxBodySize) {
-                                writer = new RemoteHttpMessageBodyWriter(jsonFactory, body, httpMessageStateSupplier);
+                                writer = new RemoteHttpMessageBodyWriter(jsonMapper, body, httpMessageStateSupplier);
                             } else {
-                                writer = new MaxSizeRemoteHttpMessageBodyWriter(jsonFactory, body, maxSize,
+                                writer = new MaxSizeRemoteHttpMessageBodyWriter(jsonMapper, body, maxSize,
                                         httpMessageStateSupplier);
                             }
                         } else {
@@ -154,7 +154,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                             if (body.length < maxBodySize) {
                                 writer = new LocalHttpMessageBodyWriter(body);
                             } else {
-                                writer = new MaxSizeLocalHttpMessageBodyWriter(jsonFactory, body, maxBodySize);
+                                writer = new MaxSizeLocalHttpMessageBodyWriter(jsonMapper, body, maxBodySize);
                             }
                         }
                     }

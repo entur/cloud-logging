@@ -15,7 +15,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-logging")
     api("org.springframework.boot:spring-boot-autoconfigure")
 
-    api ("org.entur.jackson:jackson-syntax-highlight:${jacksonSyntaxHighlightVersion}")
+    api ("org.entur.jackson:jackson-tools-syntax-highlight:${jacksonSyntaxHighlightVersion}")
     api ("org.entur.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
 
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"

@@ -1,6 +1,6 @@
 package no.entur.logging.cloud.rr.grpc.marker;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 import no.entur.logging.cloud.rr.grpc.message.GrpcRequest;
 
 import java.io.IOException;
@@ -14,12 +14,12 @@ public class GrpcRequestMarker extends GrpcConnectionMarker<GrpcRequest> {
 	}
 
 	@Override
-	protected void writeFields(JsonGenerator generator) throws IOException {
+	protected void writeFields(JsonGenerator generator) {
 		super.writeFields(generator);
 
 		long timeRemaining = message.getTimeRemainingUntilDeadlineInMilliseconds();
 		if(timeRemaining != -1L) {
-			generator.writeFieldName("deadline-in");
+			generator.writeName("deadline-in");
 			generator.writeNumber(timeRemaining);
 		}
 
@@ -29,8 +29,8 @@ public class GrpcRequestMarker extends GrpcConnectionMarker<GrpcRequest> {
 		}
 	}
 
-	protected void writeBodyField(JsonGenerator generator, String body) throws IOException {
-		generator.writeFieldName("body");
+	protected void writeBodyField(JsonGenerator generator, String body) {
+		generator.writeName("body");
 		generator.writeRawValue(body);
 	}
 

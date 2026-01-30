@@ -12,7 +12,7 @@ Please note:
  * For local development, a shortened 'classic' one-line is the default
  * To examine log statements in more details use `CompositeConsoleOutputControl.useHumanReadableJsonEncoder()` for JSON output
 
-# Ecosystem gRPC interceptors
+# Spring gRPC interceptors
 The gRPC interceptor order overview:
 
 ## Service configuration
@@ -30,7 +30,7 @@ The gRPC interceptor order overview:
   // Validation
   MyValidationServerInterceptor.class,
 
-}, sortInterceptors = true)
+})
 ```
 
 ## Interceptor order

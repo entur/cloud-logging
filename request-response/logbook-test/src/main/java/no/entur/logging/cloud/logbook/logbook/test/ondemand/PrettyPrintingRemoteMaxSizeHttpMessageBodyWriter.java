@@ -1,9 +1,9 @@
 package no.entur.logging.cloud.logbook.logbook.test.ondemand;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageState;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateResult;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateSupplier;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.nio.charset.StandardCharsets;
 
@@ -11,8 +11,8 @@ public class PrettyPrintingRemoteMaxSizeHttpMessageBodyWriter extends PrettyPrin
 
     protected final HttpMessageStateSupplier httpMessageStateSupplier;
 
-    public PrettyPrintingRemoteMaxSizeHttpMessageBodyWriter(JsonFactory jsonFactory, byte[] input, int maxSize, HttpMessageStateSupplier httpMessageStateSupplier) {
-        super(jsonFactory, input, maxSize);
+    public PrettyPrintingRemoteMaxSizeHttpMessageBodyWriter(JsonMapper mapper, byte[] input, int maxSize, HttpMessageStateSupplier httpMessageStateSupplier) {
+        super(mapper, input, maxSize);
         this.httpMessageStateSupplier = httpMessageStateSupplier;
     }
 

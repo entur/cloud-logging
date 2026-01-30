@@ -6,11 +6,11 @@ dependencies {
 
     api("org.zalando:logbook-api:${logbookVersion}")
 
-    api ("org.entur.jackson:jackson-syntax-highlight:${jacksonSyntaxHighlightVersion}")
+    api ("org.entur.jackson:jackson-tools-syntax-highlight:${jacksonSyntaxHighlightVersion}")
     api ("org.entur.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
 
     api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
-    api ("com.fasterxml.jackson.core:jackson-core")
+    api ("tools.jackson.core:jackson-core")
 
     api("org.apache.commons:commons-text:${commonsTextVersion}")
 }

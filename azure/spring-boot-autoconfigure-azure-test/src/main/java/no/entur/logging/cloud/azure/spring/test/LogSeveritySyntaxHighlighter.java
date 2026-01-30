@@ -1,8 +1,8 @@
 package no.entur.logging.cloud.azure.spring.test;
 
 import org.entur.decorators.syntaxhighlight.DelegateSyntaxHighlighter;
-import org.entur.jackson.jsh.AnsiSyntaxHighlight;
-import org.entur.jackson.jsh.SyntaxHighlighter;
+import org.entur.jackson.tools.jsh.AnsiSyntaxHighlight;
+import org.entur.jackson.tools.jsh.SyntaxHighlighter;
 
 public class LogSeveritySyntaxHighlighter extends DelegateSyntaxHighlighter {
 

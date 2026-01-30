@@ -1,10 +1,9 @@
 package no.entur.logging.cloud.logbook;
 
-import com.fasterxml.jackson.core.JsonFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 import org.slf4j.event.Level;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
@@ -17,7 +16,7 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
 
     protected Level level;
 
-    protected JsonFactory jsonFactory;
+    protected JsonMapper jsonMapper;
 
     protected int maxSize = -1;
     protected int maxBodySize = -1;
@@ -32,8 +31,8 @@ public abstract class AbstractSinkBuilder<B, E extends AbstractSinkBuilder<B, E>
         return (B) this;
     }
 
-    public B withJsonFactory(JsonFactory jsonFactory) {
-        this.jsonFactory = jsonFactory;
+    public B withJsonFactory(JsonMapper jsonMapper) {
+        this.jsonMapper = jsonMapper;
         return (B) this;
     }
 

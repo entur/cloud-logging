@@ -1,6 +1,6 @@
 package no.entur.logging.cloud.logbook;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.Origin;
 
@@ -45,38 +45,38 @@ public class RequestSingleFieldAppendingMarker extends AbstractSingleFieldAppend
     }
 
     @Override
-    protected void writeFieldValue(JsonGenerator generator) throws IOException {
+    protected void writeFieldValue(JsonGenerator generator) {
         generator.writeStartObject();
 
         if(origin != null) {
-            generator.writeStringField("origin", origin);
+            generator.writeStringProperty("origin", origin);
         }
-        generator.writeStringField("type", "request");
+        generator.writeStringProperty("type", "request");
         if(protocol != null) {
-            generator.writeStringField("protocol", protocol);
+            generator.writeStringProperty("protocol", protocol);
         }
         if(remote != null) {
-            generator.writeStringField("remote", remote);
+            generator.writeStringProperty("remote", remote);
         }
         if(method != null) {
-            generator.writeStringField("method", method);
+            generator.writeStringProperty("method", method);
         }
         if(uri != null) {
-            generator.writeStringField("uri", uri);
+            generator.writeStringProperty("uri", uri);
         }
         if(host != null) {
-            generator.writeStringField("host", host);
+            generator.writeStringProperty("host", host);
         }
         if(path != null) {
-            generator.writeStringField("path", path);
+            generator.writeStringProperty("path", path);
         }
         if(scheme != null) {
-            generator.writeStringField("scheme", scheme);
+            generator.writeStringProperty("scheme", scheme);
         }
         if(port.isEmpty()) {
-            generator.writeNumberField("port", 80);
+            generator.writeNumberProperty("port", 80);
         } else {
-            generator.writeNumberField("port", port.get());
+            generator.writeNumberProperty("port", port.get());
         }
 
         writeHeaders(generator);

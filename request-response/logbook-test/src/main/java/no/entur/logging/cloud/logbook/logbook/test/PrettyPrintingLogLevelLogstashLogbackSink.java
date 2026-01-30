@@ -1,6 +1,5 @@
 package no.entur.logging.cloud.logbook.logbook.test;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import no.entur.logging.cloud.logbook.AbstractLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.AbstractSinkBuilder;
 import no.entur.logging.cloud.logbook.DefaultRemoteHttpMessageContextSupplier;
@@ -9,6 +8,7 @@ import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
 import org.slf4j.Marker;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
 import java.util.function.BiConsumer;
@@ -41,22 +41,22 @@ public class PrettyPrintingLogLevelLogstashLogbackSink extends AbstractLogLevelL
             if (server == null) {
                 throw new IllegalStateException("Expected server message composer");
             }
-            if (jsonFactory == null) {
-                jsonFactory = new JsonFactory();
+            if (jsonMapper == null) {
+                jsonMapper = JsonMapper.builder().build();
             }
             if (remoteHttpMessageContextSupplier == null) {
                 remoteHttpMessageContextSupplier = new DefaultRemoteHttpMessageContextSupplier();
             }
             return new PrettyPrintingLogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(),
-                    jsonFactory, Math.min(maxBodySize, maxSize), remoteHttpMessageContextSupplier, server, client);
+                    jsonMapper, Math.min(maxBodySize, maxSize), remoteHttpMessageContextSupplier, server, client);
         }
     }
 
     public PrettyPrintingLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer,
-            BooleanSupplier logLevelEnabled, JsonFactory jsonFactory, int maxSize,
+            BooleanSupplier logLevelEnabled, JsonMapper jsonMapper, int maxSize,
             RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier, MessageComposer server,
             MessageComposer client) {
-        super(logConsumer, logLevelEnabled, jsonFactory, maxSize, remoteHttpMessageContextSupplier, server, client);
+        super(logConsumer, logLevelEnabled, jsonMapper, maxSize, remoteHttpMessageContextSupplier, server, client);
     }
 
     @Override

@@ -7,12 +7,12 @@ import org.springframework.core.Ordered;
 import java.util.ArrayList;
 import java.util.List;
 
-@ConfigurationProperties(prefix = "no.entur.logging.grpc.ondemand")
+@ConfigurationProperties(prefix = "entur.logging.grpc.ondemand")
 public class OndemandProperties {
 
     private boolean enabled;
 
-    private int interceptorOrder = Ordered.HIGHEST_PRECEDENCE;
+    private int interceptorOrder = 100;
 
     private OndemandSuccess success = new OndemandSuccess();
 

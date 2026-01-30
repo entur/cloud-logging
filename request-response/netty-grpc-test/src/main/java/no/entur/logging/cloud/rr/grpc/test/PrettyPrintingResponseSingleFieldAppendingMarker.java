@@ -1,11 +1,13 @@
 package no.entur.logging.cloud.rr.grpc.test;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.PrettyPrinter;
+import tools.jackson.core.JsonGenerator;
 import no.entur.logging.cloud.rr.grpc.marker.GrpcResponseMarker;
 import no.entur.logging.cloud.rr.grpc.message.GrpcResponse;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.PrettyPrinter;
+import tools.jackson.core.TokenStreamFactory;
+import tools.jackson.core.json.JsonFactory;
+
 import java.io.IOException;
 
 public class PrettyPrintingResponseSingleFieldAppendingMarker extends GrpcResponseMarker {
@@ -15,14 +17,14 @@ public class PrettyPrintingResponseSingleFieldAppendingMarker extends GrpcRespon
     }
 
     @Override
-    protected void writeBodyField(JsonGenerator generator, String body) throws IOException {
-        generator.writeFieldName("body");
+    protected void writeBodyField(JsonGenerator generator, String body) {
+        generator.writeName("body");
 
         final PrettyPrinter prettyPrinter = generator.getPrettyPrinter();
         if (prettyPrinter == null || isRawStringValue(body)) {
             generator.writeRawValue(body);
         } else {
-            final JsonFactory factory = generator.getCodec().getFactory();
+            final TokenStreamFactory factory = generator.objectWriteContext().tokenStreamFactory();
 
             // append to existing tree event by event
             try (final JsonParser parser = factory.createParser(body)) {

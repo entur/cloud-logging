@@ -1,6 +1,5 @@
 package no.entur.logging.cloud.logbook.logbook.test.ondemand;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import no.entur.logging.cloud.logbook.AbstractLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.DefaultRemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.MessageComposer;
@@ -15,9 +14,8 @@ import org.zalando.logbook.Correlation;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
 import org.zalando.logbook.Origin;
+import tools.jackson.databind.json.JsonMapper;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
@@ -55,26 +53,26 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
             if (server == null) {
                 throw new IllegalStateException("Expected server message composer");
             }
-            if (jsonFactory == null) {
-                jsonFactory = new JsonFactory();
+            if (jsonMapper == null) {
+                jsonMapper = JsonMapper.builder().build();
             }
             if (remoteHttpMessageContextSupplier == null) {
                 remoteHttpMessageContextSupplier = new DefaultRemoteHttpMessageContextSupplier();
             }
             return new PrettyPrintingOndemandLogLevelLogstashLogbackSink(loggerToBiConsumer(),
-                    logEnabledToBooleanSupplier(), jsonFactory, requestBodyWellformedDecisionSupplier,
+                    logEnabledToBooleanSupplier(), jsonMapper, requestBodyWellformedDecisionSupplier,
                     responseBodyWellformedDecisionSupplier, maxBodySize, maxSize, remoteHttpMessageContextSupplier,
                     server, client);
         }
     }
 
     public PrettyPrintingOndemandLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer,
-            BooleanSupplier logLevelEnabled, JsonFactory jsonFactory,
+            BooleanSupplier logLevelEnabled, JsonMapper jsonMapper,
             RequestHttpMessageStateSupplierSource requestHttpMessageStateSupplierSource,
             ResponseHttpMessageStateSupplierSource responseHttpMessageStateSupplierSource, int maxBodySize, int maxSize,
             RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier, MessageComposer server,
             MessageComposer client) {
-        super(logConsumer, logLevelEnabled, jsonFactory, requestHttpMessageStateSupplierSource,
+        super(logConsumer, logLevelEnabled, jsonMapper, requestHttpMessageStateSupplierSource,
                 responseHttpMessageStateSupplierSource, maxBodySize, maxSize, remoteHttpMessageContextSupplier, server,
                 client);
     }
@@ -91,21 +89,21 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
                         if (body.length > maxBodySize) {
                             writer = new PrettyPrintingLocalHttpMessageBodyWriter(body);
                         } else {
-                            writer = new PrettyPrintingLocalMaxSizeHttpMessageBodyWriter(jsonFactory, body,
+                            writer = new PrettyPrintingLocalMaxSizeHttpMessageBodyWriter(jsonMapper, body,
                                     maxBodySize);
                         }
                     } else {
                         HttpMessageStateSupplier httpMessageStateSupplier = requestHttpMessageStateSupplierSource.get();
                         if (body.length > maxBodySize) {
-                            writer = new PrettyPrintingRemoteHttpMessageBodyWriter(jsonFactory, body,
+                            writer = new PrettyPrintingRemoteHttpMessageBodyWriter(jsonMapper, body,
                                     httpMessageStateSupplier);
                         } else {
-                            writer = new PrettyPrintingRemoteMaxSizeHttpMessageBodyWriter(jsonFactory, body, maxSize,
+                            writer = new PrettyPrintingRemoteMaxSizeHttpMessageBodyWriter(jsonMapper, body, maxSize,
                                     httpMessageStateSupplier);
                         }
                     }
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 // ignore
             }
         } else if (AbstractLogLevelLogstashLogbackSink.isXmlMediaType(request.getContentType())) {
@@ -120,7 +118,7 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
                         writer = new StringHttpMessageBodyWriter(bodyAsString);
                     }
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 // ignore
             }
         }
@@ -141,22 +139,22 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
                         if (body.length > maxBodySize) {
                             writer = new PrettyPrintingLocalHttpMessageBodyWriter(body);
                         } else {
-                            writer = new PrettyPrintingLocalMaxSizeHttpMessageBodyWriter(jsonFactory, body,
+                            writer = new PrettyPrintingLocalMaxSizeHttpMessageBodyWriter(jsonMapper, body,
                                     maxBodySize);
                         }
                     } else {
                         HttpMessageStateSupplier httpMessageStateSupplier = responseHttpMessageStateSupplierSource
                                 .get();
                         if (body.length > maxBodySize) {
-                            writer = new PrettyPrintingRemoteHttpMessageBodyWriter(jsonFactory, body,
+                            writer = new PrettyPrintingRemoteHttpMessageBodyWriter(jsonMapper, body,
                                     httpMessageStateSupplier);
                         } else {
-                            writer = new PrettyPrintingRemoteMaxSizeHttpMessageBodyWriter(jsonFactory, body, maxSize,
+                            writer = new PrettyPrintingRemoteMaxSizeHttpMessageBodyWriter(jsonMapper, body, maxSize,
                                     httpMessageStateSupplier);
                         }
                     }
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 // ignore
             }
         } else if (AbstractLogLevelLogstashLogbackSink.isXmlMediaType(response.getContentType())) {
@@ -171,7 +169,7 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
                         writer = new StringHttpMessageBodyWriter(bodyAsString);
                     }
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 // ignore
             }
         }

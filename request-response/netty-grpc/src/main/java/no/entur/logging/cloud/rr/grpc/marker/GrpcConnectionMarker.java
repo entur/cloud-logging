@@ -1,6 +1,6 @@
 package no.entur.logging.cloud.rr.grpc.marker;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 import net.logstash.logback.marker.LogstashMarker;
 import no.entur.logging.cloud.rr.grpc.message.GrpcMessage;
 
@@ -21,8 +21,8 @@ public abstract class GrpcConnectionMarker<T extends GrpcMessage> extends Logsta
 	}
 
 	@Override
-	public void writeTo(JsonGenerator generator) throws IOException {
-		generator.writeFieldName("http");
+	public void writeTo(JsonGenerator generator) {
+		generator.writeName("http");
 		generator.writeStartObject();
 
 		writeFields(generator);
@@ -30,34 +30,34 @@ public abstract class GrpcConnectionMarker<T extends GrpcMessage> extends Logsta
 		generator.writeEndObject();
 	}
 	
-	protected void writeFields(JsonGenerator generator) throws IOException {
+	protected void writeFields(JsonGenerator generator) {
 
         String uri = message.getUri();
         if(uri != null) {
-            generator.writeFieldName("uri");
+            generator.writeName("uri");
             generator.writeString(uri);
         }
 
         String type = message.getType();
         if(type != null) {
-            generator.writeFieldName("type");
+            generator.writeName("type");
             generator.writeString(type);
         }
 
 		String remote = message.getRemote();
 		if(remote != null) {
-			generator.writeFieldName("remote");
+			generator.writeName("remote");
 			generator.writeString(remote);
 		}
 
 		String origin = message.getOrigin();
         if(origin != null) {
-            generator.writeFieldName("origin");
+            generator.writeName("origin");
             generator.writeString(origin);
         }
 
 		Map<String, ?> headers = message.getHeaders();
-		generator.writeFieldName("headers");
+		generator.writeName("headers");
 		generator.writeStartObject();
 
 		if(headers != null) {
@@ -65,7 +65,7 @@ public abstract class GrpcConnectionMarker<T extends GrpcMessage> extends Logsta
 
 				String key = entry.getKey();
 				if(key != null && !key.isEmpty()) {
-					generator.writeFieldName(key.toLowerCase());
+					generator.writeName(key.toLowerCase());
 					generator.writeStartArray();
 
 					Object value = entry.getValue();
@@ -73,10 +73,10 @@ public abstract class GrpcConnectionMarker<T extends GrpcMessage> extends Logsta
 						if (value instanceof List) {
 							List<Object> values = (List) value;
 							for (Object listValue : values) {
-								generator.writeObject(listValue);
+								generator.writePOJO(listValue);
 							}
 						} else {
-							generator.writeObject(value);
+							generator.writePOJO(value);
 						}
 					}
 					generator.writeEndArray();

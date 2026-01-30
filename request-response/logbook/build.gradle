@@ -9,7 +9,7 @@ dependencies {
     api "commons-io:commons-io:${commonsIoVersion}"
 
     api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
-    api("com.fasterxml.jackson.core:jackson-core")
+    api("tools.jackson.core:jackson-core")
 
     api("org.apache.commons:commons-text:${commonsTextVersion}")
 

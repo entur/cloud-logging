@@ -208,24 +208,24 @@ and
 ```xml
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>spring-boot-starter-gcp-grpc-ecosystem</artifactId>
+    <artifactId>spring-boot-starter-gcp-grpc-spring</artifactId>
     <version>${cloud-logging.version}</version>
 </dependency>
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>spring-boot-starter-gcp-grpc-ecosystem-test</artifactId>
+    <artifactId>spring-boot-starter-gcp-grpc-spring-test</artifactId>
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
 <!-- request-response logging -->
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>request-response-spring-boot-starter-gcp-grpc-ecosystem</artifactId>
+    <artifactId>request-response-spring-boot-starter-gcp-grpc-spring</artifactId>
     <version>${cloud-logging.version}</version>
 </dependency>
 <dependency>
     <groupId>no.entur.logging.cloud</groupId>
-    <artifactId>request-response-spring-boot-starter-gcp-grpc-ecosystem-test</artifactId>
+    <artifactId>request-response-spring-boot-starter-gcp-grpc-spring-test</artifactId>
     <version>${cloud-logging.version}</version>
     <scope>test</scope>
 </dependency>
@@ -285,11 +285,11 @@ ext {
 add
 
 ```groovy
-implementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-ecosystem:${cloudLoggingVersion}")
-testImplementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-ecosystem-test:${cloudLoggingVersion}")
+implementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-spring:${cloudLoggingVersion}")
+testImplementation("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-spring-test:${cloudLoggingVersion}")
 // request-response logging
-implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-ecosystem:${cloudLoggingVersion}")
-testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-ecosystem-test:${cloudLoggingVersion}")
+implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-spring:${cloudLoggingVersion}")
+testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-grpc-spring-test:${cloudLoggingVersion}")
 // on-demand logging support
 implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-grpc:${cloudLoggingVersion}")
 // metrics

@@ -1,20 +1,20 @@
 package no.entur.logging.cloud.logbook.util;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.StringReader;
 
 public class JsonValidator {
 
-    private final JsonFactory jsonFactory;
+    private final JsonMapper jsonMapper;
 
-    public JsonValidator(JsonFactory jsonFactory) {
-        this.jsonFactory = jsonFactory;
+    public JsonValidator(JsonMapper jsonMapper) {
+        this.jsonMapper = jsonMapper;
     }
 
     public boolean isWellformedJson(String input) {
-        try (JsonParser parser = jsonFactory.createParser(new StringReader(input))) {
+        try (JsonParser parser = jsonMapper.createParser(new StringReader(input))) {
             while(parser.nextToken() != null);
         } catch(Exception e) {
             return false;
