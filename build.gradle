@@ -19,7 +19,7 @@ ext {
     logbackLogstashVersion = '8.1'
     logbookVersion = '3.12.3'
     jacksonSyntaxHighlightVersion = '1.1.1'
-    logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.1.1'
+    logbackLogstashSyntaxHighlightingDecoratorsVersion = '2.0.0'
     commonsIoVersion = '2.21.0'
     commonsTextVersion = '1.15.0'
     nettyTcnativeBoringsslStaticVersion = '2.0.74.Final'
