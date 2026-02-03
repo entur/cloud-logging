@@ -1,38 +1,39 @@
 package no.entur.logging.cloud.gcp.logback.logstash;
 
+import ch.qos.logback.classic.pattern.ThrowableHandlingConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
-import ch.qos.logback.classic.spi.StackTraceElementProxy;
 import com.fasterxml.jackson.core.JsonGenerator;
+import net.logstash.logback.LogstashFormatter;
 import net.logstash.logback.composite.JsonWritingUtils;
 import net.logstash.logback.composite.loggingevent.MessageJsonProvider;
-import net.logstash.logback.stacktrace.ShortenedThrowableConverter;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class StackdriverMessageJsonProvider extends MessageJsonProvider {
 
-	private ShortenedThrowableConverter throwableConverter;
+	private final LogstashFormatter formatter;
+	private ThrowableHandlingConverter throwableConverter;
 
-	public StackdriverMessageJsonProvider() {
-		throwableConverter = new ShortenedThrowableConverter();
-		throwableConverter.setMaxLength(24 * 1024);
-		throwableConverter.setOmitCommonFrames(true);
-		throwableConverter.setShortenedClassNameLength(192);
-		throwableConverter.setLineSeparator("\n");
+	public StackdriverMessageJsonProvider(LogstashFormatter formatter) {
+		this.formatter = formatter;
 	}
 
 	@Override
 	public void start() {
 		super.start();
-		throwableConverter.start();
+		throwableConverter = formatter.getThrowableConverter();
+		if(!throwableConverter.isStarted()) {
+			throwableConverter.start();
+		}
 	}
 
 	@Override
 	public void stop() {
 		super.stop();
-		throwableConverter.stop();
+		if(throwableConverter.isStarted()) {
+			throwableConverter.stop();
+		}
 	}
 
 	@Override
@@ -61,4 +62,5 @@ public class StackdriverMessageJsonProvider extends MessageJsonProvider {
 			super.writeTo(generator, event);
 		}
 	}
+
 }

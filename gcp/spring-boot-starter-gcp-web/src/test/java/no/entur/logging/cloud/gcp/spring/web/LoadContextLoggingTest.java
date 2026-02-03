@@ -34,15 +34,15 @@ public class LoadContextLoggingTest {
     public void testMachineReadableJsonWithException() throws IOException {
         IOException e = new IOException("Something went wrong");
 
-        LOGGER.trace("Test trace message", e);
-        LOGGER.debug("Test debug message", e);
-        LOGGER.info("Test info message", e);
-        LOGGER.warn("Test warn message", e);
-        LOGGER.error("Test error message", e);
+        LOGGER.trace("Test trace message with exception", e);
+        LOGGER.debug("Test debug message with exception", e);
+        LOGGER.info("Test info message with exception", e);
+        LOGGER.warn("Test warn message with exception", e);
+        LOGGER.error("Test error message with exception", e);
 
-        LOGGER.errorTellMeTomorrow("Test error tell me tomorrow message", e);
-        LOGGER.errorInterruptMyDinner("Test error interrupt my dinner message", e);
-        LOGGER.errorWakeMeUpRightNow("Test error wake me up right now message", e);
+        LOGGER.errorTellMeTomorrow("Test error tell me tomorrow message with exception", e);
+        LOGGER.errorInterruptMyDinner("Test error interrupt my dinner message with exception", e);
+        LOGGER.errorWakeMeUpRightNow("Test error wake me up right now message with exception", e);
     }
 
 }
