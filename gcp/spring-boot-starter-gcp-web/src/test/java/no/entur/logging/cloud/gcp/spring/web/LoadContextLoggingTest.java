@@ -30,4 +30,19 @@ public class LoadContextLoggingTest {
         LOGGER.errorWakeMeUpRightNow("Test error wake me up right now message");
     }
 
+    @Test
+    public void testMachineReadableJsonWithException() throws IOException {
+        IOException e = new IOException("Something went wrong");
+
+        LOGGER.trace("Test trace message", e);
+        LOGGER.debug("Test debug message", e);
+        LOGGER.info("Test info message", e);
+        LOGGER.warn("Test warn message", e);
+        LOGGER.error("Test error message", e);
+
+        LOGGER.errorTellMeTomorrow("Test error tell me tomorrow message", e);
+        LOGGER.errorInterruptMyDinner("Test error interrupt my dinner message", e);
+        LOGGER.errorWakeMeUpRightNow("Test error wake me up right now message", e);
+    }
+
 }

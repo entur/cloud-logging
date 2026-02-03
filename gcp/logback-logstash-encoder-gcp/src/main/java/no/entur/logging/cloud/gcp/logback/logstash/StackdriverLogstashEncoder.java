@@ -22,8 +22,12 @@ import java.util.List;
 
 public class StackdriverLogstashEncoder extends LogstashEncoder {
 
+	private final StackdriverMessageJsonProvider stackdriverMessageJsonProvider = new StackdriverMessageJsonProvider();
+
 	@Override
 	protected AbstractCompositeJsonFormatter<ILoggingEvent> createFormatter() {
+		System.out.println("Create formatter");
+
 		LogstashFormatter formatter = (LogstashFormatter) super.createFormatter();
 
 		LoggingEventJsonProviders loggingEventJsonProviders = formatter.getProviders();
@@ -70,4 +74,5 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 			return false;
 		}
 	}
+
 }

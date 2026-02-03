@@ -6,74 +6,59 @@ import ch.qos.logback.classic.spi.StackTraceElementProxy;
 import com.fasterxml.jackson.core.JsonGenerator;
 import net.logstash.logback.composite.JsonWritingUtils;
 import net.logstash.logback.composite.loggingevent.MessageJsonProvider;
+import net.logstash.logback.stacktrace.ShortenedThrowableConverter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class StackdriverMessageJsonProvider extends MessageJsonProvider {
+
+	private ShortenedThrowableConverter throwableConverter;
+
+	public StackdriverMessageJsonProvider() {
+		throwableConverter = new ShortenedThrowableConverter();
+		throwableConverter.setMaxLength(24 * 1024);
+		throwableConverter.setOmitCommonFrames(true);
+		throwableConverter.setShortenedClassNameLength(192);
+		throwableConverter.setLineSeparator("\n");
+	}
+
+	@Override
+	public void start() {
+		super.start();
+		throwableConverter.start();
+	}
+
+	@Override
+	public void stop() {
+		super.stop();
+		throwableConverter.stop();
+	}
 
 	@Override
 	public void writeTo(JsonGenerator generator, ILoggingEvent event) throws IOException {
 		IThrowableProxy throwableProxy = event.getThrowableProxy();
 		if (throwableProxy != null) {
 			String formattedMessage = event.getFormattedMessage();
-			String message = throwableProxy.getMessage();        	
-			StringBuilder messageWithStackTrace = new StringBuilder();
-			if(formattedMessage != null && !formattedMessage.isEmpty() && message != null && !message.isEmpty()) {
+
+			String stacktrace = throwableConverter.convert(event);
+
+			if(formattedMessage != null) {
+				StringBuilder messageWithStackTrace = new StringBuilder(formattedMessage.length() + 2 + stacktrace.length());
+
 				messageWithStackTrace.append(formattedMessage);
-				
-				if(Character.isLetterOrDigit(formattedMessage.charAt(formattedMessage.length() - 1))) {
+				if (Character.isLetterOrDigit(formattedMessage.charAt(formattedMessage.length() - 1))) {
 					messageWithStackTrace.append('.');
 				}
-				
 				messageWithStackTrace.append(' ');
-				messageWithStackTrace.append(message);
-				messageWithStackTrace.append('\n');
-			} else if(formattedMessage != null && !formattedMessage.isEmpty()) {
-				messageWithStackTrace.append(formattedMessage);
-				messageWithStackTrace.append('\n');
-			} else if(message != null && !message.isEmpty()) {
-				messageWithStackTrace.append(message);
-				messageWithStackTrace.append('\n');
+				messageWithStackTrace.append(throwableConverter.convert(event));
+
+				JsonWritingUtils.writeStringField(generator, getFieldName(), messageWithStackTrace.toString());
+			} else {
+				JsonWritingUtils.writeStringField(generator, getFieldName(), stacktrace);
 			}
-
-			writeStack(throwableProxy, "", messageWithStackTrace);
-
-			JsonWritingUtils.writeStringField(generator, getFieldName(), messageWithStackTrace.toString());
 		} else {
 			super.writeTo(generator, event);
 		}
-	}
-	
-	/**
-	 * Format stack-trace
-	 * 
-	 * @see https://github.com/GoogleCloudPlatform/google-cloud-java/tree/master/google-cloud-contrib/google-cloud-logging-logback
-	 */
-
-	static void writeStack(IThrowableProxy throwProxy, String prefix, StringBuilder payload) {
-		if (throwProxy == null) {
-			return;
-		}
-		payload
-			.append(prefix)
-			.append(throwProxy.getClassName())
-			.append(": ")
-			.append(throwProxy.getMessage())
-			.append('\n');
-		StackTraceElementProxy[] trace = throwProxy.getStackTraceElementProxyArray();
-		if (trace == null) {
-			trace = new StackTraceElementProxy[0];
-		}
-
-		int commonFrames = throwProxy.getCommonFrames();
-		int printFrames = trace.length - commonFrames;
-		for (int i = 0; i < printFrames; i++) {
-			payload.append("    ").append(trace[i]).append('\n');
-		}
-		if (commonFrames != 0) {
-			payload.append("    ... ").append(commonFrames).append(" common frames elided\n");
-		}
-
-		writeStack(throwProxy.getCause(), "caused by: ", payload);
 	}
 }
