@@ -22,9 +22,6 @@ import java.util.List;
 
 public class StackdriverLogstashEncoder extends LogstashEncoder {
 
-	public StackdriverLogstashEncoder() {
-	}
-
 	@Override
 	protected AbstractCompositeJsonFormatter<ILoggingEvent> createFormatter() {
 		LogstashFormatter formatter = (LogstashFormatter) super.createFormatter();
@@ -73,5 +70,4 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 			return false;
 		}
 	}
-
 }
