@@ -24,30 +24,30 @@ public class StackdriverMessageJsonProvider extends MessageJsonProvider {
 	public void start() {
 		super.start();
 		throwableConverter = formatter.getThrowableConverter();
-        if(throwableConverter == null) {
-            // this should never happen
-            throwableConverter = createThrowableConverter();
-        }
+		if(throwableConverter == null) {
+			// this should never happen
+			throwableConverter = createThrowableConverter();
+		}
 
 		if(!throwableConverter.isStarted()) {
 			throwableConverter.start();
 		}
 	}
 
-    protected ThrowableHandlingConverter createThrowableConverter() {
-        ExtendedThrowableProxyConverter converter = new ExtendedThrowableProxyConverter();
-        converter.setContext(getContext());
-        return converter;
-    }
+	protected ThrowableHandlingConverter createThrowableConverter() {
+		ExtendedThrowableProxyConverter converter = new ExtendedThrowableProxyConverter();
+		converter.setContext(getContext());
+		return converter;
+	}
 
-    @Override
+	@Override
 	public void stop() {
 		super.stop();
-        if(throwableConverter != null) {
-            if(throwableConverter.isStarted()) {
-                throwableConverter.stop();
-            }
-        }
+		if(throwableConverter != null) {
+			if(throwableConverter.isStarted()) {
+				throwableConverter.stop();
+			}
+		}
 	}
 
 	@Override
@@ -58,34 +58,34 @@ public class StackdriverMessageJsonProvider extends MessageJsonProvider {
 
 			String stacktrace = throwableConverter.convert(event);
 
-            boolean writeFormattedMessage = formattedMessage != null && !formattedMessage.isEmpty();
-            boolean writeStacktrace = stacktrace != null && !stacktrace.isEmpty();
+			boolean writeFormattedMessage = formattedMessage != null && !formattedMessage.isEmpty();
+			boolean writeStacktrace = stacktrace != null && !stacktrace.isEmpty();
 
 			if(writeFormattedMessage && writeStacktrace) {
-                // stacktrace is on the form:
-                // "exception-name colon exception-message newline tab at x.y.z newline tab at a.b.c and so on"
-                // so add a space and potentially a dot between the log statement message and the first line of the
-                // formatted stacktrace
-                String message;
-                if (Character.isLetterOrDigit(formattedMessage.charAt(formattedMessage.length() - 1))) {
-                    message = formattedMessage + ". " + stacktrace;
-                } else {
-                    message = formattedMessage + ' ' + stacktrace;
-                }
-                JsonWritingUtils.writeStringField(generator, getFieldName(), message);
+				// stacktrace is on the form:
+				// "exception-name colon exception-message newline tab at x.y.z newline tab at a.b.c and so on"
+				// so add a space and potentially a dot between the log statement message and the first line of the
+				// formatted stacktrace
+				String message;
+				if (Character.isLetterOrDigit(formattedMessage.charAt(formattedMessage.length() - 1))) {
+					message = formattedMessage + ". " + stacktrace;
+				} else {
+					message = formattedMessage + ' ' + stacktrace;
+				}
+				JsonWritingUtils.writeStringField(generator, getFieldName(), message);
 			} else if (writeStacktrace) {
 				JsonWritingUtils.writeStringField(generator, getFieldName(), stacktrace);
-            } else if (writeFormattedMessage) {
-                JsonWritingUtils.writeStringField(generator, getFieldName(), formattedMessage);
-            } else {
-                super.writeTo(generator, event);
+			} else if (writeFormattedMessage) {
+				JsonWritingUtils.writeStringField(generator, getFieldName(), formattedMessage);
+			} else {
+				super.writeTo(generator, event);
 			}
 		} else {
 			super.writeTo(generator, event);
 		}
 	}
 
-    public void setThrowableConverter(ThrowableHandlingConverter throwableConverter) {
-        this.throwableConverter = throwableConverter;
-    }
+	public void setThrowableConverter(ThrowableHandlingConverter throwableConverter) {
+		this.throwableConverter = throwableConverter;
+	}
 }
