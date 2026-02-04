@@ -85,7 +85,4 @@ public class StackdriverMessageJsonProvider extends MessageJsonProvider {
 		}
 	}
 
-	public void setThrowableConverter(ThrowableHandlingConverter throwableConverter) {
-		this.throwableConverter = throwableConverter;
-	}
 }
