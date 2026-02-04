@@ -29,7 +29,7 @@ public class StackdriverTimestampJsonProvider extends AbstractJsonProvider<ILogg
             generator.writeNumberField("nanos", nanoseconds % 1000_000_000);
         } else {
             // get nanos from milliseconds
-            generator.writeNumberField("nanos", (event.getTimeStamp() % 1000) * 1000_000 );
+            generator.writeNumberField("nanos", (event.getTimeStamp() % 1000) * 1000_000);
         }
         generator.writeEndObject();
     }
