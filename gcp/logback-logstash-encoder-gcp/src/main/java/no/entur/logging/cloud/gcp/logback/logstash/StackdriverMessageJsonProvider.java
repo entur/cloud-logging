@@ -53,25 +53,30 @@ public class StackdriverMessageJsonProvider extends MessageJsonProvider {
 		IThrowableProxy throwableProxy = event.getThrowableProxy();
 		if (throwableProxy != null) {
 			String formattedMessage = event.getFormattedMessage();
+
 			String stacktrace = throwableConverter.convert(event);
 
-			if(formattedMessage != null && stacktrace != null) {
-				StringBuilder messageWithStackTrace = new StringBuilder(formattedMessage.length() + 2 + stacktrace.length());
+            boolean writeFormattedMessage = formattedMessage != null && !formattedMessage.isEmpty();
+            boolean writeStacktrace = stacktrace != null && !stacktrace.isEmpty();
 
-                if(!formattedMessage.isEmpty()) {
-                    messageWithStackTrace.append(formattedMessage);
-                    if (Character.isLetterOrDigit(formattedMessage.charAt(formattedMessage.length() - 1))) {
-                        messageWithStackTrace.append('.');
-                    }
-                    messageWithStackTrace.append(' ');
+			if(writeFormattedMessage && writeStacktrace) {
+                // stacktrace is on the form:
+                // "exception-name colon exception-message newline tab at x.y.z newline tab at a.b.c and so on"
+                // so add a space and potentially a dot between the log statement message and the first line of the
+                // formatted stacktrace
+                String message;
+                if (Character.isLetterOrDigit(formattedMessage.charAt(formattedMessage.length() - 1))) {
+                    message = formattedMessage + ". " + stacktrace;
+                } else {
+                    message = formattedMessage + ' ' + stacktrace;
                 }
-				messageWithStackTrace.append(stacktrace);
-
-				JsonWritingUtils.writeStringField(generator, getFieldName(), messageWithStackTrace.toString());
-			} else if (stacktrace != null) {
+                JsonWritingUtils.writeStringField(generator, getFieldName(), message);
+			} else if (writeStacktrace) {
 				JsonWritingUtils.writeStringField(generator, getFieldName(), stacktrace);
-            } else if (formattedMessage != null) {
+            } else if (writeFormattedMessage) {
                 JsonWritingUtils.writeStringField(generator, getFieldName(), formattedMessage);
+            } else {
+                super.writeTo(generator, event);
 			}
 		} else {
 			super.writeTo(generator, event);
