@@ -28,9 +28,9 @@ public class LoadContextLoggingTest {
     public void testHumanReadablePlain() {
         CompositeConsoleOutputControl.useHumanReadablePlainEncoder();
 
-        LOGGER.trace("Test trace message");
-        LOGGER.debug("Test debug message");
-        LOGGER.info("Test info message");
+        LOGGER.trace("Test trace message", new IOException("Trace exception"));
+        LOGGER.debug("Test debug message", new IOException("Trace exception"));
+        LOGGER.info("Test info message", new IOException("Trace exception"));
         LOGGER.warn("Test warn message");
         LOGGER.error("Test error message");
 
