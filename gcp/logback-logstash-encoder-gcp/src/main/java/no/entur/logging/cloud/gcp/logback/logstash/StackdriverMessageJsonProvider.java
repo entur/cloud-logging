@@ -1,5 +1,6 @@
 package no.entur.logging.cloud.gcp.logback.logstash;
 
+import ch.qos.logback.classic.pattern.ExtendedThrowableProxyConverter;
 import ch.qos.logback.classic.pattern.ThrowableHandlingConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
@@ -23,17 +24,28 @@ public class StackdriverMessageJsonProvider extends MessageJsonProvider {
 	public void start() {
 		super.start();
 		throwableConverter = formatter.getThrowableConverter();
+
+        if(throwableConverter == null) {
+            throwableConverter = createThrowableConverter();
+        }
+
 		if(!throwableConverter.isStarted()) {
 			throwableConverter.start();
 		}
 	}
 
-	@Override
+    protected ThrowableHandlingConverter createThrowableConverter() {
+        return new ExtendedThrowableProxyConverter();
+    }
+
+    @Override
 	public void stop() {
 		super.stop();
-		if(throwableConverter.isStarted()) {
-			throwableConverter.stop();
-		}
+        if(throwableConverter != null) {
+            if(throwableConverter.isStarted()) {
+                throwableConverter.stop();
+            }
+        }
 	}
 
 	@Override
@@ -41,26 +53,32 @@ public class StackdriverMessageJsonProvider extends MessageJsonProvider {
 		IThrowableProxy throwableProxy = event.getThrowableProxy();
 		if (throwableProxy != null) {
 			String formattedMessage = event.getFormattedMessage();
-
 			String stacktrace = throwableConverter.convert(event);
 
-			if(formattedMessage != null) {
+			if(formattedMessage != null && stacktrace != null) {
 				StringBuilder messageWithStackTrace = new StringBuilder(formattedMessage.length() + 2 + stacktrace.length());
 
-				messageWithStackTrace.append(formattedMessage);
-				if (Character.isLetterOrDigit(formattedMessage.charAt(formattedMessage.length() - 1))) {
-					messageWithStackTrace.append('.');
-				}
-				messageWithStackTrace.append(' ');
-				messageWithStackTrace.append(throwableConverter.convert(event));
+                if(!formattedMessage.isEmpty()) {
+                    messageWithStackTrace.append(formattedMessage);
+                    if (Character.isLetterOrDigit(formattedMessage.charAt(formattedMessage.length() - 1))) {
+                        messageWithStackTrace.append('.');
+                    }
+                    messageWithStackTrace.append(' ');
+                }
+				messageWithStackTrace.append(stacktrace);
 
 				JsonWritingUtils.writeStringField(generator, getFieldName(), messageWithStackTrace.toString());
-			} else {
+			} else if (stacktrace != null) {
 				JsonWritingUtils.writeStringField(generator, getFieldName(), stacktrace);
+            } else if (formattedMessage != null) {
+                JsonWritingUtils.writeStringField(generator, getFieldName(), formattedMessage);
 			}
 		} else {
 			super.writeTo(generator, event);
 		}
 	}
 
+    public void setThrowableConverter(ThrowableHandlingConverter throwableConverter) {
+        this.throwableConverter = throwableConverter;
+    }
 }
