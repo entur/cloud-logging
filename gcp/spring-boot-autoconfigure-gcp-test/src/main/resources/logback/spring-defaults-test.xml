@@ -6,17 +6,19 @@ Default logback configuration provided for import by spring, modified to give me
  - date and time zone
  - pid
  - application name
+ - stacktrace coloring of selected packages
 -->
 
 <included>
 
     <!-- TODO refering to subproject properties is a bit ugly -->
-    <springProperty name="STACKTRACE_HIGHLIGHTED_PACKAGES" source="entur.logging.test.format.stacktrace.packages"/>
+    <springProperty name="stacktraceHighlightedPackages" source="entur.logging.test.format.stacktrace.highlight"/>
 
     <conversionRule conversionWord="clr" class="org.springframework.boot.logging.logback.ColorConverter" />
-    <conversionRule conversionWord="wEx" class="no.entur.logging.cloud.logback.test.ExtendedWhitespaceThrowableProxyConverter"/>
+    <conversionRule conversionWord="whEx" class="no.entur.logging.cloud.logback.test.HighlightingThrowableProxyConverter"/>
+    <conversionRule conversionWord="wEx" class="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
 
-    <property name="CONSOLE_LOG_PATTERN" value="${CONSOLE_LOG_PATTERN:-%clr(%d{${LOG_DATEFORMAT_PATTERN:-HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(---){faint} %clr([%15.15t]){faint} %clr(${LOG_CORRELATION_PATTERN:-}){faint}%clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx{${STACKTRACE_HIGHLIGHTED_PACKAGES:-}}}}"/>
+    <property name="CONSOLE_LOG_PATTERN" value="${CONSOLE_LOG_PATTERN:-%clr(%d{${LOG_DATEFORMAT_PATTERN:-HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(---){faint} %clr([%15.15t]){faint} %clr(${LOG_CORRELATION_PATTERN:-}){faint}%clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%whEx{${stacktraceHighlightedPackages:-}}}}"/>
     <property name="CONSOLE_LOG_CHARSET" value="${CONSOLE_LOG_CHARSET:-${file.encoding:-UTF-8}}"/>
     <property name="CONSOLE_LOG_THRESHOLD" value="${CONSOLE_LOG_THRESHOLD:-TRACE}"/>
 

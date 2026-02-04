@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
@@ -18,7 +19,9 @@ import java.io.IOException;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @DirtiesContext
-
+@TestPropertySource(properties = {
+        "entur.logging.test.format.stacktrace.highlight=no.entur,org.entur",
+})
 @EnableAutoConfiguration
 public class LoadContextLoggingTest {
 
