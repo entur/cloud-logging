@@ -24,8 +24,8 @@ public class StackdriverMessageJsonProvider extends MessageJsonProvider {
 	public void start() {
 		super.start();
 		throwableConverter = formatter.getThrowableConverter();
-
         if(throwableConverter == null) {
+            // this should never happen
             throwableConverter = createThrowableConverter();
         }
 
@@ -35,7 +35,9 @@ public class StackdriverMessageJsonProvider extends MessageJsonProvider {
 	}
 
     protected ThrowableHandlingConverter createThrowableConverter() {
-        return new ExtendedThrowableProxyConverter();
+        ExtendedThrowableProxyConverter converter = new ExtendedThrowableProxyConverter();
+        converter.setContext(getContext());
+        return converter;
     }
 
     @Override
