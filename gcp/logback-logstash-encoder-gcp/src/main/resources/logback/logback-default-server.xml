@@ -5,9 +5,13 @@
                 <version>[ignore]</version>
                 <timestamp>[ignore]</timestamp>
             </fieldNames>
-            <provider class="no.entur.logging.cloud.gcp.logback.logstash.StackdriverServiceContextJsonProvider">
-            </provider>
+            <provider class="no.entur.logging.cloud.gcp.logback.logstash.StackdriverServiceContextJsonProvider"/>
             <provider class="no.entur.logging.cloud.gcp.logback.logstash.StackdriverTimestampJsonProvider"/>
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                <!-- limit, but set limits so high most will not notice -->
+                <maxLength>24576</maxLength>
+                <shortenedClassNameLength>192</shortenedClassNameLength>
+            </throwableConverter>
         </encoder>
     </appender>
 </included>
