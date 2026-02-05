@@ -36,14 +36,9 @@ public class RequestResponseGrpcSpringAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(name = {"entur.logging.request-response.grpc.server.exception-handler.enabled"}, havingValue = "true", matchIfMissing = true)
-    public StatusRuntimeExceptionExceptionHandler statusRuntimeExceptionExceptionHandler() {
-        return new StatusRuntimeExceptionExceptionHandler(0);
-    }
-
-    @Bean
-    @ConditionalOnProperty(name = {"entur.logging.request-response.grpc.server.exception-handler.enabled"}, havingValue = "true", matchIfMissing = true)
     public RuntimeExceptionExceptionHandler runtimeExceptionExceptionHandler() {
-        return new RuntimeExceptionExceptionHandler(0);
+        // catch-all so run late
+        return new RuntimeExceptionExceptionHandler(Integer.MAX_VALUE / 2);
     }
 
 }
