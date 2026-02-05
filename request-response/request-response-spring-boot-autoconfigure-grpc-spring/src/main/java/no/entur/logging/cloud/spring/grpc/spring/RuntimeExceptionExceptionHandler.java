@@ -6,6 +6,8 @@ import io.grpc.StatusRuntimeException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.Ordered;
 import org.springframework.grpc.server.exception.GrpcExceptionHandler;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 
 /**
  *
@@ -24,13 +26,13 @@ public class RuntimeExceptionExceptionHandler implements GrpcExceptionHandler, O
     @Override
 	public @Nullable StatusException handleException(Throwable e) {
 		if (e instanceof RuntimeException s) {
-            if(e instanceof StatusRuntimeException) {
+            if(s instanceof StatusRuntimeException) {
                 // handled by framework
                 return null;
             }
 
             // TODO workaround. Remove when SecurityGrpcExceptionHandler can be sorted before this handler
-            if(e.getClass().getName().equals("org.springframework.security.core.AuthenticationException") || e.getClass().getName().equals("org.springframework.security.access.AccessDeniedException")) {
+            if (s instanceof AuthenticationException || s instanceof AccessDeniedException) {
                 // handled by framework
                 return null;
             }

@@ -9,6 +9,7 @@ dependencies {
     api ("org.springframework.boot:spring-boot-starter")
     api ("org.springframework.boot:spring-boot-autoconfigure")
     api ("org.springframework.boot:spring-boot-starter-logging")
+    api ("org.springframework.security:spring-security-core")
 
     api("org.springframework.grpc:spring-grpc-server-spring-boot-starter:${springGrpcVersion}")
 
