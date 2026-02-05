@@ -26,7 +26,6 @@ dependencies {
     implementation("io.grpc:grpc-netty:$grpcVersion")
     implementation("io.grpc:grpc-util:$grpcVersion")
     implementation("org.springframework.boot:spring-boot-starter")
-    implementation("javax.annotation:javax.annotation-api:1.3.2")
 
     // added due to grpc plugin dependency resolution problem
     testImplementation "org.junit.platform:junit-platform-launcher"

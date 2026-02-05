@@ -10,8 +10,6 @@ import org.zalando.logbook.HttpResponse;
 import org.zalando.logbook.Origin;
 import tools.jackson.databind.json.JsonMapper;
 
-import javax.annotation.Nullable;
-
 import java.time.Duration;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;

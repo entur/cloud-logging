@@ -39,7 +39,6 @@ dependencies {
     testImplementation("com.google.truth:truth:${googleTruthVersion}")
     testImplementation("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
 
-    testImplementation("javax.annotation:javax.annotation-api:1.3.2")
     testImplementation project(":api")
     testImplementation project(":test:test-logback")
     testImplementation project(":test:test-logback-junit")

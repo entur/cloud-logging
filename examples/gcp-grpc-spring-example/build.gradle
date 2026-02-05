@@ -27,8 +27,6 @@ dependencies {
     implementation("io.grpc:grpc-util:$grpcVersion")
     implementation("org.springframework.boot:spring-boot-starter")
 
-    implementation("javax.annotation:javax.annotation-api:1.3.2")
-
     testImplementation project(":gcp:spring-boot-starter-gcp-grpc-spring-test")
     testImplementation project(':gcp:request-response-spring-boot-starter-gcp-grpc-spring-test')
     testImplementation("org.springframework.boot:spring-boot-starter-test")
