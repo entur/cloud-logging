@@ -4,7 +4,6 @@ import ch.qos.logback.classic.pattern.ExtendedThrowableProxyConverter;
 import ch.qos.logback.classic.pattern.ThrowableHandlingConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
-import ch.qos.logback.classic.spi.StackTraceElementProxy;
 import tools.jackson.core.JsonGenerator;
 import net.logstash.logback.LogstashFormatter;
 import net.logstash.logback.composite.JsonWritingUtils;
