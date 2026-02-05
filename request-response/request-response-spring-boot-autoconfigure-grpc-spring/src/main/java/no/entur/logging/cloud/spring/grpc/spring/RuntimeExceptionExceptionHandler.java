@@ -28,6 +28,12 @@ public class RuntimeExceptionExceptionHandler implements GrpcExceptionHandler, O
                 // handled by framework
                 return null;
             }
+
+            // TODO workaround. Remove when SecurityGrpcExceptionHandler can be sorted before this handler
+            if(e.getClass().getName().equals("org.springframework.security.core.AuthenticationException") || e.getClass().getName().equals("org.springframework.security.access.AccessDeniedException")) {
+                // handled by framework
+                return null;
+            }
             return Status.INTERNAL.withDescription(s.getMessage()).asException();
         }
 		return null;
