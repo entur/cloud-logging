@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
@@ -18,7 +19,9 @@ import java.io.IOException;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @DirtiesContext
-
+@TestPropertySource(properties = {
+        "entur.logging.test.format.stacktrace.highlight=no.entur,org.entur",
+})
 @EnableAutoConfiguration
 public class LoadContextLoggingTest {
 
@@ -28,9 +31,9 @@ public class LoadContextLoggingTest {
     public void testHumanReadablePlain() {
         CompositeConsoleOutputControl.useHumanReadablePlainEncoder();
 
-        LOGGER.trace("Test trace message");
-        LOGGER.debug("Test debug message");
-        LOGGER.info("Test info message");
+        LOGGER.trace("Test trace message", new IOException("Trace exception"));
+        LOGGER.debug("Test debug message", new IOException("Trace exception"));
+        LOGGER.info("Test info message", new IOException("Trace exception"));
         LOGGER.warn("Test warn message");
         LOGGER.error("Test error message");
 

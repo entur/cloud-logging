@@ -57,7 +57,7 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 		}
 
 		loggingEventJsonProviders.addProvider(new StackdriverLogSeverityJsonProvider());
-		loggingEventJsonProviders.addProvider(new StackdriverMessageJsonProvider());
+		loggingEventJsonProviders.addProvider(new StackdriverMessageJsonProvider(formatter));
 
 		return formatter;
 	}
