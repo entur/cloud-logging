@@ -49,7 +49,7 @@ public class LoadContextLoggingTest {
     }
 
     @Test
-    public void testMachineReadableJsonMarker() throws IOException {
+    public void testMachineReadableJsonMarker1() throws IOException {
         Map<String, String> map = Map.of(
                 "class", "myErrorClass",
                 "message", "myMessage",
@@ -69,7 +69,7 @@ public class LoadContextLoggingTest {
     }
 
     @Test
-    public void testMachineReadableJsonStructuredArgument() throws IOException {
+    public void testMachineReadableJsonMarker2() throws IOException {
         Map<String, String> map = Map.of(
                 "class", "myErrorClass",
                 "message", "myMessage",
