@@ -1,0 +1,48 @@
+package no.entur.logging.cloud.spring.grpc.spring;
+
+import io.grpc.Status;
+import io.grpc.StatusException;
+import io.grpc.StatusRuntimeException;
+import org.jspecify.annotations.Nullable;
+import org.springframework.core.Ordered;
+import org.springframework.grpc.server.exception.GrpcExceptionHandler;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+
+/**
+ *
+ * Catch all exception-handler. Does not handle {@link StatusRuntimeException}.
+ *
+ */
+
+public class RuntimeExceptionExceptionHandler implements GrpcExceptionHandler, Ordered {
+
+    private final int order;
+
+    public RuntimeExceptionExceptionHandler(int order) {
+        this.order = order;
+    }
+
+    @Override
+	public @Nullable StatusException handleException(Throwable e) {
+		if (e instanceof RuntimeException s) {
+            if(s instanceof StatusRuntimeException) {
+                // handled by framework
+                return null;
+            }
+
+            // TODO workaround. Remove when SecurityGrpcExceptionHandler can be sorted before this handler
+            if (s instanceof AuthenticationException || s instanceof AccessDeniedException) {
+                // handled by framework
+                return null;
+            }
+            return Status.INTERNAL.withDescription(s.getMessage()).asException();
+        }
+		return null;
+	}
+
+    @Override
+    public int getOrder() {
+        return order;
+    }
+}

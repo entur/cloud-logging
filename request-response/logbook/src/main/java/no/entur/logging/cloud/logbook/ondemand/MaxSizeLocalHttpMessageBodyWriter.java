@@ -1,8 +1,12 @@
 package no.entur.logging.cloud.logbook.ondemand;
 
-import com.fasterxml.jackson.core.*;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateResult;
 import no.entur.logging.cloud.logbook.util.MaxSizeJsonFilter;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.TokenStreamContext;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -11,17 +15,17 @@ public class MaxSizeLocalHttpMessageBodyWriter implements HttpMessageBodyWriter 
 
     protected final byte[] input;
     protected final int maxSize;
-    protected final JsonFactory jsonFactory;
+    protected final JsonMapper jsonMapper;
     protected final MaxSizeJsonFilter maxSizeFilter;
 
     protected HttpMessageStateResult output;
 
-    public MaxSizeLocalHttpMessageBodyWriter(JsonFactory jsonFactory, byte[] input, int maxSize) {
-        this.jsonFactory = jsonFactory;
+    public MaxSizeLocalHttpMessageBodyWriter(JsonMapper jsonMapper, byte[] input, int maxSize) {
+        this.jsonMapper = jsonMapper;
         this.input = input;
         this.maxSize = maxSize;
 
-        this.maxSizeFilter = new MaxSizeJsonFilter(maxSize, jsonFactory);
+        this.maxSizeFilter = new MaxSizeJsonFilter(maxSize, jsonMapper);
     }
 
     public void prepareResult() {
@@ -47,10 +51,10 @@ public class MaxSizeLocalHttpMessageBodyWriter implements HttpMessageBodyWriter 
         HttpMessageStateResult output = this.output;
 
         if(output.isWellformed()) {
-            generator.writeFieldName("body");
+            generator.writeName("body");
             generator.writeRawValue(output.getBody());
         } else {
-            generator.writeStringField("body", output.getBody());
+            generator.writeStringProperty("body", output.getBody());
         }
     }
 

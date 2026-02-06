@@ -1,10 +1,10 @@
 package no.entur.logging.cloud.azure.spring.test;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import org.entur.jackson.tools.jsh.AnsiSyntaxHighlight;
+import org.entur.jackson.tools.jsh.DefaultSyntaxHighlighter;
+import org.entur.jackson.tools.jsh.SyntaxHighlighter;
+import tools.jackson.core.JsonGenerator;
 import org.entur.decorators.factory.ConfigurableSyntaxHighlighterFactory;
-import org.entur.jackson.jsh.AnsiSyntaxHighlight;
-import org.entur.jackson.jsh.DefaultSyntaxHighlighter;
-import org.entur.jackson.jsh.SyntaxHighlighter;
 
 public class LogSeveritySyntaxHighlighterFactory extends ConfigurableSyntaxHighlighterFactory {
 
@@ -50,9 +50,9 @@ public class LogSeveritySyntaxHighlighterFactory extends ConfigurableSyntaxHighl
 	}
 	
 	@Override
-	public SyntaxHighlighter createSyntaxHighlighter(JsonGenerator generator) {
+	public SyntaxHighlighter createSyntaxHighlighter() {
 		if(cachedSyntaxHighlighter == null) {
-			cachedSyntaxHighlighter = super.createSyntaxHighlighter(generator);
+			cachedSyntaxHighlighter = super.createSyntaxHighlighter();
 		}
 		return new LogSeveritySyntaxHighlighter(cachedSyntaxHighlighter, severity.defaultValue, severity.debug, severity.info, severity.warning, severity.error, loggerName, message);
 	}

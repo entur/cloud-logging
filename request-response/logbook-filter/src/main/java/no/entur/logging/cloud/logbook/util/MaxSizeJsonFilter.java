@@ -1,7 +1,11 @@
 package no.entur.logging.cloud.logbook.util;
 
-import com.fasterxml.jackson.core.*;
 import org.apache.commons.io.output.StringBuilderWriter;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.TokenStreamContext;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.util.function.LongSupplier;
@@ -15,26 +19,26 @@ import java.util.function.LongSupplier;
 
 public class MaxSizeJsonFilter {
 
-    public static MaxSizeJsonFilter newInstance(int maxBodySize, JsonFactory jsonFactory) {
-        return new MaxSizeJsonFilter(maxBodySize, jsonFactory);
+    public static MaxSizeJsonFilter newInstance(int maxBodySize, JsonMapper jsonMapper) {
+        return new MaxSizeJsonFilter(maxBodySize, jsonMapper);
     }
 
-    private JsonFactory factory;
+    private JsonMapper jsonMapper;
     private final int maxSize;
 
-    public MaxSizeJsonFilter(int maxSize, JsonFactory jsonFactory) {
+    public MaxSizeJsonFilter(int maxSize, JsonMapper jsonMapper) {
         this.maxSize = maxSize;
-        this.factory = jsonFactory;
+        this.jsonMapper = jsonMapper;
     }
 
     public String transform(String body) throws IOException {
         StringBuilder output = new StringBuilder(maxSize + 128);
         try (
-                final JsonParser parser = factory.createParser(body);
+                final JsonParser parser = jsonMapper.createParser(body);
                 StringBuilderWriter writer = new StringBuilderWriter(output);
-                JsonGenerator generator = factory.createGenerator(writer);
+                JsonGenerator generator = jsonMapper.createGenerator(writer);
         ) {
-            process(parser, generator, () -> generator.getOutputBuffered() + output.length());
+            process(parser, generator, () -> generator.streamWriteOutputBuffered() + output.length());
 
             generator.close();
             return writer.toString();
@@ -46,11 +50,11 @@ public class MaxSizeJsonFilter {
     public String transform(byte[] body) throws IOException {
         StringBuilder output = new StringBuilder(maxSize + 128);
         try (
-                final JsonParser parser = factory.createParser(body);
+                final JsonParser parser = jsonMapper.createParser(body);
                 StringBuilderWriter writer = new StringBuilderWriter(output);
-                JsonGenerator generator = factory.createGenerator(writer);
+                JsonGenerator generator = jsonMapper.createGenerator(writer);
         ) {
-            process(parser, generator, () -> generator.getOutputBuffered() + output.length());
+            process(parser, generator, () -> generator.streamWriteOutputBuffered() + output.length());
 
             generator.close();
             return writer.toString();
@@ -74,7 +78,7 @@ public class MaxSizeJsonFilter {
             if(nextToken == null) {
                 break;
             }
-            if(nextToken == JsonToken.FIELD_NAME) {
+            if(nextToken == JsonToken.PROPERTY_NAME) {
                 fieldName = parser.currentName();
 
                 continue;
@@ -100,18 +104,18 @@ public class MaxSizeJsonFilter {
             if(outputSize + size >= maxSize) {
                 // write notification
 
-                JsonStreamContext ctxt = generator.getOutputContext();
+                TokenStreamContext ctxt = generator.streamWriteContext();
                 if (ctxt.inArray()) {
                     generator.writeString("Logger: " + message);
                 } else if (ctxt.inObject()) {
-                    generator.writeStringField("Logger", message);
+                    generator.writeStringProperty("Logger", message);
                 }
 
                 break;
             }
 
             if(fieldName != null) {
-                generator.writeFieldName(fieldName);
+                generator.writeName(fieldName);
                 fieldName = null;
             }
 

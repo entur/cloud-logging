@@ -39,6 +39,24 @@ public class LoadContextLoggingTest {
         LOGGER.errorWakeMeUpRightNow("Test error wake me up right now message");
     }
 
+
+    @Test
+    public void testHumanReadablePlainWithException() throws IOException {
+        CompositeConsoleOutputControl.useHumanReadablePlainEncoder();
+
+        IOException e = new IOException("Something went wrong");
+
+        LOGGER.trace("Test trace message with exception", e);
+        LOGGER.debug("Test debug message with exception", e);
+        LOGGER.info("Test info message with exception", e);
+        LOGGER.warn("Test warn message with exception", e);
+        LOGGER.error("Test error message with exception", e);
+
+        LOGGER.errorTellMeTomorrow("Test error tell me tomorrow message with exception", e);
+        LOGGER.errorInterruptMyDinner("Test error interrupt my dinner message with exception", e);
+        LOGGER.errorWakeMeUpRightNow("Test error wake me up right now message with exception", e);
+    }
+
     @Test
     public void testHumanReadableJson() throws InterruptedException {
         try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
@@ -55,6 +73,23 @@ public class LoadContextLoggingTest {
     }
 
     @Test
+    public void testHumanReadableJsonWithException() throws InterruptedException {
+        try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
+            IOException e = new IOException("Something went wrong");
+
+            LOGGER.trace("Test trace message with exception", e);
+            LOGGER.debug("Test debug message with exception", e);
+            LOGGER.info("Test info message with exception", e);
+            LOGGER.warn("Test warn message with exception", e);
+            LOGGER.error("Test error message with exception", e);
+
+            LOGGER.errorTellMeTomorrow("Test error tell me tomorrow message with exception", e);
+            LOGGER.errorInterruptMyDinner("Test error interrupt my dinner message with exception", e);
+            LOGGER.errorWakeMeUpRightNow("Test error wake me up right now message with exception", e);
+        }
+    }
+
+    @Test
     public void testMachineReadableJson() throws IOException {
         try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
 
@@ -67,6 +102,23 @@ public class LoadContextLoggingTest {
             LOGGER.errorTellMeTomorrow("Test error tell me tomorrow message");
             LOGGER.errorInterruptMyDinner("Test error interrupt my dinner message");
             LOGGER.errorWakeMeUpRightNow("Test error wake me up right now message");
+        }
+    }
+
+    @Test
+    public void testMachineReadableJsonWithException() throws IOException {
+        try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
+            IOException e = new IOException("Something went wrong");
+
+            LOGGER.trace("Test trace message with exception", e);
+            LOGGER.debug("Test debug message with exception", e);
+            LOGGER.info("Test info message with exception", e);
+            LOGGER.warn("Test warn message with exception", e);
+            LOGGER.error("Test error message with exception", e);
+
+            LOGGER.errorTellMeTomorrow("Test error tell me tomorrow message with exception", e);
+            LOGGER.errorInterruptMyDinner("Test error interrupt my dinner message with exception", e);
+            LOGGER.errorWakeMeUpRightNow("Test error wake me up right now message with exception", e);
         }
     }
 

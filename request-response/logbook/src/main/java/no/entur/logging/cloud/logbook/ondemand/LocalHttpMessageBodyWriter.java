@@ -1,6 +1,6 @@
 package no.entur.logging.cloud.logbook.ondemand;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -20,7 +20,7 @@ public class LocalHttpMessageBodyWriter implements HttpMessageBodyWriter {
 
     @Override
     public void writeBody(JsonGenerator generator) throws IOException {
-        generator.writeFieldName("body");
+        generator.writeName("body");
         generator.writeRawValue(new String(input, StandardCharsets.UTF_8));
     }
 

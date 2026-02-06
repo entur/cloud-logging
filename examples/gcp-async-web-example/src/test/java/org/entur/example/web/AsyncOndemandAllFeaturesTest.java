@@ -3,9 +3,10 @@ package org.entur.example.web;
 import org.entur.example.web.rest.MyEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		"entur.logging.http.ondemand.troubleshoot.http.headers[0].name=entur-debug-request",
 		"entur.logging.http.ondemand.flush-mode=LAZY",
 })
+@AutoConfigureTestRestTemplate
 
 public class AsyncOndemandAllFeaturesTest {
 

@@ -2,7 +2,7 @@ package no.entur.logging.cloud.gcp.logback.logstash;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 import net.logstash.logback.composite.AbstractFieldJsonProvider;
 import net.logstash.logback.composite.FieldNamesAware;
 import net.logstash.logback.composite.JsonWritingUtils;
@@ -77,7 +77,7 @@ public class StackdriverLogSeverityJsonProvider extends AbstractFieldJsonProvide
     }
 
     @Override
-    public void writeTo(JsonGenerator generator, ILoggingEvent event) throws IOException {
+    public void writeTo(JsonGenerator generator, ILoggingEvent event) {
         JsonWritingUtils.writeStringField(generator, getFieldName(), getSeverity(event).toString());
     }
     

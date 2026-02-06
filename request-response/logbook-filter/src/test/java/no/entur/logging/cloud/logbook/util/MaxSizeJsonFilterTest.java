@@ -1,9 +1,11 @@
 package no.entur.logging.cloud.logbook.util;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
 import org.junit.jupiter.api.Assertions;
+import tools.jackson.core.JsonGenerator;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
@@ -15,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class MaxSizeJsonFilterTest {
 
     private static final int MAX_BODY_SIZE = 14 * 1024;
-    private final MaxSizeJsonFilter filter = new MaxSizeJsonFilter(MAX_BODY_SIZE, new JsonFactory());
+    private final MaxSizeJsonFilter filter = new MaxSizeJsonFilter(MAX_BODY_SIZE, JsonMapper.builder().build());
 
     @Test
     public void testFilterTooBig() throws IOException {
@@ -42,7 +44,7 @@ public class MaxSizeJsonFilterTest {
 
     @Test
     public void testFilterTooBigInvalidJson() throws IOException {
-        JsonValidator jsonValidator = new JsonValidator(new JsonFactory());
+        JsonValidator jsonValidator = new JsonValidator(JsonMapper.builder().build());
 
         String s = generateLongJson(2 * MAX_BODY_SIZE);
 
@@ -68,11 +70,11 @@ public class MaxSizeJsonFilterTest {
         JsonGenerator generator = factory.createGenerator(writer);
 
         generator.writeStartObject();
-        generator.writeStringField("start", "here");
+        generator.writeStringProperty("start", "here");
         for(int i = 0; i < size; i += chunkSize) {
-            generator.writeStringField("longValue", generateLongString(chunkSize));
+            generator.writeStringProperty("longValue", generateLongString(chunkSize));
         }
-        generator.writeStringField("end", "here");
+        generator.writeStringProperty("end", "here");
         generator.writeEndObject();
 
         generator.flush();

@@ -2,11 +2,8 @@ package no.entur.logging.cloud.logbook;
 
 import org.zalando.logbook.*;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.function.BiConsumer;
-import java.util.function.BooleanSupplier;
 
 /**
  *

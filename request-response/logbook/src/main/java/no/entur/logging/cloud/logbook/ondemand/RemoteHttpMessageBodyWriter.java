@@ -1,11 +1,11 @@
 package no.entur.logging.cloud.logbook.ondemand;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
+import tools.jackson.core.JsonGenerator;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageState;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateResult;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateSupplier;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -16,12 +16,12 @@ public class RemoteHttpMessageBodyWriter extends LocalHttpMessageBodyWriter {
     protected final HttpMessageStateSupplier httpMessageStateSupplier;
 
     protected volatile HttpMessageStateResult output;
-    protected final JsonFactory jsonFactory;
+    protected final JsonMapper jsonMapper;
 
-    public RemoteHttpMessageBodyWriter(JsonFactory jsonFactory, byte[] input, HttpMessageStateSupplier httpMessageStateSupplier) {
+    public RemoteHttpMessageBodyWriter(JsonMapper jsonMapper, byte[] input, HttpMessageStateSupplier httpMessageStateSupplier) {
         super(input);
 
-        this.jsonFactory = jsonFactory;
+        this.jsonMapper = jsonMapper;
         this.httpMessageStateSupplier = httpMessageStateSupplier;
     }
 
@@ -49,15 +49,15 @@ public class RemoteHttpMessageBodyWriter extends LocalHttpMessageBodyWriter {
             this.output = output = createOutput();
         }
         if(output.isWellformed()) {
-            generator.writeFieldName("body");
+            generator.writeName("body");
             generator.writeRawValue(output.getBody());
         } else {
-            generator.writeStringField("body", output.getBody());
+            generator.writeStringProperty("body", output.getBody());
         }
     }
 
     protected boolean isWellformedJson() {
-        try (JsonParser parser = jsonFactory.createParser(new ByteArrayInputStream(input))) {
+        try (JsonParser parser = jsonMapper.createParser(new ByteArrayInputStream(input))) {
             while(parser.nextToken() != null);
         } catch(Exception e) {
             return false;

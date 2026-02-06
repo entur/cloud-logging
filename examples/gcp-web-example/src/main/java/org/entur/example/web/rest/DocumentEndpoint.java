@@ -1,7 +1,6 @@
 package org.entur.example.web.rest;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.core.json.JsonFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;
@@ -86,9 +86,9 @@ public class DocumentEndpoint {
 		JsonGenerator generator = factory.createGenerator(writer);
 
 		generator.writeStartObject();
-		generator.writeStringField("start", "here");
-		generator.writeStringField("longValue", generateLongString(64*1024));
-		generator.writeStringField("end", "here");
+		generator.writeStringProperty("start", "here");
+		generator.writeStringProperty("longValue", generateLongString(192*1024));
+		generator.writeStringProperty("end", "here");
 		generator.writeEndObject();
 
 		generator.flush();

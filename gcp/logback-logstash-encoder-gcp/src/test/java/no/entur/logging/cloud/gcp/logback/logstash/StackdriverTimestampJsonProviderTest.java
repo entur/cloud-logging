@@ -1,12 +1,13 @@
 package no.entur.logging.cloud.gcp.logback.logstash;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.StringWriter;
 
@@ -14,7 +15,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 public class StackdriverTimestampJsonProviderTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final JsonMapper MAPPER = JsonMapper.builder().build();
 
     @Test
     void writesSecondsAndNanosWhenNanosecondsAreAvailable() throws Exception {

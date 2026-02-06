@@ -1,13 +1,12 @@
 package no.entur.logging.cloud.logbook;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.MappingJsonFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Marker;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
 import org.zalando.logbook.Origin;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -22,8 +21,8 @@ public class AbstractLogLevelLogstashLogbackSinkTest {
 
     public static class MockLogLevelLogstashLogbackSink extends AbstractLogLevelLogstashLogbackSink {
 
-        public MockLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, JsonFactory jsonFactory, int maxSize, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier, MessageComposer server, MessageComposer client) {
-            super(logConsumer, logLevelEnabled, jsonFactory, maxSize, remoteHttpMessageContextSupplier, server, client);
+        public MockLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled, JsonMapper jsonMapper, int maxSize, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier, MessageComposer server, MessageComposer client) {
+            super(logConsumer, logLevelEnabled, jsonMapper, maxSize, remoteHttpMessageContextSupplier, server, client);
         }
 
         @Override
@@ -183,7 +182,8 @@ public class AbstractLogLevelLogstashLogbackSinkTest {
         MessageComposer server = mock(MessageComposer.class);
         MessageComposer client = mock(MessageComposer.class);
         BooleanSupplier logLevelEnabled = () -> true;
-        MockLogLevelLogstashLogbackSink sink = new MockLogLevelLogstashLogbackSink(logConsumer, logLevelEnabled, new MappingJsonFactory(), maxSize, remoteHttpMessageContextSupplier, server, client);
+
+        MockLogLevelLogstashLogbackSink sink = new MockLogLevelLogstashLogbackSink(logConsumer, logLevelEnabled, JsonMapper.builder().build(), maxSize, remoteHttpMessageContextSupplier, server, client);
 
         return spy(sink);
     }

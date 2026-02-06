@@ -1,9 +1,9 @@
 package no.entur.logging.cloud.logbook;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import org.slf4j.Marker;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
 import java.util.function.BiConsumer;
@@ -19,9 +19,9 @@ import java.util.function.BooleanSupplier;
 public class LogLevelLogstashLogbackSink extends AbstractLogLevelLogstashLogbackSink {
 
     public LogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled,
-            JsonFactory jsonFactory, int maxSize, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier,
-            MessageComposer server, MessageComposer client) {
-        super(logConsumer, logLevelEnabled, jsonFactory, maxSize, remoteHttpMessageContextSupplier, server, client);
+                                       JsonMapper jsonMapper, int maxSize, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier,
+                                       MessageComposer server, MessageComposer client) {
+        super(logConsumer, logLevelEnabled, jsonMapper, maxSize, remoteHttpMessageContextSupplier, server, client);
     }
 
     public static Builder newBuilder() {
@@ -49,13 +49,13 @@ public class LogLevelLogstashLogbackSink extends AbstractLogLevelLogstashLogback
             if (server == null) {
                 throw new IllegalStateException("Expected server message composer");
             }
-            if (jsonFactory == null) {
-                jsonFactory = new JsonFactory();
+            if (jsonMapper == null) {
+                jsonMapper = JsonMapper.builder().build();
             }
             if (remoteHttpMessageContextSupplier == null) {
                 remoteHttpMessageContextSupplier = new DefaultRemoteHttpMessageContextSupplier();
             }
-            return new LogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), jsonFactory,
+            return new LogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), jsonMapper,
                     Math.min(maxBodySize, maxSize), remoteHttpMessageContextSupplier, server, client);
         }
     }

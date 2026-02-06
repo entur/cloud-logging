@@ -5,9 +5,10 @@ import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputContro
 import org.entur.example.web.rest.MyEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -28,8 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 	"logbook.secure-filter.enabled=false"
 })
 
-
-
+@AutoConfigureTestRestTemplate
 public class WebLoggingFormatHttp401Test {
 
 	@LocalServerPort

@@ -39,7 +39,7 @@ This library is mostly based on
  * SLF4J 2
  * Logback + Logback logstash
  * GRPC
-   * [Ecosystem](https://github.com/grpc-ecosystem/grpc-spring)
+   * Spring GRPC
  * [Logbook](https://github.com/zalando/logbook)
 
 Supported web technologies are:

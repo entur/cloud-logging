@@ -3,14 +3,13 @@ package no.entur.logging.cloud.logbook;
 import org.slf4j.Marker;
 import org.zalando.logbook.*;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
 public abstract class AbstractLogLevelSink implements Sink {
 
-    public static boolean isXmlMediaType(@Nullable final String contentType) {
+    public static boolean isXmlMediaType(final String contentType) {
         if (contentType == null) {
             return false;
         }

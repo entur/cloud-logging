@@ -1,6 +1,5 @@
 package no.entur.logging.cloud.logbook;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import no.entur.logging.cloud.logbook.util.JsonValidator;
 import no.entur.logging.cloud.logbook.util.MaxSizeJsonFilter;
 import org.slf4j.Marker;
@@ -9,8 +8,7 @@ import org.zalando.logbook.Correlation;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
 import org.zalando.logbook.Origin;
-
-import javax.annotation.Nullable;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
 import java.util.function.BiConsumer;
@@ -26,13 +24,13 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
     protected final RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier;
 
     public AbstractLogLevelLogstashLogbackSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled,
-            JsonFactory jsonFactory, int maxSize, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier,
-            MessageComposer server, MessageComposer client) {
+                                               JsonMapper jsonMapper, int maxSize, RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier,
+                                               MessageComposer server, MessageComposer client) {
         super(logLevelEnabled, logConsumer, server, client);
 
         this.maxSize = maxSize;
-        this.maxSizeJsonFilter = new MaxSizeJsonFilter(maxSize, jsonFactory);
-        this.jsonValidator = new JsonValidator(jsonFactory);
+        this.maxSizeJsonFilter = new MaxSizeJsonFilter(maxSize, jsonMapper);
+        this.jsonValidator = new JsonValidator(jsonMapper);
 
         this.remoteHttpMessageContextSupplier = remoteHttpMessageContextSupplier;
     }

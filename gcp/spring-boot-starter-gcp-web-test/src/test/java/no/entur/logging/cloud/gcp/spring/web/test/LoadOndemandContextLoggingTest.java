@@ -32,7 +32,7 @@ public class LoadOndemandContextLoggingTest {
     private boolean enabled;
 
     @Test
-    public void testMachineReadableJson() throws IOException {
+    public void testMachineHumanReadlePlain() throws IOException {
         LOGGER.trace("Test trace message");
         LOGGER.debug("Test debug message");
         LOGGER.info("Test info message");
@@ -45,7 +45,7 @@ public class LoadOndemandContextLoggingTest {
     }
 
     @Test
-    public void testOndemandMachineReadableJson() throws IOException, InterruptedException {
+    public void testOndemandHumanReadableJson() throws IOException, InterruptedException {
         LoggingScopeAsyncAppender appender = getOndemandAsyncAppender();
 
         assertTrue(appender.getScopeProviders().isEmpty());

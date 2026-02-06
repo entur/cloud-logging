@@ -1,7 +1,7 @@
 package no.entur.logging.cloud.gcp.logback.logstash;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 import net.logstash.logback.composite.AbstractJsonProvider;
 
 import java.io.IOException;
@@ -19,17 +19,17 @@ import java.io.IOException;
 public class StackdriverTimestampJsonProvider extends AbstractJsonProvider<ILoggingEvent> {
 
     @Override
-    public void writeTo(JsonGenerator generator, ILoggingEvent event) throws IOException {
-        generator.writeObjectFieldStart("timestamp");
+    public void writeTo(JsonGenerator generator, ILoggingEvent event) {
+        generator.writeObjectPropertyStart("timestamp");
 
-        generator.writeNumberField("seconds", event.getTimeStamp() / 1000);
+        generator.writeNumberProperty("seconds", event.getTimeStamp() / 1000);
 
         int nanoseconds = event.getNanoseconds(); // May return -1 if data unavailable.
         if(nanoseconds >= 0) {
-            generator.writeNumberField("nanos", nanoseconds % 1000_000_000);
+            generator.writeNumberProperty("nanos", nanoseconds % 1000_000_000);
         } else {
             // get nanos from milliseconds
-            generator.writeNumberField("nanos", (event.getTimeStamp() % 1000) * 1000_000);
+            generator.writeNumberProperty("nanos", (event.getTimeStamp() % 1000) * 1000_000);
         }
         generator.writeEndObject();
     }
