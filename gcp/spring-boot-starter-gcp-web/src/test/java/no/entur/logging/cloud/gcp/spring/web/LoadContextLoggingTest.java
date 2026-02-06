@@ -11,7 +11,6 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.io.IOException;
 import java.util.Map;
-import static net.logstash.logback.argument.StructuredArguments.entries;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @DirtiesContext
@@ -49,7 +48,7 @@ public class LoadContextLoggingTest {
     }
 
     @Test
-    public void testMachineReadableJsonMarker1() throws IOException {
+    public void testMachineReadableJsonMarkerFirst() throws IOException {
         Map<String, String> map = Map.of(
                 "class", "myErrorClass",
                 "message", "myMessage",
@@ -69,7 +68,7 @@ public class LoadContextLoggingTest {
     }
 
     @Test
-    public void testMachineReadableJsonMarker2() throws IOException {
+    public void testMachineReadableJsonMarkerLast() throws IOException {
         Map<String, String> map = Map.of(
                 "class", "myErrorClass",
                 "message", "myMessage",
