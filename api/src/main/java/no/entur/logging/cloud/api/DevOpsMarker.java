@@ -28,19 +28,19 @@ public class DevOpsMarker implements Marker {
 
 	public static DevOpsMarker errorTellMeTomorrow(Marker marker) {
 		DevOpsMarker devOpsMarker = errorTellMeTomorrow();
-		marker.add(devOpsMarker);
+		devOpsMarker.add(marker);
 		return devOpsMarker;
 	}
 
 	public static DevOpsMarker errorWakeMeUpRightNow(Marker marker) {
 		DevOpsMarker devOpsMarker = errorWakeMeUpRightNow();
-		marker.add(devOpsMarker);
+		devOpsMarker.add(marker);
 		return devOpsMarker;
 	}
 
 	public static DevOpsMarker errorInterruptMyDinner(Marker marker) {
 		DevOpsMarker devOpsMarker = errorInterruptMyDinner();
-		marker.add(devOpsMarker);
+		devOpsMarker.add(marker);
 		return devOpsMarker;
 	}
 
