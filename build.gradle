@@ -27,7 +27,7 @@ ext {
     grpcNettyVersion = '1.78.0'
     grpcVersion = '1.78.0'
     grpcCommonsVersion = '2.65.0'
-    grpcProtobufVersion = '4.33.4'
+    grpcProtobufVersion = '4.33.5'
     springGrpcVersion = '1.0.2'
 
     jsonAssertVersion = '0.8.0'
