@@ -3,13 +3,13 @@
 Fluentbit is the service which translates console logging into Stackdriver (AKA cloud logging) log entries.
 ## Fluentbit errors
 
-### Duplicate `JsonPayload` field names
-`Fluentbit` blows up if `JsonPayload` fields are duplicated. Symptoms:
+### Duplicate `jsonPayload` field names
+`Fluentbit` blows up if `jsonPayload` fields are duplicated. Symptoms:
 
  * truncated text values
  * **missing logs for 2-4 seconds**
    * Unrelated log statements are also lost. 
-
+~~~~
 `Fluentbit` will log warnings/errors, but not in the app which is causing the problems. 
 
 Warnings/Errors like
@@ -113,7 +113,6 @@ Does not always translate into `textPayload`.
 
 ### Too long lines
 Does not always translate into `textPayload`.
-Does not always translate into `TextPayload`.
 
 > Failed to process request with tag kube_abt-xxx_abt-ccc-79d5974b67-jdsk8_abt-ccc_stdout: rpc error: code = InvalidArgument desc = Log entry with size 278.8K exceeds maximum size of 256.0K
 
