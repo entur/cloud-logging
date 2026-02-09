@@ -10,9 +10,9 @@ Fluentbit is the service which translates console logging into Stackdriver (AKA 
  * **missing logs for 2-4 seconds**
    * Non-related log statements are also lost. 
 
-`Fluentbit` will log errors, but not in the app which is causing the problems. 
+`Fluentbit` will log warnings/errors, but not in the app which is causing the problems. 
 
-Errors like
+Warnings/Errors like
 
 > Failed to get record: decoder: failed to decode payload: msgpack decode error [pos 757]: runtime error: hash of unhashable type []interface {}
 
@@ -104,14 +104,17 @@ indicate this is happening.
 ```
 </details>
 
-Apps should put their app-specific fields in a subtree rather than on the root.
+Resolution: Apps should put their app-specific fields in a subtree rather than on the root.
 
 ### Invalid JSON
 Does not always translate into `TextPayload`.
 
 > Received empty or invalid msgpack for tag kube_abt-xxx_abt-xxx-746cbbdb87-tnf54_abt-xxx: decoder: failed to decode payload: msgpack decode error [pos 1769]: runtime error: hash of unhashable type map[interface {}]interface {}"
 
+Resolution: Check use of `RawAppendingMarker` and so on. 
 ### Too long lines
 Does not always translate into `TextPayload`.
 
 > Failed to process request with tag kube_abt-xxx_abt-ccc-79d5974b67-jdsk8_abt-ccc_stdout: rpc error: code = InvalidArgument desc = Log entry with size 278.8K exceeds maximum size of 256.0K
+
+Resolution: Truncate long values.
