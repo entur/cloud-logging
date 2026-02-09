@@ -54,7 +54,7 @@ indicate this is happening.
 	public void scheduledEvery20Second() {
 		
 		/**
-		 * Loose about 2-4 seconds of logs
+		 * Lose about 2-4 seconds of logs
 		 * 
 		 * Fluentbit: Failed to get record: decoder: failed to decode payload: msgpack decode error [pos 757]: runtime error: hash of unhashable type []interface {}
 		 */
@@ -70,7 +70,7 @@ indicate this is happening.
 	@Scheduled(cron = "30 * * * * *")
 	public void scheduledEvery30Second() {
 		/**
-		 * Loose about 2-4 seconds of logs
+		 * Lose about 2-4 seconds of logs
 		 * 
 		 * Fluentbit: Failed to get record: decoder: failed to decode payload: msgpack decode error [pos 498]: cannot decode signed integer: unrecognized descriptor byte: b0/string|bytes
 		 */
@@ -93,7 +93,7 @@ indicate this is happening.
 	@Scheduled(cron = "50 * * * * *")
 	public void scheduledEvery50Second() {
 		/**
-		 * Loose about 2-4 seconds of logs
+		 * Lose about 2-4 seconds of logs
 		 * 
 		 * Failed to get record: decoder: failed to decode payload: msgpack decode error [pos 717]: cannot decode unsigned integer: unrecognized descriptor byte: a7/string|bytes
 		 */
