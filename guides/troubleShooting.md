@@ -8,7 +8,7 @@ Fluentbit is the service which translates console logging into Stackdriver (AKA 
 
  * truncated text values
  * **missing logs for 2-4 seconds**
-   * Non-related log statements are also lost. 
+   * Unrelated log statements are also lost. 
 
 `Fluentbit` will log warnings/errors, but not in the app which is causing the problems. 
 
