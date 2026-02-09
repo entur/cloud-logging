@@ -111,7 +111,7 @@ Does not always translate into `TextPayload`.
 
 > Received empty or invalid msgpack for tag kube_abt-xxx_abt-xxx-746cbbdb87-tnf54_abt-xxx: decoder: failed to decode payload: msgpack decode error [pos 1769]: runtime error: hash of unhashable type map[interface {}]interface {}"
 
-Resolution: Check use of `RawAppendingMarker` and so on. 
+Resolution: Check use of `RawJsonAppendingMarker` and so on. 
 ### Too long lines
 Does not always translate into `TextPayload`.
 
