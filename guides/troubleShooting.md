@@ -1,7 +1,8 @@
-# troubleshooting
-# GCP
-Fluentbit is the service which translates console logging into Stackdriver (AKA cloud logging) log entries.
+# Troubleshooting
+
 ## Fluentbit errors
+
+Fluentbit is the service which translates console logging into Stackdriver (AKA cloud logging) log entries.
 
 ### Duplicate `jsonPayload` field names
 `Fluentbit` blows up if `jsonPayload` fields are duplicated. Symptoms:
