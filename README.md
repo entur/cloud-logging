@@ -74,7 +74,7 @@ The above starters are implemented in two flavours:
 ## Getting started
 See [Getting started with gRPC](guides/gRPC.md) or [Getting started with servlet-based web](guides/web.md). Alternatively, go directly to the [examples](examples).
 
-See also [troubleshooting](guides/troubleshooting.md).
+See also [troubleshooting](guides/troubleShooting.md).
 # Roadmap
 
  * Replace the correlation-id tracing artifacts with standardized modern equivalents, i.e. span id and so on.
