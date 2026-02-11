@@ -25,7 +25,7 @@ ext {
     nettyTcnativeBoringsslStaticVersion = '2.0.74.Final'
 
     grpcNettyVersion = '1.78.0'
-    grpcVersion = '1.78.0'
+    grpcVersion = '1.79.0'
     grpcCommonsVersion = '2.65.0'
     grpcProtobufVersion = '4.33.5'
     springGrpcVersion = '1.0.2'
