@@ -4,6 +4,8 @@ import no.entur.logging.cloud.logbook.MessageComposer;
 
 public class MessageFormatProperties {
 
+    /** Custom prefix */
+    protected String prefix = null;
     /** Include URI protocol / scheme */
     protected boolean scheme = true;
     /** Include URI host */
@@ -14,6 +16,14 @@ public class MessageFormatProperties {
     protected boolean path = true;
     /** Include URI query */
     protected boolean query = true;
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
 
     public boolean isScheme() {
         return scheme;
@@ -56,6 +66,6 @@ public class MessageFormatProperties {
     }
 
     public MessageComposer toComposer() {
-        return new MessageComposer(scheme, host, port, path, query);
+        return new MessageComposer(prefix, scheme, host, port, path, query);
     }
 }
