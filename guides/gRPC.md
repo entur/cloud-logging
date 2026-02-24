@@ -253,38 +253,6 @@ Some included features can be removed by excluding the corresponding artifacts:
 * correlation id trace
   * correlation-id-trace-spring-boot-grpc
 
-## Running applications locally
-For 'classic' one-line log output when running a server locally, additionally add the logging test artifacts to the main scope during local execution only.
-
-* Maven: Use profiles
-* Gradle:
-    * Use configurations, and/or
-    * add dependencies directly to task
-
-<details>
-  <summary>Gradle bootRun example</summary>
-
-```groovy
-tasks.register("logPlainly") {
-   dependencies {
-      implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test")
-      implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test")
-   }
-}
-
-tasks.withType(JavaExec).configureEach {
-   dependsOn("logPlainly")
-}
-```
-
-Then configure desired output by specifying `entur.logging.style`
-
-```
-entur.logging.style=humanReadablePlain|humanReadableJson|machineReadableJson
-```
-
-</details>
-
 ## Recommended additions
 Add `Prometheus` via [io.micrometer:micrometer-registry-prometheus](https://mvnrepository.com/artifact/io.micrometer/micrometer-registry-prometheus).
 
