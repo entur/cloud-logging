@@ -7,7 +7,7 @@ plugins {
 
 // Define version variables at root level so they're available everywhere
 ext {
-    springBootVersion = '3.5.9' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
+    springBootVersion = '3.5.11' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
     // The following versions are managed by Spring Boot BOM (no need to define here):
     // junitJupiterVersion, mockitoVersion, slf4jVersion, logbackVersion, 
     // jacksonVersion, jacksonDatabindVersion, micrometerVersion, janinoVersion,
@@ -22,12 +22,12 @@ ext {
     logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.1.1'
     commonsIoVersion = '2.21.0'
     commonsTextVersion = '1.15.0'
-    nettyTcnativeBoringsslStaticVersion = '2.0.74.Final'
+    nettyTcnativeBoringsslStaticVersion = '2.0.75.Final'
 
-    grpcNettyVersion = '1.78.0'
-    grpcVersion = '1.78.0'
-    grpcCommonsVersion = '2.65.0'
-    grpcProtobufVersion = '4.33.4'
+    grpcNettyVersion = '1.79.0'
+    grpcVersion = '1.79.0'
+    grpcCommonsVersion = '2.66.0'
+    grpcProtobufVersion = '4.33.5'
     ecosystemGrpcVersion = '3.1.0.RELEASE'
 
     jsonAssertVersion = '0.8.0'
@@ -321,7 +321,7 @@ jreleaser {
         github {
             skipTag = false // Skip creating a new github tag?
             skipRelease = true // Skip creating a new github release?
-            tagName = "v${version}"
+            tagName = "legacy-v${version}"
         }
     }
 }
