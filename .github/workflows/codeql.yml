@@ -18,5 +18,6 @@ jobs:
       contents: read
       security-events: write
       actions: read
+      pull-requests: read
     name: CodeQL Scan
     uses: entur/gha-security/.github/workflows/code-scan.yml@v2
