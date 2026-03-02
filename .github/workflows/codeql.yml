@@ -14,6 +14,7 @@ on:
 
 jobs:
   code-scan:
+    permissions:
+      contents: read
     name: CodeQL Scan
     uses: entur/gha-security/.github/workflows/code-scan.yml@v2
-    secrets: inherit
