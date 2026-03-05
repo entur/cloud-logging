@@ -6,22 +6,30 @@ on:
 
 jobs:
   verify-main-gradle:
+    permissions:
+      contents: read
     uses: entur/abt-gha-public/.github/workflows/gradle-open-source-verify.yml@main
 
   post-failure-to-slack:
+    permissions:
+      contents: read
     needs: verify-main-gradle
     if: failure()
     uses: entur/gha-slack/.github/workflows/post.yml@v3
     with:
       channel_id: ${{ vars.CHANNEL_ID }}
       message: "🔴 Gradle build failed for ${{ github.repository }}\n ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-    secrets: inherit
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
   post-success-to-slack:
+    permissions:
+      contents: read
     needs: verify-main-gradle
     if: success()
     uses: entur/gha-slack/.github/workflows/post.yml@v3
     with:
       channel_id: ${{ vars.CHANNEL_ID}}
       message: "🟢 Gradle build success for ${{ github.repository }}\n ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-    secrets: inherit
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
