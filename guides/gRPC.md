@@ -10,7 +10,7 @@ Add
 
 ```xml
 <properties>
-    <cloud-logging.version>4.0.x</cloud-logging.version>
+    <cloud-logging.version>x.y.z</cloud-logging.version>
 </properties>
 ```
 
