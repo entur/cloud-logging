@@ -9,7 +9,9 @@ Then import the cloud-logging BOM:
 Add
 
 ```xml
-<cloud-logging.version>4.0.x</cloud-logging>
+<properties>
+    <cloud-logging.version>4.0.x</cloud-logging.version>
+</properties>
 ```
 
 and
@@ -78,7 +80,9 @@ testImplementation ("no.entur.logging.cloud:spring-boot-starter-gcp-grpc-spring-
 ```
 </details>
 
-Verify configuration by toggling between output modes in a unit test:
+Verify configuration by toggling between output modes in a unit test using the `CompositeConsoleOutputControl` class.
+
+### Toggle log output-format during testing
 
 ```
 try (Closeable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
@@ -86,6 +90,14 @@ try (Closeable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) 
 }
 ```
 
+Configure log levels via Spring, i.e. `application.properties` like
+
+```
+logging.level.root=INFO
+logging.level.my.package=WARN
+```
+
+### Additional log levels
 For additional error levels, try the [DevOpsLogger](../api):
 
 ```
@@ -98,14 +110,29 @@ LOGGER.errorInterruptMyDinner("Critical statement");
 LOGGER.errorWakeMeUpRightNow("Alert statement");
 ```
 
-Configure log levels via Spring, i.e. `application.properties` like
+<details>
+  <summary>Maven Logger API coordinates</summary>
 
-```
-logging.level.root=INFO
-logging.level.my.package=WARN
+```xml
+<dependency>
+    <groupId>no.entur.logging.cloud</groupId>
+    <artifactId>api</artifactId>
+</dependency>
 ```
 
-### Request-response logging
+</details>
+
+or
+
+<details>
+  <summary>Gradle Logger API coordinates</summary>
+
+```groovy
+implementation ("no.entur.logging.cloud:api")
+```
+</details>
+
+### Optional: Request-response logging
 Import the request-response Spring Boot starters:
 
 <details>
@@ -171,12 +198,12 @@ Also create your own beans for
 
 to further customize logging.
 
-### On-demand logging
-This feature adjusts the log level for individual web server requests, taking into account actual behaviour.
+### Optional: On-demand logging
+This feature adjusts the log level for individual gRPC service requests, taking into account actual behaviour.
 
 * increase log level for happy-cases (i.e. WARN or ERROR), otherwise
 * reduce log level (i.e. INFO) for
-    * unexpected HTTP response codes
+    * unexpected gRPC status codes
     * unexpected log statement levels (i.e. ERROR)
     * unexpectedly long call duration
     * troubleshooting
@@ -211,7 +238,43 @@ While __disabled__ by default, on-demand logging can be enabled using
 entur.logging.grpc.ondemand.enabled=true
 ```
 
-Add the `GrpcLoggingScopeContextInterceptor` interceptor to your gRPC services.
+Add the `GrpcLoggingScopeContextInterceptor` interceptor to your gRPC services (see [examples](../examples) for guidance on interceptor ordering).
+
+Then configure log levels
+
+```
+entur.logging.grpc.ondemand.success.level=warn
+entur.logging.grpc.ondemand.failure.level=info
+```
+
+where
+
+ * `success`: log level for the happy case
+   * cached log statements are discarded
+ * `failure`: log level for the unhappy case
+   * cached log statements are printed
+
+A `failure` can be triggered by high severity log statements (i.e. warn or error), configured as
+
+```
+entur.logging.grpc.ondemand.failure.logger.level=error
+```
+
+optionally limited to specific loggers, i.e.
+
+```
+entur.logging.grpc.ondemand.failure.logger.name[0]=my.app
+entur.logging.grpc.ondemand.failure.logger.name[1]=my.lib
+```
+
+There is also a `troubleshoot` variant
+
+```
+entur.logging.grpc.ondemand.troubleshoot.level=debug
+entur.logging.grpc.ondemand.troubleshoot.grpc.metadata[0].name=x-debug-this-request
+```
+
+which allows for additional logging in the presence of certain gRPC metadata keys.
 
 ## Running applications locally
 For 'classic' one-line log output when running a server locally, additionally add the logging test artifacts to the main scope during local execution only.
@@ -259,10 +322,16 @@ Add `Prometheus` via [io.micrometer:micrometer-registry-prometheus](https://mvnr
 ## Troubleshooting
 
 ### request-response logging not working
-Did you import the relevant artifacts?
+Did you import the relevant artifacts? Both the main and test artifacts must be added.
 
 ### on-demand logging not working
-Did you import the relevant artifacts?
+Did you import the relevant artifact?
 
-Set property to enable.
+The feature is disabled by default; set the following property to enable it:
+
+```
+entur.logging.grpc.ondemand.enabled=true
+```
+
+Also verify that the `GrpcLoggingScopeContextInterceptor` interceptor is registered for your gRPC service.
 

@@ -1,5 +1,24 @@
 # Troubleshooting
 
+See also the troubleshooting sections in the getting started guides:
+ * [Web troubleshooting](web.md#troubleshooting)
+ * [gRPC troubleshooting](gRPC.md#troubleshooting)
+
+## Common issues
+
+### Existing log configuration conflicts
+Remove any pre-existing log configuration file (e.g. `logback.xml`, `logback-spring.xml`) before adding the cloud-logging starters. The starters provide their own Logback configuration via `logback-spring.xml` on the classpath, and having two configurations active at the same time will cause unexpected behaviour.
+
+### Missing logs after adding the library
+Ensure that the Spring log level properties are set correctly:
+
+```
+logging.level.root=INFO
+logging.level.my.package=WARN
+```
+
+If using on-demand logging, remember that it is disabled by default and must be enabled explicitly (see the getting started guides).
+
 ## Fluentbit errors
 
 Fluentbit is the service which translates console logging into Stackdriver (AKA cloud logging) log entries.
@@ -111,6 +130,8 @@ Resolution: Apps should put their app-specific fields in a subtree rather than o
 Does not always translate into `textPayload`.
 
 > Received empty or invalid msgpack for tag kube_abt-xxx_abt-xxx-746cbbdb87-tnf54_abt-xxx: decoder: failed to decode payload: msgpack decode error [pos 1769]: runtime error: hash of unhashable type map[interface {}]interface {}"
+
+Resolution: Ensure all log arguments produce valid JSON. For request-response logging, use a `BodyFilter` to sanitize or truncate payloads that may contain malformed JSON.
 
 ### Too long lines
 Does not always translate into `textPayload`.
