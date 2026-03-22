@@ -24,7 +24,7 @@ public class OndemandFilter extends HttpFilter {
     private final String FILTER = OndemandFilter.class.getName() + "-filter";
     private final String SCOPE = OndemandFilter.class.getName() + "-scope";
 
-    private final String DURATION = OndemandFilter.class.getName() + "-scope";
+    private final String DURATION = OndemandFilter.class.getName() + "-duration";
 
     static class ScopeAsyncListener implements AsyncListener {
 
@@ -121,7 +121,6 @@ public class OndemandFilter extends HttpFilter {
         HttpLoggingScopeFilter filter = (HttpLoggingScopeFilter) httpServletRequest.getAttribute(FILTER);
         if(filter == null) {
             filter = filters.getScope(httpServletRequest);
-        } else {
             httpServletRequest.setAttribute(FILTER, filter);
         }
         return filter;
