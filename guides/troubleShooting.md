@@ -131,8 +131,6 @@ Does not always translate into `textPayload`.
 
 > Received empty or invalid msgpack for tag kube_abt-xxx_abt-xxx-746cbbdb87-tnf54_abt-xxx: decoder: failed to decode payload: msgpack decode error [pos 1769]: runtime error: hash of unhashable type map[interface {}]interface {}"
 
-Resolution: Ensure all log arguments produce valid JSON. For request-response logging, use a `BodyFilter` to sanitize or truncate payloads that may contain malformed JSON.
-
 ### Too long lines
 Does not always translate into `textPayload`.
 
