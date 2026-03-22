@@ -271,10 +271,10 @@ There is also a `troubleshoot` variant
 
 ```
 entur.logging.grpc.ondemand.troubleshoot.level=debug
-entur.logging.grpc.ondemand.troubleshoot.grpc.metadata[0].name=x-debug-this-request
+entur.logging.grpc.ondemand.troubleshoot.grpc.headers[0].name=x-debug-this-request
 ```
 
-which allows for additional logging in the presence of certain gRPC metadata keys.
+which allows for additional logging in the presence of certain gRPC headers.
 
 ## Running applications locally
 For 'classic' one-line log output when running a server locally, additionally add the logging test artifacts to the main scope during local execution only.
