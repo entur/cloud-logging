@@ -28,8 +28,7 @@ jobs:
     with:
       channel_id: ${{ vars.CHANNEL_ID }}
       message: "🔴 Gradle artifact deploy failed for ${{ github.repository }}\n ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-    secrets:
-      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+    secrets: inherit
 
   post-success-to-slack:
     permissions:
@@ -40,7 +39,6 @@ jobs:
     with:
       channel_id: ${{ vars.CHANNEL_ID }}
       message: "🟢 Gradle artifact deploy success for ${{ github.repository }}\n ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-    secrets:
-      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+    secrets: inherit
 
 
