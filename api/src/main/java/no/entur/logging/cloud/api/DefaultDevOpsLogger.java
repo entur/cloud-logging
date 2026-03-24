@@ -40,7 +40,7 @@ public class DefaultDevOpsLogger implements DevOpsLogger {
     }
 
     public boolean isDebugEnabled(Marker marker) {
-        return delegate.isDebugEnabled();
+        return delegate.isDebugEnabled(marker);
     }
 
     public void debug(Marker marker, String msg) {
@@ -48,7 +48,7 @@ public class DefaultDevOpsLogger implements DevOpsLogger {
     }
 
     public void debug(Marker marker, String format, Object arg) {
-        delegate.debug(format, format, arg);
+        delegate.debug(marker, format, arg);
     }
 
     public void debug(Marker marker, String format, Object arg1, Object arg2) {
@@ -139,7 +139,7 @@ public class DefaultDevOpsLogger implements DevOpsLogger {
     }
 
     public boolean isWarnEnabled(Marker marker) {
-        return delegate.isWarnEnabled();
+        return delegate.isWarnEnabled(marker);
     }
 
     public void warn(Marker marker, String msg) {
