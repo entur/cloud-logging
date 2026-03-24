@@ -1,5 +1,24 @@
 # Troubleshooting
 
+See also the troubleshooting sections in the getting started guides:
+ * [Web troubleshooting](web.md#troubleshooting)
+ * [gRPC troubleshooting](gRPC.md#troubleshooting)
+
+## Common issues
+
+### Existing log configuration conflicts
+Remove any pre-existing log configuration file (e.g. `logback.xml`, `logback-spring.xml`) before adding the cloud-logging starters. The starters provide their own Logback configuration via `logback-spring.xml` on the classpath, and having two configurations active at the same time will cause unexpected behaviour.
+
+### Missing logs after adding the library
+Ensure that the Spring log level properties are set correctly:
+
+```
+logging.level.root=INFO
+logging.level.my.package=WARN
+```
+
+If using on-demand logging, remember that it is disabled by default and must be enabled explicitly (see the getting started guides).
+
 ## Fluentbit errors
 
 Fluentbit is the service which translates console logging into Stackdriver (AKA cloud logging) log entries.
