@@ -6,9 +6,13 @@ on:
 
 jobs:
   verify-main-gradle:
+    permissions:
+      contents: read
     uses: entur/abt-gha-public/.github/workflows/gradle-open-source-verify.yml@main
 
   post-failure-to-slack:
+    permissions:
+      contents: read
     needs: verify-main-gradle
     if: failure()
     uses: entur/gha-slack/.github/workflows/post.yml@v3
@@ -18,6 +22,8 @@ jobs:
     secrets: inherit
 
   post-success-to-slack:
+    permissions:
+      contents: read
     needs: verify-main-gradle
     if: success()
     uses: entur/gha-slack/.github/workflows/post.yml@v3

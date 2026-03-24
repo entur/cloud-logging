@@ -9,7 +9,9 @@ Then import the cloud-logging BOM:
 Add
 
 ```xml
-<cloud-logging.version>x.y.z</cloud-logging>
+<properties>
+    <cloud-logging.version>x.y.z</cloud-logging.version>
+</properties>
 ```
 
 and
@@ -320,7 +322,7 @@ LOGGER.errorWakeMeUpRightNow("Alert statement");
 ```
 
 <details>
-  <summary>Logger API coordinates</summary>
+  <summary>Maven Logger API coordinates</summary>
 
 ```xml
 <dependency>
@@ -334,7 +336,7 @@ LOGGER.errorWakeMeUpRightNow("Alert statement");
 or
 
 <details>
-  <summary>Gradle Spring Boot Starter coordinates</summary>
+  <summary>Gradle Logger API coordinates</summary>
 
 ```groovy
 implementation ("no.entur.logging.cloud:api")
@@ -345,7 +347,7 @@ implementation ("no.entur.logging.cloud:api")
 To forward correlation id + add MDC-style context to log statements within gRPC interceptors (via `Scope`), add artifacts
 
 <details>
-  <summary>Gradle gRPC MDC coordinates</summary>
+  <summary>Maven gRPC MDC coordinates</summary>
 
 ```xml
 <dependency>
@@ -416,11 +418,15 @@ Add `Prometheus` via [io.micrometer:micrometer-registry-prometheus](https://mvnr
 ## Troubleshooting
 
 ### request-response logging not working
-Did you import the relevant artifacts?
+Did you import the relevant artifacts? Both the main and test artifacts must be added.
 
 ### on-demand logging not working
-Did you import the relevant artifacts? 
+Did you import the relevant artifact?
 
-Set property to enable.
+The feature is disabled by default; set the following property to enable it:
+
+```
+entur.logging.http.ondemand.enabled=true
+```
 
 
