@@ -10,3 +10,4 @@ jobs:
     permissions:
       contents: read
     uses: entur/abt-gha-public/.github/workflows/gradle-open-source-verify.yml@main
+    # no secrets necessary
