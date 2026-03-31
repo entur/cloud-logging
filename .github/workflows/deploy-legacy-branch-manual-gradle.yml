@@ -14,12 +14,17 @@ jobs:
   deploy-tag-gradle:
     uses: entur/gha-maven-central/.github/workflows/gradle-publish.yml@v1
     secrets: inherit
+    permissions:
+      contents: write
+      issues: write
     with:
       next_version: ${{ inputs.version-increment }}
       version_strategy: tag
       version_tag_prefix: legacy-v
 
   post-failure-to-slack:
+    permissions:
+      contents: read
     needs: deploy-tag-gradle
     if: failure()
     uses: entur/gha-slack/.github/workflows/post.yml@v3
@@ -29,6 +34,8 @@ jobs:
     secrets: inherit
 
   post-success-to-slack:
+    permissions:
+      contents: read
     needs: deploy-tag-gradle
     if: success()
     uses: entur/gha-slack/.github/workflows/post.yml@v3
