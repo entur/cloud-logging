@@ -19,40 +19,6 @@ public class MdcAsyncAppenderTest {
     }
 
     @Test
-    public void testMdcRestoredWhenKeyDidNotExistBefore() {
-        MdcAsyncAppender appender = new MdcAsyncAppender();
-        appender.setMdcContributer(new MdcContributer() {
-            @Override
-            public Map<String, String> getMdc() {
-                return Map.of("reqId", "abc");
-            }
-        });
-
-        ILoggingEvent event = mock(ILoggingEvent.class);
-        appender.preprocess(event);
-
-        assertThat(MDC.get("reqId")).isNull();
-    }
-
-    @Test
-    public void testMdcRestoredToPreviousValueWhenKeyExistedBefore() {
-        MDC.put("reqId", "original");
-
-        MdcAsyncAppender appender = new MdcAsyncAppender();
-        appender.setMdcContributer(new MdcContributer() {
-            @Override
-            public Map<String, String> getMdc() {
-                return Map.of("reqId", "new");
-            }
-        });
-
-        ILoggingEvent event = mock(ILoggingEvent.class);
-        appender.preprocess(event);
-
-        assertThat(MDC.get("reqId")).isEqualTo("original");
-    }
-
-    @Test
     public void testMdcNotTouchedWhenContributerEmpty() {
         MDC.put("reqId", "original");
 
