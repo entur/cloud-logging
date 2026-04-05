@@ -4,7 +4,10 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class MdcAsyncAppender extends AsyncAppender {
 
@@ -26,6 +29,9 @@ public class MdcAsyncAppender extends AsyncAppender {
             // this only works if there is a single appender, i.e.
             // ILoggingEvent#prepareForDeferredProcessing() has not been called
             MDCAdapter mdcAdapter = MDC.getMDCAdapter();
+            Map<String, String> savedValues = new HashMap<>();
+            Set<String> newKeys = new HashSet<>();
+
             for (Map.Entry<String, String> entry : mdc.entrySet()) {
                 String key = entry.getKey();
                 if(key == null) {
@@ -35,17 +41,22 @@ public class MdcAsyncAppender extends AsyncAppender {
                 if(value == null) {
                     continue;
                 }
+                String existingValue = mdcAdapter.get(key);
+                if(existingValue != null) {
+                    savedValues.put(key, existingValue);
+                } else {
+                    newKeys.add(key);
+                }
                 mdcAdapter.put(key, value);
             }
             try {
                 super.preprocess(eventObject);
             } finally {
-                for (Map.Entry<String, String> entry : mdc.entrySet()) {
-                    String key = entry.getKey();
-                    if(key == null) {
-                        continue;
-                    }
+                for (String key : newKeys) {
                     mdcAdapter.remove(key);
+                }
+                for (Map.Entry<String, String> entry : savedValues.entrySet()) {
+                    mdcAdapter.put(entry.getKey(), entry.getValue());
                 }
             }
         }
