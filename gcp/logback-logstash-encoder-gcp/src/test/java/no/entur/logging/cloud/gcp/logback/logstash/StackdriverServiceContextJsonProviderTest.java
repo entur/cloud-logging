@@ -66,7 +66,7 @@ public class StackdriverServiceContextJsonProviderTest {
     @Test
     void writeTo_withNullService_writesNothing() throws Exception {
         StackdriverServiceContextJsonProvider provider = new StackdriverServiceContextJsonProvider();
-        // service is null by default (autodetect returns null when no env var)
+        // service is null by default; no env var set in test environment
 
         JsonNode root = write(provider);
 
