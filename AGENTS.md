@@ -26,7 +26,7 @@
 - `appender/` – Core Logback async appender with MDC support and on-demand logging scope
 - `gcp/` – GCP-specific Spring Boot starters, autoconfiguration, and Stackdriver/Cloud Logging encoder
 - `azure/` – Azure-specific Spring Boot starters, autoconfiguration, and Azure Monitor encoder
-- `request-response/` – Logbook-based HTTP and gRPC request/response logging
+- `request-response/` – Logbook-based for REST services. Custom gRPC request/response logging.
 - `on-demand/` – Selective on-demand logging: caches log statements per request and only emits them for failed/slow/flagged requests
 - `trace/` – Correlation-id and MDC tracing for HTTP and gRPC
 - `micrometer/` – Log severity metrics (GCP and Azure variants)
@@ -42,7 +42,7 @@ Dependency versions are managed centrally in the root `build.gradle` `ext` block
 
 ## Conventions
 
-- Java with Spring Boot 4.x (not 3.x)
+- Java with Spring Boot 4.x (not 3.x) and Java 25.
 - Gradle multi-project build; module names declared in `settings.gradle`
 - Tests use JUnit 5 and Google Truth (`com.google.truth`) assertions — not AssertJ or Hamcrest
 - Machine-readable single-line JSON is the production log format; human-readable formats are test-scope only
@@ -61,7 +61,7 @@ Logs are written as JSON to stdout/stderr. Fluentbit on GKE forwards them to Clo
 - MDC keys → top-level JSON fields (or OpenTelemetry trace fields `logging.googleapis.com/trace`, `logging.googleapis.com/spanId` if OTel is on classpath)
 - `serviceContext.service` — populated from `HOSTNAME` environment variable
 
-**Important GCP constraints (Fluentbit quirks):**
+**Important GCP constraints (Fluentbit quirks; lsit is not exhaustive):**
 - Duplicate field names in `jsonPayload` cause Fluentbit to drop 2–4 seconds of logs from all pods — avoid emitting the same key twice in one log event
 - Log lines exceeding 256 KB are dropped — truncate large payloads
 - Avoid using reserved field names (`message`, `timestamp`) as structured argument keys
