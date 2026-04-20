@@ -17,16 +17,16 @@ ext {
     // Versions NOT in Spring Boot BOM - we manage these ourselves:
     googleTruthVersion = '1.4.5'
     logbackLogstashVersion = '9.0'
-    logbookVersion = '4.0.3'
+    logbookVersion = '4.0.4'
     jacksonSyntaxHighlightVersion = '2.0.2'
-    logbackLogstashSyntaxHighlightingDecoratorsVersion = '2.0.1'
+    logbackLogstashSyntaxHighlightingDecoratorsVersion = '2.0.2'
     commonsIoVersion = '2.21.0'
     commonsTextVersion = '1.15.0'
     nettyTcnativeBoringsslStaticVersion = '2.0.75.Final'
 
     grpcNettyVersion = '1.80.0'
     grpcVersion = '1.80.0'
-    grpcCommonsVersion = '2.67.0'
+    grpcCommonsVersion = '2.70.0'
     grpcProtobufVersion = '4.34.1'
     springGrpcVersion = '1.0.2'
 

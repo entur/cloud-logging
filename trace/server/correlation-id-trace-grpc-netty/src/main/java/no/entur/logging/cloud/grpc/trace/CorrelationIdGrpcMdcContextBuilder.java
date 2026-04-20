@@ -93,11 +93,11 @@ public class CorrelationIdGrpcMdcContextBuilder extends GrpcMdcContextBuilder<Co
 	}
 
 	public boolean hasRequestId() {
-		return requestId == null;
+		return requestId != null;
 	}
 
 	public boolean hasCorrelationId() {
-		return correlationId == null;
+		return correlationId != null;
 	}
 
 }
