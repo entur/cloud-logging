@@ -38,7 +38,7 @@ The `gcp/` and `azure/` modules are **mirrors** of each other in structure and f
 
 ## Key Versions
 
-Dependency versions are managed centrally in the root `build.gradle` `ext` block. The Spring Boot BOM controls most transitive dependency versions (JUnit, Mockito, SLF4J, Logback, Jackson, Micrometer), and non-BOM dependency versions (e.g. `logbackLogstashVersion`, `logbookVersion`) are defined explicitly there. **Do not hardcode dependency versions in submodule `build.gradle` files** unless there is an intentional, documented exception; some example subprojects may declare plugin versions locally.
+Dependency versions are managed centrally in the root `build.gradle` `ext` block. The Spring Boot BOM controls most transitive dependency versions (JUnit, Mockito, SLF4J, Logback, Jackson, Micrometer), and non-BOM dependency versions (e.g. `logbackLogstashVersion`, `logbookVersion`) are defined explicitly there.  Example subprojects (examples/*) may declare plugin versions locally; library subprojects must not.
 
 ## Conventions
 
