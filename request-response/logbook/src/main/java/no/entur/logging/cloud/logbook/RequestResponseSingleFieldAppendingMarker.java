@@ -4,14 +4,24 @@ import net.logstash.logback.marker.SingleFieldAppendingMarker;
 
 public abstract class RequestResponseSingleFieldAppendingMarker extends SingleFieldAppendingMarker  {
 
-    protected final boolean truncated;
+    protected final int truncated;
 
-    public RequestResponseSingleFieldAppendingMarker(String markerName, String fieldName, boolean truncated) {
+    public RequestResponseSingleFieldAppendingMarker(String markerName, String fieldName, int truncated) {
         super(markerName, fieldName);
         this.truncated = truncated;
     }
 
     public boolean isTruncated() {
+        return truncated != -1;
+    }
+
+    /**
+     * Number of bytes which were truncated
+     *
+     * @return count
+     */
+
+    public int getTruncated() {
         return truncated;
     }
 }

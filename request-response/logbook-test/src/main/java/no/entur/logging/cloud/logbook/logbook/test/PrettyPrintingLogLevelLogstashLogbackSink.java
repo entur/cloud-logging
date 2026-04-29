@@ -1,10 +1,6 @@
 package no.entur.logging.cloud.logbook.logbook.test;
 
-import no.entur.logging.cloud.logbook.AbstractLogLevelLogstashLogbackSink;
-import no.entur.logging.cloud.logbook.AbstractSinkBuilder;
-import no.entur.logging.cloud.logbook.DefaultRemoteHttpMessageContextSupplier;
-import no.entur.logging.cloud.logbook.MessageComposer;
-import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
+import no.entur.logging.cloud.logbook.*;
 import org.slf4j.Marker;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
@@ -60,14 +56,14 @@ public class PrettyPrintingLogLevelLogstashLogbackSink extends AbstractLogLevelL
     }
 
     @Override
-    protected Marker newRequestSingleFieldAppendingMarker(HttpRequest request, String body, boolean wellformed) {
-        return new PrettyPrintingRequestSingleFieldAppendingMarker(request, body, wellformed);
+    protected RequestResponseSingleFieldAppendingMarker newRequestSingleFieldAppendingMarker(HttpRequest request, String body, boolean wellformed, int truncated) {
+        return new PrettyPrintingRequestSingleFieldAppendingMarker(request, body, wellformed, truncated);
     }
 
     @Override
-    protected Marker newResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body,
-                                                           boolean wellformed) {
-        return new PrettyPrintingResponseSingleFieldAppendingMarker(response, duration, body, wellformed);
+    protected RequestResponseSingleFieldAppendingMarker newResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body,
+                                                           boolean wellformed, int truncated) {
+        return new PrettyPrintingResponseSingleFieldAppendingMarker(response, duration, body, wellformed, truncated);
     }
 
 }

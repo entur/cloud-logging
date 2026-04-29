@@ -44,6 +44,8 @@ public class WebLoggingFormatWithBigResponsesTest {
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
 			ResponseEntity<String> response = restTemplate.getForEntity("/api/document/some/bigResponse", String.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+			Thread.sleep(1000);
 		}
 	}
 

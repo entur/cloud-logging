@@ -72,17 +72,32 @@ public class MessageComposer {
         }
     }
 
-    public void requestMessage(HttpRequest request, StringBuilder messageBuilder) throws IOException {
+    public void requestMessage(HttpRequest request, StringBuilder messageBuilder, int truncated) throws IOException {
         String method = request.getMethod();
         if(method != null) {
             messageBuilder.append(method);
             messageBuilder.append(' ');
         }
         constructMessage(request, messageBuilder);
+
+        if(truncated != -1) {
+            writeTruncated(messageBuilder, truncated);
+        }
+    }
+
+    private static void writeTruncated(StringBuilder messageBuilder, int truncated) {
+        messageBuilder.append(" [truncated ~");
+        if(truncated <= 1024) {
+            messageBuilder.append(truncated);
+            messageBuilder.append(" bytes)");
+        } else {
+            messageBuilder.append(truncated / 1024);
+            messageBuilder.append("KB]");
+        }
     }
 
     public void responseMessage(Correlation correlation, HttpRequest request, HttpResponse response,
-            StringBuilder messageBuilder) throws IOException {
+                                StringBuilder messageBuilder, int truncated) throws IOException {
         messageBuilder.append(response.getStatus());
 
         String reasonPhrase = response.getReasonPhrase();
@@ -99,5 +114,10 @@ public class MessageComposer {
             messageBuilder.append(duration.toMillis());
             messageBuilder.append(" ms)");
         }
+
+        if(truncated != -1) {
+            writeTruncated(messageBuilder, truncated);
+        }
+
     }
 }
