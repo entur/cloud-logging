@@ -71,7 +71,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                 if (body != null && body.length > 0) {
                     if (request.getOrigin() == Origin.LOCAL) {
                         // trust our own data to be wellformed and not pretty-printed
-                        if (body.length < maxBodySize) {
+                        if (body.length <= maxBodySize) {
                             writer = new LocalHttpMessageBodyWriter(body);
                         } else {
                             truncated = body.length - maxBodySize;
@@ -82,7 +82,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                         if (verify) {
                             HttpMessageStateSupplier httpMessageStateSupplier = requestHttpMessageStateSupplierSource
                                     .get();
-                            if (body.length < maxBodySize) {
+                            if (body.length <= maxBodySize) {
                                 writer = new RemoteHttpMessageBodyWriter(jsonMapper, body, httpMessageStateSupplier);
                             } else {
                                 truncated = body.length - maxBodySize;
@@ -91,7 +91,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                             }
                         } else {
                             // trust contents is well formed
-                            if (body.length < maxBodySize) {
+                            if (body.length <= maxBodySize) {
                                 writer = new LocalHttpMessageBodyWriter(body);
                             } else {
                                 truncated = body.length - maxBodySize;
@@ -135,7 +135,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                 if (body != null && body.length > 0) {
                     if (response.getOrigin() == Origin.LOCAL) {
                         // trust our own data to be wellformed and not pretty-printed
-                        if (body.length < maxBodySize) {
+                        if (body.length <= maxBodySize) {
                             writer = new LocalHttpMessageBodyWriter(body);
                         } else {
                             truncated = body.length - maxBodySize;
@@ -146,7 +146,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                         if (verify) {
                             HttpMessageStateSupplier httpMessageStateSupplier = responseHttpMessageStateSupplierSource
                                     .get();
-                            if (body.length < maxBodySize) {
+                            if (body.length <= maxBodySize) {
                                 writer = new RemoteHttpMessageBodyWriter(jsonMapper, body, httpMessageStateSupplier);
                             } else {
                                 truncated = body.length - maxBodySize;
@@ -155,7 +155,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                             }
                         } else {
                             // trust contents is well formed
-                            if (body.length < maxBodySize) {
+                            if (body.length <= maxBodySize) {
                                 writer = new LocalHttpMessageBodyWriter(body);
                             } else {
                                 truncated = body.length - maxBodySize;

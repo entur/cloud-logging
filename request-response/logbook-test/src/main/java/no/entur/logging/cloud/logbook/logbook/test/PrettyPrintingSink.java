@@ -84,8 +84,8 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
     }
 
     @Override
-    protected void requestMessage(HttpRequest request, StringBuilder messageBuilder, int i) throws IOException {
-        super.requestMessage(request, messageBuilder, i);
+    protected void requestMessage(HttpRequest request, StringBuilder messageBuilder, int truncated) throws IOException {
+        super.requestMessage(request, messageBuilder, truncated);
 
         messageBuilder.append('\n');
         writeHeaders(request.getHeaders(), messageBuilder);
@@ -102,8 +102,8 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
 
     @Override
     protected void responseMessage(Correlation correlation, HttpRequest request, HttpResponse response,
-                                   StringBuilder messageBuilder, int i) throws IOException {
-        super.responseMessage(correlation, request, response, messageBuilder, i);
+                                   StringBuilder messageBuilder, int truncated) throws IOException {
+        super.responseMessage(correlation, request, response, messageBuilder, truncated);
 
         messageBuilder.append('\n');
         writeHeaders(response.getHeaders(), messageBuilder);

@@ -60,8 +60,9 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
         if (!isJson || !smellsLikeJson(bodyAsString)) {
             if (bodyAsString.length() > maxSize) {
                 // TODO add filter
+                int truncated = bodyAsString.length() - maxSize;
                 String truncatedBody = bodyAsString.substring(0, maxSize);
-                return newRequestSingleFieldAppendingMarker(request, truncatedBody, false, -1);
+                return newRequestSingleFieldAppendingMarker(request, truncatedBody, false, truncated);
             }
             return newRequestSingleFieldAppendingMarker(request, bodyAsString, false, -1);
         }

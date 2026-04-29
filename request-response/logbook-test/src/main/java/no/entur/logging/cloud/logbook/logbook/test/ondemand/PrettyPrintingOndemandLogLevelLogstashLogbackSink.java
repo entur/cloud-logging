@@ -84,7 +84,7 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
                 if (body != null && body.length > 0) {
                     if (request.getOrigin() == Origin.LOCAL) {
                         // trust our own data to be wellformed
-                        if (body.length < maxBodySize) {
+                        if (body.length <= maxBodySize) {
                             writer = new PrettyPrintingLocalHttpMessageBodyWriter(body);
                         } else {
                             truncated = body.length - maxBodySize;
@@ -94,7 +94,7 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
                         }
                     } else {
                         HttpMessageStateSupplier httpMessageStateSupplier = requestHttpMessageStateSupplierSource.get();
-                        if (body.length < maxBodySize) {
+                        if (body.length <= maxBodySize) {
                             writer = new PrettyPrintingRemoteHttpMessageBodyWriter(jsonMapper, body, httpMessageStateSupplier);
                         } else {
                             truncated = body.length - maxBodySize;
@@ -140,7 +140,7 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
                 if (body != null && body.length > 0) {
                     if (response.getOrigin() == Origin.LOCAL) {
                         // trust our own data to be wellformed
-                        if (body.length < maxBodySize) {
+                        if (body.length <= maxBodySize) {
                             writer = new PrettyPrintingLocalHttpMessageBodyWriter(body);
                         } else {
                             truncated = body.length - maxBodySize;
@@ -151,7 +151,7 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
                     } else {
                         HttpMessageStateSupplier httpMessageStateSupplier = responseHttpMessageStateSupplierSource
                                 .get();
-                        if (body.length < maxBodySize) {
+                        if (body.length <= maxBodySize) {
                             writer = new PrettyPrintingRemoteHttpMessageBodyWriter(jsonMapper, body,
                                     httpMessageStateSupplier);
                         } else {

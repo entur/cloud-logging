@@ -89,7 +89,7 @@ public class MessageComposer {
         messageBuilder.append(" [truncated ~");
         if(truncated <= 1024) {
             messageBuilder.append(truncated);
-            messageBuilder.append(" bytes)");
+            messageBuilder.append(" bytes]");
         } else {
             messageBuilder.append(truncated / 1024);
             messageBuilder.append("KB]");
