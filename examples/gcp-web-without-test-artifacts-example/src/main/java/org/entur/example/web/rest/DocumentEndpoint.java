@@ -4,10 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.CharArrayWriter;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/document")
@@ -45,6 +45,40 @@ public class DocumentEndpoint {
 		return new ResponseEntity(HttpStatus.NOT_FOUND);
 	}
 
+
+	@GetMapping(value = "/some/bigResponse", produces = "application/json")
+	ResponseEntity<String> bigResponse() throws IOException {
+		tools.jackson.core.json.JsonFactory factory = new tools.jackson.core.json.JsonFactory();
+
+		CharArrayWriter writer = new CharArrayWriter();
+
+		tools.jackson.core.JsonGenerator generator = factory.createGenerator(writer);
+
+		generator.writeStartObject();
+		generator.writeStringProperty("start", "here");
+		for(int i = 0; i < 10; i++) {
+			generator.writeStringProperty("longValue" + i, generateLongString(25*1024));
+		}
+		generator.writeStringProperty("longValue", generateLongString(192*1024));
+		generator.writeStringProperty("end", "here");
+		generator.writeEndObject();
+
+		generator.flush();
+
+		return new ResponseEntity<>(writer.toString(), HttpStatus.OK);
+	}
+
+	private String generateLongString(int length) {
+		StringBuilder builder = new StringBuilder(length);
+
+		int mod = 'z' - 'a';
+
+		for(int i = 0; i < length; i++) {
+			char c = (char) ('a' + i % mod);
+			builder.append(c);
+		}
+		return builder.toString();
+	}
 
 
 }
