@@ -74,7 +74,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                         if (body.length < maxBodySize) {
                             writer = new LocalHttpMessageBodyWriter(body);
                         } else {
-                            truncated = body.length -  maxBodySize;
+                            truncated = body.length - maxBodySize;
                             writer = new MaxSizeLocalHttpMessageBodyWriter(jsonMapper, body, maxBodySize);
                         }
                     } else {
@@ -85,7 +85,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                             if (body.length < maxBodySize) {
                                 writer = new RemoteHttpMessageBodyWriter(jsonMapper, body, httpMessageStateSupplier);
                             } else {
-                                truncated = body.length -  maxBodySize;
+                                truncated = body.length - maxBodySize;
                                 writer = new MaxSizeRemoteHttpMessageBodyWriter(jsonMapper, body, maxSize,
                                         httpMessageStateSupplier);
                             }
@@ -94,7 +94,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                             if (body.length < maxBodySize) {
                                 writer = new LocalHttpMessageBodyWriter(body);
                             } else {
-                                truncated = body.length -  maxBodySize;
+                                truncated = body.length - maxBodySize;
                                 writer = new MaxSizeLocalHttpMessageBodyWriter(jsonMapper, body, maxBodySize);
                             }
                         }
@@ -108,7 +108,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                 String bodyAsString = request.getBodyAsString();
                 if (bodyAsString != null && bodyAsString.length() > 0) {
                     if (bodyAsString.length() > maxBodySize) {
-                        truncated = bodyAsString.length() -  maxBodySize;
+                        truncated = bodyAsString.length() - maxBodySize;
 
                         String truncatedString = bodyAsString.substring(0, maxBodySize);
                         writer = new StringHttpMessageBodyWriter(truncatedString);
@@ -138,7 +138,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                         if (body.length < maxBodySize) {
                             writer = new LocalHttpMessageBodyWriter(body);
                         } else {
-                            truncated = body.length -  maxBodySize;
+                            truncated = body.length - maxBodySize;
                             writer = new MaxSizeLocalHttpMessageBodyWriter(jsonMapper, body, maxBodySize);
                         }
                     } else {
@@ -149,7 +149,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                             if (body.length < maxBodySize) {
                                 writer = new RemoteHttpMessageBodyWriter(jsonMapper, body, httpMessageStateSupplier);
                             } else {
-                                truncated = body.length -  maxBodySize;
+                                truncated = body.length - maxBodySize;
                                 writer = new MaxSizeRemoteHttpMessageBodyWriter(jsonMapper, body, maxSize,
                                         httpMessageStateSupplier);
                             }
@@ -158,7 +158,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                             if (body.length < maxBodySize) {
                                 writer = new LocalHttpMessageBodyWriter(body);
                             } else {
-                                truncated = body.length -  maxBodySize;
+                                truncated = body.length - maxBodySize;
                                 writer = new MaxSizeLocalHttpMessageBodyWriter(jsonMapper, body, maxBodySize);
                             }
                         }
@@ -172,7 +172,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                 String bodyAsString = response.getBodyAsString();
                 if (bodyAsString != null && bodyAsString.length() > 0) {
                     if (bodyAsString.length() > maxBodySize) {
-                        truncated = bodyAsString.length() -  maxBodySize;
+                        truncated = bodyAsString.length() - maxBodySize;
 
                         String truncatedString = bodyAsString.substring(0, maxBodySize);
                         writer = new StringHttpMessageBodyWriter(truncatedString);
