@@ -37,43 +37,46 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
         this.remoteHttpMessageContextSupplier = remoteHttpMessageContextSupplier;
     }
 
-    public Marker createRequestMarker(HttpRequest request) {
+    public RequestResponseSingleFieldAppendingMarker createRequestMarker(HttpRequest request) {
 
         String contentType = request.getContentType();
         boolean isJson = ContentType.isJsonMediaType(contentType);
         boolean isXml = isXmlMediaType(contentType);
 
         if (!isJson && !isXml) {
-            return newRequestSingleFieldAppendingMarker(request, null, false);
+            return newRequestSingleFieldAppendingMarker(request, null, false, -1);
         }
 
         String bodyAsString;
         try {
             bodyAsString = request.getBodyAsString();
         } catch (Exception e) {
-            return newRequestSingleFieldAppendingMarker(request, null, false);
+            return newRequestSingleFieldAppendingMarker(request, null, false, -1);
         }
 
         if (bodyAsString == null || bodyAsString.length() == 0) {
-            return newRequestSingleFieldAppendingMarker(request, null, false);
+            return newRequestSingleFieldAppendingMarker(request, null, false, -1);
         }
 
         // add sanity check for JSON content, even if mimetype does match
         if (!isJson || !smellsLikeJson(bodyAsString)) {
             if (bodyAsString.length() > maxSize) {
                 // TODO add filter
+                int truncated = bodyAsString.length() - maxSize;
                 String truncatedBody = bodyAsString.substring(0, maxSize);
-                return newRequestSingleFieldAppendingMarker(request, truncatedBody, false);
+                return newRequestSingleFieldAppendingMarker(request, truncatedBody, false, truncated);
             }
-            return newRequestSingleFieldAppendingMarker(request, bodyAsString, false);
+            return newRequestSingleFieldAppendingMarker(request, bodyAsString, false, -1);
         }
 
         String body;
         boolean wellformed;
 
+        int truncated = -1;
         if (request.getOrigin() == Origin.LOCAL) {
             // trust data from ourselves to be wellformed and not pretty-printed
             if (bodyAsString.length() > maxSize) {
+                truncated = bodyAsString.length() - maxSize;
                 try {
                     body = maxSizeJsonFilter.transform(bodyAsString);
                     wellformed = true;
@@ -89,6 +92,7 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
         } else {
             // do not trust data from others to be wellformed
             if (bodyAsString.length() > maxSize) {
+                truncated = bodyAsString.length() - maxSize;
                 try {
                     body = maxSizeJsonFilter.transform(bodyAsString);
                     wellformed = true;
@@ -107,51 +111,55 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
                 }
             }
         }
-        return newRequestSingleFieldAppendingMarker(request, body, wellformed);
+        return newRequestSingleFieldAppendingMarker(request, body, wellformed, truncated);
     }
 
-    protected abstract Marker newRequestSingleFieldAppendingMarker(HttpRequest request, String body,
-            boolean wellformed);
+    protected abstract RequestResponseSingleFieldAppendingMarker newRequestSingleFieldAppendingMarker(HttpRequest request, String body,
+                                                                                                      boolean wellformed, int truncated);
 
-    public Marker createResponseMarker(Correlation correlation, HttpResponse response) {
+    public RequestResponseSingleFieldAppendingMarker createResponseMarker(Correlation correlation, HttpResponse response) {
 
         String contentType = response.getContentType();
         boolean isJson = ContentType.isJsonMediaType(contentType);
         boolean isXml = isXmlMediaType(contentType);
 
         if (!isJson && !isXml) {
-            return newResponseSingleFieldAppendingMarker(response, correlation.getDuration(), null, false);
+            return newResponseSingleFieldAppendingMarker(response, correlation.getDuration(), null, false, -1);
         }
 
         String bodyAsString;
         try {
             bodyAsString = response.getBodyAsString();
         } catch (Exception e) {
-            return newResponseSingleFieldAppendingMarker(response, correlation.getDuration(), null, false);
+            return newResponseSingleFieldAppendingMarker(response, correlation.getDuration(), null, false, -1);
         }
 
         if (bodyAsString == null || bodyAsString.length() == 0) {
-            return newResponseSingleFieldAppendingMarker(response, correlation.getDuration(), null, false);
+            return newResponseSingleFieldAppendingMarker(response, correlation.getDuration(), null, false, -1);
         }
 
         // add sanity check for JSON content, even if mimetype does match
         if (!isJson || !smellsLikeJson(bodyAsString)) {
             if(bodyAsString.length() > maxSize) {
                 // TODO add filter
+                int truncated = bodyAsString.length() - maxSize;
+
                 String truncatedBody = bodyAsString.substring(0, maxSize);
                 return newResponseSingleFieldAppendingMarker(response, correlation.getDuration(),
-                        truncatedBody, false);
+                        truncatedBody, false, truncated);
             }
             return new ResponseSingleFieldAppendingMarker(response, correlation.getDuration(), bodyAsString,
-                    false);
+                    false, -1);
         }
 
         String body;
         boolean wellformed;
+        int truncated = -1;
 
         if (response.getOrigin() == Origin.LOCAL) {
             // trust data from ourselves to be wellformed
             if (bodyAsString.length() > maxSize) {
+                truncated = bodyAsString.length() - maxSize;
                 try {
                     body = maxSizeJsonFilter.transform(bodyAsString);
                     wellformed = true;
@@ -167,6 +175,7 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
         } else {
             // do not trust data from others to be wellformed
             if (bodyAsString.length() > maxSize) {
+                truncated = bodyAsString.length() - maxSize;
                 try {
                     body = maxSizeJsonFilter.transform(bodyAsString);
                     wellformed = true;
@@ -185,11 +194,11 @@ public abstract class AbstractLogLevelLogstashLogbackSink extends AbstractLogLev
                 }
             }
         }
-        return newResponseSingleFieldAppendingMarker(response, correlation.getDuration(), body, wellformed);
+        return newResponseSingleFieldAppendingMarker(response, correlation.getDuration(), body, wellformed, truncated);
     }
 
-    protected abstract Marker newResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body,
-                                                                    boolean wellformed);
+    protected abstract RequestResponseSingleFieldAppendingMarker newResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body,
+                                                                                                       boolean wellformed, int truncated);
 
     /**
      *

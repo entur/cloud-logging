@@ -9,15 +9,15 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractSingleFieldAppendingMarker<T extends HttpMessage> extends SingleFieldAppendingMarker {
+public abstract class AbstractSingleFieldAppendingMarker<T extends HttpMessage> extends RequestResponseSingleFieldAppendingMarker {
 
     protected String contentType;
     protected Map<String, List<String>> headers;
     protected String body;
     protected boolean wellformed;
 
-    public AbstractSingleFieldAppendingMarker(String markerName, T message, String body, boolean wellformed) {
-        super(markerName, "http");
+    public AbstractSingleFieldAppendingMarker(String markerName, T message, String body, boolean wellformed, int truncated) {
+        super(markerName, "http", truncated);
         this.body = body;
         this.wellformed = wellformed;
 

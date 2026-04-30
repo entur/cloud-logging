@@ -13,8 +13,8 @@ import java.time.Duration;
 public class PrettyPrintingResponseSingleFieldAppendingMarker extends ResponseSingleFieldAppendingMarker {
 
 
-    public PrettyPrintingResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body, boolean wellformed) {
-        super(response, duration, body, wellformed);
+    public PrettyPrintingResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body, boolean wellformed, int truncated) {
+        super(response, duration, body, wellformed, truncated);
     }
 
     @Override

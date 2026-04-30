@@ -18,8 +18,8 @@ public class ResponseOndemandSingleFieldAppendingMarker extends AbstractOndemand
     private String protocol;
     private int status;
 
-    public ResponseOndemandSingleFieldAppendingMarker(HttpResponse response, Duration duration, HttpMessageBodyWriter httpMessageBodyWriter) {
-        super(MARKER_NAME, response, httpMessageBodyWriter);
+    public ResponseOndemandSingleFieldAppendingMarker(HttpResponse response, Duration duration, HttpMessageBodyWriter httpMessageBodyWriter, int truncated) {
+        super(MARKER_NAME, response, httpMessageBodyWriter, truncated);
         this.duration = duration;
     }
 

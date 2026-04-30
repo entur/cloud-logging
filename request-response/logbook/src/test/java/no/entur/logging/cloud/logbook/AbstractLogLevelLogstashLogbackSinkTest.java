@@ -27,13 +27,13 @@ public class AbstractLogLevelLogstashLogbackSinkTest {
         }
 
         @Override
-        protected Marker newRequestSingleFieldAppendingMarker(HttpRequest request, String body, boolean wellformed) {
-            return mock(Marker.class);
+        protected RequestResponseSingleFieldAppendingMarker newRequestSingleFieldAppendingMarker(HttpRequest request, String body, boolean wellformed, int truncated) {
+            return mock(RequestResponseSingleFieldAppendingMarker.class);
         }
 
         @Override
-        protected Marker newResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body, boolean wellformed) {
-            return mock(Marker.class);
+        protected RequestResponseSingleFieldAppendingMarker newResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body, boolean wellformed, int truncated) {
+            return mock(RequestResponseSingleFieldAppendingMarker.class);
         }
     }
 
@@ -59,7 +59,7 @@ public class AbstractLogLevelLogstashLogbackSinkTest {
         when(request.getContentType()).thenReturn("application/unknown");
         spy.createRequestMarker(request);
 
-        verify(spy).newRequestSingleFieldAppendingMarker(request, null, false);
+        verify(spy).newRequestSingleFieldAppendingMarker(request, null, false, -1);
     }
 
     @Test
@@ -74,7 +74,7 @@ public class AbstractLogLevelLogstashLogbackSinkTest {
         when(request.getOrigin()).thenReturn(Origin.REMOTE);
         spy.createRequestMarker(request);
 
-        verify(spy).newRequestSingleFieldAppendingMarker(eq(request), anyString(), eq(true));
+        verify(spy).newRequestSingleFieldAppendingMarker(eq(request), anyString(), eq(true), eq(-1));
     }
 
     @Test
@@ -89,7 +89,7 @@ public class AbstractLogLevelLogstashLogbackSinkTest {
         when(request.getOrigin()).thenReturn(Origin.REMOTE);
         spy.createRequestMarker(request);
 
-        verify(spy).newRequestSingleFieldAppendingMarker(eq(request), anyString(), eq(false));
+        verify(spy).newRequestSingleFieldAppendingMarker(eq(request), anyString(), eq(false), eq(-1));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class AbstractLogLevelLogstashLogbackSinkTest {
         when(request.getOrigin()).thenReturn(Origin.LOCAL);
         spy.createRequestMarker(request);
 
-        verify(spy).newRequestSingleFieldAppendingMarker(eq(request), anyString(), eq(true));
+        verify(spy).newRequestSingleFieldAppendingMarker(eq(request), anyString(), eq(true), eq(-1));
     }
 
     @Test
@@ -126,7 +126,7 @@ public class AbstractLogLevelLogstashLogbackSinkTest {
         when(request.getOrigin()).thenReturn(Origin.LOCAL);
         spy.createRequestMarker(request);
 
-        verify(spy).newRequestSingleFieldAppendingMarker(eq(request), anyString(), eq(true));
+        verify(spy).newRequestSingleFieldAppendingMarker(eq(request), anyString(), eq(true), eq(1026));
     }
 
     @Test
@@ -148,7 +148,7 @@ public class AbstractLogLevelLogstashLogbackSinkTest {
         when(request.getOrigin()).thenReturn(Origin.REMOTE);
         spy.createRequestMarker(request);
 
-        verify(spy).newRequestSingleFieldAppendingMarker(eq(request), eq("{\"Logger\":\"Max body size of 1024 reached, rest of the document has been filtered.\"}"), eq(true));
+        verify(spy).newRequestSingleFieldAppendingMarker(eq(request), eq("{\"Logger\":\"Max body size of 1024 reached, rest of the document has been filtered.\"}"), eq(true), eq(1026));
     }
 
     @Test
@@ -170,7 +170,7 @@ public class AbstractLogLevelLogstashLogbackSinkTest {
         when(request.getOrigin()).thenReturn(Origin.REMOTE);
         spy.createRequestMarker(request);
 
-        verify(spy).newRequestSingleFieldAppendingMarker(eq(request), eq(json.substring(0, 1024)), eq(false));
+        verify(spy).newRequestSingleFieldAppendingMarker(eq(request), eq(json.substring(0, 1024)), eq(false), eq(1026));
     }
 
     private MockLogLevelLogstashLogbackSink createSink() {

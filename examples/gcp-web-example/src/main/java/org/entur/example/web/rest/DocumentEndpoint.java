@@ -87,7 +87,9 @@ public class DocumentEndpoint {
 
 		generator.writeStartObject();
 		generator.writeStringField("start", "here");
-		generator.writeStringField("longValue", generateLongString(64*1024));
+		for(int i = 0; i < 10; i++) {
+			generator.writeStringField("longValue" + i, generateLongString(25*1024));
+		}
 		generator.writeStringField("end", "here");
 		generator.writeEndObject();
 

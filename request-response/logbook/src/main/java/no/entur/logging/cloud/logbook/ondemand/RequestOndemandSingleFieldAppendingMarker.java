@@ -23,8 +23,8 @@ public class RequestOndemandSingleFieldAppendingMarker extends AbstractOndemandS
     protected String scheme;
     protected Optional<Integer> port;
 
-    public RequestOndemandSingleFieldAppendingMarker(HttpRequest request, HttpMessageBodyWriter httpMessageBodyWriter) {
-        super(MARKER_NAME, request, httpMessageBodyWriter);
+    public RequestOndemandSingleFieldAppendingMarker(HttpRequest request, HttpMessageBodyWriter httpMessageBodyWriter, int truncated) {
+        super(MARKER_NAME, request, httpMessageBodyWriter, truncated);
     }
 
     @Override
