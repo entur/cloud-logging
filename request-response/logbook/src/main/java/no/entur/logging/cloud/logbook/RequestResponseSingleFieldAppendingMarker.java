@@ -16,7 +16,7 @@ public abstract class RequestResponseSingleFieldAppendingMarker extends SingleFi
     }
 
     /**
-     * Number of bytes which were truncated
+     * Number of bytes or chars which were truncated
      *
      * @return count
      */
