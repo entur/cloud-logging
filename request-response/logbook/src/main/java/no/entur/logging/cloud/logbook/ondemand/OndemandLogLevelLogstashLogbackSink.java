@@ -150,7 +150,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                                 writer = new RemoteHttpMessageBodyWriter(jsonMapper, body, httpMessageStateSupplier);
                             } else {
                                 truncated = body.length - maxBodySize;
-                                writer = new MaxSizeRemoteHttpMessageBodyWriter(jsonMapper, body, maxSize,
+                                writer = new MaxSizeRemoteHttpMessageBodyWriter(jsonMapper, body, maxBodySize,
                                         httpMessageStateSupplier);
                             }
                         } else {

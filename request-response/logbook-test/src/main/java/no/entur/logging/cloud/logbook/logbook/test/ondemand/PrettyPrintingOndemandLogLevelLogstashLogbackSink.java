@@ -99,7 +99,7 @@ public class PrettyPrintingOndemandLogLevelLogstashLogbackSink extends AbstractO
                         } else {
                             truncated = body.length - maxBodySize;
 
-                            writer = new PrettyPrintingRemoteMaxSizeHttpMessageBodyWriter(jsonMapper, body, maxSize,
+                            writer = new PrettyPrintingRemoteMaxSizeHttpMessageBodyWriter(jsonMapper, body, maxBodySize,
                                     httpMessageStateSupplier);
                         }
                     }
