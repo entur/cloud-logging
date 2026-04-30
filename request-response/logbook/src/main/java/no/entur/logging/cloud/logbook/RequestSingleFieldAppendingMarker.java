@@ -22,8 +22,8 @@ public class RequestSingleFieldAppendingMarker extends AbstractSingleFieldAppend
     protected String scheme;
     protected Optional<Integer> port;
 
-    public RequestSingleFieldAppendingMarker(HttpRequest request, String body, boolean wellformed) {
-        super(MARKER_NAME, request, body, wellformed);
+    public RequestSingleFieldAppendingMarker(HttpRequest request, String body, boolean wellformed, int truncated) {
+        super(MARKER_NAME, request, body, wellformed, truncated);
     }
 
     @Override

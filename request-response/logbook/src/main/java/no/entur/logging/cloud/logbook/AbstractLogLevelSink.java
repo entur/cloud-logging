@@ -54,43 +54,43 @@ public abstract class AbstractLogLevelSink implements Sink {
         return logLevelEnabled.getAsBoolean();
     }
 
-    protected void requestMessage(HttpRequest request, StringBuilder messageBuilder) throws IOException {
+    protected void requestMessage(HttpRequest request, StringBuilder messageBuilder, int truncated) throws IOException {
         if (request.getOrigin() == Origin.LOCAL) {
-            client.requestMessage(request, messageBuilder);
+            client.requestMessage(request, messageBuilder, truncated);
         } else {
-            server.requestMessage(request, messageBuilder);
+            server.requestMessage(request, messageBuilder, truncated);
         }
     }
 
     protected void responseMessage(Correlation correlation, HttpRequest request, HttpResponse response,
-            StringBuilder messageBuilder) throws IOException {
+                                   StringBuilder messageBuilder, int truncated) throws IOException {
         if (request.getOrigin() == Origin.LOCAL) {
-            client.responseMessage(correlation, request, response, messageBuilder);
+            client.responseMessage(correlation, request, response, messageBuilder, truncated);
         } else {
-            server.responseMessage(correlation, request, response, messageBuilder);
+            server.responseMessage(correlation, request, response, messageBuilder, truncated);
         }
     }
 
     @Override
     public void write(final Precorrelation precorrelation, final HttpRequest request) throws IOException {
-        Marker marker = createRequestMarker(request);
+        RequestResponseSingleFieldAppendingMarker marker = createRequestMarker(request);
         StringBuilder stringBuilder = new StringBuilder(256);
-        requestMessage(request, stringBuilder);
+        requestMessage(request, stringBuilder, marker != null ? marker.getTruncated() : -1);
         logConsumer.accept(marker, stringBuilder.toString());
     }
 
     public void write(Correlation correlation, final HttpRequest request, HttpResponse response) throws IOException {
-        Marker marker = createResponseMarker(correlation, response);
+        RequestResponseSingleFieldAppendingMarker marker = createResponseMarker(correlation, response);
         StringBuilder stringBuilder = new StringBuilder(256);
-        responseMessage(correlation, request, response, stringBuilder);
+        responseMessage(correlation, request, response, stringBuilder, marker != null ? marker.getTruncated() : -1);
         logConsumer.accept(marker, stringBuilder.toString());
     }
 
-    protected Marker createResponseMarker(Correlation correlation, HttpResponse response) {
+    protected RequestResponseSingleFieldAppendingMarker createResponseMarker(Correlation correlation, HttpResponse response) {
         return null;
     }
 
-    protected Marker createRequestMarker(HttpRequest request) {
+    protected RequestResponseSingleFieldAppendingMarker createRequestMarker(HttpRequest request) {
         return null;
     }
 
