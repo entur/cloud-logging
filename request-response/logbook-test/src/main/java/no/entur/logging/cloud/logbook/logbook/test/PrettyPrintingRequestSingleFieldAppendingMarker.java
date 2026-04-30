@@ -9,8 +9,8 @@ import tools.jackson.core.TokenStreamFactory;
 
 public class PrettyPrintingRequestSingleFieldAppendingMarker extends RequestSingleFieldAppendingMarker {
 
-    public PrettyPrintingRequestSingleFieldAppendingMarker(HttpRequest request, String body, boolean wellformed) {
-        super(request, body, wellformed);
+    public PrettyPrintingRequestSingleFieldAppendingMarker(HttpRequest request, String body, boolean wellformed, int truncated) {
+        super(request, body, wellformed, truncated);
     }
 
     @Override

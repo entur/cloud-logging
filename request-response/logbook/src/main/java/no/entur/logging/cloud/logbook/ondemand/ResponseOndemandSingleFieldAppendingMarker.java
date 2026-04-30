@@ -5,7 +5,6 @@ import net.logstash.logback.marker.SingleFieldAppendingMarker;
 import org.zalando.logbook.HttpResponse;
 import org.zalando.logbook.Origin;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Locale;
 
@@ -18,8 +17,8 @@ public class ResponseOndemandSingleFieldAppendingMarker extends AbstractOndemand
     private String protocol;
     private int status;
 
-    public ResponseOndemandSingleFieldAppendingMarker(HttpResponse response, Duration duration, HttpMessageBodyWriter httpMessageBodyWriter) {
-        super(MARKER_NAME, response, httpMessageBodyWriter);
+    public ResponseOndemandSingleFieldAppendingMarker(HttpResponse response, Duration duration, HttpMessageBodyWriter httpMessageBodyWriter, int truncated) {
+        super(MARKER_NAME, response, httpMessageBodyWriter, truncated);
         this.duration = duration;
     }
 

@@ -1,9 +1,6 @@
 package no.entur.logging.cloud.logbook.ondemand;
 
-import no.entur.logging.cloud.logbook.AbstractLogLevelLogstashLogbackSink;
-import no.entur.logging.cloud.logbook.DefaultRemoteHttpMessageContextSupplier;
-import no.entur.logging.cloud.logbook.MessageComposer;
-import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
+import no.entur.logging.cloud.logbook.*;
 import no.entur.logging.cloud.logbook.ondemand.state.HttpMessageStateSupplier;
 import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupplierSource;
 import no.entur.logging.cloud.logbook.ondemand.state.ResponseHttpMessageStateSupplierSource;
@@ -11,8 +8,6 @@ import org.slf4j.Marker;
 import org.zalando.logbook.*;
 import tools.jackson.databind.json.JsonMapper;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
@@ -66,18 +61,20 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                 client);
     }
 
-    public Marker createRequestMarker(HttpRequest request) {
+    public RequestResponseSingleFieldAppendingMarker createRequestMarker(HttpRequest request) {
         HttpMessageBodyWriter writer = EmptyHttpMessageBodyWriter.INSTANCE;
 
+        int truncated = -1;
         if (ContentType.isJsonMediaType(request.getContentType())) {
             try {
                 byte[] body = request.getBody();
                 if (body != null && body.length > 0) {
                     if (request.getOrigin() == Origin.LOCAL) {
                         // trust our own data to be wellformed and not pretty-printed
-                        if (body.length < maxBodySize) {
+                        if (body.length <= maxBodySize) {
                             writer = new LocalHttpMessageBodyWriter(body);
                         } else {
+                            truncated = body.length - maxBodySize;
                             writer = new MaxSizeLocalHttpMessageBodyWriter(jsonMapper, body, maxBodySize);
                         }
                     } else {
@@ -85,17 +82,19 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                         if (verify) {
                             HttpMessageStateSupplier httpMessageStateSupplier = requestHttpMessageStateSupplierSource
                                     .get();
-                            if (body.length < maxBodySize) {
+                            if (body.length <= maxBodySize) {
                                 writer = new RemoteHttpMessageBodyWriter(jsonMapper, body, httpMessageStateSupplier);
                             } else {
+                                truncated = body.length - maxBodySize;
                                 writer = new MaxSizeRemoteHttpMessageBodyWriter(jsonMapper, body, maxSize,
                                         httpMessageStateSupplier);
                             }
                         } else {
                             // trust contents is well formed
-                            if (body.length < maxBodySize) {
+                            if (body.length <= maxBodySize) {
                                 writer = new LocalHttpMessageBodyWriter(body);
                             } else {
+                                truncated = body.length - maxBodySize;
                                 writer = new MaxSizeLocalHttpMessageBodyWriter(jsonMapper, body, maxBodySize);
                             }
                         }
@@ -109,8 +108,10 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                 String bodyAsString = request.getBodyAsString();
                 if (bodyAsString != null && bodyAsString.length() > 0) {
                     if (bodyAsString.length() > maxBodySize) {
-                        String truncated = bodyAsString.substring(0, maxBodySize);
-                        writer = new StringHttpMessageBodyWriter(truncated);
+                        truncated = bodyAsString.length() - maxBodySize;
+
+                        String truncatedString = bodyAsString.substring(0, maxBodySize);
+                        writer = new StringHttpMessageBodyWriter(truncatedString);
                     } else {
                         writer = new StringHttpMessageBodyWriter(bodyAsString);
                     }
@@ -120,22 +121,24 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
             }
         }
 
-        return new RequestOndemandSingleFieldAppendingMarker(request, writer);
+        return new RequestOndemandSingleFieldAppendingMarker(request, writer, truncated);
     }
 
-    public Marker createResponseMarker(Correlation correlation, HttpResponse response) {
+    public RequestResponseSingleFieldAppendingMarker createResponseMarker(Correlation correlation, HttpResponse response) {
 
         HttpMessageBodyWriter writer = EmptyHttpMessageBodyWriter.INSTANCE;
 
+        int truncated = -1;
         if (ContentType.isJsonMediaType(response.getContentType())) {
             try {
                 byte[] body = response.getBody();
                 if (body != null && body.length > 0) {
                     if (response.getOrigin() == Origin.LOCAL) {
                         // trust our own data to be wellformed and not pretty-printed
-                        if (body.length < maxBodySize) {
+                        if (body.length <= maxBodySize) {
                             writer = new LocalHttpMessageBodyWriter(body);
                         } else {
+                            truncated = body.length - maxBodySize;
                             writer = new MaxSizeLocalHttpMessageBodyWriter(jsonMapper, body, maxBodySize);
                         }
                     } else {
@@ -143,17 +146,19 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                         if (verify) {
                             HttpMessageStateSupplier httpMessageStateSupplier = responseHttpMessageStateSupplierSource
                                     .get();
-                            if (body.length < maxBodySize) {
+                            if (body.length <= maxBodySize) {
                                 writer = new RemoteHttpMessageBodyWriter(jsonMapper, body, httpMessageStateSupplier);
                             } else {
-                                writer = new MaxSizeRemoteHttpMessageBodyWriter(jsonMapper, body, maxSize,
+                                truncated = body.length - maxBodySize;
+                                writer = new MaxSizeRemoteHttpMessageBodyWriter(jsonMapper, body, maxBodySize,
                                         httpMessageStateSupplier);
                             }
                         } else {
                             // trust contents is well formed
-                            if (body.length < maxBodySize) {
+                            if (body.length <= maxBodySize) {
                                 writer = new LocalHttpMessageBodyWriter(body);
                             } else {
+                                truncated = body.length - maxBodySize;
                                 writer = new MaxSizeLocalHttpMessageBodyWriter(jsonMapper, body, maxBodySize);
                             }
                         }
@@ -167,8 +172,10 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
                 String bodyAsString = response.getBodyAsString();
                 if (bodyAsString != null && bodyAsString.length() > 0) {
                     if (bodyAsString.length() > maxBodySize) {
-                        String truncated = bodyAsString.substring(0, maxBodySize);
-                        writer = new StringHttpMessageBodyWriter(truncated);
+                        truncated = bodyAsString.length() - maxBodySize;
+
+                        String truncatedString = bodyAsString.substring(0, maxBodySize);
+                        writer = new StringHttpMessageBodyWriter(truncatedString);
                     } else {
                         writer = new StringHttpMessageBodyWriter(bodyAsString);
                     }
@@ -178,7 +185,7 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
             }
         }
 
-        return new ResponseOndemandSingleFieldAppendingMarker(response, correlation.getDuration(), writer);
+        return new ResponseOndemandSingleFieldAppendingMarker(response, correlation.getDuration(), writer, truncated);
     }
 
 }

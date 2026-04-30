@@ -61,14 +61,14 @@ public class LogLevelLogstashLogbackSink extends AbstractLogLevelLogstashLogback
     }
 
     @Override
-    protected Marker newRequestSingleFieldAppendingMarker(HttpRequest request, String body, boolean wellformed) {
-        return new RequestSingleFieldAppendingMarker(request, body, wellformed);
+    protected RequestResponseSingleFieldAppendingMarker newRequestSingleFieldAppendingMarker(HttpRequest request, String body, boolean wellformed, int truncated) {
+        return new RequestSingleFieldAppendingMarker(request, body, wellformed, truncated);
     }
 
     @Override
-    protected Marker newResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body,
-                                                           boolean wellformed) {
-        return new ResponseSingleFieldAppendingMarker(response, duration, body, wellformed);
+    protected RequestResponseSingleFieldAppendingMarker newResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body,
+                                                           boolean wellformed, int truncated) {
+        return new ResponseSingleFieldAppendingMarker(response, duration, body, wellformed, truncated);
     }
 
 }

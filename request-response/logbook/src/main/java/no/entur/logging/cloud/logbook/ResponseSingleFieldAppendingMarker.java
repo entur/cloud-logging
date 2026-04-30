@@ -17,8 +17,8 @@ public class ResponseSingleFieldAppendingMarker extends AbstractSingleFieldAppen
     private String protocol;
     private int status;
 
-    public ResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body, boolean wellformed) {
-        super(MARKER_NAME, response, body, wellformed);
+    public ResponseSingleFieldAppendingMarker(HttpResponse response, Duration duration, String body, boolean wellformed, int truncated) {
+        super(MARKER_NAME, response, body, wellformed, truncated);
         this.duration = duration;
     }
 
