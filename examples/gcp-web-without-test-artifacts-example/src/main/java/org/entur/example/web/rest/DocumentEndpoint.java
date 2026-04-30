@@ -52,19 +52,16 @@ public class DocumentEndpoint {
 
 		CharArrayWriter writer = new CharArrayWriter();
 
-		tools.jackson.core.JsonGenerator generator = factory.createGenerator(writer);
-
-		generator.writeStartObject();
-		generator.writeStringProperty("start", "here");
-		for(int i = 0; i < 10; i++) {
-			generator.writeStringProperty("longValue" + i, generateLongString(25*1024));
+		try (tools.jackson.core.JsonGenerator generator = factory.createGenerator(writer)) {
+			generator.writeStartObject();
+			generator.writeStringProperty("start", "here");
+			for(int i = 0; i < 10; i++) {
+				generator.writeStringProperty("longValue" + i, generateLongString(25*1024));
+			}
+			generator.writeStringProperty("longValue", generateLongString(192*1024));
+			generator.writeStringProperty("end", "here");
+			generator.writeEndObject();
 		}
-		generator.writeStringProperty("longValue", generateLongString(192*1024));
-		generator.writeStringProperty("end", "here");
-		generator.writeEndObject();
-
-		generator.flush();
-
 		return new ResponseEntity<>(writer.toString(), HttpStatus.OK);
 	}
 
