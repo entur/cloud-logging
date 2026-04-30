@@ -21,7 +21,7 @@ public class WebLoggingFormatWithBigResponsesTest {
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void useHumanReadablePlainEncoderTest() {
+	public void useMachineReadableJsonEncoder() {
 		ResponseEntity<String> response = restTemplate.getForEntity("/api/document/some/bigResponse", String.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
