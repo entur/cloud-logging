@@ -130,6 +130,12 @@ Please note:
  * For request-response-logging, this library assumes that locally produced JSON has valid syntax and is without pretty-printing. 
     * This assumption is made so to avoid the processing overhead of unnecessarily parsing JSON documents known to be valid.
     * If this assumption for some reason does not hold, use a BodyFilter to compensate.
+ * GCP `LogEntry` has a hard size limit of 256 KiB. Request/response bodies are truncated at 224 KiB by default to stay safely within this limit, accounting for headers, MDC fields, and other log-framework overhead. Override the default using:
+    ```
+    entur.logging.request-response.max-body-size=<bytes>
+    entur.logging.request-response.max-size=<bytes>
+    ```
+    See also: [Too long lines](troubleShooting.md#too-long-lines).
 
 Some Logbook excludes ([actuator, openapi](https://github.com/entur/cloud-logging/blob/main/request-response/logbook-spring-boot-autoconfigure/src/main/java/no/entur/logging/cloud/spring/logbook/LogbookLoggingAutoConfiguration.java)) are included by default. Add more using
 
