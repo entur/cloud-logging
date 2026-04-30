@@ -1,5 +1,6 @@
 package no.entur.logging.cloud.logbook.ondemand;
 
+import no.entur.logging.cloud.logbook.RequestResponseSingleFieldAppendingMarker;
 import com.fasterxml.jackson.core.JsonGenerator;
 import net.logstash.logback.marker.SingleFieldAppendingMarker;
 import no.entur.logging.cloud.appender.scope.LoggingScopePostProcessing;
@@ -10,7 +11,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractOndemandSingleFieldAppendingMarker<T extends HttpMessage> extends SingleFieldAppendingMarker implements LoggingScopePostProcessing {
+public abstract class AbstractOndemandSingleFieldAppendingMarker<T extends HttpMessage> extends RequestResponseSingleFieldAppendingMarker implements LoggingScopePostProcessing {
 
     protected String contentType;
     protected Map<String, List<String>> headers;
@@ -18,8 +19,8 @@ public abstract class AbstractOndemandSingleFieldAppendingMarker<T extends HttpM
     // can be null
     protected HttpMessageBodyWriter httpMessageBodyWriter;
 
-    public AbstractOndemandSingleFieldAppendingMarker(String markerName, T message, HttpMessageBodyWriter httpMessageBodyWriter) {
-        super(markerName, "http");
+    public AbstractOndemandSingleFieldAppendingMarker(String markerName, T message, HttpMessageBodyWriter httpMessageBodyWriter, int truncated) {
+        super(markerName, "http", truncated);
         this.httpMessageBodyWriter = httpMessageBodyWriter;
 
         prepareForDeferredProcessing(message);
