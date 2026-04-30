@@ -136,4 +136,4 @@ Does not always translate into `textPayload`.
 
 > Failed to process request with tag kube_abt-xxx_abt-ccc-79d5974b67-jdsk8_abt-ccc_stdout: rpc error: code = InvalidArgument desc = Log entry with size 278.8K exceeds maximum size of 256.0K
 
-Resolution: Truncate long values.
+Resolution: Truncate long values. For request-response logging, the library automatically truncates request/response bodies at 224 KiB by default (GCP `LogEntry` max is 256 KiB). The limit can be lowered further via `entur.logging.request-response.max-body-size`.
