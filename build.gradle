@@ -325,3 +325,8 @@ jreleaser {
         }
     }
 }
+
+// Disable generation of Gradle module metadata to avoid leaking spring dependencies where we don't want them
+tasks.withType(GenerateModuleMetadata) {
+    enabled = false
+}
