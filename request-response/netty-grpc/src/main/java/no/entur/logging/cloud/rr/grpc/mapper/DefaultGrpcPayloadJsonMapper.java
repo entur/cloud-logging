@@ -6,6 +6,7 @@ import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcBodyFilter;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -56,15 +57,27 @@ public class DefaultGrpcPayloadJsonMapper implements GrpcPayloadJsonMapper {
                 message = getTruncatedBinaryMessage(serializedSize);
             } else {
                 // serialize to JSON, check if too big
-                message = filter.filterBody(printer.print(m));
+                StringBuilder builder = new StringBuilder(serializedSize * 4);
+                try {
+                    printer.appendTo(m, builder);
+                } catch (InvalidProtocolBufferException e) {
+                    throw e;
+                } catch (IOException e) {
+                    // Unexpected IOException.
+                    throw new IllegalStateException(e);
+                }
 
-                if (message.length() > maxJsonMessageLength) {
-                    message = getTruncatedJsonMessage(message);
+                CharSequence filteredMessage = filter.filterBody(builder);
+
+                if (filteredMessage.length() > maxJsonMessageLength) {
+                    message = getTruncatedJsonMessage(filteredMessage);
 
                     // whoops, JSON was too large to log
                     // adjust max message length to later
 
                     previouslyTooLargeBinaryMessageLengths.put(m.getClass(), serializedSize);
+                } else {
+                    message = filteredMessage.toString();
                 }
             }
         } else if (m != null) {
@@ -86,7 +99,7 @@ public class DefaultGrpcPayloadJsonMapper implements GrpcPayloadJsonMapper {
      * @return truncated message; as raw JSON
      */
 
-    protected String getTruncatedJsonMessage(String message) {
+    protected String getTruncatedJsonMessage(CharSequence message) {
         return "\"Omitted JSON message size " + message.length() + "\"";
     }
 

@@ -12,4 +12,9 @@ public class NoneGrpcBodyFilter implements GrpcBodyFilter {
     public String filterBody(String body) {
         return body;
     }
+
+    @Override
+    public CharSequence filterBody(CharSequence body) {
+        return body;
+    }
 }
