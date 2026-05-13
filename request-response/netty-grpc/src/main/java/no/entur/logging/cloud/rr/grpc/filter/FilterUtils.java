@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
+import java.util.HexFormat;
 
 /**
  * Utilities methods for logging.
@@ -37,28 +38,12 @@ public class FilterUtils {
 	public static String toSHA(byte[] input) {
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			return byteArray2Hex(md.digest(input));
+			byte[] digest = md.digest(input);
+			return HexFormat.of().formatHex(digest);
 		} catch (NoSuchAlgorithmException nsae) {
 			// this code should never be reached!
 		}
 		return null;
-	}
-
-	/**
-	 * Converts an input byte array to a hex encoded String.
-	 *
-	 * @param bytes
-	 *			Byte array to hex encode
-	 * @return Hex encoded String of the input byte array
-	 */
-	private static String byteArray2Hex(final byte[] bytes) {
-		try (Formatter formatter = new Formatter();) {
-			for (byte b : bytes) {
-				formatter.format("%02x", b);
-			}
-			String hex = formatter.toString();
-			return hex;
-		}
 	}
 
 	/**
