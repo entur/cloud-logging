@@ -5,5 +5,7 @@ public interface GrpcBodyFilter {
     @Deprecated
     String filterBody(String body);
 
-    CharSequence filterBody(CharSequence body);
+    default CharSequence filterBody(CharSequence body) {
+        return filterBody(body == null ? null : body.toString());
+    }
 }
