@@ -214,6 +214,14 @@ configure(libraryProjects()) {
         }
     }
 
+    // must be after evaluate to actually take effect
+    // check using command: ./gradlew publishToMavenLocal --info | grep MetadataFileForMaven
+    // not that tasks are SKIPPED
+    afterEvaluate {
+        tasks.withType(GenerateModuleMetadata) {
+            enabled = false
+        }
+    }
 }
 
 allprojects {
@@ -326,7 +334,3 @@ jreleaser {
     }
 }
 
-// Disable generation of Gradle module metadata to avoid leaking spring dependencies where we don't want them
-tasks.withType(GenerateModuleMetadata) {
-    enabled = false
-}
