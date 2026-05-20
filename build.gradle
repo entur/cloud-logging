@@ -125,6 +125,17 @@ configure(jvmProjects()) {
             isNonStable(it.candidate.version)
         }
     }
+
+    configurations.all {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'org.apache.tomcat.embed') {
+                if (isLowerThanMin(details.requested.version, "11.0.22")) {
+                    details.useVersion '11.0.22'
+                    details.because 'Security issues'
+                }
+            }
+        }
+    }
 }
 
 ext.stagingRepositoryPath = "${rootDir.getCanonicalFile()}/build/staging-deploy"
@@ -334,3 +345,7 @@ jreleaser {
     }
 }
 
+boolean isLowerThanMin(String currentVersion, String minVersion) {
+    if (currentVersion == null || minVersion == null) return false
+    return new org.apache.maven.artifact.versioning.ComparableVersion(currentVersion) < new org.apache.maven.artifact.versioning.ComparableVersion(minVersion)
+}
