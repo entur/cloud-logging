@@ -1,4 +1,3 @@
-
 plugins {
     id 'com.github.ben-manes.versions' version '0.53.0' apply false // ./gradlew dependencyUpdates
     id "org.sonarqube" version "7.2.3.7755"
@@ -123,6 +122,17 @@ configure(jvmProjects()) {
     tasks.named("dependencyUpdates").configure {
         rejectVersionIf {
             isNonStable(it.candidate.version)
+        }
+    }
+
+    configurations.all {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'org.apache.tomcat.embed') {
+                if (isLowerThanMin(details.requested.version, "10.1.55")) {
+                    details.useVersion '10.1.55'
+                    details.because 'Security issues'
+                }
+            }
         }
     }
 }
@@ -288,8 +298,6 @@ abstract class JunitAlignmentRule implements ComponentMetadataRule {
     }
 }
 
-
-
 task clean {
     //project.delete(files(getBuildDir()) {
     //})
@@ -334,3 +342,8 @@ jreleaser {
     }
 }
 
+// Metodens definisjon
+boolean isLowerThanMin(String currentVersion, String minVersion) {
+    if (currentVersion == null || minVersion == null) return false
+    return new org.apache.maven.artifact.versioning.ComparableVersion(currentVersion) < new org.apache.maven.artifact.versioning.ComparableVersion(minVersion)
+}
