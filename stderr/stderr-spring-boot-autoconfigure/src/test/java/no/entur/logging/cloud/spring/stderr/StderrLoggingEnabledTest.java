@@ -1,13 +1,19 @@
 package no.entur.logging.cloud.spring.stderr;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Verifies that System.err is redirected to SLF4J when the autoconfiguration is enabled
@@ -19,6 +25,24 @@ public class StderrLoggingEnabledTest {
 
     @Autowired
     private SystemErrToSlf4jPrintStream systemErrToSlf4jPrintStream;
+
+    private ListAppender<ILoggingEvent> listAppender;
+    private ch.qos.logback.classic.Logger stderrLogger;
+
+    @BeforeEach
+    public void attachListAppender() {
+        stderrLogger = (ch.qos.logback.classic.Logger)
+                org.slf4j.LoggerFactory.getLogger("stderr");
+        listAppender = new ListAppender<>();
+        listAppender.start();
+        stderrLogger.addAppender(listAppender);
+    }
+
+    @AfterEach
+    public void detachListAppender() {
+        stderrLogger.detachAppender(listAppender);
+        listAppender.stop();
+    }
 
     @Test
     public void testBeanCreated() {
@@ -33,16 +57,37 @@ public class StderrLoggingEnabledTest {
     @Test
     public void testSingleLineIsForwarded() {
         System.err.println("Test single-line error message");
+        System.err.flush();
+
+        assertEquals(1, listAppender.list.size());
+        assertEquals("Test single-line error message", listAppender.list.get(0).getFormattedMessage());
     }
 
     @Test
     public void testStackTraceIsCombinedIntoSingleLogStatement() {
         new RuntimeException("Test exception for stack trace combining").printStackTrace();
+        System.err.flush();
+
+        assertEquals(1, listAppender.list.size(),
+                "Full stack trace must be combined into exactly one log statement");
+        String message = listAppender.list.get(0).getFormattedMessage();
+        assertTrue(message.startsWith("java.lang.RuntimeException: Test exception for stack trace combining"),
+                "Log message must begin with the exception header");
+        assertTrue(message.contains("\tat "),
+                "Log message must contain at least one stack frame");
     }
 
     @Test
     public void testChainedExceptionsAreCombined() {
         RuntimeException cause = new RuntimeException("root cause");
         new RuntimeException("wrapper exception", cause).printStackTrace();
+        System.err.flush();
+
+        assertEquals(1, listAppender.list.size(),
+                "Chained exception stack trace must be combined into exactly one log statement");
+        String message = listAppender.list.get(0).getFormattedMessage();
+        assertTrue(message.contains("wrapper exception"), "Message must contain the outer exception");
+        assertTrue(message.contains("Caused by:"), "Message must contain the cause chain");
+        assertTrue(message.contains("root cause"), "Message must contain the root cause");
     }
 }
