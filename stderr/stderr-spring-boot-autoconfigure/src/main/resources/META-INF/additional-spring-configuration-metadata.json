@@ -1,0 +1,34 @@
+{
+  "properties": [
+    {
+      "name": "entur.logging.stderr.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Whether to forward System.err output to SLF4J."
+    },
+    {
+      "name": "entur.logging.stderr.level",
+      "type": "java.lang.String",
+      "defaultValue": "error",
+      "description": "SLF4J log level used when forwarding System.err output."
+    },
+    {
+      "name": "entur.logging.stderr.logger",
+      "type": "java.lang.String",
+      "defaultValue": "stderr",
+      "description": "Logger name used when forwarding System.err output."
+    }
+  ],
+  "hints": [
+    {
+      "name": "entur.logging.stderr.level",
+      "values": [
+        { "value": "trace", "description": "Trace level." },
+        { "value": "debug", "description": "Debug level." },
+        { "value": "info",  "description": "Info level." },
+        { "value": "warn",  "description": "Warning level." },
+        { "value": "error", "description": "Error level." }
+      ]
+    }
+  ]
+}

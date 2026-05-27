@@ -38,6 +38,8 @@ include 'request-response:logbook-filter', 'request-response:logbook', 'request-
 include 'on-demand:on-demand-spring-boot-starter-web', 'on-demand:on-demand-spring-boot-starter-grpc', 'on-demand:on-demand-spring-boot-autoconfigure'
 include 'request-response:request-response-spring-boot-autoconfigure-web', 'request-response:request-response-spring-boot-autoconfigure-grpc-spring'
 
+include 'stderr:stderr-spring-boot-autoconfigure'
+
 include 'bom'
 
 // GCP
