@@ -89,35 +89,34 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
      */
     @Override
     public void println(Object x) {
-        String line = String.valueOf(x);
+        println(String.valueOf(x));
+    }
+
+    @Override
+    public void println(String l) {
+        if(l == null) {
+            flushStackTraceBuffer();
+            emit("null");
+            return;
+        }
         StringBuilder stackTraceBuffer = STACK_TRACE_BUFFER.get();
 
         // Fast path: already accumulating a trace on this thread and the line is an
         // unambiguous body line – skip the (relatively expensive) stack walk.
-        if (stackTraceBuffer.length() > 0 && isStackTraceBodyLine(line)) {
-            stackTraceBuffer.append('\n').append(line);
+        if (!stackTraceBuffer.isEmpty() && isStackTraceBodyLine(l)) {
+            stackTraceBuffer.append('\n').append(l);
             return;
         }
 
         if (isCalledFromPrintStackTrace()) {
-            if (stackTraceBuffer.length() > 0) {
+            if (!stackTraceBuffer.isEmpty()) {
                 stackTraceBuffer.append('\n');
             }
-            stackTraceBuffer.append(line);
+            stackTraceBuffer.append(l);
         } else {
-            println(line);
+            flushStackTraceBuffer(stackTraceBuffer);
+            emit(l);
         }
-    }
-
-    /**
-     * {@link Throwable#printStackTrace(PrintStream)} never calls {@code println(String)} directly;
-     * this method therefore flushes any pending per-thread stack-trace buffer and emits the line
-     * immediately without performing a stack walk.
-     */
-    @Override
-    public void println(String x) {
-        flushStackTraceBuffer();
-        emit(x != null ? x : "null");
     }
 
     // -------------------------------------------------------------------------
@@ -195,6 +194,10 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
      */
     private void flushStackTraceBuffer() {
         StringBuilder buf = STACK_TRACE_BUFFER.get();
+        flushStackTraceBuffer(buf);
+    }
+
+    private void flushStackTraceBuffer(StringBuilder buf) {
         if (buf.length() > 0) {
             String message = buf.toString();
             buf.setLength(0);
@@ -240,11 +243,7 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
     @Override
     public synchronized void flush() {
         flushStackTraceBuffer();
-        if (rawLineBuffer.length() > 0) {
-            String line = rawLineBuffer.toString();
-            rawLineBuffer.setLength(0);
-            emit(line);
-        }
+        flushStackTraceBuffer(rawLineBuffer);
         super.flush();
     }
 

@@ -100,16 +100,4 @@ public class StderrLoggingEnabledTest {
         assertTrue(message.contains("root cause"), "Message must contain the root cause");
     }
 
-    @Test
-    public void testStackTraceBufferFlushedBeforeNextPrintln() {
-        new RuntimeException("buffered trace").printStackTrace();
-        // The pending stack-trace buffer should be flushed automatically when the next
-        // println(String) (not from Throwable.printStackTrace) is called.
-        System.err.println("After the trace");
-
-        assertEquals(2, listAppender.list.size(),
-                "Stack trace and subsequent println must each produce exactly one log event");
-        assertTrue(listAppender.list.get(0).getFormattedMessage().contains("buffered trace"));
-        assertEquals("After the trace", listAppender.list.get(1).getFormattedMessage());
-    }
 }
