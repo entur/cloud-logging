@@ -6,15 +6,24 @@ import org.springframework.beans.factory.DisposableBean;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.StackWalker.StackFrame;
 
 /**
  * A {@link PrintStream} that intercepts all output written to {@code System.err} and forwards it
  * to an SLF4J {@link Logger}.
  *
- * <p>Output is processed line by line. When a sequence of lines matching the pattern produced by
- * {@link Throwable#printStackTrace()} is detected (i.e., lines beginning with {@code "\tat "},
- * {@code "Caused by: "}, etc.) the entire stack trace is accumulated and emitted as a single log
- * statement so that cloud log viewers can correlate all lines of an exception together.
+ * <h3>Detection strategy</h3>
+ * <p>{@link Throwable#printStackTrace(PrintStream)} exclusively uses {@link #println(Object)} –
+ * one call per line – routing the output through its internal {@code WrappedPrintStream}.
+ * This class overrides {@link #println(Object)} and uses {@link StackWalker} to check whether
+ * {@code Throwable.printStackTrace} is present in the current thread's call stack.  When it is,
+ * lines are accumulated in a per-thread buffer; the complete trace is emitted as a single SLF4J
+ * log statement once the next non-{@code printStackTrace} write arrives or when {@link #flush()}
+ * is called.  Every other {@link #println} call is forwarded immediately without buffering.
+ *
+ * <h3>Thread safety</h3>
+ * <p>Stack-trace accumulation uses a {@link ThreadLocal} buffer so concurrent
+ * {@code printStackTrace} calls from different threads do not interfere with each other.
  *
  * <p>Instances of this class save the previous {@code System.err} reference and restore it when
  * the Spring application context is closed (via the {@link DisposableBean} contract).
@@ -27,26 +36,30 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
      */
     private static final ThreadLocal<Boolean> LOGGING_GUARD = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
+    /**
+     * Per-thread accumulator for lines produced by {@link Throwable#printStackTrace(PrintStream)}.
+     * Using a {@link ThreadLocal} allows multiple threads to call {@code printStackTrace}
+     * concurrently without interfering with each other's buffers.
+     */
+    private static final ThreadLocal<StringBuilder> STACK_TRACE_BUFFER = ThreadLocal.withInitial(StringBuilder::new);
+
+    /**
+     * Lazy {@link StackWalker} used to determine whether the current {@link #println(Object)}
+     * call originates from {@link Throwable#printStackTrace}.  The walker stops as soon as a
+     * matching frame is found, making the check inexpensive for the common case.
+     */
+    private static final StackWalker STACK_WALKER = StackWalker.getInstance();
+
     private final Logger logger;
     private final Level level;
     private final PrintStream originalSystemErr;
 
-    // Characters accumulated for the line currently being written
-    private final StringBuilder currentLine = new StringBuilder();
-
-    // Lines accumulated while collecting a stack trace
-    private final StringBuilder stackTraceBuffer = new StringBuilder();
-
-    // The last completed line that has not yet been emitted (may turn out to be the
-    // first line of an upcoming stack trace, so we keep it pending until we know)
-    private String pendingLine = null;
-
-    // Whether we are currently collecting lines that belong to a stack trace
-    private boolean inStackTrace = false;
+    // Buffer for the raw write() path (print(String), println(int), etc.) – guarded by 'this'
+    private final StringBuilder rawLineBuffer = new StringBuilder();
 
     /**
-     * @param logger           the SLF4J logger to write forwarded output to
-     * @param level            the log level to use
+     * @param logger            the SLF4J logger to write forwarded output to
+     * @param level             the log level to use
      * @param originalSystemErr the original {@code System.err} stream to restore on {@link #destroy()}
      */
     public SystemErrToSlf4jPrintStream(Logger logger, Level level, PrintStream originalSystemErr) {
@@ -57,17 +70,52 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
     }
 
     // -------------------------------------------------------------------------
-    // PrintStream overrides – intercept all byte-level writes
+    // println interception
+    // -------------------------------------------------------------------------
+
+    /**
+     * Primary interception point for {@link Throwable#printStackTrace(PrintStream)}, which
+     * exclusively calls {@code println(Object)} (never {@code println(String)}) once per line.
+     *
+     * <p>When a {@code Throwable.printStackTrace} call is detected in the call stack the line is
+     * appended to a per-thread buffer.  Otherwise any pending stack-trace buffer for this thread
+     * is flushed first and the new line is emitted immediately.
+     */
+    @Override
+    public void println(Object x) {
+        String line = String.valueOf(x);
+        if (isCalledFromPrintStackTrace()) {
+            appendToStackTraceBuffer(line);
+        } else {
+            flushStackTraceBuffer();
+            emit(line);
+        }
+    }
+
+    /**
+     * {@link Throwable#printStackTrace(PrintStream)} never calls {@code println(String)} directly;
+     * this method therefore flushes any pending per-thread stack-trace buffer and emits the line
+     * immediately without performing a stack walk.
+     */
+    @Override
+    public void println(String x) {
+        flushStackTraceBuffer();
+        emit(x != null ? x : "null");
+    }
+
+    // -------------------------------------------------------------------------
+    // Raw write fallback – handles print(String), println(int/long/…), etc.
+    // These methods are never called by Throwable.printStackTrace.
     // -------------------------------------------------------------------------
 
     @Override
     public synchronized void write(int b) {
         if (b == '\n') {
-            String line = currentLine.toString();
-            currentLine.setLength(0);
-            processCompletedLine(line);
+            String line = rawLineBuffer.toString();
+            rawLineBuffer.setLength(0);
+            emit(line);
         } else if (b != '\r') {
-            currentLine.append((char) b);
+            rawLineBuffer.append((char) b);
         }
     }
 
@@ -78,90 +126,48 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
         }
     }
 
-    @Override
-    public synchronized void flush() {
-        if (currentLine.length() > 0) {
-            processCompletedLine(currentLine.toString());
-            currentLine.setLength(0);
-        }
-        emitPending();
-        super.flush();
-    }
-
     // -------------------------------------------------------------------------
-    // Stack-trace detection and line routing
+    // Stack-trace detection helpers
     // -------------------------------------------------------------------------
 
     /**
-     * Routes a completed (newline-terminated) line either into the stack-trace accumulator or
-     * emits it immediately as a standalone log statement.
+     * Returns {@code true} when {@code java.lang.Throwable.printStackTrace} appears anywhere in
+     * the current thread's call stack.  The {@link StackWalker} stream is lazy and short-circuits
+     * as soon as a matching frame is found.
      */
-    private void processCompletedLine(String line) {
-        if (isStackTraceContinuationLine(line)) {
-            if (!inStackTrace) {
-                // Retroactively treat the pending line as the exception header
-                inStackTrace = true;
-                stackTraceBuffer.setLength(0);
-                if (pendingLine != null) {
-                    stackTraceBuffer.append(pendingLine);
-                    pendingLine = null;
-                }
-            }
-            if (stackTraceBuffer.length() > 0) {
-                stackTraceBuffer.append('\n');
-            }
-            stackTraceBuffer.append(line);
-        } else {
-            if (inStackTrace) {
-                // The stack trace has ended – flush the accumulated lines as one log entry
-                emitStackTrace();
-                inStackTrace = false;
-                stackTraceBuffer.setLength(0);
-            } else if (pendingLine != null) {
-                // Emit the previously held line – it was not part of a stack trace
-                emit(pendingLine);
-            }
-            pendingLine = line;
+    private boolean isCalledFromPrintStackTrace() {
+        return STACK_WALKER.walk(frames ->
+            frames.anyMatch(f ->
+                "java.lang.Throwable".equals(f.getClassName()) &&
+                "printStackTrace".equals(f.getMethodName())
+            )
+        );
+    }
+
+    private void appendToStackTraceBuffer(String line) {
+        StringBuilder buf = STACK_TRACE_BUFFER.get();
+        if (buf.length() > 0) {
+            buf.append('\n');
         }
+        buf.append(line);
     }
 
     /**
-     * Returns {@code true} for lines that are part of a stack trace produced by
-     * {@link Throwable#printStackTrace()}.
-     *
-     * <ul>
-     *   <li>{@code "\tat com.example.Foo.bar(Foo.java:42)"} – ordinary stack frame</li>
-     *   <li>{@code "\t... 5 more"}                         – truncated frames indicator</li>
-     *   <li>{@code "Caused by: java.lang.RuntimeException"} – exception cause chain</li>
-     *   <li>{@code "\tSuppressed: java.lang.Exception"}     – suppressed exception</li>
-     * </ul>
+     * Emits the accumulated per-thread stack-trace buffer as a single log statement and resets
+     * the buffer.  A no-op when the buffer is empty.
      */
-    private boolean isStackTraceContinuationLine(String line) {
-        if (line.startsWith("\tat "))         return true;  // normal stack frame
-        if (line.startsWith("\t..."))         return true;  // "... N more"
-        if (line.startsWith("Caused by: "))  return true;  // cause chain
-        if (line.startsWith("\tSuppressed: ")) return true; // suppressed exception
-        return false;
-    }
-
-    /** Emits any content that is still buffered (called at flush/destroy time). */
-    private void emitPending() {
-        if (inStackTrace) {
-            emitStackTrace();
-            inStackTrace = false;
-            stackTraceBuffer.setLength(0);
-        } else if (pendingLine != null) {
-            emit(pendingLine);
-            pendingLine = null;
-        }
-    }
-
-    private void emitStackTrace() {
-        String message = stackTraceBuffer.toString();
-        if (!message.isEmpty()) {
+    private void flushStackTraceBuffer() {
+        StringBuilder buf = STACK_TRACE_BUFFER.get();
+        if (buf.length() > 0) {
+            String message = buf.toString();
+            buf.setLength(0);
             emit(message);
         }
     }
+
+    // -------------------------------------------------------------------------
+    // Emit
+    // -------------------------------------------------------------------------
 
     /** Forwards a (possibly multi-line) message to the SLF4J logger at the configured level. */
     private void emit(String message) {
@@ -194,6 +200,17 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
      * Flushes any buffered output and restores the original {@code System.err} stream.
      * Called automatically by Spring when the application context is closed.
      */
+    @Override
+    public synchronized void flush() {
+        flushStackTraceBuffer();
+        if (rawLineBuffer.length() > 0) {
+            String line = rawLineBuffer.toString();
+            rawLineBuffer.setLength(0);
+            emit(line);
+        }
+        super.flush();
+    }
+
     @Override
     public void destroy() {
         flush();

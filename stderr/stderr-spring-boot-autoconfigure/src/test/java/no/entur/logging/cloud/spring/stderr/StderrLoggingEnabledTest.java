@@ -57,15 +57,24 @@ public class StderrLoggingEnabledTest {
     @Test
     public void testSingleLineIsForwarded() {
         System.err.println("Test single-line error message");
-        System.err.flush();
-
+        // println(String) is emitted immediately – no explicit flush required
         assertEquals(1, listAppender.list.size());
         assertEquals("Test single-line error message", listAppender.list.get(0).getFormattedMessage());
     }
 
     @Test
+    public void testPrintlnObjectIsForwarded() {
+        System.err.println((Object) "Test object message");
+        // println(Object) that is not from Throwable.printStackTrace is emitted immediately
+        assertEquals(1, listAppender.list.size());
+        assertEquals("Test object message", listAppender.list.get(0).getFormattedMessage());
+    }
+
+    @Test
     public void testStackTraceIsCombinedIntoSingleLogStatement() {
         new RuntimeException("Test exception for stack trace combining").printStackTrace();
+        // Throwable.printStackTrace only calls println(Object); the accumulated buffer is
+        // flushed when flush() is called (or on the next non-printStackTrace println).
         System.err.flush();
 
         assertEquals(1, listAppender.list.size(),
@@ -89,5 +98,18 @@ public class StderrLoggingEnabledTest {
         assertTrue(message.contains("wrapper exception"), "Message must contain the outer exception");
         assertTrue(message.contains("Caused by:"), "Message must contain the cause chain");
         assertTrue(message.contains("root cause"), "Message must contain the root cause");
+    }
+
+    @Test
+    public void testStackTraceBufferFlushedBeforeNextPrintln() {
+        new RuntimeException("buffered trace").printStackTrace();
+        // The pending stack-trace buffer should be flushed automatically when the next
+        // println(String) (not from Throwable.printStackTrace) is called.
+        System.err.println("After the trace");
+
+        assertEquals(2, listAppender.list.size(),
+                "Stack trace and subsequent println must each produce exactly one log event");
+        assertTrue(listAppender.list.get(0).getFormattedMessage().contains("buffered trace"));
+        assertEquals("After the trace", listAppender.list.get(1).getFormattedMessage());
     }
 }
