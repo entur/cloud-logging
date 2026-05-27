@@ -31,7 +31,9 @@ import java.util.concurrent.TimeUnit;
  * per-thread buffer whose owning thread has terminated or whose last append is older than
  * {@value #STALE_BUFFER_AGE_MS} ms.  This ensures that stack traces written by short-lived
  * threads (e.g. worker threads that exit after an exception) are always emitted even when no
- * subsequent write to {@code System.err} occurs on that thread.
+ * subsequent write to {@code System.err} occurs on that thread.  The background thread is
+ * started lazily on the first {@code printStackTrace} write to avoid consuming resources when
+ * {@code System.err} is never used.
  *
  * <h2>Thread safety</h2>
  * <p>Stack-trace accumulation uses a {@link ConcurrentHashMap} keyed on the owning
@@ -71,8 +73,14 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
      */
     private final ConcurrentHashMap<Thread, PendingBuffer> pendingBuffers = new ConcurrentHashMap<>();
 
-    /** Background task that auto-flushes stale or orphaned per-thread buffers. */
-    private final ScheduledExecutorService staleFlusher;
+    /**
+     * Background task that auto-flushes stale or orphaned per-thread buffers.  {@code null} until
+     * the first {@code printStackTrace} write; started at most once via {@link #ensureSchedulerStarted()}.
+     */
+    private volatile ScheduledExecutorService staleFlusher;
+
+    /** Guards one-time lazy creation of {@link #staleFlusher}. */
+    private final Object schedulerLock = new Object();
 
     private final Logger logger;
     private final Level level;
@@ -103,19 +111,6 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
         this.logger = logger;
         this.level = level;
         this.originalSystemErr = originalSystemErr;
-
-        staleFlusher = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "stderr-stale-flusher");
-            t.setDaemon(true);
-            return t;
-        });
-        staleFlusher.scheduleAtFixedRate(() -> {
-            try {
-                flushStalePendingBuffers();
-            } catch (Exception ignored) {
-                // Never let an exception cancel the scheduled task
-            }
-        }, FLUSHER_INTERVAL_MS, FLUSHER_INTERVAL_MS, TimeUnit.MILLISECONDS);
     }
 
     // -------------------------------------------------------------------------
@@ -166,6 +161,7 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
         }
 
         if (isCalledFromPrintStackTrace()) {
+            ensureSchedulerStarted();
             PendingBuffer buf = pendingBuffers.computeIfAbsent(currentThread, t -> new PendingBuffer());
             synchronized (buf) {
                 if (buf.content.length() > 0) {
@@ -356,6 +352,32 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
     // -------------------------------------------------------------------------
 
     /**
+     * Starts the background stale-buffer flusher the first time it is needed.  The flusher is
+     * started at most once; subsequent calls after the first are no-ops.
+     */
+    private void ensureSchedulerStarted() {
+        if (staleFlusher == null) {
+            synchronized (schedulerLock) {
+                if (staleFlusher == null) {
+                    ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(r -> {
+                        Thread t = new Thread(r, "stderr-stale-flusher");
+                        t.setDaemon(true);
+                        return t;
+                    });
+                    executor.scheduleAtFixedRate(() -> {
+                        try {
+                            flushStalePendingBuffers();
+                        } catch (Exception ignored) {
+                            // Never let an exception cancel the scheduled task
+                        }
+                    }, FLUSHER_INTERVAL_MS, FLUSHER_INTERVAL_MS, TimeUnit.MILLISECONDS);
+                    staleFlusher = executor; // volatile write – makes the executor visible to all threads
+                }
+            }
+        }
+    }
+
+    /**
      * Flushes any buffered output and restores the original {@code System.err} stream.
      * Called automatically by Spring when the application context is closed.
      */
@@ -373,7 +395,16 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
 
     @Override
     public void destroy() {
-        staleFlusher.shutdown();
+        ScheduledExecutorService flusher = staleFlusher;
+        if (flusher != null) {
+            flusher.shutdown();
+            try {
+                // Wait for any in-flight flush task to complete before doing the final drain.
+                flusher.awaitTermination(FLUSHER_INTERVAL_MS * 2, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
         flush();
         System.setErr(originalSystemErr);
     }
