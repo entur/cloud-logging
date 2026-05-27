@@ -40,7 +40,7 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
      * Using a {@link ThreadLocal} allows multiple threads to call {@code printStackTrace}
      * concurrently without interfering with each other's buffers.
      */
-    private static final ThreadLocal<StringBuilder> STACK_TRACE_BUFFER = ThreadLocal.withInitial(StringBuilder::new);
+    private static final ThreadLocal<StringBuilder> STACK_TRACE_BUFFER = ThreadLocal.withInitial(() -> new StringBuilder(4096));
 
     /**
      * Lazy {@link StackWalker} used to determine whether the current {@link #println(Object)}
@@ -139,7 +139,14 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
     @Override
     public synchronized void write(byte[] buf, int off, int len) {
         for (int i = off; i < off + len; i++) {
-            write(buf[i] & 0xff);
+            int b = buf[i] & 0xff;
+            if (b == '\n') {
+                String line = rawLineBuffer.toString();
+                rawLineBuffer.setLength(0);
+                emit(line);
+            } else if (b != '\r') {
+                rawLineBuffer.append((char) b);
+            }
         }
     }
 
