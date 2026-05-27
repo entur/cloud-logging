@@ -53,6 +53,9 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
     static final long STALE_BUFFER_AGE_MS = 200L;
     private static final long STALE_BUFFER_AGE_NS = STALE_BUFFER_AGE_MS * 1_000_000L;
 
+    /** How long {@link #destroy()} waits for the background flusher to finish its last run (milliseconds). */
+    static final long SHUTDOWN_TIMEOUT_MS = FLUSHER_INTERVAL_MS * 2;
+
     /**
      * Guard against infinite recursion that would occur if the SLF4J backend itself wrote to
      * {@code System.err} (e.g. during its own initialisation or error reporting).
@@ -371,7 +374,7 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
                             // Never let an exception cancel the scheduled task
                         }
                     }, FLUSHER_INTERVAL_MS, FLUSHER_INTERVAL_MS, TimeUnit.MILLISECONDS);
-                    staleFlusher = executor; // volatile write – makes the executor visible to all threads
+                    staleFlusher = executor; // volatile write - makes the executor visible to all threads
                 }
             }
         }
@@ -400,7 +403,7 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
             flusher.shutdown();
             try {
                 // Wait for any in-flight flush task to complete before doing the final drain.
-                flusher.awaitTermination(FLUSHER_INTERVAL_MS * 2, TimeUnit.MILLISECONDS);
+                flusher.awaitTermination(SHUTDOWN_TIMEOUT_MS, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
