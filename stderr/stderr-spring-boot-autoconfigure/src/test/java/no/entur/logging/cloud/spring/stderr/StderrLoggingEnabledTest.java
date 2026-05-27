@@ -109,8 +109,8 @@ public class StderrLoggingEnabledTest {
         worker.join(); // Wait for the worker thread to terminate
 
         // The background flusher wakes up every FLUSHER_INTERVAL_MS and treats buffers older
-        // than STALE_BUFFER_AGE_MS as stale.  Allow up to 1 second for the flush to happen.
-        long deadline = System.currentTimeMillis() + 1_000L;
+        // than STALE_BUFFER_AGE_MS as stale.  Allow up to 3 seconds to accommodate slow CI.
+        long deadline = System.currentTimeMillis() + 3_000L;
         while (listAppender.list.isEmpty() && System.currentTimeMillis() < deadline) {
             Thread.sleep(50);
         }

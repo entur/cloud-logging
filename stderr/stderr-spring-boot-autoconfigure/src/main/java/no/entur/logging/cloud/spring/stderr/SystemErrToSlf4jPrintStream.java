@@ -83,12 +83,14 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
 
     /**
      * Mutable container for a pending stack-trace accumulation buffer together with the
-     * timestamp of the last line appended to it.  Access to all fields must be guarded by
-     * {@code synchronized} on {@code this} instance.
+     * timestamp of the last line appended to it.  Access to {@code content} must be guarded by
+     * {@code synchronized} on {@code this} instance.  {@code lastAppendNanos} is {@code volatile}
+     * so the background flusher can read it without holding the lock (the staleness check is
+     * approximate and a torn read would only cause a one-poll delay at worst).
      */
     private static final class PendingBuffer {
         final StringBuilder content = new StringBuilder(4096);
-        long lastAppendNanos = System.nanoTime();
+        volatile long lastAppendNanos = System.nanoTime();
     }
 
     /**
