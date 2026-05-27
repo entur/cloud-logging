@@ -54,7 +54,7 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
     private final PrintStream originalSystemErr;
 
     // Buffer for the raw write() path (print(String), println(int), etc.) – guarded by 'this'
-    private final StringBuilder rawLineBuffer = new StringBuilder();
+    private final StringBuilder rawLineBuffer = new StringBuilder(512);
 
     /**
      * @param logger            the SLF4J logger to write forwarded output to
@@ -90,23 +90,22 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
     @Override
     public void println(Object x) {
         String line = String.valueOf(x);
-        StringBuilder buf = STACK_TRACE_BUFFER.get();
+        StringBuilder stackTraceBuffer = STACK_TRACE_BUFFER.get();
 
         // Fast path: already accumulating a trace on this thread and the line is an
         // unambiguous body line – skip the (relatively expensive) stack walk.
-        if (buf.length() > 0 && isStackTraceBodyLine(line)) {
-            buf.append('\n').append(line);
+        if (stackTraceBuffer.length() > 0 && isStackTraceBodyLine(line)) {
+            stackTraceBuffer.append('\n').append(line);
             return;
         }
 
         if (isCalledFromPrintStackTrace()) {
-            if (buf.length() > 0) {
-                buf.append('\n');
+            if (stackTraceBuffer.length() > 0) {
+                stackTraceBuffer.append('\n');
             }
-            buf.append(line);
+            stackTraceBuffer.append(line);
         } else {
-            flushStackTraceBuffer();
-            emit(line);
+            println(line);
         }
     }
 
@@ -149,13 +148,16 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
     // -------------------------------------------------------------------------
 
     /**
-     * Returns {@code true} when {@code java.lang.Throwable.printStackTrace} appears anywhere in
-     * the current thread's call stack.  The {@link StackWalker} stream is lazy and short-circuits
-     * as soon as a matching frame is found.
+     * Returns {@code true} when {@code java.lang.Throwable.printStackTrace} appears at the
+     * expected fixed depth in the current thread's call stack.
+     * The call chain from here to {@code Throwable.printStackTrace} is:
+     * {@code isCalledFromPrintStackTrace} → {@code println(Object)} →
+     * {@code Throwable$WrappedPrintStream.println} → {@code Throwable.printStackTrace}.
+     * Limiting the walk to a small, fixed depth avoids traversing the full stack.
      */
     private boolean isCalledFromPrintStackTrace() {
         return STACK_WALKER.walk(frames ->
-            frames.anyMatch(f ->
+            frames.limit(5).anyMatch(f ->
                 "java.lang.Throwable".equals(f.getClassName()) &&
                 "printStackTrace".equals(f.getMethodName())
             )
