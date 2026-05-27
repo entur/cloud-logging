@@ -100,4 +100,27 @@ public class StderrLoggingEnabledTest {
         assertTrue(message.contains("root cause"), "Message must contain the root cause");
     }
 
+    @Test
+    public void testStackTraceFromCompletedThreadIsFlushedAutomatically() throws InterruptedException {
+        Thread worker = new Thread(() ->
+                new RuntimeException("auto-flush test exception").printStackTrace()
+        );
+        worker.start();
+        worker.join(); // Wait for the worker thread to terminate
+
+        // The background flusher wakes up every FLUSHER_INTERVAL_MS and treats buffers older
+        // than STALE_BUFFER_AGE_MS as stale.  Allow up to 1 second for the flush to happen.
+        long deadline = System.currentTimeMillis() + 1_000L;
+        while (listAppender.list.isEmpty() && System.currentTimeMillis() < deadline) {
+            Thread.sleep(50);
+        }
+
+        assertEquals(1, listAppender.list.size(),
+                "Stack trace from a completed thread must be auto-flushed without an explicit flush() call");
+        String message = listAppender.list.get(0).getFormattedMessage();
+        assertTrue(message.startsWith("java.lang.RuntimeException: auto-flush test exception"),
+                "Log message must begin with the exception header");
+        assertTrue(message.contains("\tat "),
+                "Log message must contain at least one stack frame");
+    }
 }

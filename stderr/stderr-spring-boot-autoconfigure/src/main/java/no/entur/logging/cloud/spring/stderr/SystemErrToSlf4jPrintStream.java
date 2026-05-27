@@ -6,6 +6,12 @@ import org.springframework.beans.factory.DisposableBean;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A {@link PrintStream} that intercepts all output written to {@code System.err} and forwards it
@@ -20,14 +26,30 @@ import java.io.PrintStream;
  * log statement once the next non-{@code printStackTrace} write arrives or when {@link #flush()}
  * is called.  Every other {@link #println} call is forwarded immediately without buffering.
  *
+ * <h2>Automatic flush of pending buffers</h2>
+ * <p>A background daemon thread polls every {@value #FLUSHER_INTERVAL_MS} ms and flushes any
+ * per-thread buffer whose owning thread has terminated or whose last append is older than
+ * {@value #STALE_BUFFER_AGE_MS} ms.  This ensures that stack traces written by short-lived
+ * threads (e.g. worker threads that exit after an exception) are always emitted even when no
+ * subsequent write to {@code System.err} occurs on that thread.
+ *
  * <h2>Thread safety</h2>
- * <p>Stack-trace accumulation uses a {@link ThreadLocal} buffer so concurrent
- * {@code printStackTrace} calls from different threads do not interfere with each other.
+ * <p>Stack-trace accumulation uses a {@link ConcurrentHashMap} keyed on the owning
+ * {@link Thread}, so concurrent {@code printStackTrace} calls from different threads do not
+ * interfere with each other.  Access to each individual {@link PendingBuffer} is guarded by
+ * {@code synchronized} on that buffer object.
  *
  * <p>Instances of this class save the previous {@code System.err} reference and restore it when
  * the Spring application context is closed (via the {@link DisposableBean} contract).
  */
 public class SystemErrToSlf4jPrintStream extends PrintStream implements DisposableBean {
+
+    /** How often the background flusher wakes up (milliseconds). */
+    static final long FLUSHER_INTERVAL_MS = 100L;
+
+    /** A pending buffer older than this (in nanoseconds) is considered stale and flushed. */
+    static final long STALE_BUFFER_AGE_MS = 200L;
+    private static final long STALE_BUFFER_AGE_NS = STALE_BUFFER_AGE_MS * 1_000_000L;
 
     /**
      * Guard against infinite recursion that would occur if the SLF4J backend itself wrote to
@@ -36,18 +58,21 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
     private static final ThreadLocal<Boolean> LOGGING_GUARD = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
     /**
-     * Per-thread accumulator for lines produced by {@link Throwable#printStackTrace(PrintStream)}.
-     * Using a {@link ThreadLocal} allows multiple threads to call {@code printStackTrace}
-     * concurrently without interfering with each other's buffers.
-     */
-    private static final ThreadLocal<StringBuilder> STACK_TRACE_BUFFER = ThreadLocal.withInitial(() -> new StringBuilder(4096));
-
-    /**
      * Lazy {@link StackWalker} used to determine whether the current {@link #println(Object)}
      * call originates from {@link Throwable#printStackTrace}.  The walker stops as soon as a
      * matching frame is found, making the check inexpensive for the common case.
      */
     private static final StackWalker STACK_WALKER = StackWalker.getInstance();
+
+    /**
+     * Per-thread accumulator for lines produced by {@link Throwable#printStackTrace(PrintStream)}.
+     * Keyed on the owning {@link Thread}; access to each value is guarded by {@code synchronized}
+     * on the {@link PendingBuffer} instance.
+     */
+    private final ConcurrentHashMap<Thread, PendingBuffer> pendingBuffers = new ConcurrentHashMap<>();
+
+    /** Background task that auto-flushes stale or orphaned per-thread buffers. */
+    private final ScheduledExecutorService staleFlusher;
 
     private final Logger logger;
     private final Level level;
@@ -55,6 +80,16 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
 
     // Buffer for the raw write() path (print(String), println(int), etc.) – guarded by 'this'
     private final StringBuilder rawLineBuffer = new StringBuilder(512);
+
+    /**
+     * Mutable container for a pending stack-trace accumulation buffer together with the
+     * timestamp of the last line appended to it.  Access to all fields must be guarded by
+     * {@code synchronized} on {@code this} instance.
+     */
+    private static final class PendingBuffer {
+        final StringBuilder content = new StringBuilder(4096);
+        long lastAppendNanos = System.nanoTime();
+    }
 
     /**
      * @param logger            the SLF4J logger to write forwarded output to
@@ -66,6 +101,19 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
         this.logger = logger;
         this.level = level;
         this.originalSystemErr = originalSystemErr;
+
+        staleFlusher = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "stderr-stale-flusher");
+            t.setDaemon(true);
+            return t;
+        });
+        staleFlusher.scheduleAtFixedRate(() -> {
+            try {
+                flushStalePendingBuffers();
+            } catch (Exception ignored) {
+                // Never let an exception cancel the scheduled task
+            }
+        }, FLUSHER_INTERVAL_MS, FLUSHER_INTERVAL_MS, TimeUnit.MILLISECONDS);
     }
 
     // -------------------------------------------------------------------------
@@ -95,26 +143,37 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
     @Override
     public void println(String l) {
         if(l == null) {
-            flushStackTraceBuffer();
+            flushCurrentThreadBuffer();
             emit("null");
             return;
         }
-        StringBuilder stackTraceBuffer = STACK_TRACE_BUFFER.get();
+
+        Thread currentThread = Thread.currentThread();
+        PendingBuffer existingBuf = pendingBuffers.get(currentThread);
 
         // Fast path: already accumulating a trace on this thread and the line is an
         // unambiguous body line – skip the (relatively expensive) stack walk.
-        if (!stackTraceBuffer.isEmpty() && isStackTraceBodyLine(l)) {
-            stackTraceBuffer.append('\n').append(l);
-            return;
+        if (existingBuf != null) {
+            synchronized (existingBuf) {
+                if (existingBuf.content.length() > 0 && isStackTraceBodyLine(l)) {
+                    existingBuf.content.append('\n').append(l);
+                    existingBuf.lastAppendNanos = System.nanoTime();
+                    return;
+                }
+            }
         }
 
         if (isCalledFromPrintStackTrace()) {
-            if (!stackTraceBuffer.isEmpty()) {
-                stackTraceBuffer.append('\n');
+            PendingBuffer buf = pendingBuffers.computeIfAbsent(currentThread, t -> new PendingBuffer());
+            synchronized (buf) {
+                if (buf.content.length() > 0) {
+                    buf.content.append('\n');
+                }
+                buf.content.append(l);
+                buf.lastAppendNanos = System.nanoTime();
             }
-            stackTraceBuffer.append(l);
         } else {
-            flushStackTraceBuffer(stackTraceBuffer);
+            flushCurrentThreadBuffer();
             emit(l);
         }
     }
@@ -188,19 +247,77 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
             || line.startsWith("\tSuppressed: ");
     }
 
+    // -------------------------------------------------------------------------
+    // Buffer management
+    // -------------------------------------------------------------------------
+
     /**
-     * Emits the accumulated per-thread stack-trace buffer as a single log statement and resets
-     * the buffer.  A no-op when the buffer is empty.
+     * Flushes and removes the pending buffer for the current thread, if one exists and is
+     * non-empty.  This is called when a non-{@code printStackTrace} write arrives, signalling
+     * that the previous trace (if any) is complete.
      */
-    private void flushStackTraceBuffer() {
-        StringBuilder buf = STACK_TRACE_BUFFER.get();
-        flushStackTraceBuffer(buf);
+    private void flushCurrentThreadBuffer() {
+        PendingBuffer buf = pendingBuffers.remove(Thread.currentThread());
+        if (buf != null) {
+            String message;
+            synchronized (buf) {
+                if (buf.content.length() == 0) {
+                    return;
+                }
+                message = buf.content.toString();
+                buf.content.setLength(0);
+            }
+            emit(message);
+        }
     }
 
-    private void flushStackTraceBuffer(StringBuilder buf) {
-        if (buf.length() > 0) {
-            String message = buf.toString();
-            buf.setLength(0);
+    /**
+     * Flushes and removes all pending buffers across all threads.  Used by {@link #flush()} to
+     * drain buffers that belong to threads other than the caller (e.g. completed threads whose
+     * buffers were not yet picked up by the background flusher).
+     */
+    private void flushAllPendingBuffers() {
+        for (Iterator<Map.Entry<Thread, PendingBuffer>> it = pendingBuffers.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<Thread, PendingBuffer> entry = it.next();
+            PendingBuffer buf = entry.getValue();
+            String message;
+            synchronized (buf) {
+                if (buf.content.length() == 0) {
+                    it.remove();
+                    continue;
+                }
+                message = buf.content.toString();
+                buf.content.setLength(0);
+            }
+            it.remove();
+            emit(message);
+        }
+    }
+
+    /**
+     * Background task: flushes any pending buffer whose owning thread has terminated or whose
+     * last append is older than {@value #STALE_BUFFER_AGE_MS} ms.
+     */
+    private void flushStalePendingBuffers() {
+        long now = System.nanoTime();
+        for (Iterator<Map.Entry<Thread, PendingBuffer>> it = pendingBuffers.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<Thread, PendingBuffer> entry = it.next();
+            Thread owner = entry.getKey();
+            PendingBuffer buf = entry.getValue();
+            boolean stale = !owner.isAlive() || (now - buf.lastAppendNanos) >= STALE_BUFFER_AGE_NS;
+            if (!stale) {
+                continue;
+            }
+            String message;
+            synchronized (buf) {
+                if (buf.content.length() == 0) {
+                    it.remove();
+                    continue;
+                }
+                message = buf.content.toString();
+                buf.content.setLength(0);
+            }
+            it.remove();
             emit(message);
         }
     }
@@ -242,13 +359,19 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
      */
     @Override
     public synchronized void flush() {
-        flushStackTraceBuffer();
-        flushStackTraceBuffer(rawLineBuffer);
+        flushCurrentThreadBuffer();
+        flushAllPendingBuffers();
+        if (rawLineBuffer.length() > 0) {
+            String line = rawLineBuffer.toString();
+            rawLineBuffer.setLength(0);
+            emit(line);
+        }
         super.flush();
     }
 
     @Override
     public void destroy() {
+        staleFlusher.shutdown();
         flush();
         System.setErr(originalSystemErr);
     }
