@@ -6,13 +6,12 @@ import org.springframework.beans.factory.DisposableBean;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.lang.StackWalker.StackFrame;
 
 /**
  * A {@link PrintStream} that intercepts all output written to {@code System.err} and forwards it
  * to an SLF4J {@link Logger}.
  *
- * <h3>Detection strategy</h3>
+ * <h2>Detection strategy</h2>
  * <p>{@link Throwable#printStackTrace(PrintStream)} exclusively uses {@link #println(Object)} –
  * one call per line – routing the output through its internal {@code WrappedPrintStream}.
  * This class overrides {@link #println(Object)} and uses {@link StackWalker} to check whether
@@ -21,7 +20,7 @@ import java.lang.StackWalker.StackFrame;
  * log statement once the next non-{@code printStackTrace} write arrives or when {@link #flush()}
  * is called.  Every other {@link #println} call is forwarded immediately without buffering.
  *
- * <h3>Thread safety</h3>
+ * <h2>Thread safety</h2>
  * <p>Stack-trace accumulation uses a {@link ThreadLocal} buffer so concurrent
  * {@code printStackTrace} calls from different threads do not interfere with each other.
  *
@@ -179,14 +178,6 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
             || line.startsWith("\t...")
             || line.startsWith("Caused by: ")
             || line.startsWith("\tSuppressed: ");
-    }
-
-    private void appendToStackTraceBuffer(String line) {
-        StringBuilder buf = STACK_TRACE_BUFFER.get();
-        if (buf.length() > 0) {
-            buf.append('\n');
-        }
-        buf.append(line);
     }
 
     /**
