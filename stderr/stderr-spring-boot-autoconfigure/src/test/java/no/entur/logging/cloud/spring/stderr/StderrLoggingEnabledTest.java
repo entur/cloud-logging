@@ -72,7 +72,7 @@ public class StderrLoggingEnabledTest {
 
     @Test
     public void testStackTraceIsCombinedIntoSingleLogStatement() {
-        new RuntimeException("Test exception for stack trace combining").printStackTrace();
+        new RuntimeException("Intentional test exception – not a real error").printStackTrace();
         // Throwable.printStackTrace only calls println(Object); the accumulated buffer is
         // flushed when flush() is called (or on the next non-printStackTrace println).
         System.err.flush();
@@ -80,7 +80,7 @@ public class StderrLoggingEnabledTest {
         assertEquals(1, listAppender.list.size(),
                 "Full stack trace must be combined into exactly one log statement");
         String message = listAppender.list.get(0).getFormattedMessage();
-        assertTrue(message.startsWith("java.lang.RuntimeException: Test exception for stack trace combining"),
+        assertTrue(message.startsWith("java.lang.RuntimeException: Intentional test exception"),
                 "Log message must begin with the exception header");
         assertTrue(message.contains("\tat "),
                 "Log message must contain at least one stack frame");

@@ -80,12 +80,31 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
      * <p>When a {@code Throwable.printStackTrace} call is detected in the call stack the line is
      * appended to a per-thread buffer.  Otherwise any pending stack-trace buffer for this thread
      * is flushed first and the new line is emitted immediately.
+     *
+     * <h4>Stack-walk optimisation</h4>
+     * <p>When this thread is already accumulating a stack trace and the incoming line is
+     * unambiguously a stack-trace body line (a frame, truncated-frame indicator, or cause/
+     * suppressed header), the stack walk is skipped entirely and the line is appended to the
+     * existing buffer.  The walk is only performed for the first line of a potential new trace
+     * or when the line content does not conclusively identify it as a continuation.
      */
     @Override
     public void println(Object x) {
         String line = String.valueOf(x);
+        StringBuilder buf = STACK_TRACE_BUFFER.get();
+
+        // Fast path: already accumulating a trace on this thread and the line is an
+        // unambiguous body line – skip the (relatively expensive) stack walk.
+        if (buf.length() > 0 && isStackTraceBodyLine(line)) {
+            buf.append('\n').append(line);
+            return;
+        }
+
         if (isCalledFromPrintStackTrace()) {
-            appendToStackTraceBuffer(line);
+            if (buf.length() > 0) {
+                buf.append('\n');
+            }
+            buf.append(line);
         } else {
             flushStackTraceBuffer();
             emit(line);
@@ -142,6 +161,24 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
                 "printStackTrace".equals(f.getMethodName())
             )
         );
+    }
+
+    /**
+     * Returns {@code true} for lines that are unambiguously part of a stack-trace body as
+     * produced by {@link Throwable#printStackTrace(PrintStream)}:
+     * <ul>
+     *   <li>{@code "\tat com.example.Foo.bar(Foo.java:42)"} – ordinary stack frame</li>
+     *   <li>{@code "\t... 5 more"}                         – truncated frames indicator</li>
+     *   <li>{@code "Caused by: java.lang.RuntimeException"} – cause chain header</li>
+     *   <li>{@code "\tSuppressed: java.lang.Exception"}     – suppressed exception header</li>
+     * </ul>
+     * Used as a fast pre-check to avoid a stack walk when we are already accumulating a trace.
+     */
+    private static boolean isStackTraceBodyLine(String line) {
+        return line.startsWith("\tat ")
+            || line.startsWith("\t...")
+            || line.startsWith("Caused by: ")
+            || line.startsWith("\tSuppressed: ");
     }
 
     private void appendToStackTraceBuffer(String line) {
