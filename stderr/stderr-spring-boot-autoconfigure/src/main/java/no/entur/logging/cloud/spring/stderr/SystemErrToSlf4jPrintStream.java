@@ -86,6 +86,7 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
     private final Logger logger;
     private final Level level;
     private final PrintStream originalSystemErr;
+    private volatile boolean destroying;
 
     // Buffer for the raw write() path (print(String), println(int), etc.) – guarded by 'this'
     private final StringBuilder rawLineBuffer = new StringBuilder(512);
@@ -141,6 +142,10 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
 
     @Override
     public void println(String l) {
+        if (destroying) {
+            originalSystemErr.println(l);
+            return;
+        }
         if(l == null) {
             flushCurrentThreadBuffer();
             emit("null");
@@ -185,6 +190,10 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
 
     @Override
     public synchronized void write(int b) {
+        if (destroying) {
+            originalSystemErr.write(b);
+            return;
+        }
         if (b == '\n') {
             String line = rawLineBuffer.toString();
             rawLineBuffer.setLength(0);
@@ -196,6 +205,10 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
 
     @Override
     public synchronized void write(byte[] buf, int off, int len) {
+        if (destroying) {
+            originalSystemErr.write(buf, off, len);
+            return;
+        }
         for (int i = off; i < off + len; i++) {
             int b = buf[i] & 0xff;
             if (b == '\n') {
@@ -407,7 +420,7 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
 
     @Override
     public void destroy() {
-        System.setErr(originalSystemErr);
+        destroying = true;
         ScheduledExecutorService flusher = staleFlusher;
         if (flusher != null) {
             flusher.shutdown();
@@ -419,5 +432,6 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
             }
         }
         flush();
+        System.setErr(originalSystemErr);
     }
 }

@@ -133,8 +133,8 @@ public class StderrLoggingEnabledTest {
     public void testConcurrentStackTracesFromMultipleThreadsAreAllCaptured() throws InterruptedException {
         int threadCount = 8;
         List<Thread> workers = new ArrayList<>(threadCount);
-        for (int i = 0; i < threadCount; i++) {
-            int threadIndex = i;
+        for (int threadNumber = 0; threadNumber < threadCount; threadNumber++) {
+            int threadIndex = threadNumber;
             Thread worker = new Thread(() ->
                     new RuntimeException("concurrent-ex-" + threadIndex).printStackTrace()
             );
@@ -149,8 +149,8 @@ public class StderrLoggingEnabledTest {
 
         assertEquals(threadCount, listAppender.list.size(),
                 "Every thread stack trace must produce exactly one combined log statement");
-        for (int i = 0; i < threadCount; i++) {
-            String exceptionId = "concurrent-ex-" + i;
+        for (int threadNumber = 0; threadNumber < threadCount; threadNumber++) {
+            String exceptionId = "concurrent-ex-" + threadNumber;
             assertTrue(
                     listAppender.list.stream().anyMatch(event -> event.getFormattedMessage().contains(exceptionId)),
                     "Missing stack trace output for " + exceptionId
