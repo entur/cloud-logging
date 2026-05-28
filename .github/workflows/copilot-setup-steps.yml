@@ -33,4 +33,4 @@ jobs:
               uses: gradle/actions/setup-gradle@v4
 
             - name: Download dependencies
-              run: ./gradlew dependencies --no-daemon -q
+              run: ./gradlew build -x test --no-daemon -q
