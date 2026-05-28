@@ -31,9 +31,7 @@ import java.util.concurrent.TimeUnit;
  * per-thread buffer whose owning thread has terminated or whose last append is older than
  * {@value #STALE_BUFFER_AGE_MS} ms.  This ensures that stack traces written by short-lived
  * threads (e.g. worker threads that exit after an exception) are always emitted even when no
- * subsequent write to {@code System.err} occurs on that thread.  The background thread is
- * started lazily on the first {@code printStackTrace} write to avoid consuming resources when
- * {@code System.err} is never used.
+ * subsequent write to {@code System.err} occurs on that thread.
  *
  * <h2>Thread safety</h2>
  * <p>Stack-trace accumulation uses a {@link ConcurrentHashMap} keyed on the owning
@@ -114,6 +112,7 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
         this.logger = logger;
         this.level = level;
         this.originalSystemErr = originalSystemErr;
+        ensureSchedulerStarted();
     }
 
     // -------------------------------------------------------------------------
@@ -242,10 +241,20 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
      * Used as a fast pre-check to avoid a stack walk when we are already accumulating a trace.
      */
     private static boolean isStackTraceBodyLine(String line) {
-        return line.startsWith("\tat ")
-            || line.startsWith("\t...")
-            || line.startsWith("Caused by: ")
-            || line.startsWith("\tSuppressed: ");
+        int length = line.length();
+        if (length < 2) {
+            return false;
+        }
+        if (line.charAt(0) == '\t') {
+            if (length >= 5 && line.charAt(1) == 'a' && line.charAt(2) == 't' && line.charAt(3) == ' ') {
+                return true;
+            }
+            if (length >= 4 && line.charAt(1) == '.' && line.charAt(2) == '.' && line.charAt(3) == '.') {
+                return true;
+            }
+            return length >= 13 && line.startsWith("\tSuppressed: ");
+        }
+        return length >= 11 && line.startsWith("Caused by: ");
     }
 
     // -------------------------------------------------------------------------
@@ -398,6 +407,7 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
 
     @Override
     public void destroy() {
+        System.setErr(originalSystemErr);
         ScheduledExecutorService flusher = staleFlusher;
         if (flusher != null) {
             flusher.shutdown();
@@ -409,6 +419,5 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
             }
         }
         flush();
-        System.setErr(originalSystemErr);
     }
 }

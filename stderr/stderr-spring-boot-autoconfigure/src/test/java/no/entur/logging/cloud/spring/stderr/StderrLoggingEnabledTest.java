@@ -10,7 +10,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -122,5 +127,60 @@ public class StderrLoggingEnabledTest {
                 "Log message must begin with the exception header");
         assertTrue(message.contains("\tat "),
                 "Log message must contain at least one stack frame");
+    }
+
+    @Test
+    public void testConcurrentStackTracesFromMultipleThreadsAreAllCaptured() throws InterruptedException {
+        int threadCount = 8;
+        List<Thread> workers = new ArrayList<>(threadCount);
+        for (int i = 0; i < threadCount; i++) {
+            int threadIndex = i;
+            Thread worker = new Thread(() ->
+                    new RuntimeException("concurrent-ex-" + threadIndex).printStackTrace()
+            );
+            workers.add(worker);
+            worker.start();
+        }
+        for (Thread worker : workers) {
+            worker.join();
+        }
+
+        System.err.flush();
+
+        assertEquals(threadCount, listAppender.list.size(),
+                "Every thread stack trace must produce exactly one combined log statement");
+        for (int i = 0; i < threadCount; i++) {
+            String exceptionId = "concurrent-ex-" + i;
+            assertTrue(
+                    listAppender.list.stream().anyMatch(event -> event.getFormattedMessage().contains(exceptionId)),
+                    "Missing stack trace output for " + exceptionId
+            );
+        }
+    }
+
+    @Test
+    public void testDestroyFlushesPendingOutputWithoutLoss() throws Exception {
+        PrintStream previous = System.err;
+        SystemErrToSlf4jPrintStream local = new SystemErrToSlf4jPrintStream(stderrLogger, org.slf4j.event.Level.ERROR, previous);
+        System.setErr(local);
+        try {
+            Thread worker = new Thread(() ->
+                    new RuntimeException("destroy-flush-ex").printStackTrace()
+            );
+            worker.start();
+            worker.join();
+
+            local.destroy();
+        } finally {
+            if (System.err != previous) {
+                System.setErr(previous);
+            }
+        }
+
+        assertFalse(listAppender.list.isEmpty(), "Destroy must flush pending stderr output");
+        assertTrue(
+                listAppender.list.stream().anyMatch(event -> event.getFormattedMessage().contains("destroy-flush-ex")),
+                "Expected stack trace emitted during destroy()"
+        );
     }
 }
