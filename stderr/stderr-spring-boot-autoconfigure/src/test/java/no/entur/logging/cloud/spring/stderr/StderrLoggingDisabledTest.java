@@ -7,8 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static com.google.common.truth.Truth.assertThat;
 
 /**
  * Verifies that System.err is NOT redirected when the autoconfiguration is explicitly disabled.
@@ -23,11 +22,11 @@ public class StderrLoggingDisabledTest {
 
     @Test
     public void testBeanNotCreated() {
-        assertNull(systemErrToSlf4jPrintStream);
+        assertThat(systemErrToSlf4jPrintStream).isNull();
     }
 
     @Test
     public void testSystemErrIsNotRedirected() {
-        assertNotSame(SystemErrToSlf4jPrintStream.class, System.err.getClass());
+        assertThat(System.err).isNotInstanceOf(SystemErrToSlf4jPrintStream.class);
     }
 }

@@ -14,11 +14,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 /**
  * Verifies that System.err is redirected to SLF4J when the autoconfiguration is enabled
@@ -51,28 +48,28 @@ public class StderrLoggingEnabledTest {
 
     @Test
     public void testBeanCreated() {
-        assertNotNull(systemErrToSlf4jPrintStream);
+        assertThat(systemErrToSlf4jPrintStream).isNotNull();
     }
 
     @Test
     public void testSystemErrIsRedirected() {
-        assertSame(systemErrToSlf4jPrintStream, System.err);
+        assertThat(System.err).isSameInstanceAs(systemErrToSlf4jPrintStream);
     }
 
     @Test
     public void testSingleLineIsForwarded() {
         System.err.println("Test single-line error message");
         // println(String) is emitted immediately – no explicit flush required
-        assertEquals(1, listAppender.list.size());
-        assertEquals("Test single-line error message", listAppender.list.get(0).getFormattedMessage());
+        assertThat(listAppender.list).hasSize(1);
+        assertThat(listAppender.list.get(0).getFormattedMessage()).isEqualTo("Test single-line error message");
     }
 
     @Test
     public void testPrintlnObjectIsForwarded() {
         System.err.println((Object) "Test object message");
         // println(Object) that is not from Throwable.printStackTrace is emitted immediately
-        assertEquals(1, listAppender.list.size());
-        assertEquals("Test object message", listAppender.list.get(0).getFormattedMessage());
+        assertThat(listAppender.list).hasSize(1);
+        assertThat(listAppender.list.get(0).getFormattedMessage()).isEqualTo("Test object message");
     }
 
     @Test
@@ -82,13 +79,13 @@ public class StderrLoggingEnabledTest {
         // flushed when flush() is called (or on the next non-printStackTrace println).
         System.err.flush();
 
-        assertEquals(1, listAppender.list.size(),
-                "Full stack trace must be combined into exactly one log statement");
+        assertWithMessage("Full stack trace must be combined into exactly one log statement")
+                .that(listAppender.list).hasSize(1);
         String message = listAppender.list.get(0).getFormattedMessage();
-        assertTrue(message.startsWith("java.lang.RuntimeException: Intentional test exception"),
-                "Log message must begin with the exception header");
-        assertTrue(message.contains("\tat "),
-                "Log message must contain at least one stack frame");
+        assertWithMessage("Log message must begin with the exception header")
+                .that(message).startsWith("java.lang.RuntimeException: Intentional test exception");
+        assertWithMessage("Log message must contain at least one stack frame")
+                .that(message).contains("\tat ");
     }
 
     @Test
@@ -97,12 +94,12 @@ public class StderrLoggingEnabledTest {
         new RuntimeException("wrapper exception", cause).printStackTrace();
         System.err.flush();
 
-        assertEquals(1, listAppender.list.size(),
-                "Chained exception stack trace must be combined into exactly one log statement");
+        assertWithMessage("Chained exception stack trace must be combined into exactly one log statement")
+                .that(listAppender.list).hasSize(1);
         String message = listAppender.list.get(0).getFormattedMessage();
-        assertTrue(message.contains("wrapper exception"), "Message must contain the outer exception");
-        assertTrue(message.contains("Caused by:"), "Message must contain the cause chain");
-        assertTrue(message.contains("root cause"), "Message must contain the root cause");
+        assertWithMessage("Message must contain the outer exception").that(message).contains("wrapper exception");
+        assertWithMessage("Message must contain the cause chain").that(message).contains("Caused by:");
+        assertWithMessage("Message must contain the root cause").that(message).contains("root cause");
     }
 
     @Test
@@ -120,13 +117,13 @@ public class StderrLoggingEnabledTest {
             Thread.sleep(50);
         }
 
-        assertEquals(1, listAppender.list.size(),
-                "Stack trace from a completed thread must be auto-flushed without an explicit flush() call");
+        assertWithMessage("Stack trace from a completed thread must be auto-flushed without an explicit flush() call")
+                .that(listAppender.list).hasSize(1);
         String message = listAppender.list.get(0).getFormattedMessage();
-        assertTrue(message.startsWith("java.lang.RuntimeException: auto-flush test exception"),
-                "Log message must begin with the exception header");
-        assertTrue(message.contains("\tat "),
-                "Log message must contain at least one stack frame");
+        assertWithMessage("Log message must begin with the exception header")
+                .that(message).startsWith("java.lang.RuntimeException: auto-flush test exception");
+        assertWithMessage("Log message must contain at least one stack frame")
+                .that(message).contains("\tat ");
     }
 
     @Test
@@ -147,14 +144,13 @@ public class StderrLoggingEnabledTest {
 
         System.err.flush();
 
-        assertEquals(threadCount, listAppender.list.size(),
-                "Every thread stack trace must produce exactly one combined log statement");
+        assertWithMessage("Every thread stack trace must produce exactly one combined log statement")
+                .that(listAppender.list).hasSize(threadCount);
         for (int threadNumber = 0; threadNumber < threadCount; threadNumber++) {
             String exceptionId = "concurrent-ex-" + threadNumber;
-            assertTrue(
-                    listAppender.list.stream().anyMatch(event -> event.getFormattedMessage().contains(exceptionId)),
-                    "Missing stack trace output for " + exceptionId
-            );
+            assertWithMessage("Missing stack trace output for " + exceptionId)
+                    .that(listAppender.list.stream().anyMatch(event -> event.getFormattedMessage().contains(exceptionId)))
+                    .isTrue();
         }
     }
 
@@ -177,10 +173,9 @@ public class StderrLoggingEnabledTest {
             }
         }
 
-        assertFalse(listAppender.list.isEmpty(), "Destroy must flush pending stderr output");
-        assertTrue(
-                listAppender.list.stream().anyMatch(event -> event.getFormattedMessage().contains("destroy-flush-ex")),
-                "Expected stack trace emitted during destroy()"
-        );
+        assertWithMessage("Destroy must flush pending stderr output").that(listAppender.list).isNotEmpty();
+        assertWithMessage("Expected stack trace emitted during destroy()")
+                .that(listAppender.list.stream().anyMatch(event -> event.getFormattedMessage().contains("destroy-flush-ex")))
+                .isTrue();
     }
 }

@@ -4,8 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.DisposableBean;
 
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -75,8 +78,9 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
     private final ConcurrentHashMap<Thread, PendingBuffer> pendingBuffers = new ConcurrentHashMap<>();
 
     /**
-     * Background task that auto-flushes stale or orphaned per-thread buffers.  {@code null} until
-     * the first {@code printStackTrace} write; started at most once via {@link #ensureSchedulerStarted()}.
+     * Background task that auto-flushes stale or orphaned per-thread buffers.  Started
+     * unconditionally in the constructor via {@link #ensureSchedulerStarted()}; subsequent
+     * calls to {@code ensureSchedulerStarted()} are no-ops.
      */
     private volatile ScheduledExecutorService staleFlusher;
 
@@ -89,7 +93,8 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
     private volatile boolean destroying;
 
     // Buffer for the raw write() path (print(String), println(int), etc.) – guarded by 'this'
-    private final StringBuilder rawLineBuffer = new StringBuilder(512);
+    private static final Charset CHARSET = StandardCharsets.UTF_8;
+    private final ByteArrayOutputStream rawLineBuffer = new ByteArrayOutputStream(512);
 
     /**
      * Mutable container for a pending stack-trace accumulation buffer together with the
@@ -195,11 +200,12 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
             return;
         }
         if (b == '\n') {
-            String line = rawLineBuffer.toString();
-            rawLineBuffer.setLength(0);
+            flushCurrentThreadBuffer();
+            String line = rawLineBuffer.toString(CHARSET);
+            rawLineBuffer.reset();
             emit(line);
         } else if (b != '\r') {
-            rawLineBuffer.append((char) b);
+            rawLineBuffer.write(b);
         }
     }
 
@@ -212,11 +218,12 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
         for (int i = off; i < off + len; i++) {
             int b = buf[i] & 0xff;
             if (b == '\n') {
-                String line = rawLineBuffer.toString();
-                rawLineBuffer.setLength(0);
+                flushCurrentThreadBuffer();
+                String line = rawLineBuffer.toString(CHARSET);
+                rawLineBuffer.reset();
                 emit(line);
             } else if (b != '\r') {
-                rawLineBuffer.append((char) b);
+                rawLineBuffer.write(b);
             }
         }
     }
@@ -403,21 +410,29 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
     }
 
     /**
-     * Flushes any buffered output and restores the original {@code System.err} stream.
-     * Called automatically by Spring when the application context is closed.
+     * Flushes any buffered output for the <em>current thread</em> and any stale or orphaned
+     * per-thread buffers.  Active buffers owned by other threads that are still in the middle
+     * of a {@code printStackTrace} call are intentionally left untouched to avoid splitting
+     * a single exception into multiple log events.  Call {@link #flushAllPendingBuffers()}
+     * only after writes have been gated (e.g. during {@link #destroy()}).
      */
     @Override
     public synchronized void flush() {
         flushCurrentThreadBuffer();
-        flushAllPendingBuffers();
-        if (rawLineBuffer.length() > 0) {
-            String line = rawLineBuffer.toString();
-            rawLineBuffer.setLength(0);
+        flushStalePendingBuffers();
+        if (rawLineBuffer.size() > 0) {
+            String line = rawLineBuffer.toString(CHARSET);
+            rawLineBuffer.reset();
             emit(line);
         }
         super.flush();
     }
 
+    /**
+     * Gates new writes, drains all pending buffers, and restores the original
+     * {@code System.err} stream.  Called automatically by Spring when the
+     * application context is closed.
+     */
     @Override
     public void destroy() {
         destroying = true;
@@ -431,7 +446,10 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
                 Thread.currentThread().interrupt();
             }
         }
+        // flush() only drains current-thread and stale buffers; once destroying=true gates
+        // all new writes it is safe to drain every remaining buffer unconditionally.
         flush();
+        flushAllPendingBuffers();
         System.setErr(originalSystemErr);
     }
 }
