@@ -190,8 +190,19 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
         if (isCalledFromPrintStackTrace()) {
             ensureSchedulerStarted();
             PendingBuffer buf = pendingBuffers.computeIfAbsent(currentThread, t -> new PendingBuffer());
+            String previousTrace = null;
             synchronized (buf) {
+                // A non-body line while the buffer is non-empty is the header of a new
+                // printStackTrace call.  Flush the previous trace immediately so each call
+                // produces its own log event without waiting for the stale-age timeout.
+                if (!buf.lines.isEmpty() && !isStackTraceBodyLine(l)) {
+                    previousTrace = buildMessage(buf.lines, buf.lines.size());
+                    buf.lines.clear();
+                }
                 buf.lines.add(new TimestampedLine(l, System.nanoTime()));
+            }
+            if (previousTrace != null) {
+                emit(previousTrace);
             }
         } else {
             flushCurrentThreadBuffer();

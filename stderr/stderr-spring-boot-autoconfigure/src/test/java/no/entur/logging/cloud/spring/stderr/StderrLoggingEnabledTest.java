@@ -181,19 +181,18 @@ public class StderrLoggingEnabledTest {
 
     @Test
     public void testRepeatedPrintStackTraceOnSameThreadFlushedAsSeparateEvents() throws InterruptedException {
-        // Two printStackTrace calls on the same thread: the first trace's lines grow stale
-        // before the second trace is printed.  The background flusher must emit them as two
-        // separate log events, not combine them into one.
+        // Two back-to-back printStackTrace calls on the same thread.  When the header line of
+        // the second trace arrives it is detected as a new-trace start and the first trace is
+        // flushed synchronously – no artificial delay is needed.
         Thread worker = new Thread(() -> {
             new RuntimeException("repeated-ex-1").printStackTrace();
-            // Pause long enough for the first trace's lines to exceed STALE_BUFFER_AGE_MS.
-            try { Thread.sleep(SystemErrToSlf4jPrintStream.STALE_BUFFER_AGE_MS * 3); } catch (InterruptedException ignored) { }
             new RuntimeException("repeated-ex-2").printStackTrace();
         });
         worker.start();
         worker.join();
 
-        // Allow time for the background flusher to drain the remaining buffer.
+        // The first trace is flushed synchronously when the second trace starts.
+        // The second trace is flushed by the background stale-flusher after the thread exits.
         long deadline = System.currentTimeMillis() + 3_000L;
         while (listAppender.list.size() < 2 && System.currentTimeMillis() < deadline) {
             Thread.sleep(50);
