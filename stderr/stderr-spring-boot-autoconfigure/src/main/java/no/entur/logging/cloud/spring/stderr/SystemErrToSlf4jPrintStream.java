@@ -9,7 +9,9 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -31,10 +33,11 @@ import java.util.concurrent.TimeUnit;
  *
  * <h2>Automatic flush of pending buffers</h2>
  * <p>A background daemon thread polls every {@value #FLUSHER_INTERVAL_MS} ms and flushes any
- * per-thread buffer whose owning thread has terminated or whose last append is older than
- * {@value #STALE_BUFFER_AGE_MS} ms.  This ensures that stack traces written by short-lived
- * threads (e.g. worker threads that exit after an exception) are always emitted even when no
- * subsequent write to {@code System.err} occurs on that thread.
+ * per-thread buffer lines that are older than {@value #STALE_BUFFER_AGE_MS} ms or whose owning
+ * thread has terminated.  Each line is stored with its own append timestamp, so consecutive
+ * {@code printStackTrace} calls on the same thread are flushed independently: once the lines
+ * from the first trace grow stale they are emitted as a single log statement even while newer
+ * lines from a second trace are still accumulating in the same buffer.
  *
  * <h2>Thread safety</h2>
  * <p>Stack-trace accumulation uses a {@link ConcurrentHashMap} keyed on the owning
@@ -97,15 +100,28 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
     private final ByteArrayOutputStream rawLineBuffer = new ByteArrayOutputStream(512);
 
     /**
-     * Mutable container for a pending stack-trace accumulation buffer together with the
-     * timestamp of the last line appended to it.  Access to {@code content} must be guarded by
-     * {@code synchronized} on {@code this} instance.  {@code lastAppendNanos} is {@code volatile}
-     * so the background flusher can read it without holding the lock (the staleness check is
-     * approximate and a torn read would only cause a one-poll delay at worst).
+     * One line produced by {@link Throwable#printStackTrace(PrintStream)}, together with the
+     * nanosecond timestamp at which it was appended to the buffer.
+     */
+    private static final class TimestampedLine {
+        final String line;
+        final long appendNanos;
+
+        TimestampedLine(String line, long appendNanos) {
+            this.line = line;
+            this.appendNanos = appendNanos;
+        }
+    }
+
+    /**
+     * Mutable container for lines accumulated from one or more consecutive
+     * {@link Throwable#printStackTrace} calls on the same thread.  Each line carries its own
+     * append timestamp so that the background flusher can emit only the lines that are old
+     * enough, leaving any still-active trace lines for a subsequent poll.  Access to
+     * {@code lines} must be guarded by {@code synchronized} on {@code this} instance.
      */
     private static final class PendingBuffer {
-        final StringBuilder content = new StringBuilder(4096);
-        volatile long lastAppendNanos = System.nanoTime();
+        final List<TimestampedLine> lines = new ArrayList<>();
     }
 
     /**
@@ -164,9 +180,8 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
         // unambiguous body line – skip the (relatively expensive) stack walk.
         if (existingBuf != null) {
             synchronized (existingBuf) {
-                if (existingBuf.content.length() > 0 && isStackTraceBodyLine(l)) {
-                    existingBuf.content.append('\n').append(l);
-                    existingBuf.lastAppendNanos = System.nanoTime();
+                if (!existingBuf.lines.isEmpty() && isStackTraceBodyLine(l)) {
+                    existingBuf.lines.add(new TimestampedLine(l, System.nanoTime()));
                     return;
                 }
             }
@@ -176,11 +191,7 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
             ensureSchedulerStarted();
             PendingBuffer buf = pendingBuffers.computeIfAbsent(currentThread, t -> new PendingBuffer());
             synchronized (buf) {
-                if (buf.content.length() > 0) {
-                    buf.content.append('\n');
-                }
-                buf.content.append(l);
-                buf.lastAppendNanos = System.nanoTime();
+                buf.lines.add(new TimestampedLine(l, System.nanoTime()));
             }
         } else {
             flushCurrentThreadBuffer();
@@ -291,20 +302,20 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
         if (buf != null) {
             String message;
             synchronized (buf) {
-                if (buf.content.length() == 0) {
+                if (buf.lines.isEmpty()) {
                     return;
                 }
-                message = buf.content.toString();
-                buf.content.setLength(0);
+                message = buildMessage(buf.lines, buf.lines.size());
+                buf.lines.clear();
             }
             emit(message);
         }
     }
 
     /**
-     * Flushes and removes all pending buffers across all threads.  Used by {@link #flush()} to
-     * drain buffers that belong to threads other than the caller (e.g. completed threads whose
-     * buffers were not yet picked up by the background flusher).
+     * Flushes and removes all pending buffers across all threads.  Used by {@link #destroy()}
+     * to drain every remaining buffer after writes have been gated by {@code destroying = true},
+     * guaranteeing that no new lines can be added concurrently.
      */
     private void flushAllPendingBuffers() {
         for (Iterator<Map.Entry<Thread, PendingBuffer>> it = pendingBuffers.entrySet().iterator(); it.hasNext(); ) {
@@ -312,12 +323,12 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
             PendingBuffer buf = entry.getValue();
             String message;
             synchronized (buf) {
-                if (buf.content.length() == 0) {
+                if (buf.lines.isEmpty()) {
                     it.remove();
                     continue;
                 }
-                message = buf.content.toString();
-                buf.content.setLength(0);
+                message = buildMessage(buf.lines, buf.lines.size());
+                buf.lines.clear();
             }
             it.remove();
             emit(message);
@@ -325,8 +336,13 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
     }
 
     /**
-     * Background task: flushes any pending buffer whose owning thread has terminated or whose
-     * last append is older than {@value #STALE_BUFFER_AGE_MS} ms.
+     * Background task: for each pending buffer, emits all leading lines whose individual
+     * append timestamp is older than {@value #STALE_BUFFER_AGE_MS} ms, or all lines if the
+     * owning thread has terminated.  Lines are appended in chronological order, so the oldest
+     * lines are always at the front of the list; scanning stops at the first line that is still
+     * within the staleness window.  This allows the first of two consecutive
+     * {@code printStackTrace} calls on the same thread to be flushed independently once its
+     * lines age out, even while newer lines from the second call are still accumulating.
      */
     private void flushStalePendingBuffers() {
         long now = System.nanoTime();
@@ -334,22 +350,48 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
             Map.Entry<Thread, PendingBuffer> entry = it.next();
             Thread owner = entry.getKey();
             PendingBuffer buf = entry.getValue();
-            boolean stale = !owner.isAlive() || (now - buf.lastAppendNanos) >= STALE_BUFFER_AGE_NS;
-            if (!stale) {
-                continue;
-            }
+            boolean threadDead = !owner.isAlive();
             String message;
             synchronized (buf) {
-                if (buf.content.length() == 0) {
+                if (buf.lines.isEmpty()) {
                     it.remove();
                     continue;
                 }
-                message = buf.content.toString();
-                buf.content.setLength(0);
+                // Count consecutive lines from the front that are old enough to flush.
+                int flushCount = 0;
+                for (TimestampedLine tl : buf.lines) {
+                    if (threadDead || (now - tl.appendNanos) >= STALE_BUFFER_AGE_NS) {
+                        flushCount++;
+                    } else {
+                        break; // Lines are chronological; stop at the first fresh line.
+                    }
+                }
+                if (flushCount == 0) {
+                    continue;
+                }
+                message = buildMessage(buf.lines, flushCount);
+                buf.lines.subList(0, flushCount).clear();
+                if (buf.lines.isEmpty()) {
+                    it.remove();
+                }
             }
-            it.remove();
             emit(message);
         }
+    }
+
+    /**
+     * Joins the first {@code count} lines from {@code lines} into a single newline-delimited
+     * string suitable for passing to {@link #emit(String)}.
+     */
+    private static String buildMessage(List<TimestampedLine> lines, int count) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < count; i++) {
+            if (sb.length() > 0) {
+                sb.append('\n');
+            }
+            sb.append(lines.get(i).line);
+        }
+        return sb.toString();
     }
 
     // -------------------------------------------------------------------------

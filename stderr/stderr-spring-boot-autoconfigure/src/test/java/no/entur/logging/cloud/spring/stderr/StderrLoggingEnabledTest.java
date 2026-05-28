@@ -178,4 +178,34 @@ public class StderrLoggingEnabledTest {
                 .that(listAppender.list.stream().anyMatch(event -> event.getFormattedMessage().contains("destroy-flush-ex")))
                 .isTrue();
     }
+
+    @Test
+    public void testRepeatedPrintStackTraceOnSameThreadFlushedAsSeparateEvents() throws InterruptedException {
+        // Two printStackTrace calls on the same thread: the first trace's lines grow stale
+        // before the second trace is printed.  The background flusher must emit them as two
+        // separate log events, not combine them into one.
+        Thread worker = new Thread(() -> {
+            new RuntimeException("repeated-ex-1").printStackTrace();
+            // Pause long enough for the first trace's lines to exceed STALE_BUFFER_AGE_MS.
+            try { Thread.sleep(SystemErrToSlf4jPrintStream.STALE_BUFFER_AGE_MS * 3); } catch (InterruptedException ignored) { }
+            new RuntimeException("repeated-ex-2").printStackTrace();
+        });
+        worker.start();
+        worker.join();
+
+        // Allow time for the background flusher to drain the remaining buffer.
+        long deadline = System.currentTimeMillis() + 3_000L;
+        while (listAppender.list.size() < 2 && System.currentTimeMillis() < deadline) {
+            Thread.sleep(50);
+        }
+
+        assertWithMessage("Each repeated printStackTrace call must produce its own log event")
+                .that(listAppender.list).hasSize(2);
+        assertWithMessage("First event must contain repeated-ex-1")
+                .that(listAppender.list.stream().anyMatch(e -> e.getFormattedMessage().contains("repeated-ex-1")))
+                .isTrue();
+        assertWithMessage("Second event must contain repeated-ex-2")
+                .that(listAppender.list.stream().anyMatch(e -> e.getFormattedMessage().contains("repeated-ex-2")))
+                .isTrue();
+    }
 }
