@@ -191,8 +191,15 @@ public class StderrLoggingEnabledTest {
         worker.start();
         worker.join();
 
-        // The first trace is flushed synchronously when the second trace starts.
-        // The second trace is flushed by the background stale-flusher after the thread exits.
+        // The first trace must already be present immediately after the worker exits: it was
+        // flushed synchronously inside println() when the header of repeated-ex-2 arrived,
+        // which proves the flush was not deferred to the background stale-flusher.
+        assertWithMessage("First trace must be flushed synchronously before the worker thread exits")
+                .that(listAppender.list.stream().anyMatch(e -> e.getFormattedMessage().contains("repeated-ex-1")))
+                .isTrue();
+
+        // The second trace is still in the buffer when the thread exits; wait for the
+        // background stale-flusher to drain it.
         long deadline = System.currentTimeMillis() + 3_000L;
         while (listAppender.list.size() < 2 && System.currentTimeMillis() < deadline) {
             Thread.sleep(50);
@@ -200,9 +207,6 @@ public class StderrLoggingEnabledTest {
 
         assertWithMessage("Each repeated printStackTrace call must produce its own log event")
                 .that(listAppender.list).hasSize(2);
-        assertWithMessage("First event must contain repeated-ex-1")
-                .that(listAppender.list.stream().anyMatch(e -> e.getFormattedMessage().contains("repeated-ex-1")))
-                .isTrue();
         assertWithMessage("Second event must contain repeated-ex-2")
                 .that(listAppender.list.stream().anyMatch(e -> e.getFormattedMessage().contains("repeated-ex-2")))
                 .isTrue();

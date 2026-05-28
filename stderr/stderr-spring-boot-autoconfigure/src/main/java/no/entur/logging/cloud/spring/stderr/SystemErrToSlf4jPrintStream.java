@@ -167,7 +167,7 @@ public class SystemErrToSlf4jPrintStream extends PrintStream implements Disposab
             originalSystemErr.println(l);
             return;
         }
-        if(l == null) {
+        if (l == null) {
             flushCurrentThreadBuffer();
             emit("null");
             return;
