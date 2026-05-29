@@ -25,3 +25,4 @@ jobs:
       pull-requests: write
       security-events: write
       issues: write
+      packages: read
