@@ -26,6 +26,7 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
     private final Counter errorTellMeTomorrowCounter;
 
     public SystemErrMicrometerPrintStream(MeterRegistry registry, PrintStream originalSystemErr) {
+        // Null output stream avoids double-writing: write() overrides delegate directly to originalSystemErr.
         super(OutputStream.nullOutputStream());
         this.originalSystemErr = originalSystemErr;
 

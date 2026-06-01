@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Verifies that System.err is intercepted and Micrometer counters are incremented when
@@ -50,7 +49,7 @@ public class StderrMicrometerEnabledTest {
     }
 
     @Test
-    public void testMultipleLinesIncrementCountersOnce() {
+    public void testEachLineIncrementsCounters() {
         double errorBefore = getCount("error");
 
         System.err.println("line one");
