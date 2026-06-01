@@ -80,11 +80,13 @@ public class StderrMicrometerEnabledTest {
     }
 
     @Test
-    public void testWriteBytesIncrementsCounters() {
+    @Test
+    public void testWriteByteArraySliceIncrementsCounters() {
         double errorBefore = getCount("error");
         double errorTellMeBefore = getCount("errorTellMeTomorrow");
 
-        systemErrMicrometerPrintStream.writeBytes("line via writeBytes\n".getBytes());
+        byte[] bytes = "line via write(byte[],off,len)\n".getBytes();
+        systemErrMicrometerPrintStream.write(bytes, 0, bytes.length);
 
         assertThat(getCount("error")).isEqualTo(errorBefore + 1.0);
         assertThat(getCount("errorTellMeTomorrow")).isEqualTo(errorTellMeBefore + 1.0);
