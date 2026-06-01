@@ -31,7 +31,7 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
     private final Counter errorTellMeTomorrowCounter;
 
     public SystemErrMicrometerPrintStream(MeterRegistry registry, PrintStream originalSystemErr) {
-        super(originalSystemErr);
+        super(originalSystemErr, true);
         this.originalSystemErr = originalSystemErr;
 
         this.errorCounter = Counter.builder("logback.events")
