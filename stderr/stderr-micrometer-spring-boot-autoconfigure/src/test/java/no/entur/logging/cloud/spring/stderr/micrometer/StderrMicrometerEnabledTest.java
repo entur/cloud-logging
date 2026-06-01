@@ -68,6 +68,15 @@ public class StderrMicrometerEnabledTest {
         assertThat(getCount("error")).isEqualTo(errorBefore);
     }
 
+    @Test
+    public void testWriteBytesIncrementsCounters() {
+        double errorBefore = getCount("error");
+
+        systemErrMicrometerPrintStream.writeBytes("line via writeBytes\n".getBytes());
+
+        assertThat(getCount("error")).isEqualTo(errorBefore + 1.0);
+    }
+
     private double getCount(String level) {
         Collection<Counter> counters = meterRegistry.find("logback.events").counters();
         Optional<Counter> counter = counters.stream()

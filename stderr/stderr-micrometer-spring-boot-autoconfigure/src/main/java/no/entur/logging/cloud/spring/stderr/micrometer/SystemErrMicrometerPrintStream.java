@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.DisposableBean;
 
-import java.io.OutputStream;
 import java.io.PrintStream;
 
 /**
@@ -15,7 +14,11 @@ import java.io.PrintStream;
  * {@code DevOpsMetricsTurboFilter} so that stderr lines are counted alongside regular
  * log-level events in existing dashboards.
  *
- * <p>All bytes are forwarded to the original {@code System.err} PrintStream unchanged.
+ * <p>All bytes are forwarded to the original {@code System.err} PrintStream unchanged via the
+ * superclass. Only {@link #write(int)} and {@link #write(byte[], int, int)} need to be overridden
+ * because all other {@link java.io.PrintStream} write paths ({@code print}, {@code println},
+ * {@code format}, {@code writeBytes}, {@code write(byte[])}, etc.) ultimately delegate to one of
+ * these two methods via virtual dispatch.
  *
  * <p>Restores the original {@code System.err} when {@link #destroy()} is called.
  */
@@ -26,8 +29,7 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
     private final Counter errorTellMeTomorrowCounter;
 
     public SystemErrMicrometerPrintStream(MeterRegistry registry, PrintStream originalSystemErr) {
-        // Null output stream avoids double-writing: write() overrides delegate directly to originalSystemErr.
-        super(OutputStream.nullOutputStream());
+        super(originalSystemErr);
         this.originalSystemErr = originalSystemErr;
 
         this.errorCounter = Counter.builder("logback.events")
@@ -45,7 +47,7 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
 
     @Override
     public void write(int b) {
-        originalSystemErr.write(b);
+        super.write(b);
         if (b == '\n') {
             errorCounter.increment();
             errorTellMeTomorrowCounter.increment();
@@ -54,7 +56,7 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
 
     @Override
     public void write(byte[] b, int off, int len) {
-        originalSystemErr.write(b, off, len);
+        super.write(b, off, len);
         int newlines = 0;
         for (int i = off; i < off + len; i++) {
             if (b[i] == '\n') {
@@ -65,16 +67,6 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
             errorCounter.increment(newlines);
             errorTellMeTomorrowCounter.increment(newlines);
         }
-    }
-
-    @Override
-    public void flush() {
-        originalSystemErr.flush();
-    }
-
-    @Override
-    public void close() {
-        originalSystemErr.close();
     }
 
     @Override

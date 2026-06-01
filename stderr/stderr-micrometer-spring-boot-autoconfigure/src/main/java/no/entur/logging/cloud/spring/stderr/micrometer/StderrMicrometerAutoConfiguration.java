@@ -15,13 +15,17 @@ import org.springframework.context.annotation.Bean;
  * <p>Activated by default when a {@link MeterRegistry} bean is present; can be disabled by
  * setting {@code entur.logging.stderr.micrometer.enabled=false}.
  */
-@AutoConfiguration
+@AutoConfiguration(afterName = {
+        "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsAutoConfiguration",
+        "org.springframework.boot.micrometer.metrics.autoconfigure.CompositeMeterRegistryAutoConfiguration",
+        "org.springframework.boot.micrometer.metrics.autoconfigure.export.simple.SimpleMetricsExportAutoConfiguration"
+})
 @ConditionalOnProperty(name = "entur.logging.stderr.micrometer.enabled", havingValue = "true", matchIfMissing = true)
-@ConditionalOnBean(MeterRegistry.class)
 @EnableConfigurationProperties(StderrMicrometerProperties.class)
 public class StderrMicrometerAutoConfiguration {
 
     @Bean
+    @ConditionalOnBean(MeterRegistry.class)
     @ConditionalOnMissingBean(SystemErrMicrometerPrintStream.class)
     public SystemErrMicrometerPrintStream systemErrMicrometerPrintStream(MeterRegistry registry) {
         SystemErrMicrometerPrintStream printStream = new SystemErrMicrometerPrintStream(registry, System.err);
