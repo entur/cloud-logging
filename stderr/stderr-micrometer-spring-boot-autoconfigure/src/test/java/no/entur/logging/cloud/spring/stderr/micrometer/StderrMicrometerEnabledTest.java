@@ -69,7 +69,7 @@ public class StderrMicrometerEnabledTest {
     }
 
     @Test
-    public void testWriteByteArrayIncrementsCounters() throws Exception {
+    public void testWriteByteArrayIncrementsCounters() {
         double errorBefore = getCount("error");
         double errorTellMeBefore = getCount("errorTellMeTomorrow");
 

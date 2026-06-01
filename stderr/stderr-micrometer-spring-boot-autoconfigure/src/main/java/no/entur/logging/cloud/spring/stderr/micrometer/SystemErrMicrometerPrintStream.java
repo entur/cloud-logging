@@ -72,7 +72,7 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
     }
 
     @Override
-    public void write(byte[] b) throws java.io.IOException {
+    public void write(byte[] b) {
         write(b, 0, b.length);
     }
 
