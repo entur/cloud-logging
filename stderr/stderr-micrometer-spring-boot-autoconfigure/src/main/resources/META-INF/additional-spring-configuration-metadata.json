@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "entur.logging.stderr.micrometer.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Whether to intercept System.err output and update Micrometer counters."
+    }
+  ]
+}
