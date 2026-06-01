@@ -80,7 +80,6 @@ public class StderrMicrometerEnabledTest {
     }
 
     @Test
-    @Test
     public void testWriteByteArraySliceIncrementsCounters() {
         double errorBefore = getCount("error");
         double errorTellMeBefore = getCount("errorTellMeTomorrow");
