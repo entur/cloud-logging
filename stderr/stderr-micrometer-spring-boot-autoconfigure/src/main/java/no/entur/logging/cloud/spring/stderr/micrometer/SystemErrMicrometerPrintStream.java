@@ -36,7 +36,7 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
 
         this.errorCounter = Counter.builder("logback.events")
                 .tags("level", "error")
-                .description("Number of all error level events that made it to the logs")
+                .description("Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)")
                 .baseUnit("events")
                 .register(registry);
 
