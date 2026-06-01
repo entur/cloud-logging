@@ -71,10 +71,12 @@ public class StderrMicrometerEnabledTest {
     @Test
     public void testWriteBytesIncrementsCounters() {
         double errorBefore = getCount("error");
+        double errorTellMeBefore = getCount("errorTellMeTomorrow");
 
         systemErrMicrometerPrintStream.writeBytes("line via writeBytes\n".getBytes());
 
         assertThat(getCount("error")).isEqualTo(errorBefore + 1.0);
+        assertThat(getCount("errorTellMeTomorrow")).isEqualTo(errorTellMeBefore + 1.0);
     }
 
     private double getCount(String level) {
