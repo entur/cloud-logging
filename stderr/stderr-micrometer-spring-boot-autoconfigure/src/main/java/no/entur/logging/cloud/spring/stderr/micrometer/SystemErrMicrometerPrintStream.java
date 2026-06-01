@@ -15,10 +15,12 @@ import java.io.PrintStream;
  * log-level events in existing dashboards.
  *
  * <p>All bytes are forwarded to the original {@code System.err} PrintStream unchanged via the
- * superclass. Only {@link #write(int)} and {@link #write(byte[], int, int)} need to be overridden
- * because all other {@link java.io.PrintStream} write paths ({@code print}, {@code println},
- * {@code format}, {@code writeBytes}, {@code write(byte[])}, etc.) ultimately delegate to one of
- * these two methods via virtual dispatch.
+ * superclass. The following methods are overridden to intercept all possible write paths:
+ * {@link #write(int)}, {@link #write(byte[], int, int)}, and {@link #write(byte[])}.
+ * All higher-level {@link java.io.PrintStream} paths ({@code print}, {@code println},
+ * {@code format}, {@code printf}, {@code writeBytes}, etc.) ultimately route through one of
+ * these three methods, either via the internal {@code charOut = new OutputStreamWriter(this)}
+ * chain (for character-based methods) or via direct delegation (for {@code writeBytes}).
  *
  * <p>Restores the original {@code System.err} when {@link #destroy()} is called.
  */
@@ -67,6 +69,11 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
             errorCounter.increment(newlines);
             errorTellMeTomorrowCounter.increment(newlines);
         }
+    }
+
+    @Override
+    public void write(byte[] b) throws java.io.IOException {
+        write(b, 0, b.length);
     }
 
     @Override
