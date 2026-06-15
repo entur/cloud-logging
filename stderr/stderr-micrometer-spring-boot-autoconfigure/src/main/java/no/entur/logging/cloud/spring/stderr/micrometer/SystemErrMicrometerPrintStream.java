@@ -42,8 +42,8 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
     public void write(int b) {
         super.write(b);
         if (b == '\n') {
-            errorCount.increment();
-            errorTellMeTomorrowCount.increment();
+            errorCount.accept(1L);
+            errorTellMeTomorrowCount.accept(1L);
         }
     }
 
@@ -57,8 +57,8 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
             }
         }
         if (newlines > 0) {
-            errorCount.add(newlines);
-            errorTellMeTomorrowCount.add(newlines);
+            errorCount.accept(newlines);
+            errorTellMeTomorrowCount.accept(newlines);
         }
     }
 
