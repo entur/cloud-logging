@@ -1,22 +1,23 @@
 package no.entur.logging.cloud.micrometer;
 
-import io.micrometer.core.instrument.FunctionCounter;
+import io.micrometer.core.instrument.Measurement;
+import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Statistic;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import no.entur.logging.cloud.api.DevOpsLogger;
 import no.entur.logging.cloud.api.DevOpsLoggerFactory;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DevOpsLogbackMetricsTest {
 
 	private static DevOpsLogger log = DevOpsLoggerFactory.getLogger(DevOpsLogbackMetricsTest.class);
-	
+
 	@Test
 	public void givenGlobalRegistry_whenLogging_thenCounted() {
 		SimpleMeterRegistry oneSimpleMeter = new SimpleMeterRegistry();
@@ -25,7 +26,7 @@ public class DevOpsLogbackMetricsTest {
 		DevOpsLogbackMetrics m = new DevOpsLogbackMetrics();
 
 	    m.bindTo(oneSimpleMeter);
-	    
+
 	    log.errorTellMeTomorrow("Error statement");
 	    log.errorWakeMeUpRightNow("Alert statement");
 	    log.errorWakeMeUpRightNow("Alert statement");
@@ -33,18 +34,17 @@ public class DevOpsLogbackMetricsTest {
 	    log.errorInterruptMyDinner("Critical statement");
 	    log.errorInterruptMyDinner("Critical statement");
 
-	    Collection<FunctionCounter> counters = oneSimpleMeter.find("logback.events").functionCounters();
+	    assertThat(getCount(oneSimpleMeter, "logback.events", "level", "errorTellMeTomorrow")).isEqualTo(1.0);
+	    assertThat(getCount(oneSimpleMeter, "logback.events", "level", "errorWakeMeUpRightNow")).isEqualTo(2.0);
+	    assertThat(getCount(oneSimpleMeter, "logback.events", "level", "errorInterruptMyDinner")).isEqualTo(3.0);
+	}
 
-	    Optional<FunctionCounter> error = counters.stream().filter(counter -> counter.getId().getTag("level").equals("errorTellMeTomorrow")).findAny();
-	    assertTrue(error.isPresent());
-	    assertThat(error.get().count()).isEqualTo(1.0);
-	    
-	    Optional<FunctionCounter> alert = counters.stream().filter(counter -> counter.getId().getTag("level").equals("errorWakeMeUpRightNow")).findAny();
-	    assertTrue(alert.isPresent());
-	    assertThat(alert.get().count()).isEqualTo(2.0);
-
-	    Optional<FunctionCounter> critical = counters.stream().filter(counter -> counter.getId().getTag("level").equals("errorInterruptMyDinner")).findAny();
-	    assertTrue(critical.isPresent());
-	    assertThat(critical.get().count()).isEqualTo(3.0);
+	private double getCount(SimpleMeterRegistry registry, String metricName, String tagKey, String tagValue) {
+		Optional<Meter> meter = registry.find(metricName).tag(tagKey, tagValue).meters().stream().findAny();
+		if (meter.isEmpty()) return 0.0;
+		return StreamSupport.stream(meter.get().measure().spliterator(), false)
+				.filter(ms -> ms.getStatistic() == Statistic.COUNT)
+				.mapToDouble(Measurement::getValue)
+				.sum();
 	}
 }

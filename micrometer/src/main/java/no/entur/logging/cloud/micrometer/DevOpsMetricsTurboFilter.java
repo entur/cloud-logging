@@ -5,7 +5,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
-import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import no.entur.logging.cloud.api.DevOpsLevel;
@@ -13,77 +12,52 @@ import no.entur.logging.cloud.api.DevOpsMarker;
 import org.slf4j.Marker;
 
 import java.util.List;
-import java.util.concurrent.atomic.LongAdder;
 
 public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
 
-    protected final LongAdder errorWakeMeUpRightNowCount;
-    protected final LongAdder errorInterruptMyDinnerCount;
-    protected final LongAdder errorTellMeTomorrowCount;
+    protected final CompatibleCounter errorWakeMeUpRightNowCount;
+    protected final CompatibleCounter errorInterruptMyDinnerCount;
+    protected final CompatibleCounter errorTellMeTomorrowCount;
 
-    protected final LongAdder errorCount; // alias for all errors / backwards compatibility
+    protected final CompatibleCounter errorCount; // alias for all errors / backwards compatibility
 
-    protected final LongAdder warnCount;
-    protected final LongAdder infoCount;
-    protected final LongAdder debugCount;
-    protected final LongAdder traceCount;
+    protected final CompatibleCounter warnCount;
+    protected final CompatibleCounter infoCount;
+    protected final CompatibleCounter debugCount;
+    protected final CompatibleCounter traceCount;
 
     public DevOpsMetricsTurboFilter(MeterRegistry registry, Iterable<Tag> tags) {
-        errorWakeMeUpRightNowCount = new LongAdder();
-        FunctionCounter.builder("logback.events", errorWakeMeUpRightNowCount, LongAdder::doubleValue)
-                .tags(tags).tags("level", "errorWakeMeUpRightNow")
-                .description("Number of error 'Wake Me Up Right Now' level events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        errorWakeMeUpRightNowCount = CompatibleCounter.register("logback.events", registry, tags,
+                "level", "errorWakeMeUpRightNow",
+                "Number of error 'Wake Me Up Right Now' level events that made it to the logs");
 
-        errorInterruptMyDinnerCount = new LongAdder();
-        FunctionCounter.builder("logback.events", errorInterruptMyDinnerCount, LongAdder::doubleValue)
-                .tags(tags).tags("level", "errorInterruptMyDinner")
-                .description("Number of error 'Interrupt My Dinner' level events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        errorInterruptMyDinnerCount = CompatibleCounter.register("logback.events", registry, tags,
+                "level", "errorInterruptMyDinner",
+                "Number of error 'Interrupt My Dinner' level events that made it to the logs");
 
-        errorTellMeTomorrowCount = new LongAdder();
-        FunctionCounter.builder("logback.events", errorTellMeTomorrowCount, LongAdder::doubleValue)
-                .tags(tags).tags("level", "errorTellMeTomorrow")
-                .description("Number of error 'Tell Me Tomorrow' level events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        errorTellMeTomorrowCount = CompatibleCounter.register("logback.events", registry, tags,
+                "level", "errorTellMeTomorrow",
+                "Number of error 'Tell Me Tomorrow' level events that made it to the logs");
 
-        errorCount = new LongAdder();
-        FunctionCounter.builder("logback.events", errorCount, LongAdder::doubleValue)
-                .tags(tags).tags("level", "error")
-                .description("Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)")
-                .baseUnit("events")
-                .register(registry);
+        errorCount = CompatibleCounter.register("logback.events", registry, tags,
+                "level", "error",
+                "Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)");
 
-        warnCount = new LongAdder();
-        FunctionCounter.builder("logback.events", warnCount, LongAdder::doubleValue)
-                .tags(tags).tags("level", "warn")
-                .description("Number of warn level events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        warnCount = CompatibleCounter.register("logback.events", registry, tags,
+                "level", "warn",
+                "Number of warn level events that made it to the logs");
 
-        infoCount = new LongAdder();
-        FunctionCounter.builder("logback.events", infoCount, LongAdder::doubleValue)
-                .tags(tags).tags("level", "info")
-                .description("Number of info level events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        infoCount = CompatibleCounter.register("logback.events", registry, tags,
+                "level", "info",
+                "Number of info level events that made it to the logs");
 
-        debugCount = new LongAdder();
-        FunctionCounter.builder("logback.events", debugCount, LongAdder::doubleValue)
-                .tags(tags).tags("level", "debug")
-                .description("Number of debug level events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        debugCount = CompatibleCounter.register("logback.events", registry, tags,
+                "level", "debug",
+                "Number of debug level events that made it to the logs");
 
-        traceCount = new LongAdder();
-        FunctionCounter.builder("logback.events", traceCount, LongAdder::doubleValue)
-                .tags(tags).tags("level", "trace")
-                .description("Number of trace level events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        traceCount = CompatibleCounter.register("logback.events", registry, tags,
+                "level", "trace",
+                "Number of trace level events that made it to the logs");
     }
 
     @Override
@@ -203,7 +177,6 @@ public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEven
             }
         }
     }
-
 
     public void increment(DevOpsLevel severity, int amount) {
         switch (severity) {

@@ -1,11 +1,14 @@
 package no.entur.logging.cloud.spring.stderr.micrometer;
 
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.boot.SpringBootVersion;
 
 import java.io.PrintStream;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.LongConsumer;
 
 /**
  * A {@link PrintStream} that intercepts all output written to {@code System.err} and increments
@@ -27,35 +30,72 @@ import java.util.concurrent.atomic.LongAdder;
  */
 public class SystemErrMicrometerPrintStream extends PrintStream implements DisposableBean {
 
+    private static final boolean USE_FUNCTION_COUNTER = isSpringBoot41OrNewer();
+
+    private static boolean isSpringBoot41OrNewer() {
+        String version = SpringBootVersion.getVersion();
+        if (version == null) {
+            return true;
+        }
+        String[] parts = version.split("\\.");
+        int major = Integer.parseInt(parts[0]);
+        int minor = Integer.parseInt(parts[1]);
+        return major > 4 || (major == 4 && minor >= 1);
+    }
+
     private final PrintStream originalSystemErr;
-    private final LongAdder errorCount;
-    private final LongAdder errorTellMeTomorrowCount;
+    private final Runnable incError;
+    private final LongConsumer addError;
+    private final Runnable incErrorTellMeTomorrow;
+    private final LongConsumer addErrorTellMeTomorrow;
 
     public SystemErrMicrometerPrintStream(MeterRegistry registry, PrintStream originalSystemErr) {
         super(originalSystemErr, true);
         this.originalSystemErr = originalSystemErr;
 
-        errorCount = new LongAdder();
-        FunctionCounter.builder("logback.events", errorCount, LongAdder::doubleValue)
-                .tags("level", "error")
-                .description("Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)")
-                .baseUnit("events")
-                .register(registry);
+        if (USE_FUNCTION_COUNTER) {
+            LongAdder errorAdder = new LongAdder();
+            FunctionCounter.builder("logback.events", errorAdder, LongAdder::doubleValue)
+                    .tags("level", "error")
+                    .description("Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)")
+                    .baseUnit("events")
+                    .register(registry);
+            incError = errorAdder::increment;
+            addError = errorAdder::add;
 
-        errorTellMeTomorrowCount = new LongAdder();
-        FunctionCounter.builder("logback.events", errorTellMeTomorrowCount, LongAdder::doubleValue)
-                .tags("level", "errorTellMeTomorrow")
-                .description("Number of error 'Tell Me Tomorrow' level events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+            LongAdder errorTellMeTomorrowAdder = new LongAdder();
+            FunctionCounter.builder("logback.events", errorTellMeTomorrowAdder, LongAdder::doubleValue)
+                    .tags("level", "errorTellMeTomorrow")
+                    .description("Number of error 'Tell Me Tomorrow' level events that made it to the logs")
+                    .baseUnit("events")
+                    .register(registry);
+            incErrorTellMeTomorrow = errorTellMeTomorrowAdder::increment;
+            addErrorTellMeTomorrow = errorTellMeTomorrowAdder::add;
+        } else {
+            Counter errorCounter = Counter.builder("logback.events")
+                    .tags("level", "error")
+                    .description("Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)")
+                    .baseUnit("events")
+                    .register(registry);
+            incError = errorCounter::increment;
+            addError = amount -> errorCounter.increment((double) amount);
+
+            Counter errorTellMeTomorrowCounter = Counter.builder("logback.events")
+                    .tags("level", "errorTellMeTomorrow")
+                    .description("Number of error 'Tell Me Tomorrow' level events that made it to the logs")
+                    .baseUnit("events")
+                    .register(registry);
+            incErrorTellMeTomorrow = errorTellMeTomorrowCounter::increment;
+            addErrorTellMeTomorrow = amount -> errorTellMeTomorrowCounter.increment((double) amount);
+        }
     }
 
     @Override
     public void write(int b) {
         super.write(b);
         if (b == '\n') {
-            errorCount.increment();
-            errorTellMeTomorrowCount.increment();
+            incError.run();
+            incErrorTellMeTomorrow.run();
         }
     }
 
@@ -69,8 +109,8 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
             }
         }
         if (newlines > 0) {
-            errorCount.add(newlines);
-            errorTellMeTomorrowCount.add(newlines);
+            addError.accept(newlines);
+            addErrorTellMeTomorrow.accept(newlines);
         }
     }
 
@@ -86,3 +126,4 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
         }
     }
 }
+

@@ -5,78 +5,56 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
-import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import no.entur.logging.cloud.api.DevOpsLevel;
 import no.entur.logging.cloud.api.DevOpsMarker;
+import no.entur.logging.cloud.micrometer.CompatibleCounter;
 import no.entur.logging.cloud.micrometer.LoggingEventMetrics;
 import org.slf4j.Marker;
 
 import java.util.List;
-import java.util.concurrent.atomic.LongAdder;
 
 public class StackdriverMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
 
-    protected final LongAdder alertCount;
-    protected final LongAdder criticalCount;
-    protected final LongAdder errorCount;
-    protected final LongAdder warnCount;
-    protected final LongAdder infoCount;
-    protected final LongAdder debugCount;
-    protected final LongAdder defaultCount;
+    protected final CompatibleCounter alertCount;
+    protected final CompatibleCounter criticalCount;
+    protected final CompatibleCounter errorCount;
+    protected final CompatibleCounter warnCount;
+    protected final CompatibleCounter infoCount;
+    protected final CompatibleCounter debugCount;
+    protected final CompatibleCounter defaultCount;
 
     public StackdriverMetricsTurboFilter(MeterRegistry registry, Iterable<Tag> tags) {
         // emergency level is not in use
 
-        alertCount = new LongAdder();
-        FunctionCounter.builder("logback.gcp.events", alertCount, LongAdder::doubleValue)
-                .tags(tags).tags("severity", "alert")
-                .description("Number of alert severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        alertCount = CompatibleCounter.register("logback.gcp.events", registry, tags,
+                "severity", "alert",
+                "Number of alert severity events that made it to the logs");
 
-        criticalCount = new LongAdder();
-        FunctionCounter.builder("logback.gcp.events", criticalCount, LongAdder::doubleValue)
-                .tags(tags).tags("severity", "critical")
-                .description("Number of critical severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        criticalCount = CompatibleCounter.register("logback.gcp.events", registry, tags,
+                "severity", "critical",
+                "Number of critical severity events that made it to the logs");
 
-        errorCount = new LongAdder();
-        FunctionCounter.builder("logback.gcp.events", errorCount, LongAdder::doubleValue)
-                .tags(tags).tags("severity", "error")
-                .description("Number of error severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        errorCount = CompatibleCounter.register("logback.gcp.events", registry, tags,
+                "severity", "error",
+                "Number of error severity events that made it to the logs");
 
-        warnCount = new LongAdder();
-        FunctionCounter.builder("logback.gcp.events", warnCount, LongAdder::doubleValue)
-                .tags(tags).tags("severity", "warning")
-                .description("Number of warn severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        warnCount = CompatibleCounter.register("logback.gcp.events", registry, tags,
+                "severity", "warning",
+                "Number of warn severity events that made it to the logs");
 
-        infoCount = new LongAdder();
-        FunctionCounter.builder("logback.gcp.events", infoCount, LongAdder::doubleValue)
-                .tags(tags).tags("severity", "info")
-                .description("Number of info severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        infoCount = CompatibleCounter.register("logback.gcp.events", registry, tags,
+                "severity", "info",
+                "Number of info severity events that made it to the logs");
 
-        debugCount = new LongAdder();
-        FunctionCounter.builder("logback.gcp.events", debugCount, LongAdder::doubleValue)
-                .tags(tags).tags("severity", "debug")
-                .description("Number of debug severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        debugCount = CompatibleCounter.register("logback.gcp.events", registry, tags,
+                "severity", "debug",
+                "Number of debug severity events that made it to the logs");
 
-        defaultCount = new LongAdder();
-        FunctionCounter.builder("logback.gcp.events", defaultCount, LongAdder::doubleValue)
-                .tags(tags).tags("severity", "default")
-                .description("Number of default severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        defaultCount = CompatibleCounter.register("logback.gcp.events", registry, tags,
+                "severity", "default",
+                "Number of default severity events that made it to the logs");
     }
 
     @Override
@@ -229,3 +207,4 @@ public class StackdriverMetricsTurboFilter extends TurboFilter implements Loggin
         }
     }
 }
+

@@ -5,79 +5,57 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
-import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import no.entur.logging.cloud.api.DevOpsLevel;
 import no.entur.logging.cloud.api.DevOpsMarker;
-import org.slf4j.Marker;
+import no.entur.logging.cloud.micrometer.CompatibleCounter;
 import no.entur.logging.cloud.micrometer.LoggingEventMetrics;
+import org.slf4j.Marker;
 
 import java.util.List;
-import java.util.concurrent.atomic.LongAdder;
 
 
 public class AzureMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
 
-    private final LongAdder alertCount;
-    private final LongAdder criticalCount;
-    private final LongAdder errorCount;
-    private final LongAdder warnCount;
-    private final LongAdder infoCount;
-    private final LongAdder debugCount;
-    private final LongAdder defaultCount;
+    private final CompatibleCounter alertCount;
+    private final CompatibleCounter criticalCount;
+    private final CompatibleCounter errorCount;
+    private final CompatibleCounter warnCount;
+    private final CompatibleCounter infoCount;
+    private final CompatibleCounter debugCount;
+    private final CompatibleCounter defaultCount;
 
     public AzureMetricsTurboFilter(MeterRegistry registry, Iterable<Tag> tags) {
         // emergency level is not in use
 
-        alertCount = new LongAdder();
-        FunctionCounter.builder("logback.azure.events", alertCount, LongAdder::doubleValue)
-                .tags(tags).tags("severity", "alert")
-                .description("Number of alert severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        alertCount = CompatibleCounter.register("logback.azure.events", registry, tags,
+                "severity", "alert",
+                "Number of alert severity events that made it to the logs");
 
-        criticalCount = new LongAdder();
-        FunctionCounter.builder("logback.azure.events", criticalCount, LongAdder::doubleValue)
-                .tags(tags).tags("severity", "critical")
-                .description("Number of critical severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        criticalCount = CompatibleCounter.register("logback.azure.events", registry, tags,
+                "severity", "critical",
+                "Number of critical severity events that made it to the logs");
 
-        errorCount = new LongAdder();
-        FunctionCounter.builder("logback.azure.events", errorCount, LongAdder::doubleValue)
-                .tags(tags).tags("severity", "error")
-                .description("Number of error severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        errorCount = CompatibleCounter.register("logback.azure.events", registry, tags,
+                "severity", "error",
+                "Number of error severity events that made it to the logs");
 
-        warnCount = new LongAdder();
-        FunctionCounter.builder("logback.azure.events", warnCount, LongAdder::doubleValue)
-                .tags(tags).tags("severity", "warning")
-                .description("Number of warn severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        warnCount = CompatibleCounter.register("logback.azure.events", registry, tags,
+                "severity", "warning",
+                "Number of warn severity events that made it to the logs");
 
-        infoCount = new LongAdder();
-        FunctionCounter.builder("logback.azure.events", infoCount, LongAdder::doubleValue)
-                .tags(tags).tags("severity", "info")
-                .description("Number of info severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        infoCount = CompatibleCounter.register("logback.azure.events", registry, tags,
+                "severity", "info",
+                "Number of info severity events that made it to the logs");
 
-        debugCount = new LongAdder();
-        FunctionCounter.builder("logback.azure.events", debugCount, LongAdder::doubleValue)
-                .tags(tags).tags("severity", "debug")
-                .description("Number of debug severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        debugCount = CompatibleCounter.register("logback.azure.events", registry, tags,
+                "severity", "debug",
+                "Number of debug severity events that made it to the logs");
 
-        defaultCount = new LongAdder();
-        FunctionCounter.builder("logback.azure.events", defaultCount, LongAdder::doubleValue)
-                .tags(tags).tags("severity", "default")
-                .description("Number of default severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        defaultCount = CompatibleCounter.register("logback.azure.events", registry, tags,
+                "severity", "default",
+                "Number of default severity events that made it to the logs");
     }
 
     @Override
@@ -194,3 +172,4 @@ public class AzureMetricsTurboFilter extends TurboFilter implements LoggingEvent
         }
     }
 }
+

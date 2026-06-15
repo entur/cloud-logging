@@ -8,6 +8,8 @@ dependencies {
     api("org.slf4j:slf4j-api")
     api ("io.micrometer:micrometer-core")
 
+    implementation ("org.springframework.boot:spring-boot")
+    testImplementation ("org.springframework.boot:spring-boot")
 }
 
 
