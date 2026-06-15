@@ -57,19 +57,4 @@ public class GcpLoggingAutoConfiguration {
         return binder;
     }
 
-    @Bean
-    @ConditionalOnClass({DevOpsLogbackMetrics.class, StackdriverLogbackMetrics.class})
-    @ConditionalOnEnabledOndemandLogging
-    public LogbackMetrics ondemandLogbackMetricsPlaceholder() {
-        // No-op placeholder: prevents Spring Boot's LogbackMetricsAutoConfiguration from
-        // registering its own LogbackMetrics bean whose FunctionCounters would be observed
-        // instead of the LongAdders used by GcpOndemandLoggingMeterBinder.
-        return new DevOpsLogbackMetrics() {
-            @Override
-            public void bindTo(MeterRegistry registry) {
-                // metrics are handled by ondemandMeterBinder
-            }
-        };
-    }
-
 }
