@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.gcp.spring;
 
 
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics;
 import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
@@ -9,6 +10,7 @@ import no.entur.logging.cloud.gcp.spring.ondemand.ConditionalOnDisabledOndemandL
 import no.entur.logging.cloud.gcp.spring.ondemand.ConditionalOnEnabledOndemandLogging;
 import no.entur.logging.cloud.gcp.spring.ondemand.GcpOndemandLoggingMeterBinder;
 import no.entur.logging.cloud.micrometer.DevOpsLogbackMetrics;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +26,7 @@ import org.springframework.context.annotation.Configuration;
  */
 
 @Configuration
+@AutoConfigureBefore(name = "org.springframework.boot.micrometer.metrics.autoconfigure.logging.logback.LogbackMetricsAutoConfiguration")
 public class GcpLoggingAutoConfiguration {
 
     @Bean
@@ -52,6 +55,21 @@ public class GcpLoggingAutoConfiguration {
         appender.setMetrics(binder);
 
         return binder;
+    }
+
+    @Bean
+    @ConditionalOnClass({DevOpsLogbackMetrics.class, StackdriverLogbackMetrics.class})
+    @ConditionalOnEnabledOndemandLogging
+    public LogbackMetrics ondemandLogbackMetricsPlaceholder() {
+        // No-op placeholder: prevents Spring Boot's LogbackMetricsAutoConfiguration from
+        // registering FunctionCounters for logback.events that would conflict with the
+        // CumulativeCounters registered by GcpOndemandLoggingMeterBinder.
+        return new DevOpsLogbackMetrics() {
+            @Override
+            public void bindTo(MeterRegistry registry) {
+                // metrics are handled by ondemandMeterBinder
+            }
+        };
     }
 
 }

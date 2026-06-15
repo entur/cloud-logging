@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.azure.spring;
 
 
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics;
 import no.entur.logging.cloud.api.DevOpsLogger;
@@ -11,6 +12,7 @@ import no.entur.logging.cloud.azure.spring.ondemand.AzureOndemandLoggingMeterBin
 import no.entur.logging.cloud.gcp.spring.ondemand.ConditionalOnDisabledOndemandLogging;
 import no.entur.logging.cloud.gcp.spring.ondemand.ConditionalOnEnabledOndemandLogging;
 import no.entur.logging.cloud.micrometer.DevOpsLogbackMetrics;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +29,7 @@ import org.springframework.context.annotation.Configuration;
 
 
 @Configuration
+@AutoConfigureBefore(name = "org.springframework.boot.micrometer.metrics.autoconfigure.logging.logback.LogbackMetricsAutoConfiguration")
 public class AzureLoggingAutoConfiguration {
 
     private static final DevOpsLogger LOGGER = DevOpsLoggerFactory.getLogger(AzureLoggingAutoConfiguration.class);
@@ -57,5 +60,20 @@ public class AzureLoggingAutoConfiguration {
         appender.setMetrics(binder);
 
         return binder;
+    }
+
+    @Bean
+    @ConditionalOnClass({DevOpsLogbackMetrics.class, AzureLogbackMetrics.class})
+    @ConditionalOnEnabledOndemandLogging
+    public LogbackMetrics ondemandLogbackMetricsPlaceholder() {
+        // No-op placeholder: prevents Spring Boot's LogbackMetricsAutoConfiguration from
+        // registering FunctionCounters for logback.events that would conflict with the
+        // CumulativeCounters registered by AzureOndemandLoggingMeterBinder.
+        return new DevOpsLogbackMetrics() {
+            @Override
+            public void bindTo(MeterRegistry registry) {
+                // metrics are handled by ondemandMeterBinder
+            }
+        };
     }
 }

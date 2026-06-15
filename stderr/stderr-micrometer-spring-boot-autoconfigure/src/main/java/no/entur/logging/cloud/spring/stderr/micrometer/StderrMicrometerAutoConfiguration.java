@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.spring.stderr.micrometer;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.logging.LogbackMetrics;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -15,11 +16,14 @@ import org.springframework.context.annotation.Bean;
  * <p>Activated by default when a {@link MeterRegistry} bean is present; can be disabled by
  * setting {@code entur.logging.stderr.micrometer.enabled=false}.
  */
-@AutoConfiguration(afterName = {
-        "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsAutoConfiguration",
-        "org.springframework.boot.micrometer.metrics.autoconfigure.CompositeMeterRegistryAutoConfiguration",
-        "org.springframework.boot.micrometer.metrics.autoconfigure.export.simple.SimpleMetricsExportAutoConfiguration"
-})
+@AutoConfiguration(
+        afterName = {
+                "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsAutoConfiguration",
+                "org.springframework.boot.micrometer.metrics.autoconfigure.CompositeMeterRegistryAutoConfiguration",
+                "org.springframework.boot.micrometer.metrics.autoconfigure.export.simple.SimpleMetricsExportAutoConfiguration"
+        },
+        beforeName = "org.springframework.boot.micrometer.metrics.autoconfigure.logging.logback.LogbackMetricsAutoConfiguration"
+)
 @ConditionalOnProperty(name = "entur.logging.stderr.micrometer.enabled", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties(StderrMicrometerProperties.class)
 public class StderrMicrometerAutoConfiguration {
@@ -31,5 +35,20 @@ public class StderrMicrometerAutoConfiguration {
         SystemErrMicrometerPrintStream printStream = new SystemErrMicrometerPrintStream(registry, System.err);
         System.setErr(printStream);
         return printStream;
+    }
+
+    @Bean
+    @ConditionalOnBean(MeterRegistry.class)
+    @ConditionalOnMissingBean(LogbackMetrics.class)
+    public LogbackMetrics stderrLogbackMetricsPlaceholder() {
+        // No-op placeholder: prevents Spring Boot's LogbackMetricsAutoConfiguration from
+        // registering FunctionCounters for logback.events that would conflict with the
+        // CumulativeCounters registered by SystemErrMicrometerPrintStream.
+        return new LogbackMetrics() {
+            @Override
+            public void bindTo(MeterRegistry registry) {
+                // metrics are handled by SystemErrMicrometerPrintStream
+            }
+        };
     }
 }
