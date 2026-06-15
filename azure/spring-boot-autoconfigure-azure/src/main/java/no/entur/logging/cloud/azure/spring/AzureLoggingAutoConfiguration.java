@@ -67,8 +67,8 @@ public class AzureLoggingAutoConfiguration {
     @ConditionalOnEnabledOndemandLogging
     public LogbackMetrics ondemandLogbackMetricsPlaceholder() {
         // No-op placeholder: prevents Spring Boot's LogbackMetricsAutoConfiguration from
-        // registering FunctionCounters for logback.events that would conflict with the
-        // CumulativeCounters registered by AzureOndemandLoggingMeterBinder.
+        // registering its own LogbackMetrics bean whose FunctionCounters would be observed
+        // instead of the LongAdders used by AzureOndemandLoggingMeterBinder.
         return new DevOpsLogbackMetrics() {
             @Override
             public void bindTo(MeterRegistry registry) {

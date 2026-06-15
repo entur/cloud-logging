@@ -5,7 +5,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
-import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import no.entur.logging.cloud.api.DevOpsLevel;
@@ -13,64 +13,73 @@ import no.entur.logging.cloud.api.DevOpsMarker;
 import org.slf4j.Marker;
 
 import java.util.List;
+import java.util.concurrent.atomic.LongAdder;
 
 public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
 
-    protected final Counter errorWakeMeUpRightNowCounter;
-    protected final Counter errorInterruptMyDinnerCounter;
-    protected final Counter errorTellMeTomorrowCounter;
+    protected final LongAdder errorWakeMeUpRightNowCount;
+    protected final LongAdder errorInterruptMyDinnerCount;
+    protected final LongAdder errorTellMeTomorrowCount;
 
-    protected final Counter errorCounter; // alias for all errors / backwards compatibility
+    protected final LongAdder errorCount; // alias for all errors / backwards compatibility
 
-    protected final Counter warnCounter;
-    protected final Counter infoCounter;
-    protected final Counter debugCounter;
-    protected final Counter traceCounter;
+    protected final LongAdder warnCount;
+    protected final LongAdder infoCount;
+    protected final LongAdder debugCount;
+    protected final LongAdder traceCount;
 
     public DevOpsMetricsTurboFilter(MeterRegistry registry, Iterable<Tag> tags) {
-        errorWakeMeUpRightNowCounter = Counter.builder("logback.events")
+        errorWakeMeUpRightNowCount = new LongAdder();
+        FunctionCounter.builder("logback.events", errorWakeMeUpRightNowCount, LongAdder::doubleValue)
                 .tags(tags).tags("level", "errorWakeMeUpRightNow")
                 .description("Number of error 'Wake Me Up Right Now' level events that made it to the logs")
                 .baseUnit("events")
                 .register(registry);
 
-        errorInterruptMyDinnerCounter = Counter.builder("logback.events")
+        errorInterruptMyDinnerCount = new LongAdder();
+        FunctionCounter.builder("logback.events", errorInterruptMyDinnerCount, LongAdder::doubleValue)
                 .tags(tags).tags("level", "errorInterruptMyDinner")
                 .description("Number of error 'Interrupt My Dinner' level events that made it to the logs")
                 .baseUnit("events")
                 .register(registry);
 
-        errorTellMeTomorrowCounter = Counter.builder("logback.events")
+        errorTellMeTomorrowCount = new LongAdder();
+        FunctionCounter.builder("logback.events", errorTellMeTomorrowCount, LongAdder::doubleValue)
                 .tags(tags).tags("level", "errorTellMeTomorrow")
                 .description("Number of error 'Tell Me Tomorrow' level events that made it to the logs")
                 .baseUnit("events")
                 .register(registry);
 
-        errorCounter = Counter.builder("logback.events")
+        errorCount = new LongAdder();
+        FunctionCounter.builder("logback.events", errorCount, LongAdder::doubleValue)
                 .tags(tags).tags("level", "error")
                 .description("Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)")
                 .baseUnit("events")
                 .register(registry);
 
-        warnCounter = Counter.builder("logback.events")
+        warnCount = new LongAdder();
+        FunctionCounter.builder("logback.events", warnCount, LongAdder::doubleValue)
                 .tags(tags).tags("level", "warn")
                 .description("Number of warn level events that made it to the logs")
                 .baseUnit("events")
                 .register(registry);
 
-        infoCounter = Counter.builder("logback.events")
+        infoCount = new LongAdder();
+        FunctionCounter.builder("logback.events", infoCount, LongAdder::doubleValue)
                 .tags(tags).tags("level", "info")
                 .description("Number of info level events that made it to the logs")
                 .baseUnit("events")
                 .register(registry);
 
-        debugCounter = Counter.builder("logback.events")
+        debugCount = new LongAdder();
+        FunctionCounter.builder("logback.events", debugCount, LongAdder::doubleValue)
                 .tags(tags).tags("level", "debug")
                 .description("Number of debug level events that made it to the logs")
                 .baseUnit("events")
                 .register(registry);
 
-        traceCounter = Counter.builder("logback.events")
+        traceCount = new LongAdder();
+        FunctionCounter.builder("logback.events", traceCount, LongAdder::doubleValue)
                 .tags(tags).tags("level", "trace")
                 .description("Number of trace level events that made it to the logs")
                 .baseUnit("events")
@@ -91,7 +100,7 @@ public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEven
         Level level = event.getLevel();
         switch (level.toInt()) {
             case Level.ERROR_INT:
-                errorCounter.increment();
+                errorCount.increment();
 
                 List<Marker> markerList = event.getMarkerList();
                 if(markerList != null && !markerList.isEmpty()) {
@@ -99,24 +108,24 @@ public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEven
                     if (severity != null) {
                         increment(severity);
                     } else {
-                        errorTellMeTomorrowCounter.increment();
+                        errorTellMeTomorrowCount.increment();
                     }
                 } else {
-                    errorTellMeTomorrowCounter.increment();
+                    errorTellMeTomorrowCount.increment();
                 }
 
                 break;
             case Level.WARN_INT:
-                warnCounter.increment();
+                warnCount.increment();
                 break;
             case Level.INFO_INT:
-                infoCounter.increment();
+                infoCount.increment();
                 break;
             case Level.DEBUG_INT:
-                debugCounter.increment();
+                debugCount.increment();
                 break;
             case Level.TRACE_INT:
-                traceCounter.increment();
+                traceCount.increment();
                 break;
             default: {
                 // do nothing
@@ -127,31 +136,31 @@ public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEven
     public void increment(Marker marker, Level level) {
         switch (level.toInt()) {
             case Level.ERROR_INT:
-                errorCounter.increment();
+                errorCount.increment();
 
                 if (marker != null) {
                     DevOpsLevel severity = DevOpsMarker.searchSeverityMarker(marker);
                     if (severity != null) {
                         increment(severity);
                     } else {
-                        errorTellMeTomorrowCounter.increment();
+                        errorTellMeTomorrowCount.increment();
                     }
                 } else {
-                    errorTellMeTomorrowCounter.increment();
+                    errorTellMeTomorrowCount.increment();
                 }
 
                 break;
             case Level.WARN_INT:
-                warnCounter.increment();
+                warnCount.increment();
                 break;
             case Level.INFO_INT:
-                infoCounter.increment();
+                infoCount.increment();
                 break;
             case Level.DEBUG_INT:
-                debugCounter.increment();
+                debugCount.increment();
                 break;
             case Level.TRACE_INT:
-                traceCounter.increment();
+                traceCount.increment();
                 break;
             default: {
                 // do nothing
@@ -162,35 +171,35 @@ public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEven
     protected void increment(DevOpsLevel severity) {
         switch (severity) {
             case ERROR_WAKE_ME_UP_RIGHT_NOW: {
-                errorWakeMeUpRightNowCounter.increment();
+                errorWakeMeUpRightNowCount.increment();
                 break;
             }
             case ERROR_INTERRUPT_MY_DINNER: {
-                errorInterruptMyDinnerCounter.increment();
+                errorInterruptMyDinnerCount.increment();
                 break;
             }
             case ERROR_TELL_ME_TOMORROW: {
-                errorTellMeTomorrowCounter.increment();
+                errorTellMeTomorrowCount.increment();
                 break;
             }
             case WARN: {
-                warnCounter.increment();
+                warnCount.increment();
                 break;
             }
             case INFO: {
-                infoCounter.increment();
+                infoCount.increment();
                 break;
             }
             case DEBUG: {
-                debugCounter.increment();
+                debugCount.increment();
                 break;
             }
             case TRACE: {
-                traceCounter.increment();
+                traceCount.increment();
                 break;
             }
             default: {
-                errorTellMeTomorrowCounter.increment();
+                errorTellMeTomorrowCount.increment();
             }
         }
     }
@@ -199,35 +208,35 @@ public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEven
     public void increment(DevOpsLevel severity, int amount) {
         switch (severity) {
             case ERROR_WAKE_ME_UP_RIGHT_NOW: {
-                errorWakeMeUpRightNowCounter.increment(amount);
+                errorWakeMeUpRightNowCount.add(amount);
                 break;
             }
             case ERROR_INTERRUPT_MY_DINNER: {
-                errorInterruptMyDinnerCounter.increment(amount);
+                errorInterruptMyDinnerCount.add(amount);
                 break;
             }
             case ERROR_TELL_ME_TOMORROW: {
-                errorTellMeTomorrowCounter.increment(amount);
+                errorTellMeTomorrowCount.add(amount);
                 break;
             }
             case WARN: {
-                warnCounter.increment(amount);
+                warnCount.add(amount);
                 break;
             }
             case INFO: {
-                infoCounter.increment(amount);
+                infoCount.add(amount);
                 break;
             }
             case DEBUG: {
-                debugCounter.increment(amount);
+                debugCount.add(amount);
                 break;
             }
             case TRACE: {
-                traceCounter.increment(amount);
+                traceCount.add(amount);
                 break;
             }
             default: {
-                errorTellMeTomorrowCounter.increment(amount);
+                errorTellMeTomorrowCount.add(amount);
             }
         }
     }
