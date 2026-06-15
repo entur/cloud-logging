@@ -5,72 +5,60 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
-import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import no.entur.logging.cloud.api.DevOpsLevel;
 import no.entur.logging.cloud.api.DevOpsMarker;
-import org.slf4j.Marker;
+import no.entur.logging.cloud.micrometer.counter.EventCounter;
+import no.entur.logging.cloud.micrometer.counter.EventCounterFactory;
 import no.entur.logging.cloud.micrometer.LoggingEventMetrics;
+import org.slf4j.Marker;
 
 import java.util.List;
 
 
 public class AzureMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
 
-    private final Counter alertCounter;
-    private final Counter criticalCounter;
-    private final Counter errorCounter;
-    private final Counter warnCounter;
-    private final Counter infoCounter;
-    private final Counter debugCounter;
-    private final Counter defaultCounter;
+    private static final EventCounterFactory COUNTER_FACTORY = EventCounterFactory.forCurrentMicrometerVersion();
+
+    private final EventCounter alertCount;
+    private final EventCounter criticalCount;
+    private final EventCounter errorCount;
+    private final EventCounter warnCount;
+    private final EventCounter infoCount;
+    private final EventCounter debugCount;
+    private final EventCounter defaultCount;
 
     public AzureMetricsTurboFilter(MeterRegistry registry, Iterable<Tag> tags) {
         // emergency level is not in use
 
-        // TODO doe it make sense to use these levels when they are not supported by the log accumulation tool?
-        alertCounter = Counter.builder("logback.azure.events")
-                .tags(tags).tags("severity", "alert")
-                .description("Number of alert severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        alertCount = COUNTER_FACTORY.register("logback.azure.events", registry, tags,
+                "severity", "alert",
+                "Number of alert severity events that made it to the logs");
 
-        criticalCounter = Counter.builder("logback.azure.events")
-                .tags(tags).tags("severity", "critical")
-                .description("Number of critical severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        criticalCount = COUNTER_FACTORY.register("logback.azure.events", registry, tags,
+                "severity", "critical",
+                "Number of critical severity events that made it to the logs");
 
-        errorCounter = Counter.builder("logback.azure.events")
-                .tags(tags).tags("severity", "error")
-                .description("Number of error severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        errorCount = COUNTER_FACTORY.register("logback.azure.events", registry, tags,
+                "severity", "error",
+                "Number of error severity events that made it to the logs");
 
-        warnCounter = Counter.builder("logback.azure.events")
-                .tags(tags).tags("severity", "warning")
-                .description("Number of warn severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        warnCount = COUNTER_FACTORY.register("logback.azure.events", registry, tags,
+                "severity", "warning",
+                "Number of warn severity events that made it to the logs");
 
-        infoCounter = Counter.builder("logback.azure.events")
-                .tags(tags).tags("severity", "info")
-                .description("Number of info severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        infoCount = COUNTER_FACTORY.register("logback.azure.events", registry, tags,
+                "severity", "info",
+                "Number of info severity events that made it to the logs");
 
-        debugCounter = Counter.builder("logback.azure.events")
-                .tags(tags).tags("severity", "debug")
-                .description("Number of debug severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        debugCount = COUNTER_FACTORY.register("logback.azure.events", registry, tags,
+                "severity", "debug",
+                "Number of debug severity events that made it to the logs");
 
-        defaultCounter = Counter.builder("logback.azure.events")
-                .tags(tags).tags("severity", "default")
-                .description("Number of default severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        defaultCount = COUNTER_FACTORY.register("logback.azure.events", registry, tags,
+                "severity", "default",
+                "Number of default severity events that made it to the logs");
     }
 
     @Override
@@ -94,24 +82,24 @@ public class AzureMetricsTurboFilter extends TurboFilter implements LoggingEvent
                     if (severity != null) {
                         increment(severity);
                     } else {
-                        errorCounter.increment();
+                        errorCount.accept(1L);
                     }
                 } else {
-                    errorCounter.increment();
+                    errorCount.accept(1L);
                 }
 
                 break;
             case Level.WARN_INT:
-                warnCounter.increment();
+                warnCount.accept(1L);
                 break;
             case Level.INFO_INT:
-                infoCounter.increment();
+                infoCount.accept(1L);
                 break;
             case Level.DEBUG_INT:
-                debugCounter.increment();
+                debugCount.accept(1L);
                 break;
             case Level.TRACE_INT:
-                defaultCounter.increment();
+                defaultCount.accept(1L);
                 break;
             default: {
                 // do nothing
@@ -128,24 +116,24 @@ public class AzureMetricsTurboFilter extends TurboFilter implements LoggingEvent
                     if (severity != null) {
                         increment(severity);
                     } else {
-                        errorCounter.increment();
+                        errorCount.accept(1L);
                     }
                 } else {
-                    errorCounter.increment();
+                    errorCount.accept(1L);
                 }
 
                 break;
             case Level.WARN_INT:
-                warnCounter.increment();
+                warnCount.accept(1L);
                 break;
             case Level.INFO_INT:
-                infoCounter.increment();
+                infoCount.accept(1L);
                 break;
             case Level.DEBUG_INT:
-                debugCounter.increment();
+                debugCount.accept(1L);
                 break;
             case Level.TRACE_INT:
-                defaultCounter.increment();
+                defaultCount.accept(1L);
                 break;
             default: {
                 // do nothing
@@ -156,34 +144,35 @@ public class AzureMetricsTurboFilter extends TurboFilter implements LoggingEvent
     protected void increment(DevOpsLevel severity) {
         switch (severity) {
             case ERROR_WAKE_ME_UP_RIGHT_NOW: {
-                alertCounter.increment();
+                alertCount.accept(1L);
                 break;
             }
             case ERROR_INTERRUPT_MY_DINNER: {
-                criticalCounter.increment();
+                criticalCount.accept(1L);
                 break;
             }
             case WARN: {
-                warnCounter.increment();
+                warnCount.accept(1L);
                 break;
             }
             case INFO: {
-                infoCounter.increment();
+                infoCount.accept(1L);
                 break;
             }
             case DEBUG: {
-                debugCounter.increment();
+                debugCount.accept(1L);
                 break;
             }
             case TRACE: {
-                defaultCounter.increment();
+                defaultCount.accept(1L);
                 break;
             }
             case ERROR_TELL_ME_TOMORROW:
             default: {
-                errorCounter.increment();
+                errorCount.accept(1L);
                 break;
             }
         }
     }
 }
+

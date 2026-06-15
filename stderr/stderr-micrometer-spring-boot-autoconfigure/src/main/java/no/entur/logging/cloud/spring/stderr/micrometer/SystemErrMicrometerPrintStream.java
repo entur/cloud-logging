@@ -1,7 +1,6 @@
 package no.entur.logging.cloud.spring.stderr.micrometer;
 
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
+import no.entur.logging.cloud.micrometer.counter.EventCounter;
 import org.springframework.beans.factory.DisposableBean;
 
 import java.io.PrintStream;
@@ -27,32 +26,24 @@ import java.io.PrintStream;
 public class SystemErrMicrometerPrintStream extends PrintStream implements DisposableBean {
 
     private final PrintStream originalSystemErr;
-    private final Counter errorCounter;
-    private final Counter errorTellMeTomorrowCounter;
+    private final EventCounter errorCount;
+    private final EventCounter errorTellMeTomorrowCount;
 
-    public SystemErrMicrometerPrintStream(MeterRegistry registry, PrintStream originalSystemErr) {
+    public SystemErrMicrometerPrintStream(PrintStream originalSystemErr,
+                                          EventCounter errorCount,
+                                          EventCounter errorTellMeTomorrowCount) {
         super(originalSystemErr, true);
         this.originalSystemErr = originalSystemErr;
-
-        this.errorCounter = Counter.builder("logback.events")
-                .tags("level", "error")
-                .description("Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)")
-                .baseUnit("events")
-                .register(registry);
-
-        this.errorTellMeTomorrowCounter = Counter.builder("logback.events")
-                .tags("level", "errorTellMeTomorrow")
-                .description("Number of error 'Tell Me Tomorrow' level events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        this.errorCount = errorCount;
+        this.errorTellMeTomorrowCount = errorTellMeTomorrowCount;
     }
 
     @Override
     public void write(int b) {
         super.write(b);
         if (b == '\n') {
-            errorCounter.increment();
-            errorTellMeTomorrowCounter.increment();
+            errorCount.accept(1L);
+            errorTellMeTomorrowCount.accept(1L);
         }
     }
 
@@ -66,8 +57,8 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
             }
         }
         if (newlines > 0) {
-            errorCounter.increment(newlines);
-            errorTellMeTomorrowCounter.increment(newlines);
+            errorCount.accept(newlines);
+            errorTellMeTomorrowCount.accept(newlines);
         }
     }
 

@@ -5,11 +5,12 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
-import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import no.entur.logging.cloud.api.DevOpsLevel;
 import no.entur.logging.cloud.api.DevOpsMarker;
+import no.entur.logging.cloud.micrometer.counter.EventCounter;
+import no.entur.logging.cloud.micrometer.counter.EventCounterFactory;
 import no.entur.logging.cloud.micrometer.LoggingEventMetrics;
 import org.slf4j.Marker;
 
@@ -17,58 +18,46 @@ import java.util.List;
 
 public class StackdriverMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
 
-    protected final Counter alertCounter;
-    protected final Counter criticalCounter;
-    protected final Counter errorCounter;
-    protected final Counter warnCounter;
-    protected final Counter infoCounter;
-    protected final Counter debugCounter;
-    protected final Counter defaultCounter;
+    private static final EventCounterFactory COUNTER_FACTORY = EventCounterFactory.forCurrentMicrometerVersion();
+
+    protected final EventCounter alertCount;
+    protected final EventCounter criticalCount;
+    protected final EventCounter errorCount;
+    protected final EventCounter warnCount;
+    protected final EventCounter infoCount;
+    protected final EventCounter debugCount;
+    protected final EventCounter defaultCount;
 
     public StackdriverMetricsTurboFilter(MeterRegistry registry, Iterable<Tag> tags) {
         // emergency level is not in use
 
-        alertCounter = Counter.builder("logback.gcp.events")
-                .tags(tags).tags("severity", "alert")
-                .description("Number of alert severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        alertCount = COUNTER_FACTORY.register("logback.gcp.events", registry, tags,
+                "severity", "alert",
+                "Number of alert severity events that made it to the logs");
 
-        criticalCounter = Counter.builder("logback.gcp.events")
-                .tags(tags).tags("severity", "critical")
-                .description("Number of critical severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        criticalCount = COUNTER_FACTORY.register("logback.gcp.events", registry, tags,
+                "severity", "critical",
+                "Number of critical severity events that made it to the logs");
 
-        errorCounter = Counter.builder("logback.gcp.events")
-                .tags(tags).tags("severity", "error")
-                .description("Number of error severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        errorCount = COUNTER_FACTORY.register("logback.gcp.events", registry, tags,
+                "severity", "error",
+                "Number of error severity events that made it to the logs");
 
-        warnCounter = Counter.builder("logback.gcp.events")
-                .tags(tags).tags("severity", "warning")
-                .description("Number of warn severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        warnCount = COUNTER_FACTORY.register("logback.gcp.events", registry, tags,
+                "severity", "warning",
+                "Number of warn severity events that made it to the logs");
 
-        infoCounter = Counter.builder("logback.gcp.events")
-                .tags(tags).tags("severity", "info")
-                .description("Number of info severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        infoCount = COUNTER_FACTORY.register("logback.gcp.events", registry, tags,
+                "severity", "info",
+                "Number of info severity events that made it to the logs");
 
-        debugCounter = Counter.builder("logback.gcp.events")
-                .tags(tags).tags("severity", "debug")
-                .description("Number of debug severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        debugCount = COUNTER_FACTORY.register("logback.gcp.events", registry, tags,
+                "severity", "debug",
+                "Number of debug severity events that made it to the logs");
 
-        defaultCounter = Counter.builder("logback.gcp.events")
-                .tags(tags).tags("severity", "default")
-                .description("Number of default severity events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        defaultCount = COUNTER_FACTORY.register("logback.gcp.events", registry, tags,
+                "severity", "default",
+                "Number of default severity events that made it to the logs");
     }
 
     @Override
@@ -92,24 +81,24 @@ public class StackdriverMetricsTurboFilter extends TurboFilter implements Loggin
                     if (severity != null) {
                         increment(severity);
                     } else {
-                        errorCounter.increment();
+                        errorCount.accept(1L);
                     }
                 } else {
-                    errorCounter.increment();
+                    errorCount.accept(1L);
                 }
 
                 break;
             case Level.WARN_INT:
-                warnCounter.increment();
+                warnCount.accept(1L);
                 break;
             case Level.INFO_INT:
-                infoCounter.increment();
+                infoCount.accept(1L);
                 break;
             case Level.DEBUG_INT:
-                debugCounter.increment();
+                debugCount.accept(1L);
                 break;
             case Level.TRACE_INT:
-                defaultCounter.increment();
+                defaultCount.accept(1L);
                 break;
             default: {
                 // do nothing
@@ -128,24 +117,24 @@ public class StackdriverMetricsTurboFilter extends TurboFilter implements Loggin
                     if (severity != null) {
                         increment(severity);
                     } else {
-                        errorCounter.increment();
+                        errorCount.accept(1L);
                     }
                 } else {
-                    errorCounter.increment();
+                    errorCount.accept(1L);
                 }
 
                 break;
             case Level.WARN_INT:
-                warnCounter.increment();
+                warnCount.accept(1L);
                 break;
             case Level.INFO_INT:
-                infoCounter.increment();
+                infoCount.accept(1L);
                 break;
             case Level.DEBUG_INT:
-                debugCounter.increment();
+                debugCount.accept(1L);
                 break;
             case Level.TRACE_INT:
-                defaultCounter.increment();
+                defaultCount.accept(1L);
                 break;
             default: {
                 // do nothing
@@ -156,32 +145,32 @@ public class StackdriverMetricsTurboFilter extends TurboFilter implements Loggin
     protected void increment(DevOpsLevel severity) {
         switch (severity) {
             case ERROR_WAKE_ME_UP_RIGHT_NOW: {
-                alertCounter.increment();
+                alertCount.accept(1L);
                 break;
             }
             case ERROR_INTERRUPT_MY_DINNER: {
-                criticalCounter.increment();
+                criticalCount.accept(1L);
                 break;
             }
             case WARN: {
-                warnCounter.increment();
+                warnCount.accept(1L);
                 break;
             }
             case INFO: {
-                infoCounter.increment();
+                infoCount.accept(1L);
                 break;
             }
             case DEBUG: {
-                debugCounter.increment();
+                debugCount.accept(1L);
                 break;
             }
             case TRACE: {
-                defaultCounter.increment();
+                defaultCount.accept(1L);
                 break;
             }
             case ERROR_TELL_ME_TOMORROW:
             default: {
-                errorCounter.increment();
+                errorCount.accept(1L);
                 break;
             }
         }
@@ -190,34 +179,35 @@ public class StackdriverMetricsTurboFilter extends TurboFilter implements Loggin
     public void increment(DevOpsLevel severity, int amount) {
         switch (severity) {
             case ERROR_WAKE_ME_UP_RIGHT_NOW: {
-                alertCounter.increment(amount);
+                alertCount.accept(amount);
                 break;
             }
             case ERROR_INTERRUPT_MY_DINNER: {
-                criticalCounter.increment(amount);
+                criticalCount.accept(amount);
                 break;
             }
             case WARN: {
-                warnCounter.increment(amount);
+                warnCount.accept(amount);
                 break;
             }
             case INFO: {
-                infoCounter.increment(amount);
+                infoCount.accept(amount);
                 break;
             }
             case DEBUG: {
-                debugCounter.increment(amount);
+                debugCount.accept(amount);
                 break;
             }
             case TRACE: {
-                defaultCounter.increment(amount);
+                defaultCount.accept(amount);
                 break;
             }
             case ERROR_TELL_ME_TOMORROW:
             default: {
-                errorCounter.increment(amount);
+                errorCount.accept(amount);
                 break;
             }
         }
     }
 }
+

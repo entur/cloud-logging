@@ -1,15 +1,17 @@
 package no.entur.logging.cloud.spring.stderr.micrometer;
 
-import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Measurement;
+import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Statistic;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 
-import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -200,10 +202,11 @@ public class StderrMicrometerEnabledTest {
     }
 
     private double getCount(String level) {
-        Collection<Counter> counters = meterRegistry.find("logback.events").counters();
-        Optional<Counter> counter = counters.stream()
-                .filter(c -> level.equals(c.getId().getTag("level")))
-                .findAny();
-        return counter.map(Counter::count).orElse(0.0);
+        Optional<Meter> meter = meterRegistry.find("logback.events").tag("level", level).meters().stream().findAny();
+        if (meter.isEmpty()) return 0.0;
+        return StreamSupport.stream(meter.get().measure().spliterator(), false)
+                .filter(ms -> ms.getStatistic() == Statistic.COUNT)
+                .mapToDouble(Measurement::getValue)
+                .sum();
     }
 }
