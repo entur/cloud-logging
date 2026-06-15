@@ -1,6 +1,6 @@
 package no.entur.logging.cloud.spring.stderr.micrometer;
 
-import no.entur.logging.cloud.micrometer.CompatibleCounter;
+import no.entur.logging.cloud.micrometer.counter.EventCounter;
 import org.springframework.beans.factory.DisposableBean;
 
 import java.io.PrintStream;
@@ -26,12 +26,12 @@ import java.io.PrintStream;
 public class SystemErrMicrometerPrintStream extends PrintStream implements DisposableBean {
 
     private final PrintStream originalSystemErr;
-    private final CompatibleCounter errorCount;
-    private final CompatibleCounter errorTellMeTomorrowCount;
+    private final EventCounter errorCount;
+    private final EventCounter errorTellMeTomorrowCount;
 
     public SystemErrMicrometerPrintStream(PrintStream originalSystemErr,
-                                          CompatibleCounter errorCount,
-                                          CompatibleCounter errorTellMeTomorrowCount) {
+                                          EventCounter errorCount,
+                                          EventCounter errorTellMeTomorrowCount) {
         super(originalSystemErr, true);
         this.originalSystemErr = originalSystemErr;
         this.errorCount = errorCount;

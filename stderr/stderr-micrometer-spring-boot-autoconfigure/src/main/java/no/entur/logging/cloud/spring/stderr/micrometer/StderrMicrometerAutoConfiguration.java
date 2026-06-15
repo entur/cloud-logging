@@ -1,9 +1,8 @@
 package no.entur.logging.cloud.spring.stderr.micrometer;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.binder.logging.LogbackMetrics;
-import no.entur.logging.cloud.micrometer.CompatibleCounter;
-import no.entur.logging.cloud.micrometer.CompatibleCounterFactory;
+import no.entur.logging.cloud.micrometer.counter.EventCounter;
+import no.entur.logging.cloud.micrometer.counter.EventCounterFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -36,13 +35,13 @@ public class StderrMicrometerAutoConfiguration {
     @ConditionalOnBean(MeterRegistry.class)
     @ConditionalOnMissingBean(SystemErrMicrometerPrintStream.class)
     public SystemErrMicrometerPrintStream systemErrMicrometerPrintStream(MeterRegistry registry) {
-        CompatibleCounterFactory factory = CompatibleCounterFactory.forCurrentSpringBootVersion();
+        EventCounterFactory factory = EventCounterFactory.forCurrentSpringBootVersion();
 
-        CompatibleCounter errorCount = factory.register("logback.events", registry, Collections.emptyList(),
+        EventCounter errorCount = factory.register("logback.events", registry, Collections.emptyList(),
                 "level", "error",
                 "Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)");
 
-        CompatibleCounter errorTellMeTomorrowCount = factory.register("logback.events", registry, Collections.emptyList(),
+        EventCounter errorTellMeTomorrowCount = factory.register("logback.events", registry, Collections.emptyList(),
                 "level", "errorTellMeTomorrow",
                 "Number of error 'Tell Me Tomorrow' level events that made it to the logs");
 

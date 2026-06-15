@@ -9,8 +9,8 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import no.entur.logging.cloud.api.DevOpsLevel;
 import no.entur.logging.cloud.api.DevOpsMarker;
-import no.entur.logging.cloud.micrometer.CompatibleCounter;
-import no.entur.logging.cloud.micrometer.CompatibleCounterFactory;
+import no.entur.logging.cloud.micrometer.counter.EventCounter;
+import no.entur.logging.cloud.micrometer.counter.EventCounterFactory;
 import no.entur.logging.cloud.micrometer.LoggingEventMetrics;
 import org.slf4j.Marker;
 
@@ -19,15 +19,15 @@ import java.util.List;
 
 public class AzureMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
 
-    private static final CompatibleCounterFactory COUNTER_FACTORY = CompatibleCounterFactory.forCurrentSpringBootVersion();
+    private static final EventCounterFactory COUNTER_FACTORY = EventCounterFactory.forCurrentSpringBootVersion();
 
-    private final CompatibleCounter alertCount;
-    private final CompatibleCounter criticalCount;
-    private final CompatibleCounter errorCount;
-    private final CompatibleCounter warnCount;
-    private final CompatibleCounter infoCount;
-    private final CompatibleCounter debugCount;
-    private final CompatibleCounter defaultCount;
+    private final EventCounter alertCount;
+    private final EventCounter criticalCount;
+    private final EventCounter errorCount;
+    private final EventCounter warnCount;
+    private final EventCounter infoCount;
+    private final EventCounter debugCount;
+    private final EventCounter defaultCount;
 
     public AzureMetricsTurboFilter(MeterRegistry registry, Iterable<Tag> tags) {
         // emergency level is not in use

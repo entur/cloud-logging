@@ -1,12 +1,12 @@
-package no.entur.logging.cloud.micrometer;
+package no.entur.logging.cloud.micrometer.counter;
 
 import java.util.concurrent.atomic.LongAdder;
 
-final class FunctionCompatibleCounter implements CompatibleCounter {
+final class FunctionEventCounter implements EventCounter {
 
     private final LongAdder adder;
 
-    FunctionCompatibleCounter(LongAdder adder) {
+    FunctionEventCounter(LongAdder adder) {
         this.adder = adder;
     }
 

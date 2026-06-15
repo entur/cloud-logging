@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.micrometer;
+package no.entur.logging.cloud.micrometer.counter;
 
 import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -6,10 +6,10 @@ import io.micrometer.core.instrument.Tag;
 
 import java.util.concurrent.atomic.LongAdder;
 
-public final class FunctionCompatibleCounterFactory implements CompatibleCounterFactory {
+public final class FunctionEventCounterFactory implements EventCounterFactory {
 
     @Override
-    public CompatibleCounter register(String metricName, MeterRegistry registry,
+    public EventCounter register(String metricName, MeterRegistry registry,
                                       Iterable<Tag> tags, String tagKey, String tagValue,
                                       String description) {
         LongAdder adder = new LongAdder();
@@ -18,6 +18,6 @@ public final class FunctionCompatibleCounterFactory implements CompatibleCounter
                 .description(description)
                 .baseUnit("events")
                 .register(registry);
-        return new FunctionCompatibleCounter(adder);
+        return new FunctionEventCounter(adder);
     }
 }

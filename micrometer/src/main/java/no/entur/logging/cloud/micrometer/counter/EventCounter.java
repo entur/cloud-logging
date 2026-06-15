@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.micrometer;
+package no.entur.logging.cloud.micrometer.counter;
 
 import java.util.function.LongConsumer;
 
@@ -9,5 +9,5 @@ import java.util.function.LongConsumer;
  *
  * <p>Call {@link #accept(long)} to increment the counter by {@code n}.
  */
-public interface CompatibleCounter extends LongConsumer {
+public interface EventCounter extends LongConsumer {
 }

@@ -9,8 +9,8 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import no.entur.logging.cloud.api.DevOpsLevel;
 import no.entur.logging.cloud.api.DevOpsMarker;
-import no.entur.logging.cloud.micrometer.CompatibleCounter;
-import no.entur.logging.cloud.micrometer.CompatibleCounterFactory;
+import no.entur.logging.cloud.micrometer.counter.EventCounter;
+import no.entur.logging.cloud.micrometer.counter.EventCounterFactory;
 import no.entur.logging.cloud.micrometer.LoggingEventMetrics;
 import org.slf4j.Marker;
 
@@ -18,15 +18,15 @@ import java.util.List;
 
 public class StackdriverMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
 
-    private static final CompatibleCounterFactory COUNTER_FACTORY = CompatibleCounterFactory.forCurrentSpringBootVersion();
+    private static final EventCounterFactory COUNTER_FACTORY = EventCounterFactory.forCurrentSpringBootVersion();
 
-    protected final CompatibleCounter alertCount;
-    protected final CompatibleCounter criticalCount;
-    protected final CompatibleCounter errorCount;
-    protected final CompatibleCounter warnCount;
-    protected final CompatibleCounter infoCount;
-    protected final CompatibleCounter debugCount;
-    protected final CompatibleCounter defaultCount;
+    protected final EventCounter alertCount;
+    protected final EventCounter criticalCount;
+    protected final EventCounter errorCount;
+    protected final EventCounter warnCount;
+    protected final EventCounter infoCount;
+    protected final EventCounter debugCount;
+    protected final EventCounter defaultCount;
 
     public StackdriverMetricsTurboFilter(MeterRegistry registry, Iterable<Tag> tags) {
         // emergency level is not in use

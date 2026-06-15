@@ -9,24 +9,26 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import no.entur.logging.cloud.api.DevOpsLevel;
 import no.entur.logging.cloud.api.DevOpsMarker;
+import no.entur.logging.cloud.micrometer.counter.EventCounter;
+import no.entur.logging.cloud.micrometer.counter.EventCounterFactory;
 import org.slf4j.Marker;
 
 import java.util.List;
 
 public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
 
-    private static final CompatibleCounterFactory COUNTER_FACTORY = CompatibleCounterFactory.forCurrentSpringBootVersion();
+    private static final EventCounterFactory COUNTER_FACTORY = EventCounterFactory.forCurrentSpringBootVersion();
 
-    protected final CompatibleCounter errorWakeMeUpRightNowCount;
-    protected final CompatibleCounter errorInterruptMyDinnerCount;
-    protected final CompatibleCounter errorTellMeTomorrowCount;
+    protected final EventCounter errorWakeMeUpRightNowCount;
+    protected final EventCounter errorInterruptMyDinnerCount;
+    protected final EventCounter errorTellMeTomorrowCount;
 
-    protected final CompatibleCounter errorCount; // alias for all errors / backwards compatibility
+    protected final EventCounter errorCount; // alias for all errors / backwards compatibility
 
-    protected final CompatibleCounter warnCount;
-    protected final CompatibleCounter infoCount;
-    protected final CompatibleCounter debugCount;
-    protected final CompatibleCounter traceCount;
+    protected final EventCounter warnCount;
+    protected final EventCounter infoCount;
+    protected final EventCounter debugCount;
+    protected final EventCounter traceCount;
 
     public DevOpsMetricsTurboFilter(MeterRegistry registry, Iterable<Tag> tags) {
         errorWakeMeUpRightNowCount = COUNTER_FACTORY.register("logback.events", registry, tags,
