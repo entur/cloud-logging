@@ -1,5 +1,6 @@
 
 dependencies {
+    api project(':micrometer')
     api("io.micrometer:micrometer-core")
     api("org.springframework.boot:spring-boot-autoconfigure")
 

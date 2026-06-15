@@ -37,18 +37,4 @@ public class StderrMicrometerAutoConfiguration {
         return printStream;
     }
 
-    @Bean
-    @ConditionalOnBean(MeterRegistry.class)
-    @ConditionalOnMissingBean(LogbackMetrics.class)
-    public LogbackMetrics stderrLogbackMetricsPlaceholder() {
-        // No-op placeholder: prevents Spring Boot's LogbackMetricsAutoConfiguration from
-        // registering FunctionCounters for logback.events that would conflict with the
-        // CumulativeCounters registered by SystemErrMicrometerPrintStream.
-        return new LogbackMetrics() {
-            @Override
-            public void bindTo(MeterRegistry registry) {
-                // metrics are handled by SystemErrMicrometerPrintStream
-            }
-        };
-    }
 }
