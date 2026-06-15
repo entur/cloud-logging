@@ -17,7 +17,7 @@ import java.util.List;
 
 public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
 
-    private static final EventCounterFactory COUNTER_FACTORY = EventCounterFactory.forCurrentSpringBootVersion();
+    private static final EventCounterFactory COUNTER_FACTORY = EventCounterFactory.forCurrentMicrometerVersion();
 
     protected final EventCounter errorWakeMeUpRightNowCount;
     protected final EventCounter errorInterruptMyDinnerCount;

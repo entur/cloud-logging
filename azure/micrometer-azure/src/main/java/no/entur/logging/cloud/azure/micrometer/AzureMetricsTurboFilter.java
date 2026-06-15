@@ -19,7 +19,7 @@ import java.util.List;
 
 public class AzureMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
 
-    private static final EventCounterFactory COUNTER_FACTORY = EventCounterFactory.forCurrentSpringBootVersion();
+    private static final EventCounterFactory COUNTER_FACTORY = EventCounterFactory.forCurrentMicrometerVersion();
 
     private final EventCounter alertCount;
     private final EventCounter criticalCount;

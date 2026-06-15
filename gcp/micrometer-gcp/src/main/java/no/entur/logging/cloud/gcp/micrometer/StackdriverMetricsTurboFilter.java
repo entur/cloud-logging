@@ -18,7 +18,7 @@ import java.util.List;
 
 public class StackdriverMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
 
-    private static final EventCounterFactory COUNTER_FACTORY = EventCounterFactory.forCurrentSpringBootVersion();
+    private static final EventCounterFactory COUNTER_FACTORY = EventCounterFactory.forCurrentMicrometerVersion();
 
     protected final EventCounter alertCount;
     protected final EventCounter criticalCount;

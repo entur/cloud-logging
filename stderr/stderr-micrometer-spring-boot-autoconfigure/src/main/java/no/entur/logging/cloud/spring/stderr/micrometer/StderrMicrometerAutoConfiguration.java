@@ -35,7 +35,7 @@ public class StderrMicrometerAutoConfiguration {
     @ConditionalOnBean(MeterRegistry.class)
     @ConditionalOnMissingBean(SystemErrMicrometerPrintStream.class)
     public SystemErrMicrometerPrintStream systemErrMicrometerPrintStream(MeterRegistry registry) {
-        EventCounterFactory factory = EventCounterFactory.forCurrentSpringBootVersion();
+        EventCounterFactory factory = EventCounterFactory.forCurrentMicrometerVersion();
 
         EventCounter errorCount = factory.register("logback.events", registry, Collections.emptyList(),
                 "level", "error",
