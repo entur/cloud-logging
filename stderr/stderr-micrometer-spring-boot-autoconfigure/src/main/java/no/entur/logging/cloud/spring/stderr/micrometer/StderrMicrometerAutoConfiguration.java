@@ -2,12 +2,15 @@ package no.entur.logging.cloud.spring.stderr.micrometer;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics;
+import no.entur.logging.cloud.micrometer.CompatibleCounter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+
+import java.util.Collections;
 
 /**
  * Spring Boot auto-configuration that intercepts {@code System.err} output and increments
@@ -32,7 +35,15 @@ public class StderrMicrometerAutoConfiguration {
     @ConditionalOnBean(MeterRegistry.class)
     @ConditionalOnMissingBean(SystemErrMicrometerPrintStream.class)
     public SystemErrMicrometerPrintStream systemErrMicrometerPrintStream(MeterRegistry registry) {
-        SystemErrMicrometerPrintStream printStream = new SystemErrMicrometerPrintStream(registry, System.err);
+        CompatibleCounter errorCount = CompatibleCounter.register("logback.events", registry, Collections.emptyList(),
+                "level", "error",
+                "Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)");
+
+        CompatibleCounter errorTellMeTomorrowCount = CompatibleCounter.register("logback.events", registry, Collections.emptyList(),
+                "level", "errorTellMeTomorrow",
+                "Number of error 'Tell Me Tomorrow' level events that made it to the logs");
+
+        SystemErrMicrometerPrintStream printStream = new SystemErrMicrometerPrintStream(System.err, errorCount, errorTellMeTomorrowCount);
         System.setErr(printStream);
         return printStream;
     }

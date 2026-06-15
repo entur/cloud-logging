@@ -1,6 +1,5 @@
 package no.entur.logging.cloud.spring.stderr.micrometer;
 
-import io.micrometer.core.instrument.MeterRegistry;
 import no.entur.logging.cloud.micrometer.CompatibleCounter;
 import org.springframework.beans.factory.DisposableBean;
 
@@ -30,17 +29,13 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
     private final CompatibleCounter errorCount;
     private final CompatibleCounter errorTellMeTomorrowCount;
 
-    public SystemErrMicrometerPrintStream(MeterRegistry registry, PrintStream originalSystemErr) {
+    public SystemErrMicrometerPrintStream(PrintStream originalSystemErr,
+                                          CompatibleCounter errorCount,
+                                          CompatibleCounter errorTellMeTomorrowCount) {
         super(originalSystemErr, true);
         this.originalSystemErr = originalSystemErr;
-
-        errorCount = CompatibleCounter.register("logback.events", registry, java.util.Collections.emptyList(),
-                "level", "error",
-                "Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)");
-
-        errorTellMeTomorrowCount = CompatibleCounter.register("logback.events", registry, java.util.Collections.emptyList(),
-                "level", "errorTellMeTomorrow",
-                "Number of error 'Tell Me Tomorrow' level events that made it to the logs");
+        this.errorCount = errorCount;
+        this.errorTellMeTomorrowCount = errorTellMeTomorrowCount;
     }
 
     @Override
