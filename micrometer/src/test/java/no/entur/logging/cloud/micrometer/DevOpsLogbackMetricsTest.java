@@ -53,37 +53,4 @@ public class DevOpsLogbackMetricsTest {
 	    assertThat(critical.get().count()).isEqualTo(3.0);
 	}
 
-	/**
-	 * Simulates a scenario where non-{@code Counter} meters (e.g., {@code FunctionCounter})
-	 * already occupy the standard-level slots.  {@code captureOrRegister} must remove them
-	 * and register fresh {@link Counter} instances so that incrementing always works.
-	 */
-	@Test
-	public void givenFunctionCountersAlreadyRegistered_whenCreatingFilter_thenCountersAreIncrementable() {
-		SimpleMeterRegistry registry = new SimpleMeterRegistry();
-
-		// Pre-register FunctionCounters for the five standard levels.
-		for (String level : new String[]{"error", "warn", "info", "debug", "trace"}) {
-			LongAdder adder = new LongAdder();
-			FunctionCounter.builder("logback.events", adder, LongAdder::doubleValue)
-					.tag("level", level)
-					.register(registry);
-		}
-
-		// captureOrRegister must replace each FunctionCounter with an incrementable Counter.
-		DevOpsMetricsTurboFilter filter = new DevOpsMetricsTurboFilter(registry, emptyList());
-
-		// Exercise the increment(Marker, Level) path which drives the standard-level counters.
-		filter.increment(null, Level.ERROR);
-		filter.increment(null, Level.WARN);
-		filter.increment(null, Level.INFO);
-		filter.increment(null, Level.DEBUG);
-		filter.increment(null, Level.TRACE);
-
-		assertThat(registry.find("logback.events").tag("level", "error").counter().count()).isEqualTo(1.0);
-		assertThat(registry.find("logback.events").tag("level", "warn").counter().count()).isEqualTo(1.0);
-		assertThat(registry.find("logback.events").tag("level", "info").counter().count()).isEqualTo(1.0);
-		assertThat(registry.find("logback.events").tag("level", "debug").counter().count()).isEqualTo(1.0);
-		assertThat(registry.find("logback.events").tag("level", "trace").counter().count()).isEqualTo(1.0);
-	}
 }

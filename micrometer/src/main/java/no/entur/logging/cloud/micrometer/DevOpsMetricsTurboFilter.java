@@ -88,7 +88,8 @@ public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEven
             return c;
         }
         if (existing != null) {
-            registry.remove(existing);
+            throw new IllegalStateException("Meter with name '" + name + "' and tag '" + tagKey + "=" + tagValue
+                    + "' already exists but is not a Counter: " + existing.getClass().getName());
         }
         return Counter.builder(name)
                 .tags(baseTags)

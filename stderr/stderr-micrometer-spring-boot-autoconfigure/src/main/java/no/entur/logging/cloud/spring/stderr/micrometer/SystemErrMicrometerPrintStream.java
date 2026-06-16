@@ -28,13 +28,6 @@ import java.io.PrintStream;
  */
 public class SystemErrMicrometerPrintStream extends PrintStream implements DisposableBean {
 
-    /**
-     * No-op counter used when a non-{@code Counter} meter (e.g., a {@code FunctionCounter}
-     * registered by Micrometer 1.17+'s built-in {@code MetricsTurboFilter}) already occupies
-     * the same metric ID.  Incrementing it is safe but has no observable effect.
-     */
-    private static final Counter NOOP_COUNTER = Counter.builder("noop").register(new SimpleMeterRegistry());
-
     private final PrintStream originalSystemErr;
     private final Counter errorCounter;
     private final Counter errorTellMeTomorrowCounter;
@@ -60,7 +53,6 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
 
     /**
      * Captures an existing {@link Counter} from the registry, or registers a fresh one.
-     * Returns {@link #NOOP_COUNTER} when a non-{@code Counter} meter already owns the ID.
      */
     private static Counter captureOrRegister(MeterRegistry registry, String name,
             String tagKey, String tagValue, String description) {
@@ -68,7 +60,8 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
         if (existing instanceof Counter c) {
             return c;
         } else if (existing != null) {
-            return NOOP_COUNTER;
+            throw new IllegalStateException("Meter with name '" + name + "' and tag '" + tagKey + "=" + tagValue
+                    + "' already exists but is not a Counter: " + existing.getClass().getName());
         }
         return Counter.builder(name)
                 .tags(tagKey, tagValue)
