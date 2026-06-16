@@ -1,0 +1,3545 @@
+{
+  "groups": [
+    {
+      "name": "management.appoptics.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.appoptics.AppOpticsProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.appoptics.AppOpticsProperties"
+    },
+    {
+      "name": "management.atlas.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties"
+    },
+    {
+      "name": "management.datadog.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.datadog.DatadogProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.datadog.DatadogProperties"
+    },
+    {
+      "name": "management.dynatrace.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties"
+    },
+    {
+      "name": "management.dynatrace.metrics.export.v1",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties$V1",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties",
+      "sourceMethod": "getV1()"
+    },
+    {
+      "name": "management.dynatrace.metrics.export.v2",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties$V2",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties",
+      "sourceMethod": "getV2()"
+    },
+    {
+      "name": "management.elastic.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties"
+    },
+    {
+      "name": "management.endpoint.metrics",
+      "type": "org.springframework.boot.micrometer.metrics.actuate.endpoint.MetricsEndpoint",
+      "sourceType": "org.springframework.boot.micrometer.metrics.actuate.endpoint.MetricsEndpoint"
+    },
+    {
+      "name": "management.endpoint.prometheus",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusScrapeEndpoint",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusScrapeEndpoint"
+    },
+    {
+      "name": "management.ganglia.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.ganglia.GangliaProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.ganglia.GangliaProperties"
+    },
+    {
+      "name": "management.graphite.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.graphite.GraphiteProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.graphite.GraphiteProperties"
+    },
+    {
+      "name": "management.humio.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.humio.HumioProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.humio.HumioProperties"
+    },
+    {
+      "name": "management.influx.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties"
+    },
+    {
+      "name": "management.jmx.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.jmx.JmxProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.jmx.JmxProperties"
+    },
+    {
+      "name": "management.kairos.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.kairos.KairosProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.kairos.KairosProperties"
+    },
+    {
+      "name": "management.metrics",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties"
+    },
+    {
+      "name": "management.metrics.distribution",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Distribution",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties",
+      "sourceMethod": "getDistribution()"
+    },
+    {
+      "name": "management.metrics.observations",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Observations",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties",
+      "sourceMethod": "getObservations()"
+    },
+    {
+      "name": "management.metrics.system",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$System",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties",
+      "sourceMethod": "getSystem()"
+    },
+    {
+      "name": "management.metrics.system.diskspace",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$System$Diskspace",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$System",
+      "sourceMethod": "getDiskspace()"
+    },
+    {
+      "name": "management.metrics.web",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Web",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties",
+      "sourceMethod": "getWeb()"
+    },
+    {
+      "name": "management.metrics.web.client",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Web$Client",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Web",
+      "sourceMethod": "getClient()"
+    },
+    {
+      "name": "management.metrics.web.server",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Web$Server",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Web",
+      "sourceMethod": "getServer()"
+    },
+    {
+      "name": "management.newrelic.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.newrelic.NewRelicProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.newrelic.NewRelicProperties"
+    },
+    {
+      "name": "management.otlp.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.otlp.OtlpMetricsProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.otlp.OtlpMetricsProperties"
+    },
+    {
+      "name": "management.prometheus.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties"
+    },
+    {
+      "name": "management.prometheus.metrics.export.pushgateway",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties$Pushgateway",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties",
+      "sourceMethod": "getPushgateway()"
+    },
+    {
+      "name": "management.simple.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.simple.SimpleProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.simple.SimpleProperties"
+    },
+    {
+      "name": "management.stackdriver.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.stackdriver.StackdriverProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.stackdriver.StackdriverProperties"
+    },
+    {
+      "name": "management.statsd.metrics.export",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.statsd.StatsdProperties",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.statsd.StatsdProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "management.appoptics.metrics.export.api-token",
+      "type": "java.lang.String",
+      "description": "AppOptics API token.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.appoptics.AppOpticsProperties"
+    },
+    {
+      "name": "management.appoptics.metrics.export.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Number of measurements per request to use for this backend. If more measurements are found, then multiple requests will be made.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.appoptics.AppOpticsProperties",
+      "defaultValue": 500
+    },
+    {
+      "name": "management.appoptics.metrics.export.connect-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.appoptics.AppOpticsProperties",
+      "defaultValue": "5s"
+    },
+    {
+      "name": "management.appoptics.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to this backend is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.appoptics.AppOpticsProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.appoptics.metrics.export.floor-times",
+      "type": "java.lang.Boolean",
+      "description": "Whether to ship a floored time, useful when sending measurements from multiple hosts to align them on a given time boundary.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.appoptics.AppOpticsProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "management.appoptics.metrics.export.host-tag",
+      "type": "java.lang.String",
+      "description": "Tag that will be mapped to \"@host\" when shipping metrics to AppOptics.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.appoptics.AppOpticsProperties",
+      "defaultValue": "instance"
+    },
+    {
+      "name": "management.appoptics.metrics.export.read-timeout",
+      "type": "java.time.Duration",
+      "description": "Read timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.appoptics.AppOpticsProperties",
+      "defaultValue": "10s"
+    },
+    {
+      "name": "management.appoptics.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size (i.e. reporting frequency) to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.appoptics.AppOpticsProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.appoptics.metrics.export.uri",
+      "type": "java.lang.String",
+      "description": "URI to ship metrics to.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.appoptics.AppOpticsProperties",
+      "defaultValue": "https:\/\/api.appoptics.com\/v1\/measurements"
+    },
+    {
+      "name": "management.atlas.metrics.export.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Number of measurements per request to use for this backend. If more measurements are found, then multiple requests will be made.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties",
+      "defaultValue": 10000
+    },
+    {
+      "name": "management.atlas.metrics.export.config-refresh-frequency",
+      "type": "java.time.Duration",
+      "description": "Frequency for refreshing config settings from the LWC service.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties",
+      "defaultValue": "10s"
+    },
+    {
+      "name": "management.atlas.metrics.export.config-time-to-live",
+      "type": "java.time.Duration",
+      "description": "Time to live for subscriptions from the LWC service.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties",
+      "defaultValue": "150s"
+    },
+    {
+      "name": "management.atlas.metrics.export.config-uri",
+      "type": "java.lang.String",
+      "description": "URI for the Atlas LWC endpoint to retrieve current subscriptions.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties",
+      "defaultValue": "http:\/\/localhost:7101\/lwc\/api\/v1\/expressions\/local-dev"
+    },
+    {
+      "name": "management.atlas.metrics.export.connect-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties",
+      "defaultValue": "1s"
+    },
+    {
+      "name": "management.atlas.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to this backend is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.atlas.metrics.export.eval-uri",
+      "type": "java.lang.String",
+      "description": "URI for the Atlas LWC endpoint to evaluate the data for a subscription.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties",
+      "defaultValue": "http:\/\/localhost:7101\/lwc\/api\/v1\/evaluate"
+    },
+    {
+      "name": "management.atlas.metrics.export.lwc-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable streaming to Atlas LWC.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "management.atlas.metrics.export.lwc-ignore-publish-step",
+      "type": "java.lang.Boolean",
+      "description": "Whether expressions with the same step size as Atlas publishing should be ignored for streaming. Used for cases where data being published to Atlas is also sent into streaming from the backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.atlas.metrics.export.lwc-step",
+      "type": "java.time.Duration",
+      "description": "Step size (reporting frequency) to use for streaming to Atlas LWC. This is the highest supported resolution for getting an on-demand stream of the data. It must be less than or equal to management.metrics.export.atlas.step and management.metrics.export.atlas.step should be an even multiple of this value.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties",
+      "defaultValue": "5s"
+    },
+    {
+      "name": "management.atlas.metrics.export.meter-time-to-live",
+      "type": "java.time.Duration",
+      "description": "Time to live for meters that do not have any activity. After this period the meter will be considered expired and will not get reported.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties",
+      "defaultValue": "15m"
+    },
+    {
+      "name": "management.atlas.metrics.export.num-threads",
+      "type": "java.lang.Integer",
+      "description": "Number of threads to use with the metrics publishing scheduler.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties",
+      "defaultValue": 4
+    },
+    {
+      "name": "management.atlas.metrics.export.read-timeout",
+      "type": "java.time.Duration",
+      "description": "Read timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties",
+      "defaultValue": "10s"
+    },
+    {
+      "name": "management.atlas.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size (i.e. reporting frequency) to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.atlas.metrics.export.uri",
+      "type": "java.lang.String",
+      "description": "URI of the Atlas server.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.atlas.AtlasProperties",
+      "defaultValue": "http:\/\/localhost:7101\/api\/v1\/publish"
+    },
+    {
+      "name": "management.datadog.metrics.export.api-key",
+      "type": "java.lang.String",
+      "description": "Datadog API key.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.datadog.DatadogProperties"
+    },
+    {
+      "name": "management.datadog.metrics.export.application-key",
+      "type": "java.lang.String",
+      "description": "Datadog application key. Not strictly required, but improves the Datadog experience by sending meter descriptions, types, and base units to Datadog.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.datadog.DatadogProperties"
+    },
+    {
+      "name": "management.datadog.metrics.export.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Number of measurements per request to use for this backend. If more measurements are found, then multiple requests will be made.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.datadog.DatadogProperties",
+      "defaultValue": 10000
+    },
+    {
+      "name": "management.datadog.metrics.export.connect-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.datadog.DatadogProperties",
+      "defaultValue": "1s"
+    },
+    {
+      "name": "management.datadog.metrics.export.descriptions",
+      "type": "java.lang.Boolean",
+      "description": "Whether to publish descriptions metadata to Datadog. Turn this off to minimize the amount of metadata sent.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.datadog.DatadogProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.datadog.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to this backend is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.datadog.DatadogProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.datadog.metrics.export.host-tag",
+      "type": "java.lang.String",
+      "description": "Tag that will be mapped to \"host\" when shipping metrics to Datadog.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.datadog.DatadogProperties",
+      "defaultValue": "instance"
+    },
+    {
+      "name": "management.datadog.metrics.export.read-timeout",
+      "type": "java.time.Duration",
+      "description": "Read timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.datadog.DatadogProperties",
+      "defaultValue": "10s"
+    },
+    {
+      "name": "management.datadog.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size (i.e. reporting frequency) to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.datadog.DatadogProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.datadog.metrics.export.uri",
+      "type": "java.lang.String",
+      "description": "URI to ship metrics to. Set this if you need to publish metrics to a Datadog site other than US, or to an internal proxy en-route to Datadog.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.datadog.DatadogProperties",
+      "defaultValue": "https:\/\/api.datadoghq.com"
+    },
+    {
+      "name": "management.defaults.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable default metrics exporters.",
+      "defaultValue": true
+    },
+    {
+      "name": "management.dynatrace.metrics.export.api-token",
+      "type": "java.lang.String",
+      "description": "Dynatrace authentication token.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties"
+    },
+    {
+      "name": "management.dynatrace.metrics.export.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Number of measurements per request to use for this backend. If more measurements are found, then multiple requests will be made.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties",
+      "defaultValue": 10000
+    },
+    {
+      "name": "management.dynatrace.metrics.export.connect-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties",
+      "defaultValue": "1s"
+    },
+    {
+      "name": "management.dynatrace.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to this backend is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.dynatrace.metrics.export.read-timeout",
+      "type": "java.time.Duration",
+      "description": "Read timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties",
+      "defaultValue": "10s"
+    },
+    {
+      "name": "management.dynatrace.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size (i.e. reporting frequency) to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.dynatrace.metrics.export.uri",
+      "type": "java.lang.String",
+      "description": "URI to ship metrics to. Should be used for SaaS, self-managed instances or to en-route through an internal proxy.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties"
+    },
+    {
+      "name": "management.dynatrace.metrics.export.v1.device-id",
+      "type": "java.lang.String",
+      "description": "ID of the custom device that is exporting metrics to Dynatrace.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties$V1"
+    },
+    {
+      "name": "management.dynatrace.metrics.export.v1.group",
+      "type": "java.lang.String",
+      "description": "Group for exported metrics. Used to specify custom device group name in the Dynatrace UI.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties$V1"
+    },
+    {
+      "name": "management.dynatrace.metrics.export.v1.technology-type",
+      "type": "java.lang.String",
+      "description": "Technology type for exported metrics. Used to group metrics under a logical technology name in the Dynatrace UI.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties$V1",
+      "defaultValue": "java"
+    },
+    {
+      "name": "management.dynatrace.metrics.export.v2.default-dimensions",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Default dimensions that are added to all metrics in the form of key-value pairs. These are overwritten by Micrometer tags if they use the same key.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties$V2"
+    },
+    {
+      "name": "management.dynatrace.metrics.export.v2.enrich-with-dynatrace-metadata",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable Dynatrace metadata export.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties$V2",
+      "defaultValue": true
+    },
+    {
+      "name": "management.dynatrace.metrics.export.v2.export-meter-metadata",
+      "type": "java.lang.Boolean",
+      "description": "Whether to export meter metadata (unit and description) to the Dynatrace backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties$V2",
+      "defaultValue": true
+    },
+    {
+      "name": "management.dynatrace.metrics.export.v2.metric-key-prefix",
+      "type": "java.lang.String",
+      "description": "Prefix string that is added to all exported metrics.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties$V2"
+    },
+    {
+      "name": "management.dynatrace.metrics.export.v2.use-dynatrace-summary-instruments",
+      "type": "java.lang.Boolean",
+      "description": "Whether to fall back to the built-in micrometer instruments for Timer and DistributionSummary.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.dynatrace.DynatraceProperties$V2",
+      "defaultValue": true
+    },
+    {
+      "name": "management.elastic.metrics.export.api-key-credentials",
+      "type": "java.lang.String",
+      "description": "Base64-encoded credentials string. Mutually exclusive with user-name and password.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties"
+    },
+    {
+      "name": "management.elastic.metrics.export.auto-create-index",
+      "type": "java.lang.Boolean",
+      "description": "Whether to create the index automatically if it does not exist.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.elastic.metrics.export.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Number of measurements per request to use for this backend. If more measurements are found, then multiple requests will be made.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties",
+      "defaultValue": 10000
+    },
+    {
+      "name": "management.elastic.metrics.export.connect-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties",
+      "defaultValue": "1s"
+    },
+    {
+      "name": "management.elastic.metrics.export.enable-source",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable _source in the default index template when auto-creating the index.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "management.elastic.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to this backend is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.elastic.metrics.export.host",
+      "type": "java.lang.String",
+      "description": "Host to export metrics to.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties",
+      "defaultValue": "http:\/\/localhost:9200"
+    },
+    {
+      "name": "management.elastic.metrics.export.index",
+      "type": "java.lang.String",
+      "description": "Index to export metrics to.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties",
+      "defaultValue": "micrometer-metrics"
+    },
+    {
+      "name": "management.elastic.metrics.export.index-date-format",
+      "type": "java.lang.String",
+      "description": "Index date format used for rolling indices. Appended to the index name.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties",
+      "defaultValue": "yyyy-MM"
+    },
+    {
+      "name": "management.elastic.metrics.export.index-date-separator",
+      "type": "java.lang.String",
+      "description": "Prefix to separate the index name from the date format used for rolling indices.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties",
+      "defaultValue": "-"
+    },
+    {
+      "name": "management.elastic.metrics.export.password",
+      "type": "java.lang.String",
+      "description": "Login password of the Elastic server. Mutually exclusive with api-key-credentials.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties"
+    },
+    {
+      "name": "management.elastic.metrics.export.pipeline",
+      "type": "java.lang.String",
+      "description": "Ingest pipeline name. By default, events are not pre-processed.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties"
+    },
+    {
+      "name": "management.elastic.metrics.export.read-timeout",
+      "type": "java.time.Duration",
+      "description": "Read timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties",
+      "defaultValue": "10s"
+    },
+    {
+      "name": "management.elastic.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size (i.e. reporting frequency) to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.elastic.metrics.export.timestamp-field-name",
+      "type": "java.lang.String",
+      "description": "Name of the timestamp field.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties",
+      "defaultValue": "@timestamp"
+    },
+    {
+      "name": "management.elastic.metrics.export.user-name",
+      "type": "java.lang.String",
+      "description": "Login user of the Elastic server. Mutually exclusive with api-key-credentials.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.elastic.ElasticProperties"
+    },
+    {
+      "name": "management.endpoint.metrics.access",
+      "type": "org.springframework.boot.actuate.endpoint.Access",
+      "description": "Permitted level of access for the metrics endpoint.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.actuate.endpoint.MetricsEndpoint",
+      "defaultValue": "unrestricted"
+    },
+    {
+      "name": "management.endpoint.metrics.cache.time-to-live",
+      "type": "java.time.Duration",
+      "description": "Maximum time that a response can be cached.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.actuate.endpoint.MetricsEndpoint",
+      "defaultValue": "0ms"
+    },
+    {
+      "name": "management.endpoint.prometheus.access",
+      "type": "org.springframework.boot.actuate.endpoint.Access",
+      "description": "Permitted level of access for the prometheus endpoint.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusScrapeEndpoint",
+      "defaultValue": "unrestricted"
+    },
+    {
+      "name": "management.ganglia.metrics.export.addressing-mode",
+      "type": "info.ganglia.gmetric4j.gmetric.GMetric$UDPAddressingMode",
+      "description": "UDP addressing mode, either unicast or multicast.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.ganglia.GangliaProperties",
+      "defaultValue": "multicast"
+    },
+    {
+      "name": "management.ganglia.metrics.export.duration-units",
+      "type": "java.util.concurrent.TimeUnit",
+      "description": "Base time unit used to report durations.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.ganglia.GangliaProperties",
+      "defaultValue": "milliseconds"
+    },
+    {
+      "name": "management.ganglia.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to Ganglia is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.ganglia.GangliaProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.ganglia.metrics.export.host",
+      "type": "java.lang.String",
+      "description": "Host of the Ganglia server to receive exported metrics.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.ganglia.GangliaProperties",
+      "defaultValue": "localhost"
+    },
+    {
+      "name": "management.ganglia.metrics.export.port",
+      "type": "java.lang.Integer",
+      "description": "Port of the Ganglia server to receive exported metrics.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.ganglia.GangliaProperties",
+      "defaultValue": 8649
+    },
+    {
+      "name": "management.ganglia.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size (i.e. reporting frequency) to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.ganglia.GangliaProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.ganglia.metrics.export.time-to-live",
+      "type": "java.lang.Integer",
+      "description": "Time to live for metrics on Ganglia. Set the multicast Time-To-Live to be one greater than the number of hops (routers) between the hosts.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.ganglia.GangliaProperties",
+      "defaultValue": 1
+    },
+    {
+      "name": "management.graphite.metrics.export.duration-units",
+      "type": "java.util.concurrent.TimeUnit",
+      "description": "Base time unit used to report durations.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.graphite.GraphiteProperties",
+      "defaultValue": "milliseconds"
+    },
+    {
+      "name": "management.graphite.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to Graphite is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.graphite.GraphiteProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.graphite.metrics.export.graphite-tags-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether Graphite tags should be used, as opposed to a hierarchical naming convention. Enabled by default unless \"tagsAsPrefix\" is set.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.graphite.GraphiteProperties"
+    },
+    {
+      "name": "management.graphite.metrics.export.host",
+      "type": "java.lang.String",
+      "description": "Host of the Graphite server to receive exported metrics.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.graphite.GraphiteProperties",
+      "defaultValue": "localhost"
+    },
+    {
+      "name": "management.graphite.metrics.export.port",
+      "type": "java.lang.Integer",
+      "description": "Port of the Graphite server to receive exported metrics.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.graphite.GraphiteProperties",
+      "defaultValue": 2004
+    },
+    {
+      "name": "management.graphite.metrics.export.protocol",
+      "type": "io.micrometer.graphite.GraphiteProtocol",
+      "description": "Protocol to use while shipping data to Graphite.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.graphite.GraphiteProperties",
+      "defaultValue": "pickled"
+    },
+    {
+      "name": "management.graphite.metrics.export.rate-units",
+      "type": "java.util.concurrent.TimeUnit",
+      "description": "Base time unit used to report rates.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.graphite.GraphiteProperties",
+      "defaultValue": "seconds"
+    },
+    {
+      "name": "management.graphite.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size (i.e. reporting frequency) to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.graphite.GraphiteProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.graphite.metrics.export.tags-as-prefix",
+      "type": "java.lang.String[]",
+      "description": "For the hierarchical naming convention, turn the specified tag keys into part of the metric prefix. Ignored if \"graphiteTagsEnabled\" is true.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.graphite.GraphiteProperties",
+      "defaultValue": []
+    },
+    {
+      "name": "management.humio.metrics.export.api-token",
+      "type": "java.lang.String",
+      "description": "Humio API token.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.humio.HumioProperties"
+    },
+    {
+      "name": "management.humio.metrics.export.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Number of measurements per request to use for this backend. If more measurements are found, then multiple requests will be made.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.humio.HumioProperties",
+      "defaultValue": 10000
+    },
+    {
+      "name": "management.humio.metrics.export.connect-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.humio.HumioProperties",
+      "defaultValue": "5s"
+    },
+    {
+      "name": "management.humio.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to this backend is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.humio.HumioProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.humio.metrics.export.read-timeout",
+      "type": "java.time.Duration",
+      "description": "Read timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.humio.HumioProperties",
+      "defaultValue": "10s"
+    },
+    {
+      "name": "management.humio.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size (i.e. reporting frequency) to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.humio.HumioProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.humio.metrics.export.tags",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Humio tags describing the data source in which metrics will be stored. Humio tags are a distinct concept from Micrometer's tags. Micrometer's tags are used to divide metrics along dimensional boundaries.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.humio.HumioProperties"
+    },
+    {
+      "name": "management.humio.metrics.export.uri",
+      "type": "java.lang.String",
+      "description": "URI to ship metrics to. If you need to publish metrics to an internal proxy en-route to Humio, you can define the location of the proxy with this.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.humio.HumioProperties",
+      "defaultValue": "https:\/\/cloud.humio.com"
+    },
+    {
+      "name": "management.influx.metrics.export.api-version",
+      "type": "io.micrometer.influx.InfluxApiVersion",
+      "description": "API version of InfluxDB to use. Defaults to 'v1' unless an org is configured. If an org is configured, defaults to 'v2'.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties"
+    },
+    {
+      "name": "management.influx.metrics.export.auto-create-db",
+      "type": "java.lang.Boolean",
+      "description": "Whether to create the Influx database if it does not exist before attempting to publish metrics to it. InfluxDB v1 only.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.influx.metrics.export.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Number of measurements per request to use for this backend. If more measurements are found, then multiple requests will be made.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties",
+      "defaultValue": 10000
+    },
+    {
+      "name": "management.influx.metrics.export.bucket",
+      "type": "java.lang.String",
+      "description": "Bucket for metrics. Use either the bucket name or ID. Defaults to the value of the db property if not set. InfluxDB v2 only.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties"
+    },
+    {
+      "name": "management.influx.metrics.export.compressed",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable GZIP compression of metrics batches published to Influx.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.influx.metrics.export.connect-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties",
+      "defaultValue": "1s"
+    },
+    {
+      "name": "management.influx.metrics.export.consistency",
+      "type": "io.micrometer.influx.InfluxConsistency",
+      "description": "Write consistency for each point.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties",
+      "defaultValue": "one"
+    },
+    {
+      "name": "management.influx.metrics.export.db",
+      "type": "java.lang.String",
+      "description": "Database to send metrics to. InfluxDB v1 only.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties",
+      "defaultValue": "mydb"
+    },
+    {
+      "name": "management.influx.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to this backend is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.influx.metrics.export.org",
+      "type": "java.lang.String",
+      "description": "Org to write metrics to. InfluxDB v2 only.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties"
+    },
+    {
+      "name": "management.influx.metrics.export.password",
+      "type": "java.lang.String",
+      "description": "Login password of the Influx server. InfluxDB v1 only.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties"
+    },
+    {
+      "name": "management.influx.metrics.export.read-timeout",
+      "type": "java.time.Duration",
+      "description": "Read timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties",
+      "defaultValue": "10s"
+    },
+    {
+      "name": "management.influx.metrics.export.retention-duration",
+      "type": "java.lang.String",
+      "description": "Time period for which Influx should retain data in the current database. For instance 7d, check the influx documentation for more details on the duration format. InfluxDB v1 only.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties"
+    },
+    {
+      "name": "management.influx.metrics.export.retention-policy",
+      "type": "java.lang.String",
+      "description": "Retention policy to use (Influx writes to the DEFAULT retention policy if one is not specified). InfluxDB v1 only.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties"
+    },
+    {
+      "name": "management.influx.metrics.export.retention-replication-factor",
+      "type": "java.lang.Integer",
+      "description": "How many copies of the data are stored in the cluster. Must be 1 for a single node instance. InfluxDB v1 only.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties"
+    },
+    {
+      "name": "management.influx.metrics.export.retention-shard-duration",
+      "type": "java.lang.String",
+      "description": "Time range covered by a shard group. For instance 2w, check the influx documentation for more details on the duration format. InfluxDB v1 only.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties"
+    },
+    {
+      "name": "management.influx.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size (i.e. reporting frequency) to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.influx.metrics.export.token",
+      "type": "java.lang.String",
+      "description": "Authentication token to use with calls to the InfluxDB backend. For InfluxDB v1, the Bearer scheme is used. For v2, the Token scheme is used.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties"
+    },
+    {
+      "name": "management.influx.metrics.export.uri",
+      "type": "java.lang.String",
+      "description": "URI of the Influx server.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties",
+      "defaultValue": "http:\/\/localhost:8086"
+    },
+    {
+      "name": "management.influx.metrics.export.user-name",
+      "type": "java.lang.String",
+      "description": "Login user of the Influx server. InfluxDB v1 only.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.influx.InfluxProperties"
+    },
+    {
+      "name": "management.jmx.metrics.export.domain",
+      "type": "java.lang.String",
+      "description": "Metrics JMX domain name.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.jmx.JmxProperties",
+      "defaultValue": "metrics"
+    },
+    {
+      "name": "management.jmx.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to this backend is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.jmx.JmxProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.jmx.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size (i.e. reporting frequency) to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.jmx.JmxProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.kairos.metrics.export.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Number of measurements per request to use for this backend. If more measurements are found, then multiple requests will be made.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.kairos.KairosProperties",
+      "defaultValue": 10000
+    },
+    {
+      "name": "management.kairos.metrics.export.connect-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.kairos.KairosProperties",
+      "defaultValue": "1s"
+    },
+    {
+      "name": "management.kairos.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to this backend is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.kairos.KairosProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.kairos.metrics.export.password",
+      "type": "java.lang.String",
+      "description": "Login password of the KairosDB server.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.kairos.KairosProperties"
+    },
+    {
+      "name": "management.kairos.metrics.export.read-timeout",
+      "type": "java.time.Duration",
+      "description": "Read timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.kairos.KairosProperties",
+      "defaultValue": "10s"
+    },
+    {
+      "name": "management.kairos.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size (i.e. reporting frequency) to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.kairos.KairosProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.kairos.metrics.export.uri",
+      "type": "java.lang.String",
+      "description": "URI of the KairosDB server.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.kairos.KairosProperties",
+      "defaultValue": "http:\/\/localhost:8080\/api\/v1\/datapoints"
+    },
+    {
+      "name": "management.kairos.metrics.export.user-name",
+      "type": "java.lang.String",
+      "description": "Login user of the KairosDB server.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.kairos.KairosProperties"
+    },
+    {
+      "name": "management.metrics.distribution.buffer-length",
+      "type": "java.util.Map<java.lang.String,java.lang.Integer>",
+      "description": "Number of histograms for meter IDs starting with the specified name to keep in the ring buffer. The longest match wins, the key `all` can also be used to configure all meters.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Distribution"
+    },
+    {
+      "name": "management.metrics.distribution.expiry",
+      "type": "java.util.Map<java.lang.String,java.time.Duration>",
+      "description": "Maximum amount of time that samples for meter IDs starting with the specified name are accumulated to decaying distribution statistics before they are reset and rotated. The longest match wins, the key `all` can also be used to configure all meters.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Distribution"
+    },
+    {
+      "name": "management.metrics.distribution.maximum-expected-value",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Maximum value that meter IDs starting with the specified name are expected to observe. The longest match wins. Values can be specified as a double or as a Duration value (for timer meters, defaulting to ms if no unit specified).",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Distribution"
+    },
+    {
+      "name": "management.metrics.distribution.minimum-expected-value",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Minimum value that meter IDs starting with the specified name are expected to observe. The longest match wins. Values can be specified as a double or as a Duration value (for timer meters, defaulting to ms if no unit specified).",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Distribution"
+    },
+    {
+      "name": "management.metrics.distribution.percentiles",
+      "type": "java.util.Map<java.lang.String,java.lang.Double[]>",
+      "description": "Specific computed non-aggregable percentiles to ship to the backend for meter IDs starting-with the specified name. The longest match wins, the key 'all' can also be used to configure all meters.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Distribution"
+    },
+    {
+      "name": "management.metrics.distribution.percentiles-histogram",
+      "type": "java.util.Map<java.lang.String,java.lang.Boolean>",
+      "description": "Whether meter IDs starting with the specified name should publish percentile histograms. For monitoring systems that support aggregable percentile calculation based on a histogram, this can be set to true. For other systems, this has no effect. The longest match wins, the key 'all' can also be used to configure all meters.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Distribution"
+    },
+    {
+      "name": "management.metrics.distribution.slo",
+      "type": "java.util.Map<java.lang.String,org.springframework.boot.micrometer.metrics.autoconfigure.ServiceLevelObjectiveBoundary[]>",
+      "description": "Specific service-level objective boundaries for meter IDs starting with the specified name. The longest match wins. Counters will be published for each specified boundary. Values can be specified as a double or as a Duration value (for timer meters, defaulting to ms if no unit specified).",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Distribution"
+    },
+    {
+      "name": "management.metrics.enable",
+      "type": "java.util.Map<java.lang.String,java.lang.Boolean>",
+      "description": "Whether meter IDs starting with the specified name should be enabled. The longest match wins, the key 'all' can also be used to configure all meters.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties"
+    },
+    {
+      "name": "management.metrics.observations.ignored-meters",
+      "type": "java.util.Set<io.micrometer.core.instrument.observation.DefaultMeterObservationHandler$IgnoredMeters>",
+      "description": "Meters that should be ignored when recoding observations.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Observations"
+    },
+    {
+      "name": "management.metrics.system.diskspace.paths",
+      "type": "java.util.List<java.io.File>",
+      "description": "List of paths to report disk metrics for.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$System$Diskspace",
+      "defaultValue": [
+        "."
+      ]
+    },
+    {
+      "name": "management.metrics.tags",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Common tags that are applied to every meter.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties"
+    },
+    {
+      "name": "management.metrics.use-global-registry",
+      "type": "java.lang.Boolean",
+      "description": "Whether auto-configured MeterRegistry implementations should be bound to the global static registry on Metrics. For testing, set this to 'false' to maximize test independence.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.metrics.web.client.max-uri-tags",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of unique URI tag values allowed. After the max number of tag values is reached, metrics with additional tag values are denied by filter.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Web$Client",
+      "defaultValue": 100
+    },
+    {
+      "name": "management.metrics.web.server.max-uri-tags",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of unique URI tag values allowed. After the max number of tag values is reached, metrics with additional tag values are denied by filter.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties$Web$Server",
+      "defaultValue": 100
+    },
+    {
+      "name": "management.newrelic.metrics.export.account-id",
+      "type": "java.lang.String",
+      "description": "New Relic account ID.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.newrelic.NewRelicProperties"
+    },
+    {
+      "name": "management.newrelic.metrics.export.api-key",
+      "type": "java.lang.String",
+      "description": "New Relic API key.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.newrelic.NewRelicProperties"
+    },
+    {
+      "name": "management.newrelic.metrics.export.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Number of measurements per request to use for this backend. If more measurements are found, then multiple requests will be made.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.newrelic.NewRelicProperties",
+      "defaultValue": 10000
+    },
+    {
+      "name": "management.newrelic.metrics.export.client-provider-type",
+      "type": "io.micrometer.newrelic.ClientProviderType",
+      "description": "Client provider type to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.newrelic.NewRelicProperties",
+      "defaultValue": "insights-api"
+    },
+    {
+      "name": "management.newrelic.metrics.export.connect-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.newrelic.NewRelicProperties",
+      "defaultValue": "1s"
+    },
+    {
+      "name": "management.newrelic.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to this backend is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.newrelic.NewRelicProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.newrelic.metrics.export.event-type",
+      "type": "java.lang.String",
+      "description": "The event type that should be published. This property will be ignored if 'meter-name-event-type-enabled' is set to 'true'.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.newrelic.NewRelicProperties",
+      "defaultValue": "SpringBootSample"
+    },
+    {
+      "name": "management.newrelic.metrics.export.meter-name-event-type-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to send the meter name as the event type instead of using the 'event-type' configuration property value. Can be set to 'true' if New Relic guidelines are not being followed or event types consistent with previous Spring Boot releases are required.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.newrelic.NewRelicProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "management.newrelic.metrics.export.read-timeout",
+      "type": "java.time.Duration",
+      "description": "Read timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.newrelic.NewRelicProperties",
+      "defaultValue": "10s"
+    },
+    {
+      "name": "management.newrelic.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size (i.e. reporting frequency) to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.newrelic.NewRelicProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.newrelic.metrics.export.uri",
+      "type": "java.lang.String",
+      "description": "URI to ship metrics to.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.newrelic.NewRelicProperties",
+      "defaultValue": "https:\/\/insights-collector.newrelic.com"
+    },
+    {
+      "name": "management.otlp.metrics.export.aggregation-temporality",
+      "type": "io.micrometer.registry.otlp.AggregationTemporality",
+      "description": "Aggregation temporality of sums. It defines the way additive values are expressed. This setting depends on the backend you use, some only support one temporality.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.otlp.OtlpMetricsProperties",
+      "defaultValue": "cumulative"
+    },
+    {
+      "name": "management.otlp.metrics.export.base-time-unit",
+      "type": "java.util.concurrent.TimeUnit",
+      "description": "Time unit for exported metrics.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.otlp.OtlpMetricsProperties",
+      "defaultValue": "milliseconds"
+    },
+    {
+      "name": "management.otlp.metrics.export.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Number of measurements per request to use for this backend. If more measurements are found, then multiple requests will be made.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.otlp.OtlpMetricsProperties",
+      "defaultValue": 10000
+    },
+    {
+      "name": "management.otlp.metrics.export.connect-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.otlp.OtlpMetricsProperties",
+      "defaultValue": "1s"
+    },
+    {
+      "name": "management.otlp.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to this backend is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.otlp.OtlpMetricsProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.otlp.metrics.export.headers",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Headers for the exported metrics.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.otlp.OtlpMetricsProperties"
+    },
+    {
+      "name": "management.otlp.metrics.export.histogram-flavor",
+      "type": "io.micrometer.registry.otlp.HistogramFlavor",
+      "description": "Default histogram type when histogram publishing is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.otlp.OtlpMetricsProperties",
+      "defaultValue": "explicit-bucket-histogram"
+    },
+    {
+      "name": "management.otlp.metrics.export.max-bucket-count",
+      "type": "java.lang.Integer",
+      "description": "Default maximum number of buckets to be used for exponential histograms, if configured. This has no effect on explicit bucket histograms.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.otlp.OtlpMetricsProperties",
+      "defaultValue": 160
+    },
+    {
+      "name": "management.otlp.metrics.export.max-scale",
+      "type": "java.lang.Integer",
+      "description": "Max scale to use for exponential histograms, if configured.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.otlp.OtlpMetricsProperties",
+      "defaultValue": 20
+    },
+    {
+      "name": "management.otlp.metrics.export.meter",
+      "type": "java.util.Map<java.lang.String,org.springframework.boot.micrometer.metrics.autoconfigure.export.otlp.OtlpMetricsProperties$Meter>",
+      "description": "Per-meter properties that can be used to override defaults.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.otlp.OtlpMetricsProperties"
+    },
+    {
+      "name": "management.otlp.metrics.export.read-timeout",
+      "type": "java.time.Duration",
+      "description": "Read timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.otlp.OtlpMetricsProperties",
+      "defaultValue": "10s"
+    },
+    {
+      "name": "management.otlp.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size (i.e. reporting frequency) to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.otlp.OtlpMetricsProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.otlp.metrics.export.url",
+      "type": "java.lang.String",
+      "description": "URI of the OTLP server.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.otlp.OtlpMetricsProperties"
+    },
+    {
+      "name": "management.prometheus.metrics.export.descriptions",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable publishing descriptions as part of the scrape payload to Prometheus. Turn this off to minimize the amount of data sent on each scrape.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.prometheus.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to this backend is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.prometheus.metrics.export.properties",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Additional properties to pass to the Prometheus client.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties"
+    },
+    {
+      "name": "management.prometheus.metrics.export.pushgateway.address",
+      "type": "java.lang.String",
+      "description": "Address (host:port) for the Pushgateway.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties$Pushgateway",
+      "defaultValue": "localhost:9091"
+    },
+    {
+      "name": "management.prometheus.metrics.export.pushgateway.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable publishing over a Prometheus Pushgateway.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties$Pushgateway",
+      "defaultValue": false
+    },
+    {
+      "name": "management.prometheus.metrics.export.pushgateway.format",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties$Pushgateway$Format",
+      "description": "Format to use when pushing metrics.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties$Pushgateway",
+      "defaultValue": "protobuf"
+    },
+    {
+      "name": "management.prometheus.metrics.export.pushgateway.grouping-key",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Grouping key for the pushed metrics.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties$Pushgateway"
+    },
+    {
+      "name": "management.prometheus.metrics.export.pushgateway.job",
+      "type": "java.lang.String",
+      "description": "Job identifier for this application instance.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties$Pushgateway"
+    },
+    {
+      "name": "management.prometheus.metrics.export.pushgateway.password",
+      "type": "java.lang.String",
+      "description": "Login password of the Prometheus Pushgateway.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties$Pushgateway"
+    },
+    {
+      "name": "management.prometheus.metrics.export.pushgateway.push-rate",
+      "type": "java.time.Duration",
+      "description": "Frequency with which to push metrics.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties$Pushgateway",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.prometheus.metrics.export.pushgateway.scheme",
+      "type": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties$Pushgateway$Scheme",
+      "description": "Scheme to use when pushing metrics.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties$Pushgateway",
+      "defaultValue": "http"
+    },
+    {
+      "name": "management.prometheus.metrics.export.pushgateway.shutdown-operation",
+      "type": "org.springframework.boot.micrometer.metrics.export.prometheus.PrometheusPushGatewayManager$ShutdownOperation",
+      "description": "Operation that should be performed on shutdown.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties$Pushgateway",
+      "defaultValue": "none"
+    },
+    {
+      "name": "management.prometheus.metrics.export.pushgateway.token",
+      "type": "java.lang.String",
+      "description": "Token to use for authentication with the Prometheus Pushgateway.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties$Pushgateway"
+    },
+    {
+      "name": "management.prometheus.metrics.export.pushgateway.username",
+      "type": "java.lang.String",
+      "description": "Login user of the Prometheus Pushgateway.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties$Pushgateway"
+    },
+    {
+      "name": "management.prometheus.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size (i.e. reporting frequency) to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.simple.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to this backend is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.simple.SimpleProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.simple.metrics.export.mode",
+      "type": "io.micrometer.core.instrument.simple.CountingMode",
+      "description": "Counting mode.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.simple.SimpleProperties",
+      "defaultValue": "cumulative"
+    },
+    {
+      "name": "management.simple.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size (i.e. reporting frequency) to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.simple.SimpleProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.stackdriver.metrics.export.auto-create-metric-descriptors",
+      "type": "java.lang.Boolean",
+      "description": "Whether it should be attempted to create a metric descriptor before writing a time series.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.stackdriver.StackdriverProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.stackdriver.metrics.export.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Number of measurements per request to use for this backend. If more measurements are found, then multiple requests will be made.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.stackdriver.StackdriverProperties",
+      "defaultValue": 10000
+    },
+    {
+      "name": "management.stackdriver.metrics.export.connect-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.stackdriver.StackdriverProperties",
+      "defaultValue": "1s"
+    },
+    {
+      "name": "management.stackdriver.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to this backend is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.stackdriver.StackdriverProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.stackdriver.metrics.export.metric-type-prefix",
+      "type": "java.lang.String",
+      "description": "Prefix for metric type. Valid prefixes are described in the Google Cloud documentation (https:\/\/cloud.google.com\/monitoring\/custom-metrics#identifier).",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.stackdriver.StackdriverProperties",
+      "defaultValue": "custom.googleapis.com\/"
+    },
+    {
+      "name": "management.stackdriver.metrics.export.project-id",
+      "type": "java.lang.String",
+      "description": "Identifier of the Google Cloud project to monitor.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.stackdriver.StackdriverProperties"
+    },
+    {
+      "name": "management.stackdriver.metrics.export.read-timeout",
+      "type": "java.time.Duration",
+      "description": "Read timeout for requests to this backend.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.stackdriver.StackdriverProperties",
+      "defaultValue": "10s"
+    },
+    {
+      "name": "management.stackdriver.metrics.export.resource-labels",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Monitored resource's labels.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.stackdriver.StackdriverProperties"
+    },
+    {
+      "name": "management.stackdriver.metrics.export.resource-type",
+      "type": "java.lang.String",
+      "description": "Monitored resource type.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.stackdriver.StackdriverProperties",
+      "defaultValue": "global"
+    },
+    {
+      "name": "management.stackdriver.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size (i.e. reporting frequency) to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.stackdriver.StackdriverProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.stackdriver.metrics.export.use-semantic-metric-types",
+      "type": "java.lang.Boolean",
+      "description": "Whether to use semantically correct metric types. When false, counter metrics are published as the GAUGE MetricKind. When true, counter metrics are published as the CUMULATIVE MetricKind.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.stackdriver.StackdriverProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "management.statsd.metrics.export.buffered",
+      "type": "java.lang.Boolean",
+      "description": "Whether measurements should be buffered before sending to the StatsD server.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.statsd.StatsdProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.statsd.metrics.export.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether exporting of metrics to StatsD is enabled.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.statsd.StatsdProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.statsd.metrics.export.flavor",
+      "type": "io.micrometer.statsd.StatsdFlavor",
+      "description": "StatsD line protocol to use.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.statsd.StatsdProperties",
+      "defaultValue": "datadog"
+    },
+    {
+      "name": "management.statsd.metrics.export.host",
+      "type": "java.lang.String",
+      "description": "Host of the StatsD server to receive exported metrics.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.statsd.StatsdProperties",
+      "defaultValue": "localhost"
+    },
+    {
+      "name": "management.statsd.metrics.export.max-packet-length",
+      "type": "java.lang.Integer",
+      "description": "Total length of a single payload should be kept within your network's MTU.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.statsd.StatsdProperties",
+      "defaultValue": 1400
+    },
+    {
+      "name": "management.statsd.metrics.export.polling-frequency",
+      "type": "java.time.Duration",
+      "description": "How often gauges will be polled. When a gauge is polled, its value is recalculated and if the value has changed (or publishUnchangedMeters is true), it is sent to the StatsD server.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.statsd.StatsdProperties",
+      "defaultValue": "10s"
+    },
+    {
+      "name": "management.statsd.metrics.export.port",
+      "type": "java.lang.Integer",
+      "description": "Port of the StatsD server to receive exported metrics.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.statsd.StatsdProperties",
+      "defaultValue": 8125
+    },
+    {
+      "name": "management.statsd.metrics.export.protocol",
+      "type": "io.micrometer.statsd.StatsdProtocol",
+      "description": "Protocol of the StatsD server to receive exported metrics.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.statsd.StatsdProperties",
+      "defaultValue": "udp"
+    },
+    {
+      "name": "management.statsd.metrics.export.publish-unchanged-meters",
+      "type": "java.lang.Boolean",
+      "description": "Whether to send unchanged meters to the StatsD server.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.statsd.StatsdProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "management.statsd.metrics.export.step",
+      "type": "java.time.Duration",
+      "description": "Step size to use in computing windowed statistics like max. To get the most out of these statistics, align the step interval to be close to your scrape interval.",
+      "sourceType": "org.springframework.boot.micrometer.metrics.autoconfigure.export.statsd.StatsdProperties",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "management.metrics.binders.files.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable files metrics.",
+      "defaultValue": true,
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "Instead, filter 'process.files' metrics.",
+        "since": "2.1.0"
+      }
+    },
+    {
+      "name": "management.metrics.binders.jvm.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable JVM metrics.",
+      "defaultValue": true,
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "Instead, disable JvmMetricsAutoConfiguration or filter 'jvm' metrics.",
+        "since": "2.1.0"
+      }
+    },
+    {
+      "name": "management.metrics.binders.logback.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable Logback metrics.",
+      "defaultValue": true,
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "Instead, disable LogbackMetricsAutoConfiguration or filter 'logback' metrics.",
+        "since": "2.1.0"
+      }
+    },
+    {
+      "name": "management.metrics.binders.processor.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable processor metrics.",
+      "defaultValue": true,
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "Instead, filter 'system.cpu' and 'process.cpu' metrics.",
+        "since": "2.1.0"
+      }
+    },
+    {
+      "name": "management.metrics.binders.uptime.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable uptime metrics.",
+      "defaultValue": true,
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "Instead, filter 'process.uptime' and 'process.start.time' metrics.",
+        "since": "2.1.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.appoptics.api-token",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.appoptics.metrics.export.api-token",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.appoptics.batch-size",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.appoptics.metrics.export.batch-size",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.appoptics.connect-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.appoptics.metrics.export.connect-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.appoptics.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.appoptics.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.appoptics.floor-times",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.appoptics.metrics.export.floor-times",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.appoptics.host-tag",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.appoptics.metrics.export.host-tag",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.appoptics.num-threads",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.appoptics.read-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.appoptics.metrics.export.read-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.appoptics.step",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.appoptics.metrics.export.step",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.appoptics.uri",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.appoptics.metrics.export.uri",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.atlas.batch-size",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.atlas.metrics.export.batch-size",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.atlas.config-refresh-frequency",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.atlas.metrics.export.config-refresh-frequency",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.atlas.config-time-to-live",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.atlas.metrics.export.config-time-to-live",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.atlas.config-uri",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.atlas.metrics.export.config-uri",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.atlas.connect-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.atlas.metrics.export.connect-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.atlas.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.atlas.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.atlas.eval-uri",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.atlas.metrics.export.eval-uri",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.atlas.lwc-enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.atlas.metrics.export.lwc-enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.atlas.meter-time-to-live",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.atlas.metrics.export.meter-time-to-live",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.atlas.num-threads",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.atlas.read-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.atlas.metrics.export.read-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.atlas.step",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.atlas.metrics.export.step",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.atlas.uri",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.atlas.metrics.export.uri",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.datadog.api-key",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.datadog.metrics.export.api-key",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.datadog.application-key",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.datadog.metrics.export.application-key",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.datadog.batch-size",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.datadog.metrics.export.batch-size",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.datadog.connect-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.datadog.metrics.export.connect-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.datadog.descriptions",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.datadog.metrics.export.descriptions",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.datadog.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.datadog.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.datadog.host-tag",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.datadog.metrics.export.host-tag",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.datadog.num-threads",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.datadog.read-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.datadog.metrics.export.read-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.datadog.step",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.datadog.metrics.export.step",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.datadog.uri",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.datadog.metrics.export.uri",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.defaults.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.defaults.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.api-token",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.dynatrace.metrics.export.api-token",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.batch-size",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.dynatrace.metrics.export.batch-size",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.connect-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.dynatrace.metrics.export.connect-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.device-id",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.dynatrace.metrics.export.v1.device-id",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.dynatrace.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.group",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.dynatrace.metrics.export.v1.group",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.num-threads",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.read-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.dynatrace.metrics.export.read-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.step",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.dynatrace.metrics.export.step",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.technology-type",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.dynatrace.metrics.export.v1.technology-type",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.uri",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.dynatrace.metrics.export.uri",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.v1.device-id",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.dynatrace.metrics.export.v1.device-id",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.v1.group",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.dynatrace.metrics.export.v1.group",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.v1.technology-type",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.dynatrace.metrics.export.v1.technology-type",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.v2.default-dimensions",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.dynatrace.metrics.export.v2.default-dimensions",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.v2.enrich-with-dynatrace-metadata",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.dynatrace.metrics.export.v2.enrich-with-dynatrace-metadata",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.dynatrace.v2.metric-key-prefix",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.dynatrace.metrics.export.v2.metric-key-prefix",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.elastic.api-key-credentials",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.elastic.metrics.export.api-key-credentials",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.elastic.auto-create-index",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.elastic.metrics.export.auto-create-index",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.elastic.batch-size",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.elastic.metrics.export.batch-size",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.elastic.connect-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.elastic.metrics.export.connect-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.elastic.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.elastic.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.elastic.host",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.elastic.metrics.export.host",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.elastic.index",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.elastic.metrics.export.index",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.elastic.index-date-format",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.elastic.metrics.export.index-date-format",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.elastic.index-date-separator",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.elastic.metrics.export.index-date-separator",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.elastic.num-threads",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.elastic.password",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.elastic.metrics.export.password",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.elastic.pipeline",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.elastic.metrics.export.pipeline",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.elastic.read-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.elastic.metrics.export.read-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.elastic.step",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.elastic.metrics.export.step",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.elastic.timestamp-field-name",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.elastic.metrics.export.timestamp-field-name",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.elastic.user-name",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.elastic.metrics.export.user-name",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.ganglia.addressing-mode",
+      "type": "info.ganglia.gmetric4j.gmetric.GMetric$UDPAddressingMode",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.ganglia.metrics.export.addressing-mode",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.ganglia.duration-units",
+      "type": "java.util.concurrent.TimeUnit",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.ganglia.metrics.export.duration-units",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.ganglia.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.ganglia.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.ganglia.host",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.ganglia.metrics.export.host",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.ganglia.port",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.ganglia.metrics.export.port",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.ganglia.rate-units",
+      "type": "java.util.concurrent.TimeUnit",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.ganglia.step",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.ganglia.metrics.export.step",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.ganglia.time-to-live",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.ganglia.metrics.export.time-to-live",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.graphite.duration-units",
+      "type": "java.util.concurrent.TimeUnit",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.graphite.metrics.export.duration-units",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.graphite.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.graphite.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.graphite.graphite-tags-enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.graphite.metrics.export.graphite-tags-enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.graphite.host",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.graphite.metrics.export.host",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.graphite.port",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.graphite.metrics.export.port",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.graphite.protocol",
+      "type": "io.micrometer.graphite.GraphiteProtocol",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.graphite.metrics.export.protocol",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.graphite.rate-units",
+      "type": "java.util.concurrent.TimeUnit",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.graphite.metrics.export.rate-units",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.graphite.step",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.graphite.metrics.export.step",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.graphite.tags-as-prefix",
+      "type": "java.lang.String[]",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.graphite.metrics.export.tags-as-prefix",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.humio.api-token",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.humio.metrics.export.api-token",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.humio.batch-size",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.humio.metrics.export.batch-size",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.humio.connect-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.humio.metrics.export.connect-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.humio.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.humio.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.humio.num-threads",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.humio.read-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.humio.metrics.export.read-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.humio.repository",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.humio.step",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.humio.metrics.export.step",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.humio.tags",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.humio.metrics.export.tags",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.humio.uri",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.humio.metrics.export.uri",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.api-version",
+      "type": "io.micrometer.influx.InfluxApiVersion",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.api-version",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.auto-create-db",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.auto-create-db",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.batch-size",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.batch-size",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.bucket",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.bucket",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.compressed",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.compressed",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.connect-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.connect-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.consistency",
+      "type": "io.micrometer.influx.InfluxConsistency",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.consistency",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.db",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.db",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.num-threads",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.org",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.org",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.password",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.password",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.read-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.read-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.retention-duration",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.retention-duration",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.retention-policy",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.retention-policy",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.retention-replication-factor",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.retention-replication-factor",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.retention-shard-duration",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.retention-shard-duration",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.step",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.step",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.token",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.token",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.uri",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.uri",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.influx.user-name",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.influx.metrics.export.user-name",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.jmx.domain",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.jmx.metrics.export.domain",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.jmx.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.jmx.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.jmx.step",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.jmx.metrics.export.step",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.kairos.batch-size",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.kairos.metrics.export.batch-size",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.kairos.connect-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.kairos.metrics.export.connect-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.kairos.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.kairos.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.kairos.num-threads",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.kairos.password",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.kairos.metrics.export.password",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.kairos.read-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.kairos.metrics.export.read-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.kairos.step",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.kairos.metrics.export.step",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.kairos.uri",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.kairos.metrics.export.uri",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.kairos.user-name",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.kairos.metrics.export.user-name",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.newrelic.account-id",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.newrelic.metrics.export.account-id",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.newrelic.api-key",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.newrelic.metrics.export.api-key",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.newrelic.batch-size",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.newrelic.metrics.export.batch-size",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.newrelic.client-provider-type",
+      "type": "io.micrometer.newrelic.ClientProviderType",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.newrelic.metrics.export.client-provider-type",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.newrelic.connect-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.newrelic.metrics.export.connect-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.newrelic.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.newrelic.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.newrelic.event-type",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.newrelic.metrics.export.event-type",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.newrelic.meter-name-event-type-enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.newrelic.metrics.export.meter-name-event-type-enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.newrelic.num-threads",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.newrelic.read-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.newrelic.metrics.export.read-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.newrelic.step",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.newrelic.metrics.export.step",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.newrelic.uri",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.newrelic.metrics.export.uri",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.prometheus.descriptions",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.prometheus.metrics.export.descriptions",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.prometheus.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.prometheus.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.prometheus.histogram-flavor",
+      "type": "io.micrometer.prometheus.HistogramFlavor",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "No longer supported by the Prometheus client.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.prometheus.pushgateway.base-url",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.prometheus.metrics.export.pushgateway.address",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.prometheus.pushgateway.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.prometheus.metrics.export.pushgateway.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.prometheus.pushgateway.grouping-key",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.prometheus.metrics.export.pushgateway.grouping-key",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.prometheus.pushgateway.job",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.prometheus.metrics.export.pushgateway.job",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.prometheus.pushgateway.password",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.prometheus.metrics.export.pushgateway.password",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.prometheus.pushgateway.push-rate",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.prometheus.metrics.export.pushgateway.push-rate",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.prometheus.pushgateway.shutdown-operation",
+      "type": "org.springframework.boot.actuate.metrics.export.prometheus.PrometheusPushGatewayManager$ShutdownOperation",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.prometheus.metrics.export.pushgateway.shutdown-operation",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.prometheus.pushgateway.username",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.prometheus.metrics.export.pushgateway.username",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.prometheus.step",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.prometheus.metrics.export.step",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.signalfx.access-token",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "SignalFX is no longer supported.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.signalfx.batch-size",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "SignalFX is no longer supported.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.signalfx.connect-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "SignalFX is no longer supported.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.signalfx.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "SignalFX is no longer supported.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.signalfx.num-threads",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "SignalFX is no longer supported.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.signalfx.published-histogram-type",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "SignalFX is no longer supported.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.signalfx.read-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "SignalFX is no longer supported.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.signalfx.source",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "SignalFX is no longer supported.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.signalfx.step",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "SignalFX is no longer supported.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.signalfx.uri",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "SignalFX is no longer supported.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.simple.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.simple.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.simple.mode",
+      "type": "io.micrometer.core.instrument.simple.CountingMode",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.simple.metrics.export.mode",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.simple.step",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.simple.metrics.export.step",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.stackdriver.batch-size",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.stackdriver.metrics.export.batch-size",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.stackdriver.connect-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.stackdriver.metrics.export.connect-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.stackdriver.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.stackdriver.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.stackdriver.num-threads",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.stackdriver.project-id",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.stackdriver.metrics.export.project-id",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.stackdriver.read-timeout",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.stackdriver.metrics.export.read-timeout",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.stackdriver.resource-labels",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.stackdriver.metrics.export.resource-labels",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.stackdriver.resource-type",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.stackdriver.metrics.export.resource-type",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.stackdriver.step",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.stackdriver.metrics.export.step",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.stackdriver.use-semantic-metric-types",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.stackdriver.metrics.export.use-semantic-metric-types",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.statsd.enabled",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.statsd.metrics.export.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.statsd.flavor",
+      "type": "io.micrometer.statsd.StatsdFlavor",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.statsd.metrics.export.flavor",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.statsd.host",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.statsd.metrics.export.host",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.statsd.max-packet-length",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.statsd.metrics.export.max-packet-length",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.statsd.polling-frequency",
+      "type": "java.time.Duration",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.statsd.metrics.export.polling-frequency",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.statsd.port",
+      "type": "java.lang.Integer",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.statsd.metrics.export.port",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.statsd.protocol",
+      "type": "io.micrometer.statsd.StatsdProtocol",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.statsd.metrics.export.protocol",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.statsd.publish-unchanged-meters",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.statsd.metrics.export.publish-unchanged-meters",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.export.statsd.queue-size",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.web.client.request.autotime.enabled",
+      "description": "Whether to automatically time web client requests.",
+      "defaultValue": true,
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "Requests are timed automatically.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.web.client.request.autotime.percentiles",
+      "description": "Computed non-aggregable percentiles to publish.",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "Should be configured globally via management.metrics.distribution.percentiles.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.web.client.request.autotime.percentiles-histogram",
+      "description": "Whether percentile histograms should be published.",
+      "defaultValue": false,
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "Should be configured globally via management.metrics.distribution.percentiles-histogram.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.web.client.request.metric-name",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.observations.http.client.requests.name",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.web.client.requests-metric-name",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.observations.http.client.requests.name",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.web.server.auto-time-requests",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.metrics.web.server.request.autotime.enabled",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.web.server.request.autotime.enabled",
+      "description": "Whether to automatically time web server requests.",
+      "defaultValue": true,
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "Requests are timed automatically.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.web.server.request.autotime.percentiles",
+      "description": "Computed non-aggregable percentiles to publish.",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "Should be configured globally via management.metrics.distribution.percentiles.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.web.server.request.autotime.percentiles-histogram",
+      "description": "Whether percentile histograms should be published.",
+      "defaultValue": false,
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "Should be configured globally via management.metrics.distribution.percentiles-histogram.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.web.server.request.ignore-trailing-slash",
+      "type": "java.lang.Boolean",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "reason": "Not needed anymore, direct instrumentation in Spring MVC.",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.web.server.request.metric-name",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.observations.http.server.requests.name",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.metrics.web.server.requests-metric-name",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.observations.http.server.requests.name",
+        "since": "3.0.0"
+      }
+    },
+    {
+      "name": "management.promethus.metrics.export.pushgateway.base-url",
+      "type": "java.lang.String",
+      "deprecated": true,
+      "deprecation": {
+        "level": "error",
+        "replacement": "management.prometheus.metrics.export.pushgateway.address",
+        "since": "3.5.0"
+      }
+    }
+  ],
+  "hints": [],
+  "ignored": {
+    "properties": []
+  }
+}
