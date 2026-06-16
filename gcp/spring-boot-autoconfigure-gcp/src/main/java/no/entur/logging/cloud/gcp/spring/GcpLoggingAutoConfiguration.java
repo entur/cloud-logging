@@ -9,7 +9,9 @@ import no.entur.logging.cloud.gcp.spring.ondemand.ConditionalOnDisabledOndemandL
 import no.entur.logging.cloud.gcp.spring.ondemand.ConditionalOnEnabledOndemandLogging;
 import no.entur.logging.cloud.gcp.spring.ondemand.GcpOndemandLoggingMeterBinder;
 import no.entur.logging.cloud.micrometer.DevOpsLogbackMetrics;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.micrometer.metrics.autoconfigure.logging.logback.LogbackMetricsAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
  * metrics within the appender so that only actually written log statements will count in our own metrics.
  *
  */
+@AutoConfiguration(before = {LogbackMetricsAutoConfiguration.class})
 
 @Configuration
 public class GcpLoggingAutoConfiguration {
@@ -52,6 +55,24 @@ public class GcpLoggingAutoConfiguration {
         appender.setMetrics(binder);
 
         return binder;
+    }
+
+    /**
+     * Suppresses Spring Boot's built-in {@code LogbackMetrics} when on-demand logging is enabled.
+     * In on-demand mode metrics are counted by {@code GcpOndemandLoggingMeterBinder} (appender-side)
+     * rather than by a turbo filter, so the built-in turbo-filter-based counting must be disabled.
+     */
+
+    @Bean
+    @ConditionalOnClass({DevOpsLogbackMetrics.class, StackdriverLogbackMetrics.class})
+    @ConditionalOnEnabledOndemandLogging
+    public LogbackMetrics gcpOndemandLogbackMetricsSuppressor() {
+        return new LogbackMetrics() {
+            @Override
+            public void bindTo(io.micrometer.core.instrument.MeterRegistry registry) {
+                // no-op: on-demand mode uses GcpOndemandLoggingMeterBinder for metrics
+            }
+        };
     }
 
 }
