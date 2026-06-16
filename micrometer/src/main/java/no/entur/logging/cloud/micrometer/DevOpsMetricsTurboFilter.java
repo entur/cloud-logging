@@ -54,7 +54,7 @@ public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEven
         // registers FunctionCounter + LongAdder for these IDs instead of a plain Counter.
         // Calling Counter.builder().register() when a FunctionCounter already occupies
         // the same ID throws IllegalArgumentException.  captureOrRegister() checks the
-        // registry first: it reuses an existing Counter, returns NOOP_COUNTER when any
+        // registry first: it reuses an existing Counter, throws an exception
         // other meter type is present, and only registers a new Counter when the slot is empty.
         errorCounter = captureOrRegister(registry, "logback.events", tags, "level", "error",
                 "Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)");
