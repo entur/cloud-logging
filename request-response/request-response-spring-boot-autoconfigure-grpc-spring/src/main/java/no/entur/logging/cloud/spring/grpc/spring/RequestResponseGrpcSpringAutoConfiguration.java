@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.grpc.server.autoconfigure.exception.GrpcExceptionHandlerAutoConfiguration;
+import org.springframework.boot.grpc.server.autoconfigure.GrpcServerAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
  */
 
 @Configuration
-@AutoConfigureBefore(GrpcExceptionHandlerAutoConfiguration.class)
+@AutoConfigureBefore(GrpcServerAutoConfiguration.class)
 public class RequestResponseGrpcSpringAutoConfiguration {
 
     @Value("${entur.logging.request-response.grpc.server.interceptor-order:300}")

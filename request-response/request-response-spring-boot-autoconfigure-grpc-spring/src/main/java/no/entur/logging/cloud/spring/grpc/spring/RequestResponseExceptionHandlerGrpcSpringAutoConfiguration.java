@@ -3,8 +3,9 @@ package no.entur.logging.cloud.spring.grpc.spring;
 import no.entur.logging.cloud.spring.rr.grpc.RequestResponseGrpcExceptionHandlerInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.grpc.server.autoconfigure.exception.GrpcExceptionHandlerAutoConfiguration;
+import org.springframework.boot.grpc.server.autoconfigure.GrpcServerAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.grpc.server.exception.GrpcExceptionHandlerInterceptor;
@@ -18,13 +19,14 @@ import org.springframework.grpc.server.exception.GrpcExceptionHandlerInterceptor
  */
 
 @Configuration
-@AutoConfigureAfter(GrpcExceptionHandlerAutoConfiguration.class)
+@AutoConfigureAfter(GrpcServerAutoConfiguration.class)
 public class RequestResponseExceptionHandlerGrpcSpringAutoConfiguration {
 
     @Value("${entur.logging.request-response.grpc.server.exception-handler.interceptor-order:400}")
     private int exceptionInterceptorOrder;
 
     @Bean
+    @ConditionalOnBean(GrpcExceptionHandlerInterceptor.class)
     @ConditionalOnProperty(name = {"entur.logging.request-response.grpc.server.exception-handler.enabled"}, havingValue = "true", matchIfMissing = true)
     public RequestResponseGrpcExceptionHandlerInterceptor requestResponseGrpcExceptionHandlerInterceptor(GrpcExceptionHandlerInterceptor interceptor) {
         return new RequestResponseGrpcExceptionHandlerInterceptor(interceptor, exceptionInterceptorOrder);
