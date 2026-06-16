@@ -28,7 +28,6 @@ ext {
     grpcVersion = '1.82.0'
     grpcCommonsVersion = '2.72.0'
     grpcProtobufVersion = '4.35.0'
-    // spring-grpc is now included in Spring Boot 4.1+ BOM (spring-boot-starter-grpc-server etc.)
 
     jsonAssertVersion = '0.8.0'
 }
