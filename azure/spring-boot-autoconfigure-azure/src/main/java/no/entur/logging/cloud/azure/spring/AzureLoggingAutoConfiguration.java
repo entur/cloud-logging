@@ -3,8 +3,6 @@ package no.entur.logging.cloud.azure.spring;
 
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics;
-import no.entur.logging.cloud.api.DevOpsLogger;
-import no.entur.logging.cloud.api.DevOpsLoggerFactory;
 import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import no.entur.logging.cloud.azure.micrometer.AzureLogbackMetrics;
 import no.entur.logging.cloud.azure.spring.ondemand.AzureOndemandLoggingMeterBinder;
@@ -73,7 +71,7 @@ public class AzureLoggingAutoConfiguration {
         return new LogbackMetrics() {
             @Override
             public void bindTo(io.micrometer.core.instrument.MeterRegistry registry) {
-                // no-op: on-demand mode uses GcpOndemandLoggingMeterBinder for metrics
+                // no-op: on-demand mode uses AzureOndemandLoggingMeterBinder for metrics
             }
         };
     }
