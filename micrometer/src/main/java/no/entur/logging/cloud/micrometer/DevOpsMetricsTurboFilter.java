@@ -5,7 +5,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
-import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
@@ -14,89 +14,100 @@ import no.entur.logging.cloud.api.DevOpsMarker;
 import org.slf4j.Marker;
 
 import java.util.List;
+import java.util.concurrent.atomic.LongAdder;
 
 public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
 
-    protected final Counter errorWakeMeUpRightNowCounter;
-    protected final Counter errorInterruptMyDinnerCounter;
-    protected final Counter errorTellMeTomorrowCounter;
+    protected final LongAdder errorWakeMeUpRightNowAdder = new LongAdder();
+    protected final LongAdder errorInterruptMyDinnerAdder = new LongAdder();
+    protected final LongAdder errorTellMeTomorrowAdder = new LongAdder();
 
-    protected final Counter errorCounter; // alias for all errors / backwards compatibility
+    protected final LongAdder errorAdder = new LongAdder(); // alias for all errors / backwards compatibility
 
-    protected final Counter warnCounter;
-    protected final Counter infoCounter;
-    protected final Counter debugCounter;
-    protected final Counter traceCounter;
+    protected final LongAdder warnAdder = new LongAdder();
+    protected final LongAdder infoAdder = new LongAdder();
+    protected final LongAdder debugAdder = new LongAdder();
+    protected final LongAdder traceAdder = new LongAdder();
 
     public DevOpsMetricsTurboFilter(MeterRegistry registry, Iterable<Tag> tags) {
         // DevOps-specific level values are never registered by Micrometer's built-in
-        // MetricsTurboFilter, so a plain Counter.builder().register() is always safe here.
-        errorWakeMeUpRightNowCounter = Counter.builder("logback.events")
+        // MetricsTurboFilter, so a plain FunctionCounter registration is always safe here.
+        FunctionCounter.builder("logback.events", errorWakeMeUpRightNowAdder, LongAdder::doubleValue)
                 .tags(tags).tags("level", "errorWakeMeUpRightNow")
                 .description("Number of error 'Wake Me Up Right Now' level events that made it to the logs")
                 .baseUnit("events")
                 .register(registry);
 
-        errorInterruptMyDinnerCounter = Counter.builder("logback.events")
+        FunctionCounter.builder("logback.events", errorInterruptMyDinnerAdder, LongAdder::doubleValue)
                 .tags(tags).tags("level", "errorInterruptMyDinner")
                 .description("Number of error 'Interrupt My Dinner' level events that made it to the logs")
                 .baseUnit("events")
                 .register(registry);
 
-        errorTellMeTomorrowCounter = Counter.builder("logback.events")
+        FunctionCounter.builder("logback.events", errorTellMeTomorrowAdder, LongAdder::doubleValue)
                 .tags(tags).tags("level", "errorTellMeTomorrow")
                 .description("Number of error 'Tell Me Tomorrow' level events that made it to the logs")
                 .baseUnit("events")
                 .register(registry);
 
-        // Standard level values (error, warn, info, debug, trace) are also used by
-        // Micrometer's built-in MetricsTurboFilter.  In Micrometer 1.17+ that filter
-        // registers FunctionCounter + LongAdder for these IDs instead of a plain Counter.
-        // Calling Counter.builder().register() when a FunctionCounter already occupies
-        // the same ID throws IllegalArgumentException.  captureOrRegister() checks the
-        // registry first: it reuses an existing Counter, throws an exception
-        // other meter type is present, and only registers a new Counter when the slot is empty.
-        errorCounter = captureOrRegister(registry, "logback.events", tags, "level", "error",
-                "Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)");
+        // Standard level values (error, warn, info, debug, trace) may also be registered by
+        // Micrometer's built-in MetricsTurboFilter. In Micrometer 1.17+ that filter already
+        // uses FunctionCounter + LongAdder; in pre-1.17 it uses a plain Counter.
+        // removeLegacyCounter() removes any pre-existing Counter before registering the
+        // FunctionCounter, so the two types do not conflict.
+        // TODO: Legacy - removeLegacyCounter() calls below can be deleted once pre-1.17
+        //       Micrometer is no longer supported.
+        removeLegacyCounter(registry, "logback.events", tags, "level", "error");
+        FunctionCounter.builder("logback.events", errorAdder, LongAdder::doubleValue)
+                .tags(tags).tags("level", "error")
+                .description("Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)")
+                .baseUnit("events")
+                .register(registry);
 
-        warnCounter = captureOrRegister(registry, "logback.events", tags, "level", "warn",
-                "Number of warn level events that made it to the logs");
+        removeLegacyCounter(registry, "logback.events", tags, "level", "warn");
+        FunctionCounter.builder("logback.events", warnAdder, LongAdder::doubleValue)
+                .tags(tags).tags("level", "warn")
+                .description("Number of warn level events that made it to the logs")
+                .baseUnit("events")
+                .register(registry);
 
-        infoCounter = captureOrRegister(registry, "logback.events", tags, "level", "info",
-                "Number of info level events that made it to the logs");
+        removeLegacyCounter(registry, "logback.events", tags, "level", "info");
+        FunctionCounter.builder("logback.events", infoAdder, LongAdder::doubleValue)
+                .tags(tags).tags("level", "info")
+                .description("Number of info level events that made it to the logs")
+                .baseUnit("events")
+                .register(registry);
 
-        debugCounter = captureOrRegister(registry, "logback.events", tags, "level", "debug",
-                "Number of debug level events that made it to the logs");
+        removeLegacyCounter(registry, "logback.events", tags, "level", "debug");
+        FunctionCounter.builder("logback.events", debugAdder, LongAdder::doubleValue)
+                .tags(tags).tags("level", "debug")
+                .description("Number of debug level events that made it to the logs")
+                .baseUnit("events")
+                .register(registry);
 
-        traceCounter = captureOrRegister(registry, "logback.events", tags, "level", "trace",
-                "Number of trace level events that made it to the logs");
+        removeLegacyCounter(registry, "logback.events", tags, "level", "trace");
+        FunctionCounter.builder("logback.events", traceAdder, LongAdder::doubleValue)
+                .tags(tags).tags("level", "trace")
+                .description("Number of trace level events that made it to the logs")
+                .baseUnit("events")
+                .register(registry);
     }
 
     /**
-     * Captures an existing {@link Counter} from the registry under {@code name + tags + tagKey=tagValue},
-     * or registers a fresh one when the slot is empty.
-     *
-     * <p>When a non-{@code Counter} meter (e.g., a {@code FunctionCounter}) already occupies
-     * that ID, it is removed from the registry so that a new, incrementable {@link Counter}
-     * can be registered in its place.  This guarantees that the returned meter can always be
-     * used to increment the underlying counter.</p>
+     * Removes a plain {@code Counter} meter from the registry if one occupies the given ID,
+     * so that a {@link FunctionCounter} can be registered in its place without a type-mismatch error.
+     * <p>
+     * Pre-1.17 Micrometer's built-in {@code LogbackMetrics} registers plain Counters for
+     * standard log levels; 1.17+ uses FunctionCounter. This method bridges the gap during migration.
+     * <p>
+     * TODO: Legacy - this method can be deleted once pre-1.17 Micrometer is no longer supported.
      */
-    private static Counter captureOrRegister(MeterRegistry registry, String name,
-            Iterable<Tag> baseTags, String tagKey, String tagValue, String description) {
-        Meter existing = registry.find(name).tag(tagKey, tagValue).tags(baseTags).meter();
-        if (existing instanceof Counter c) {
-            return c;
+    private static void removeLegacyCounter(MeterRegistry registry, String name,
+            Iterable<Tag> baseTags, String tagKey, String tagValue) {
+        Meter existing = registry.find(name).tags(baseTags).tag(tagKey, tagValue).meter();
+        if (existing != null && !(existing instanceof FunctionCounter)) {
+            registry.remove(existing);
         }
-        if (existing != null) {
-            throw new IllegalStateException("Meter with name '" + name + "' and tag '" + tagKey + "=" + tagValue
-                    + "' already exists but is not a Counter: " + existing.getClass().getName());
-        }
-        return Counter.builder(name)
-                .tags(baseTags)
-                .tag(tagKey, tagValue)
-                .description(description)
-                .baseUnit("events")
-                .register(registry);
     }
 
     @Override
@@ -113,7 +124,7 @@ public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEven
         Level level = event.getLevel();
         switch (level.toInt()) {
             case Level.ERROR_INT:
-                errorCounter.increment();
+                errorAdder.increment();
 
                 List<Marker> markerList = event.getMarkerList();
                 if(markerList != null && !markerList.isEmpty()) {
@@ -121,24 +132,24 @@ public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEven
                     if (severity != null) {
                         increment(severity);
                     } else {
-                        errorTellMeTomorrowCounter.increment();
+                        errorTellMeTomorrowAdder.increment();
                     }
                 } else {
-                    errorTellMeTomorrowCounter.increment();
+                    errorTellMeTomorrowAdder.increment();
                 }
 
                 break;
             case Level.WARN_INT:
-                warnCounter.increment();
+                warnAdder.increment();
                 break;
             case Level.INFO_INT:
-                infoCounter.increment();
+                infoAdder.increment();
                 break;
             case Level.DEBUG_INT:
-                debugCounter.increment();
+                debugAdder.increment();
                 break;
             case Level.TRACE_INT:
-                traceCounter.increment();
+                traceAdder.increment();
                 break;
             default: {
                 // do nothing
@@ -149,31 +160,31 @@ public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEven
     public void increment(Marker marker, Level level) {
         switch (level.toInt()) {
             case Level.ERROR_INT:
-                errorCounter.increment();
+                errorAdder.increment();
 
                 if (marker != null) {
                     DevOpsLevel severity = DevOpsMarker.searchSeverityMarker(marker);
                     if (severity != null) {
                         increment(severity);
                     } else {
-                        errorTellMeTomorrowCounter.increment();
+                        errorTellMeTomorrowAdder.increment();
                     }
                 } else {
-                    errorTellMeTomorrowCounter.increment();
+                    errorTellMeTomorrowAdder.increment();
                 }
 
                 break;
             case Level.WARN_INT:
-                warnCounter.increment();
+                warnAdder.increment();
                 break;
             case Level.INFO_INT:
-                infoCounter.increment();
+                infoAdder.increment();
                 break;
             case Level.DEBUG_INT:
-                debugCounter.increment();
+                debugAdder.increment();
                 break;
             case Level.TRACE_INT:
-                traceCounter.increment();
+                traceAdder.increment();
                 break;
             default: {
                 // do nothing
@@ -184,35 +195,35 @@ public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEven
     protected void increment(DevOpsLevel severity) {
         switch (severity) {
             case ERROR_WAKE_ME_UP_RIGHT_NOW: {
-                errorWakeMeUpRightNowCounter.increment();
+                errorWakeMeUpRightNowAdder.increment();
                 break;
             }
             case ERROR_INTERRUPT_MY_DINNER: {
-                errorInterruptMyDinnerCounter.increment();
+                errorInterruptMyDinnerAdder.increment();
                 break;
             }
             case ERROR_TELL_ME_TOMORROW: {
-                errorTellMeTomorrowCounter.increment();
+                errorTellMeTomorrowAdder.increment();
                 break;
             }
             case WARN: {
-                warnCounter.increment();
+                warnAdder.increment();
                 break;
             }
             case INFO: {
-                infoCounter.increment();
+                infoAdder.increment();
                 break;
             }
             case DEBUG: {
-                debugCounter.increment();
+                debugAdder.increment();
                 break;
             }
             case TRACE: {
-                traceCounter.increment();
+                traceAdder.increment();
                 break;
             }
             default: {
-                errorTellMeTomorrowCounter.increment();
+                errorTellMeTomorrowAdder.increment();
             }
         }
     }
@@ -221,35 +232,35 @@ public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEven
     public void increment(DevOpsLevel severity, int amount) {
         switch (severity) {
             case ERROR_WAKE_ME_UP_RIGHT_NOW: {
-                errorWakeMeUpRightNowCounter.increment(amount);
+                errorWakeMeUpRightNowAdder.add(amount);
                 break;
             }
             case ERROR_INTERRUPT_MY_DINNER: {
-                errorInterruptMyDinnerCounter.increment(amount);
+                errorInterruptMyDinnerAdder.add(amount);
                 break;
             }
             case ERROR_TELL_ME_TOMORROW: {
-                errorTellMeTomorrowCounter.increment(amount);
+                errorTellMeTomorrowAdder.add(amount);
                 break;
             }
             case WARN: {
-                warnCounter.increment(amount);
+                warnAdder.add(amount);
                 break;
             }
             case INFO: {
-                infoCounter.increment(amount);
+                infoAdder.add(amount);
                 break;
             }
             case DEBUG: {
-                debugCounter.increment(amount);
+                debugAdder.add(amount);
                 break;
             }
             case TRACE: {
-                traceCounter.increment(amount);
+                traceAdder.add(amount);
                 break;
             }
             default: {
-                errorTellMeTomorrowCounter.increment(amount);
+                errorTellMeTomorrowAdder.add(amount);
             }
         }
     }

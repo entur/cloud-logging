@@ -1,6 +1,6 @@
 package no.entur.logging.cloud.gcp.micrometer;
 
-import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import no.entur.logging.cloud.api.DevOpsLogger;
@@ -33,17 +33,17 @@ public class StackdriverLogbackMetricsTest {
 	    log.errorInterruptMyDinner("Critical statement");
 	    log.errorInterruptMyDinner("Critical statement");
 
-	    Collection<Counter> counters = oneSimpleMeter.find("logback.gcp.events").counters();
+	    Collection<FunctionCounter> counters = oneSimpleMeter.find("logback.gcp.events").functionCounters();
 
-	    Optional<Counter> error = counters.stream().filter(counter -> counter.getId().getTag("severity").equals("error")).findAny();
+	    Optional<FunctionCounter> error = counters.stream().filter(counter -> counter.getId().getTag("severity").equals("error")).findAny();
 	    assertTrue(error.isPresent());
 	    assertThat(error.get().count()).isEqualTo(1.0);
 	    
-	    Optional<Counter> alert = counters.stream().filter(counter -> counter.getId().getTag("severity").equals("alert")).findAny();
+	    Optional<FunctionCounter> alert = counters.stream().filter(counter -> counter.getId().getTag("severity").equals("alert")).findAny();
 	    assertTrue(alert.isPresent());
 	    assertThat(alert.get().count()).isEqualTo(2.0);
 
-	    Optional<Counter> critical = counters.stream().filter(counter -> counter.getId().getTag("severity").equals("critical")).findAny();
+	    Optional<FunctionCounter> critical = counters.stream().filter(counter -> counter.getId().getTag("severity").equals("critical")).findAny();
 	    assertTrue(critical.isPresent());
 	    assertThat(critical.get().count()).isEqualTo(3.0);
 	}

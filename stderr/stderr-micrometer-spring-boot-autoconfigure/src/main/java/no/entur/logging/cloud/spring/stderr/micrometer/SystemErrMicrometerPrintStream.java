@@ -1,12 +1,14 @@
 package no.entur.logging.cloud.spring.stderr.micrometer;
 
-import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 
 import java.io.PrintStream;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * A {@link PrintStream} that intercepts all output written to {@code System.err} and increments
@@ -26,25 +28,48 @@ import java.io.PrintStream;
  *
  * <p>Restores the original {@code System.err} when {@link #destroy()} is called.
  */
-public class SystemErrMicrometerPrintStream extends PrintStream implements DisposableBean {
+public class SystemErrMicrometerPrintStream extends PrintStream implements DisposableBean, SmartInitializingSingleton {
 
     private final PrintStream originalSystemErr;
-    private final Counter errorCounter;
-    private final Counter errorTellMeTomorrowCounter;
+    private final MeterRegistry registry;
+    private final LongAdder errorAdder = new LongAdder();
+    private final LongAdder errorTellMeTomorrowAdder = new LongAdder();
 
     public SystemErrMicrometerPrintStream(MeterRegistry registry, PrintStream originalSystemErr) {
         super(originalSystemErr, true);
         this.originalSystemErr = originalSystemErr;
+        this.registry = registry;
+        // Meter registration is deferred to afterSingletonsInstantiated() so that
+        // MeterRegistryPostProcessor (a BeanPostProcessor created early) has already applied
+        // all MeterBinders — including the built-in LogbackMetrics — before we register.
+        // This avoids a type-mismatch conflict when the built-in LogbackMetrics registers
+        // a plain Counter for logback.events[level=error] (pre-1.17 Micrometer).
+    }
 
-        // logback.events[level=error] is also registered by Micrometer's built-in
-        // MetricsTurboFilter (FunctionCounter in Micrometer 1.17+).  Use
-        // captureOrRegister to avoid an IllegalArgumentException on type mismatch.
-        this.errorCounter = captureOrRegister(registry, "logback.events", "level", "error",
-                "Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)");
+    /**
+     * Registers the FunctionCounter meters after all singletons have been instantiated.
+     *
+     * <p>At this point {@code MeterRegistryPostProcessor} has already applied its
+     * {@code MeterBinder}s (e.g., the built-in {@code LogbackMetrics}), so any
+     * pre-existing plain Counter can be safely replaced by a FunctionCounter.
+     */
+    @Override
+    public void afterSingletonsInstantiated() {
+        // logback.events[level=error] may have been registered as a plain Counter by
+        // Micrometer's built-in LogbackMetrics (pre-1.17). removeLegacyCounter() removes
+        // it so our FunctionCounter can be registered without a type-mismatch error.
+        // TODO: Legacy - removeLegacyCounter() call below can be deleted once pre-1.17
+        //       Micrometer is no longer supported.
+        removeLegacyCounter(registry, "logback.events", "level", "error");
+        FunctionCounter.builder("logback.events", errorAdder, LongAdder::doubleValue)
+                .tags("level", "error")
+                .description("Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)")
+                .baseUnit("events")
+                .register(registry);
 
         // logback.events[level=errorTellMeTomorrow] is DevOps-specific and never
         // registered by Micrometer's built-in filter, so plain registration is safe.
-        this.errorTellMeTomorrowCounter = Counter.builder("logback.events")
+        FunctionCounter.builder("logback.events", errorTellMeTomorrowAdder, LongAdder::doubleValue)
                 .tags("level", "errorTellMeTomorrow")
                 .description("Number of error 'Tell Me Tomorrow' level events that made it to the logs")
                 .baseUnit("events")
@@ -52,30 +77,25 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
     }
 
     /**
-     * Captures an existing {@link Counter} from the registry, or registers a fresh one.
+     * Removes a plain Counter meter (if present) from the registry so that a FunctionCounter
+     * can be registered for the same ID without a type-mismatch error.
+     * <p>
+     * TODO: Legacy - this method can be deleted once pre-1.17 Micrometer is no longer supported.
      */
-    private static Counter captureOrRegister(MeterRegistry registry, String name,
-            String tagKey, String tagValue, String description) {
+    private static void removeLegacyCounter(MeterRegistry registry, String name,
+            String tagKey, String tagValue) {
         Meter existing = registry.find(name).tag(tagKey, tagValue).meter();
-        if (existing instanceof Counter c) {
-            return c;
-        } else if (existing != null) {
-            throw new IllegalStateException("Meter with name '" + name + "' and tag '" + tagKey + "=" + tagValue
-                    + "' already exists but is not a Counter: " + existing.getClass().getName());
+        if (existing != null && !(existing instanceof FunctionCounter)) {
+            registry.remove(existing);
         }
-        return Counter.builder(name)
-                .tags(tagKey, tagValue)
-                .description(description)
-                .baseUnit("events")
-                .register(registry);
     }
 
     @Override
     public void write(int b) {
         super.write(b);
         if (b == '\n') {
-            errorCounter.increment();
-            errorTellMeTomorrowCounter.increment();
+            errorAdder.increment();
+            errorTellMeTomorrowAdder.increment();
         }
     }
 
@@ -89,8 +109,8 @@ public class SystemErrMicrometerPrintStream extends PrintStream implements Dispo
             }
         }
         if (newlines > 0) {
-            errorCounter.increment(newlines);
-            errorTellMeTomorrowCounter.increment(newlines);
+            errorAdder.add(newlines);
+            errorTellMeTomorrowAdder.add(newlines);
         }
     }
 

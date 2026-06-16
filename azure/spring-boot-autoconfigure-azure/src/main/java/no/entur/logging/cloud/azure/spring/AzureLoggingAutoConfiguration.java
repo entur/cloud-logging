@@ -61,4 +61,27 @@ public class AzureLoggingAutoConfiguration {
 
         return binder;
     }
+
+    /**
+     * Suppresses Spring Boot's built-in {@code LogbackMetrics} when on-demand logging is enabled.
+     * In on-demand mode metrics are counted by {@code AzureOndemandLoggingMeterBinder} (appender-side)
+     * rather than by a turbo filter, so the built-in turbo-filter-based counting must be disabled.
+     * Without this bean the built-in would register plain Counter meters for standard log levels
+     * that conflict with the FunctionCounter meters registered by {@code DevOpsMetricsTurboFilter}.
+     * <p>
+     * TODO: Legacy - this suppressor can be removed once Micrometer's built-in LogbackMetrics
+     *       also uses FunctionCounter (Micrometer 1.17+), at which point the type conflict
+     *       no longer occurs and the no-op bean is not needed.
+     */
+    @Bean
+    @ConditionalOnClass({DevOpsLogbackMetrics.class, AzureLogbackMetrics.class})
+    @ConditionalOnEnabledOndemandLogging
+    public LogbackMetrics azureOndemandLogbackMetricsSuppressor() {
+        return new LogbackMetrics() {
+            @Override
+            public void bindTo(io.micrometer.core.instrument.MeterRegistry registry) {
+                // no-op: on-demand mode uses AzureOndemandLoggingMeterBinder for metrics
+            }
+        };
+    }
 }

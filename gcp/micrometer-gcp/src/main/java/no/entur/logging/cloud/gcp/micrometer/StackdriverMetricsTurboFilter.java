@@ -5,7 +5,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
-import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import no.entur.logging.cloud.api.DevOpsLevel;
@@ -14,57 +14,60 @@ import no.entur.logging.cloud.micrometer.LoggingEventMetrics;
 import org.slf4j.Marker;
 
 import java.util.List;
+import java.util.concurrent.atomic.LongAdder;
 
 public class StackdriverMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
 
-    protected final Counter alertCounter;
-    protected final Counter criticalCounter;
-    protected final Counter errorCounter;
-    protected final Counter warnCounter;
-    protected final Counter infoCounter;
-    protected final Counter debugCounter;
-    protected final Counter defaultCounter;
+    protected final LongAdder alertAdder = new LongAdder();
+    protected final LongAdder criticalAdder = new LongAdder();
+    protected final LongAdder errorAdder = new LongAdder();
+    protected final LongAdder warnAdder = new LongAdder();
+    protected final LongAdder infoAdder = new LongAdder();
+    protected final LongAdder debugAdder = new LongAdder();
+    protected final LongAdder defaultAdder = new LongAdder();
 
     public StackdriverMetricsTurboFilter(MeterRegistry registry, Iterable<Tag> tags) {
         // emergency level is not in use
 
-        alertCounter = Counter.builder("logback.gcp.events")
+        // TODO: Legacy Counter-based registration was replaced with FunctionCounter + LongAdder.
+        //       This comment can be deleted once the migration is confirmed complete.
+        FunctionCounter.builder("logback.gcp.events", alertAdder, LongAdder::doubleValue)
                 .tags(tags).tags("severity", "alert")
                 .description("Number of alert severity events that made it to the logs")
                 .baseUnit("events")
                 .register(registry);
 
-        criticalCounter = Counter.builder("logback.gcp.events")
+        FunctionCounter.builder("logback.gcp.events", criticalAdder, LongAdder::doubleValue)
                 .tags(tags).tags("severity", "critical")
                 .description("Number of critical severity events that made it to the logs")
                 .baseUnit("events")
                 .register(registry);
 
-        errorCounter = Counter.builder("logback.gcp.events")
+        FunctionCounter.builder("logback.gcp.events", errorAdder, LongAdder::doubleValue)
                 .tags(tags).tags("severity", "error")
                 .description("Number of error severity events that made it to the logs")
                 .baseUnit("events")
                 .register(registry);
 
-        warnCounter = Counter.builder("logback.gcp.events")
+        FunctionCounter.builder("logback.gcp.events", warnAdder, LongAdder::doubleValue)
                 .tags(tags).tags("severity", "warning")
                 .description("Number of warn severity events that made it to the logs")
                 .baseUnit("events")
                 .register(registry);
 
-        infoCounter = Counter.builder("logback.gcp.events")
+        FunctionCounter.builder("logback.gcp.events", infoAdder, LongAdder::doubleValue)
                 .tags(tags).tags("severity", "info")
                 .description("Number of info severity events that made it to the logs")
                 .baseUnit("events")
                 .register(registry);
 
-        debugCounter = Counter.builder("logback.gcp.events")
+        FunctionCounter.builder("logback.gcp.events", debugAdder, LongAdder::doubleValue)
                 .tags(tags).tags("severity", "debug")
                 .description("Number of debug severity events that made it to the logs")
                 .baseUnit("events")
                 .register(registry);
 
-        defaultCounter = Counter.builder("logback.gcp.events")
+        FunctionCounter.builder("logback.gcp.events", defaultAdder, LongAdder::doubleValue)
                 .tags(tags).tags("severity", "default")
                 .description("Number of default severity events that made it to the logs")
                 .baseUnit("events")
@@ -92,24 +95,24 @@ public class StackdriverMetricsTurboFilter extends TurboFilter implements Loggin
                     if (severity != null) {
                         increment(severity);
                     } else {
-                        errorCounter.increment();
+                        errorAdder.increment();
                     }
                 } else {
-                    errorCounter.increment();
+                    errorAdder.increment();
                 }
 
                 break;
             case Level.WARN_INT:
-                warnCounter.increment();
+                warnAdder.increment();
                 break;
             case Level.INFO_INT:
-                infoCounter.increment();
+                infoAdder.increment();
                 break;
             case Level.DEBUG_INT:
-                debugCounter.increment();
+                debugAdder.increment();
                 break;
             case Level.TRACE_INT:
-                defaultCounter.increment();
+                defaultAdder.increment();
                 break;
             default: {
                 // do nothing
@@ -128,24 +131,24 @@ public class StackdriverMetricsTurboFilter extends TurboFilter implements Loggin
                     if (severity != null) {
                         increment(severity);
                     } else {
-                        errorCounter.increment();
+                        errorAdder.increment();
                     }
                 } else {
-                    errorCounter.increment();
+                    errorAdder.increment();
                 }
 
                 break;
             case Level.WARN_INT:
-                warnCounter.increment();
+                warnAdder.increment();
                 break;
             case Level.INFO_INT:
-                infoCounter.increment();
+                infoAdder.increment();
                 break;
             case Level.DEBUG_INT:
-                debugCounter.increment();
+                debugAdder.increment();
                 break;
             case Level.TRACE_INT:
-                defaultCounter.increment();
+                defaultAdder.increment();
                 break;
             default: {
                 // do nothing
@@ -156,32 +159,32 @@ public class StackdriverMetricsTurboFilter extends TurboFilter implements Loggin
     protected void increment(DevOpsLevel severity) {
         switch (severity) {
             case ERROR_WAKE_ME_UP_RIGHT_NOW: {
-                alertCounter.increment();
+                alertAdder.increment();
                 break;
             }
             case ERROR_INTERRUPT_MY_DINNER: {
-                criticalCounter.increment();
+                criticalAdder.increment();
                 break;
             }
             case WARN: {
-                warnCounter.increment();
+                warnAdder.increment();
                 break;
             }
             case INFO: {
-                infoCounter.increment();
+                infoAdder.increment();
                 break;
             }
             case DEBUG: {
-                debugCounter.increment();
+                debugAdder.increment();
                 break;
             }
             case TRACE: {
-                defaultCounter.increment();
+                defaultAdder.increment();
                 break;
             }
             case ERROR_TELL_ME_TOMORROW:
             default: {
-                errorCounter.increment();
+                errorAdder.increment();
                 break;
             }
         }
@@ -190,32 +193,32 @@ public class StackdriverMetricsTurboFilter extends TurboFilter implements Loggin
     public void increment(DevOpsLevel severity, int amount) {
         switch (severity) {
             case ERROR_WAKE_ME_UP_RIGHT_NOW: {
-                alertCounter.increment(amount);
+                alertAdder.add(amount);
                 break;
             }
             case ERROR_INTERRUPT_MY_DINNER: {
-                criticalCounter.increment(amount);
+                criticalAdder.add(amount);
                 break;
             }
             case WARN: {
-                warnCounter.increment(amount);
+                warnAdder.add(amount);
                 break;
             }
             case INFO: {
-                infoCounter.increment(amount);
+                infoAdder.add(amount);
                 break;
             }
             case DEBUG: {
-                debugCounter.increment(amount);
+                debugAdder.add(amount);
                 break;
             }
             case TRACE: {
-                defaultCounter.increment(amount);
+                defaultAdder.add(amount);
                 break;
             }
             case ERROR_TELL_ME_TOMORROW:
             default: {
-                errorCounter.increment(amount);
+                errorAdder.add(amount);
                 break;
             }
         }

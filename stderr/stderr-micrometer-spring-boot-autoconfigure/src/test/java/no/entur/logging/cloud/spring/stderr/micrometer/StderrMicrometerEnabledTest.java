@@ -1,6 +1,6 @@
 package no.entur.logging.cloud.spring.stderr.micrometer;
 
-import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -200,10 +200,10 @@ public class StderrMicrometerEnabledTest {
     }
 
     private double getCount(String level) {
-        Collection<Counter> counters = meterRegistry.find("logback.events").counters();
-        Optional<Counter> counter = counters.stream()
+        Collection<FunctionCounter> counters = meterRegistry.find("logback.events").functionCounters();
+        Optional<FunctionCounter> counter = counters.stream()
                 .filter(c -> level.equals(c.getId().getTag("level")))
                 .findAny();
-        return counter.map(Counter::count).orElse(0.0);
+        return counter.map(FunctionCounter::count).orElse(0.0);
     }
 }
