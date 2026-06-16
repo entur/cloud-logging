@@ -7,7 +7,7 @@ Spring Boot auto-configuration that intercepts `System.err` output and increment
  * Uses the same `logback.events` metric name and tags as `DevOpsMetricsTurboFilter` so the counts are additive with regular log-level metrics
  * Restores the original `System.err` when the Spring application context is closed
 
-Note: This module assumes use of Counter meters as registred by spring-boot-autoconfigure-azure or spring-boot-autoconfigure-gcp.
+Note: This module assumes use of FunctionCounter meters as registered by spring-boot-autoconfigure-azure or spring-boot-autoconfigure-gcp.
 
 ## Configuration
 
