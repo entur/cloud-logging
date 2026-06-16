@@ -9,9 +9,9 @@ import no.entur.logging.cloud.gcp.spring.ondemand.ConditionalOnDisabledOndemandL
 import no.entur.logging.cloud.gcp.spring.ondemand.ConditionalOnEnabledOndemandLogging;
 import no.entur.logging.cloud.gcp.spring.ondemand.GcpOndemandLoggingMeterBinder;
 import no.entur.logging.cloud.micrometer.DevOpsLogbackMetrics;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
  *
@@ -23,7 +23,15 @@ import org.springframework.context.annotation.Configuration;
  *
  */
 
-@Configuration
+@AutoConfiguration(
+        afterName = {
+                "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsAutoConfiguration",
+                "org.springframework.boot.micrometer.metrics.autoconfigure.CompositeMeterRegistryAutoConfiguration"
+        },
+        beforeName = {
+                "org.springframework.boot.micrometer.metrics.autoconfigure.logging.logback.LogbackMetricsAutoConfiguration"
+        }
+)
 public class GcpLoggingAutoConfiguration {
 
     @Bean

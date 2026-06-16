@@ -9,7 +9,6 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import no.entur.logging.cloud.api.DevOpsLevel;
 import no.entur.logging.cloud.api.DevOpsMarker;
 import org.slf4j.Marker;
@@ -17,13 +16,6 @@ import org.slf4j.Marker;
 import java.util.List;
 
 public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
-
-    /**
-     * No-op counter used when a non-{@code Counter} meter (e.g., a {@code FunctionCounter}
-     * registered by Micrometer 1.17+'s built-in {@code MetricsTurboFilter}) already occupies
-     * the same metric ID.  Incrementing it is safe but has no observable effect.
-     */
-    private static final Counter NOOP_COUNTER = Counter.builder("noop").register(new SimpleMeterRegistry());
 
     protected final Counter errorWakeMeUpRightNowCounter;
     protected final Counter errorInterruptMyDinnerCounter;
@@ -84,20 +76,19 @@ public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEven
      * Captures an existing {@link Counter} from the registry under {@code name + tags + tagKey=tagValue},
      * or registers a fresh one when the slot is empty.
      *
-     * <p>When a non-{@code Counter} meter (e.g., a {@code FunctionCounter} registered by
-     * Micrometer 1.17+'s {@code MetricsTurboFilter}) already occupies that ID, the method
-     * returns {@link #NOOP_COUNTER} instead of throwing {@link IllegalArgumentException}.
-     * In that scenario the built-in filter is already tracking the metric, so no duplicate
-     * registration is needed.</p>
+     * <p>When a non-{@code Counter} meter (e.g., a {@code FunctionCounter}) already occupies
+     * that ID, it is removed from the registry so that a new, incrementable {@link Counter}
+     * can be registered in its place.  This guarantees that the returned meter can always be
+     * used to increment the underlying counter.</p>
      */
     private static Counter captureOrRegister(MeterRegistry registry, String name,
             Iterable<Tag> baseTags, String tagKey, String tagValue, String description) {
         Meter existing = registry.find(name).tag(tagKey, tagValue).tags(baseTags).meter();
         if (existing instanceof Counter c) {
             return c;
-        } else if (existing != null) {
-            // A non-Counter meter already owns this ID — avoid a type-conflict exception.
-            return NOOP_COUNTER;
+        }
+        if (existing != null) {
+            registry.remove(existing);
         }
         return Counter.builder(name)
                 .tags(baseTags)

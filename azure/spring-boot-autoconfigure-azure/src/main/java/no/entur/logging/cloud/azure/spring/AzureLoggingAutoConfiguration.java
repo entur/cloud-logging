@@ -3,17 +3,15 @@ package no.entur.logging.cloud.azure.spring;
 
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics;
-import no.entur.logging.cloud.api.DevOpsLogger;
-import no.entur.logging.cloud.api.DevOpsLoggerFactory;
 import no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender;
 import no.entur.logging.cloud.azure.micrometer.AzureLogbackMetrics;
 import no.entur.logging.cloud.azure.spring.ondemand.AzureOndemandLoggingMeterBinder;
 import no.entur.logging.cloud.gcp.spring.ondemand.ConditionalOnDisabledOndemandLogging;
 import no.entur.logging.cloud.gcp.spring.ondemand.ConditionalOnEnabledOndemandLogging;
 import no.entur.logging.cloud.micrometer.DevOpsLogbackMetrics;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
  *
@@ -25,11 +23,16 @@ import org.springframework.context.annotation.Configuration;
  *
  */
 
-
-@Configuration
+@AutoConfiguration(
+        afterName = {
+                "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsAutoConfiguration",
+                "org.springframework.boot.micrometer.metrics.autoconfigure.CompositeMeterRegistryAutoConfiguration"
+        },
+        beforeName = {
+                "org.springframework.boot.micrometer.metrics.autoconfigure.logging.logback.LogbackMetricsAutoConfiguration"
+        }
+)
 public class AzureLoggingAutoConfiguration {
-
-    private static final DevOpsLogger LOGGER = DevOpsLoggerFactory.getLogger(AzureLoggingAutoConfiguration.class);
 
     @Bean
     @ConditionalOnClass(AzureLogbackMetrics.class)

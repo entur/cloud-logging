@@ -4,6 +4,8 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import ch.qos.logback.classic.Level;
+import no.entur.logging.cloud.api.DevOpsLevel;
 import no.entur.logging.cloud.api.DevOpsLogger;
 import no.entur.logging.cloud.api.DevOpsLoggerFactory;
 import org.junit.jupiter.api.Test;
@@ -13,7 +15,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static java.util.Collections.emptyList;
 
@@ -53,19 +54,15 @@ public class DevOpsLogbackMetricsTest {
 	}
 
 	/**
-	 * Simulates the Micrometer 1.17+ scenario where the built-in {@code MetricsTurboFilter}
-	 * has already registered {@code FunctionCounter} meters for standard log levels before
-	 * our {@code DevOpsMetricsTurboFilter} is initialised.
-	 * <p>
-	 * Without the {@code captureOrRegister} helper this would throw
-	 * {@link IllegalArgumentException}: "Meter with the same name but different types …".
+	 * Simulates a scenario where non-{@code Counter} meters (e.g., {@code FunctionCounter})
+	 * already occupy the standard-level slots.  {@code captureOrRegister} must remove them
+	 * and register fresh {@link Counter} instances so that incrementing always works.
 	 */
 	@Test
-	public void givenFunctionCountersAlreadyRegistered_whenCreatingFilter_thenNoException() {
+	public void givenFunctionCountersAlreadyRegistered_whenCreatingFilter_thenCountersAreIncrementable() {
 		SimpleMeterRegistry registry = new SimpleMeterRegistry();
 
-		// Pre-register FunctionCounters for the five standard levels — mimicking what
-		// Micrometer 1.17's MetricsTurboFilter does before our filter initialises.
+		// Pre-register FunctionCounters for the five standard levels.
 		for (String level : new String[]{"error", "warn", "info", "debug", "trace"}) {
 			LongAdder adder = new LongAdder();
 			FunctionCounter.builder("logback.events", adder, LongAdder::doubleValue)
@@ -73,7 +70,20 @@ public class DevOpsLogbackMetricsTest {
 					.register(registry);
 		}
 
-		// Must not throw even though FunctionCounters already occupy the standard-level slots.
-		assertDoesNotThrow(() -> new DevOpsMetricsTurboFilter(registry, emptyList()));
+		// captureOrRegister must replace each FunctionCounter with an incrementable Counter.
+		DevOpsMetricsTurboFilter filter = new DevOpsMetricsTurboFilter(registry, emptyList());
+
+		// Exercise the increment(Marker, Level) path which drives the standard-level counters.
+		filter.increment(null, Level.ERROR);
+		filter.increment(null, Level.WARN);
+		filter.increment(null, Level.INFO);
+		filter.increment(null, Level.DEBUG);
+		filter.increment(null, Level.TRACE);
+
+		assertThat(registry.find("logback.events").tag("level", "error").counter().count()).isEqualTo(1.0);
+		assertThat(registry.find("logback.events").tag("level", "warn").counter().count()).isEqualTo(1.0);
+		assertThat(registry.find("logback.events").tag("level", "info").counter().count()).isEqualTo(1.0);
+		assertThat(registry.find("logback.events").tag("level", "debug").counter().count()).isEqualTo(1.0);
+		assertThat(registry.find("logback.events").tag("level", "trace").counter().count()).isEqualTo(1.0);
 	}
 }
