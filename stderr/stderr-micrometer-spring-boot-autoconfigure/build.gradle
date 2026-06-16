@@ -5,6 +5,8 @@ dependencies {
 
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"
 
+    testImplementation project(":micrometer")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-actuator")
     testRuntimeOnly("ch.qos.logback:logback-classic")
