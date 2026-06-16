@@ -6,8 +6,10 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
 import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import no.entur.logging.cloud.api.DevOpsLevel;
 import no.entur.logging.cloud.api.DevOpsMarker;
 import org.slf4j.Marker;
@@ -15,6 +17,13 @@ import org.slf4j.Marker;
 import java.util.List;
 
 public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEventMetrics {
+
+    /**
+     * No-op counter used when a non-{@code Counter} meter (e.g., a {@code FunctionCounter}
+     * registered by Micrometer 1.17+'s built-in {@code MetricsTurboFilter}) already occupies
+     * the same metric ID.  Incrementing it is safe but has no observable effect.
+     */
+    private static final Counter NOOP_COUNTER = Counter.builder("noop").register(new SimpleMeterRegistry());
 
     protected final Counter errorWakeMeUpRightNowCounter;
     protected final Counter errorInterruptMyDinnerCounter;
@@ -28,6 +37,8 @@ public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEven
     protected final Counter traceCounter;
 
     public DevOpsMetricsTurboFilter(MeterRegistry registry, Iterable<Tag> tags) {
+        // DevOps-specific level values are never registered by Micrometer's built-in
+        // MetricsTurboFilter, so a plain Counter.builder().register() is always safe here.
         errorWakeMeUpRightNowCounter = Counter.builder("logback.events")
                 .tags(tags).tags("level", "errorWakeMeUpRightNow")
                 .description("Number of error 'Wake Me Up Right Now' level events that made it to the logs")
@@ -46,33 +57,52 @@ public class DevOpsMetricsTurboFilter extends TurboFilter implements LoggingEven
                 .baseUnit("events")
                 .register(registry);
 
-        errorCounter = Counter.builder("logback.events")
-                .tags(tags).tags("level", "error")
-                .description("Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)")
-                .baseUnit("events")
-                .register(registry);
+        // Standard level values (error, warn, info, debug, trace) are also used by
+        // Micrometer's built-in MetricsTurboFilter.  In Micrometer 1.17+ that filter
+        // registers FunctionCounter + LongAdder for these IDs instead of a plain Counter.
+        // Calling Counter.builder().register() when a FunctionCounter already occupies
+        // the same ID throws IllegalArgumentException.  captureOrRegister() checks the
+        // registry first: it reuses an existing Counter, returns NOOP_COUNTER when any
+        // other meter type is present, and only registers a new Counter when the slot is empty.
+        errorCounter = captureOrRegister(registry, "logback.events", tags, "level", "error",
+                "Number of all error level events that made it to the logs (errorTellMeTomorrow + errorInterruptMyDinner + errorWakeMeUpRightNow)");
 
-        warnCounter = Counter.builder("logback.events")
-                .tags(tags).tags("level", "warn")
-                .description("Number of warn level events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        warnCounter = captureOrRegister(registry, "logback.events", tags, "level", "warn",
+                "Number of warn level events that made it to the logs");
 
-        infoCounter = Counter.builder("logback.events")
-                .tags(tags).tags("level", "info")
-                .description("Number of info level events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        infoCounter = captureOrRegister(registry, "logback.events", tags, "level", "info",
+                "Number of info level events that made it to the logs");
 
-        debugCounter = Counter.builder("logback.events")
-                .tags(tags).tags("level", "debug")
-                .description("Number of debug level events that made it to the logs")
-                .baseUnit("events")
-                .register(registry);
+        debugCounter = captureOrRegister(registry, "logback.events", tags, "level", "debug",
+                "Number of debug level events that made it to the logs");
 
-        traceCounter = Counter.builder("logback.events")
-                .tags(tags).tags("level", "trace")
-                .description("Number of trace level events that made it to the logs")
+        traceCounter = captureOrRegister(registry, "logback.events", tags, "level", "trace",
+                "Number of trace level events that made it to the logs");
+    }
+
+    /**
+     * Captures an existing {@link Counter} from the registry under {@code name + tags + tagKey=tagValue},
+     * or registers a fresh one when the slot is empty.
+     *
+     * <p>When a non-{@code Counter} meter (e.g., a {@code FunctionCounter} registered by
+     * Micrometer 1.17+'s {@code MetricsTurboFilter}) already occupies that ID, the method
+     * returns {@link #NOOP_COUNTER} instead of throwing {@link IllegalArgumentException}.
+     * In that scenario the built-in filter is already tracking the metric, so no duplicate
+     * registration is needed.</p>
+     */
+    private static Counter captureOrRegister(MeterRegistry registry, String name,
+            Iterable<Tag> baseTags, String tagKey, String tagValue, String description) {
+        Meter existing = registry.find(name).tag(tagKey, tagValue).tags(baseTags).meter();
+        if (existing instanceof Counter c) {
+            return c;
+        } else if (existing != null) {
+            // A non-Counter meter already owns this ID — avoid a type-conflict exception.
+            return NOOP_COUNTER;
+        }
+        return Counter.builder(name)
+                .tags(baseTags)
+                .tag(tagKey, tagValue)
+                .description(description)
                 .baseUnit("events")
                 .register(registry);
     }
