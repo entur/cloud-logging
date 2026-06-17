@@ -1,5 +1,12 @@
 [![Maven Central](https://img.shields.io/maven-central/v/no.entur.logging.cloud/api.svg)](https://mvnrepository.com/artifact/no.entur.logging.cloud)
 
+# This is the 6.x legacy branch
+For the latest version, see the main branch.
+
+This branch vs later versions:
+ * Spring Boot 4.0.x support
+ * Uses Spring gRPC with group `org.springframework.grpc` (not the `org.springframework.boot` as in 4.1+)
+
 # cloud-logging
 Logging libraries for JVM applications. Goals
 
