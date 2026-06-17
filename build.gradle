@@ -1,12 +1,12 @@
 plugins {
-    id 'com.github.ben-manes.versions' version '0.53.0' apply false // ./gradlew dependencyUpdates
+    id 'com.github.ben-manes.versions' version '0.54.0' apply false // ./gradlew dependencyUpdates
     id "org.sonarqube" version "7.2.3.7755"
-    id 'org.jreleaser' version '1.23.0' apply false
+    id 'org.jreleaser' version '1.24.0' apply false
 }
 
 // Define version variables at root level so they're available everywhere
 ext {
-    springBootVersion = '3.5.14' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
+    springBootVersion = '3.5.15' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
     // The following versions are managed by Spring Boot BOM (no need to define here):
     // junitJupiterVersion, mockitoVersion, slf4jVersion, logbackVersion, 
     // jacksonVersion, jacksonDatabindVersion, micrometerVersion, janinoVersion,
@@ -21,12 +21,12 @@ ext {
     logbackLogstashSyntaxHighlightingDecoratorsVersion = '1.1.1'
     commonsIoVersion = '2.22.0'
     commonsTextVersion = '1.15.0'
-    nettyTcnativeBoringsslStaticVersion = '2.0.77.Final'
+    nettyTcnativeBoringsslStaticVersion = '2.0.78.Final'
 
-    grpcNettyVersion = '1.80.0'
-    grpcVersion = '1.80.0'
-    grpcCommonsVersion = '2.67.0'
-    grpcProtobufVersion = '4.34.1'
+    grpcNettyVersion = '1.82.0'
+    grpcVersion = '1.82.0'
+    grpcCommonsVersion = '2.72.0'
+    grpcProtobufVersion = '4.35.0'
     ecosystemGrpcVersion = '3.1.0.RELEASE'
 
     jsonAssertVersion = '0.8.0'
