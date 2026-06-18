@@ -27,7 +27,7 @@ ergonomics around them.
     fields are renamed to the cloud's conventions; and Fluentbit/Cloud Logging quirks (such as
     duplicate keys causing log loss and the 256 KB line limit) are worked around. See
     [`AGENTS.md`](AGENTS.md) for the full mapping.
- 4. **Cross-thread correlation propagation.** gRPC request context (correlation id, trace)
+ 4. **Cross-thread correlation propagation.** gRPC request context (correlation-id, trace)
     lives in the gRPC `Context` rather than the thread-local MDC, because handlers hop threads
     (e.g. Netty event-loop threads). It is captured into the MDC at the moment the log event
     is snapshotted for asynchronous processing, so correlation fields survive the hop to the
