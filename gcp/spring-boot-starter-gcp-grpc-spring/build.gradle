@@ -18,7 +18,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-autoconfigure")
     api("org.springframework.boot:spring-boot-starter-logging")
 
-    api("org.springframework.grpc:spring-grpc-server-spring-boot-starter:${springGrpcVersion}")
+    api("org.springframework.boot:spring-boot-starter-grpc-server")
 
     api "io.grpc:grpc-netty:${grpcNettyVersion}"
 
