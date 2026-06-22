@@ -9,5 +9,5 @@ jobs:
   verify-pr:
     permissions:
       contents: read
-    uses: entur/abt-gha-public/.github/workflows/gradle-open-source-verify.yml@main
+    uses: entur/abt-gha-public/.github/workflows/gradle-open-source-verify.yml@v1.25
     # no secrets necessary
