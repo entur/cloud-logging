@@ -38,7 +38,7 @@ public class MdcAsyncAppenderTest {
      * {@link MdcContributer} (e.g. carried in a gRPC {@code Context} rather than the thread-local
      * MDC) must be captured into the event's deferred-processing snapshot at append time, on the
      * calling thread, so they survive the hop to the async worker thread that serializes the log.
-     * The caller thread's own MDC must be left exactly as it was.
+     * The caller thread's MDC must be restored after append (i.e., contributed keys must not leak into the calling thread).
      *
      * <p>This is what {@code ILoggingEvent#prepareForDeferredProcessing()} freezes, and it can only
      * be exercised with a real {@link LoggingEvent} (a mock never snapshots anything). Guarding it
