@@ -71,10 +71,17 @@ The above starters are implemented in two flavours:
  * Servlet-based web
  * Netty-based gRPC
 
+## Spring Boot compatibility matrix
+
+ * [5.x](https://github.com/entur/cloud-logging/tree/5.x): Spring Boot 3.5.x
+ * [6.x](https://github.com/entur/cloud-logging/tree/6.x): Spring Boot 4.0.x
+ * 7.x (latest): Spring Boot 4.1.x
+
 ## Getting started
 See [Getting started with gRPC](guides/gRPC.md) or [Getting started with servlet-based web](guides/web.md). Alternatively, go directly to the [examples](examples).
 
 See also [troubleshooting](guides/troubleShooting.md).
+
 # Roadmap
 
  * Replace the correlation-id tracing artifacts with standardized modern equivalents, i.e. span id and so on.
