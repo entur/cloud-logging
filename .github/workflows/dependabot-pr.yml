@@ -1,5 +1,7 @@
 # Dependabot PRs don't receive secrets by default. After a human approves the PR,
-# re-run the full CI (with secrets) by calling the reusable ci.yml.
+# re-run CI by calling the reusable ci.yml. CI only builds and tests — it needs no
+# secrets (Maven Central publishing happens in the separate manual deploy workflows),
+# so permissions here mirror ci.yml's own (contents: read, checks: write).
 name: Dependabot CI (post-approval)
 on:
   pull_request_review:
@@ -7,11 +9,7 @@ on:
 permissions:
   contents: read
   checks: write
-  id-token: write
-  pull-requests: write
-  security-events: write
 jobs:
   ci:
     if: github.event.review.state == 'approved' && github.event.pull_request.user.login == 'dependabot[bot]'
     uses: ./.github/workflows/ci.yml
-    secrets: inherit

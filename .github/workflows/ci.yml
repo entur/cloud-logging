@@ -8,7 +8,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, 5.x, 6.x]
   workflow_call:
 
 concurrency:
@@ -35,7 +35,7 @@ jobs:
       - uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # 3.0.0
         if: always()
         with:
-          name: test-results
+          name: reports-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: "**/build/test-results/test/*.xml"
           reporter: java-junit
 
