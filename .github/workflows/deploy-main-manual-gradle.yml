@@ -27,7 +27,7 @@ jobs:
       contents: read
     needs: deploy-tag-gradle
     if: failure()
-    uses: entur/gha-slack/.github/workflows/post.yml@v3
+    uses: entur/gha-slack/.github/workflows/post.yml@v3.1.2
     with:
       channel_id: ${{ vars.CHANNEL_ID }}
       message: "🔴 Gradle artifact deploy failed for ${{ github.repository }}\n ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
@@ -38,7 +38,7 @@ jobs:
       contents: read
     needs: deploy-tag-gradle
     if: success()
-    uses: entur/gha-slack/.github/workflows/post.yml@v3
+    uses: entur/gha-slack/.github/workflows/post.yml@v3.1.2
     with:
       channel_id: ${{ vars.CHANNEL_ID}}
       message: "🟢 Gradle artifact deploy success for ${{ github.repository }}\n ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
