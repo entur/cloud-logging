@@ -22,7 +22,7 @@ ext {
     logbackLogstashSyntaxHighlightingDecoratorsVersion = '2.0.3'
     commonsIoVersion = '2.22.0'
     commonsTextVersion = '1.15.0'
-    nettyTcnativeBoringsslStaticVersion = '2.0.79.Final'
+    nettyTcnativeBoringsslStaticVersion = '2.0.80.Final'
 
     grpcNettyVersion = '1.82.1'
     grpcVersion = '1.82.1'
