@@ -8,7 +8,7 @@ jobs:
   verify-main-gradle:
     permissions:
       contents: read
-    uses: entur/abt-gha-public/.github/workflows/gradle-open-source-verify.yml@v1.26
+    uses: entur/abt-gha-public/.github/workflows/gradle-open-source-verify.yml@v1.27
 
   post-failure-to-slack:
     permissions:
