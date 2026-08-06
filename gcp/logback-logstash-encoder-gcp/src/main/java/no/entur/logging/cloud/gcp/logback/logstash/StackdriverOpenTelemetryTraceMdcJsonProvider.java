@@ -8,7 +8,10 @@ import java.util.Map;
 
 /**
  *
- * A simple MDC provider. Renames MDC field name trace_id and span_id to logging.googleapis.com/trace and logging.googleapis.com/spanId.
+ * A simple MDC provider. Copies the MDC fields trace_id and span_id to logging.googleapis.com/trace
+ * (formatted as projects/[PROJECT-ID]/traces/[TRACE-ID] when a project id is available) and
+ * logging.googleapis.com/spanId respectively. The original trace_id/span_id entries are left untouched
+ * in the MDC and are still emitted as-is by the surrounding MDC pass-through.
  * Falls back to traceId/spanId (Micrometer Tracing's MDC convention) when the OpenTelemetry Java agent's
  * snake_case keys are not present, since consumers of this library are not required to use the agent.
  *
