@@ -42,15 +42,6 @@ public class StackdriverOpenTelemetryTraceMdcJsonProvider extends AbstractJsonPr
         return value != null && !value.isBlank();
     }
 
-    // W3C trace-flags is a 2-character hex byte; bit 0 is the "sampled" flag.
-    private static Boolean parseSampled(String traceFlags) {
-        try {
-            return (Integer.parseInt(traceFlags, 16) & 0x1) != 0;
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
     @Override
     public void writeTo(JsonGenerator generator, ILoggingEvent event) {
         Map<String, String> mdcProperties = event.getMDCPropertyMap();

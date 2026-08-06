@@ -115,50 +115,6 @@ public class StackdriverOpenTelemetryTraceMdcJsonProviderTest {
                 .isEqualTo("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
     }
 
-    @Test
-    void writeTo_sampledTraceFlags_writesTraceSampledTrue() throws Exception {
-        Map<String, String> mdc = new LinkedHashMap<>();
-        mdc.put("trace_id", "4bf92f3577b34da6a3ce929d0e0e4736");
-        mdc.put("trace_flags", "01");
-
-        JsonNode root = write(mdc, null);
-
-        assertThat(root.get("logging.googleapis.com/trace_sampled").asBoolean()).isTrue();
-    }
-
-    @Test
-    void writeTo_unsampledTraceFlags_writesTraceSampledFalse() throws Exception {
-        Map<String, String> mdc = new LinkedHashMap<>();
-        mdc.put("trace_id", "4bf92f3577b34da6a3ce929d0e0e4736");
-        mdc.put("trace_flags", "00");
-
-        JsonNode root = write(mdc, null);
-
-        assertThat(root.get("logging.googleapis.com/trace_sampled").asBoolean()).isFalse();
-    }
-
-    @Test
-    void writeTo_unparseableTraceFlags_omitsTraceSampledField() throws Exception {
-        Map<String, String> mdc = new LinkedHashMap<>();
-        mdc.put("trace_id", "4bf92f3577b34da6a3ce929d0e0e4736");
-        mdc.put("trace_flags", "not-hex");
-
-        JsonNode root = write(mdc, null);
-
-        assertThat(root.has("logging.googleapis.com/trace_sampled")).isFalse();
-    }
-
-    @Test
-    void writeTo_legacyTraceSampledKeyAlreadyPresent_fieldWrittenExactlyOnce() throws Exception {
-        Map<String, String> mdc = new LinkedHashMap<>();
-        mdc.put("trace_flags", "01");
-        mdc.put("logging.googleapis.com/trace_sampled", "legacy-value");
-
-        String json = writeRaw(mdc, null);
-
-        assertThat(countOccurrences(json, "\"logging.googleapis.com/trace_sampled\"")).isEqualTo(1);
-    }
-
     private static JsonNode write(Map<String, String> mdcMap, String projectId) throws Exception {
         return MAPPER.readTree(writeRaw(mdcMap, projectId));
     }

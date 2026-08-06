@@ -41,7 +41,9 @@ public class OrderedTraceIdGrpcMdcContextServerInterceptorTest {
 
     @Test
     void interceptCall_realTraceIdInMdc_defersAndDoesNotSetFallback() {
+        // a real trace from OpenTelemetry always carries both trace_id and span_id together
         MDC.put("trace_id", "4bf92f3577b34da6a3ce929d0e0e4736");
+        MDC.put("span_id", "00f067aa0ba902b7");
 
         Map<String, String> context = new HashMap<>();
         context.put(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY, "my-correlation-id");
@@ -56,6 +58,7 @@ public class OrderedTraceIdGrpcMdcContextServerInterceptorTest {
     @Test
     void interceptCall_realCamelCaseTraceIdInMdc_defersAndDoesNotSetFallback() {
         MDC.put("traceId", "4bf92f3577b34da6a3ce929d0e0e4736");
+        MDC.put("spanId", "00f067aa0ba902b7");
 
         Map<String, String> context = new HashMap<>();
         context.put(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY, "my-correlation-id");
@@ -64,6 +67,7 @@ public class OrderedTraceIdGrpcMdcContextServerInterceptorTest {
         runInterceptCall(grpcMdcContext);
 
         assertThat(grpcMdcContext.containsKey(OrderedTraceIdGrpcMdcContextServerInterceptor.TRACE_MDC_KEY)).isFalse();
+        assertThat(grpcMdcContext.containsKey(OrderedTraceIdGrpcMdcContextServerInterceptor.SPAN_ID_MDC_KEY)).isFalse();
     }
 
     @Test
