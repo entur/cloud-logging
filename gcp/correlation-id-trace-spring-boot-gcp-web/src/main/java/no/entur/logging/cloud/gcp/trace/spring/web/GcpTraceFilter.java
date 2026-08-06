@@ -52,6 +52,17 @@ public class GcpTraceFilter implements Filter {
 
 	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
+		// Defer to a real trace/span already established by OpenTelemetry instrumentation (classic SLF4J
+		// MDC, populated by the OTel Java agent as trace_id/span_id, or by Micrometer Tracing as traceId/spanId).
+		// Leaving these MDC keys untouched lets StackdriverOpenTelemetryTraceMdcJsonProvider derive the
+		// correctly project-prefixed logging.googleapis.com/trace value from the real trace id.
+		boolean realTracePresent = MDC.get("trace_id") != null || MDC.get("traceId") != null;
+
+		if(realTracePresent) {
+			chain.doFilter(servletRequest, servletResponse);
+			return;
+		}
+
 		String trace = getTrace(servletRequest);
 		if(trace == null) {
 			// copy from correlation-id, if possible

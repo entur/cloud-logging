@@ -6,6 +6,7 @@ import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import no.entur.logging.cloud.grpc.mdc.GrpcMdcContext;
 import no.entur.logging.cloud.grpc.trace.CorrelationIdGrpcMdcContext;
+import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -39,14 +40,19 @@ public class OrderedTraceIdGrpcMdcContextServerInterceptor implements ServerInte
             return next.startCall(call, headers);
         }
 
-        // this interceptor runs after the CorrelationId interceptor, so there should always be a value here
-        if(!grpcMdcContext.containsKey(TRACE_MDC_KEY)) {
+        // Defer to a real trace/span already established by OpenTelemetry instrumentation.
+        // OTel writes trace_id/span_id (or traceId/spanId, for Micrometer Tracing) into the classic
+        // SLF4J MDC directly - GrpcMdcContext exists in parallel to it and never sees those values,
+        // so the real MDC has to be checked here rather than grpcMdcContext itself.
+        boolean realTraceIdPresent = MDC.get("trace_id") != null || MDC.get("traceId") != null;
+        if(!realTraceIdPresent && !grpcMdcContext.containsKey(TRACE_MDC_KEY)) {
             String correlationId = grpcMdcContext.get(CorrelationIdGrpcMdcContext.CORRELATION_ID_MDC_KEY);
 
             grpcMdcContext.put(TRACE_MDC_KEY, correlationId);
         }
 
-        if(!grpcMdcContext.containsKey(SPAN_ID_MDC_KEY)) {
+        boolean realSpanIdPresent = MDC.get("span_id") != null || MDC.get("spanId") != null;
+        if(!realSpanIdPresent && !grpcMdcContext.containsKey(SPAN_ID_MDC_KEY)) {
             //  16-character, hexadecimal encoding of an 8-byte array
             ThreadLocalRandom current = ThreadLocalRandom.current();
             long random = current.nextLong();
