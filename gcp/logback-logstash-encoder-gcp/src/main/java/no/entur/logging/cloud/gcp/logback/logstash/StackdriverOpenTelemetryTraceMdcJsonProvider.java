@@ -8,27 +8,53 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
+ * An MDC provider that maps OpenTelemetry trace fields to the special JSON fields
+ * recognized by Google Cloud Logging.
  *
- * A simple MDC provider. Renames MDC field name traceId to trace.
+ * <p>When the Google Cloud Logging agent ingests structured JSON written to stdout, it promotes
+ * recognized JSON fields into the corresponding {@code LogEntry} fields. In particular:
+ * <ul>
+ *     <li>{@code logging.googleapis.com/trace} becomes {@code LogEntry.trace}</li>
+ *     <li>{@code logging.googleapis.com/spanId} becomes {@code LogEntry.spanId}</li>
+ * </ul>
+ * Unrecognized fields remain in {@code LogEntry.jsonPayload}.
  *
+ * @see <a href="https://docs.cloud.google.com/logging/docs/agent/logging/configuration#special-fields">
+ *     Special fields in structured payloads
+ * </a>
  */
-
 public class StackdriverOpenTelemetryTraceMdcJsonProvider extends AbstractJsonProvider<ILoggingEvent> {
+
+    static final String OPENTELEMETRY_TRACE_ID_KEY = "traceId";
+    static final String OPENTELEMETRY_SPAN_ID_KEY = "spanId";
+    static final String GCP_TRACE_KEY = "logging.googleapis.com/trace";
+    static final String GCP_SPAN_ID_KEY = "logging.googleapis.com/spanId";
 
     @Override
     public void writeTo(JsonGenerator generator, ILoggingEvent event) {
         Map<String, String> mdcProperties = event.getMDCPropertyMap();
         if (mdcProperties != null && !mdcProperties.isEmpty()) {
-            String traceId = mdcProperties.get("traceId");
-            if(traceId != null) {
-                generator.writeStringProperty("trace", traceId);
-            }
+            String traceId = mdcProperties.get(OPENTELEMETRY_TRACE_ID_KEY);
+            String spanId = mdcProperties.get(OPENTELEMETRY_SPAN_ID_KEY);
+
             for (Map.Entry<String, String> entry : mdcProperties.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue();
                 if(key == null || value == null) {
                     continue;
                 }
+
+                if ((GCP_TRACE_KEY.equals(key) && traceId != null)
+                        || (GCP_SPAN_ID_KEY.equals(key) && spanId != null)) {
+                    continue;
+                }
+
+                if (OPENTELEMETRY_TRACE_ID_KEY.equals(key)) {
+                    key = GCP_TRACE_KEY;
+                } else if (OPENTELEMETRY_SPAN_ID_KEY.equals(key)) {
+                    key = GCP_SPAN_ID_KEY;
+                }
+
                 generator.writeStringProperty(key, value);
             }
         }
