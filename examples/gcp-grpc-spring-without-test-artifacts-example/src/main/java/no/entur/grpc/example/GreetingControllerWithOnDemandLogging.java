@@ -1,7 +1,6 @@
 package no.entur.grpc.example;
 
 
-import no.entur.logging.cloud.gcp.trace.spring.grpc.interceptor.OrderedTraceIdGrpcMdcContextServerInterceptor;
 import no.entur.logging.cloud.spring.ondemand.grpc.scope.GrpcLoggingScopeContextInterceptor;
 import no.entur.logging.cloud.spring.rr.grpc.OrderedGrpcLoggingServerInterceptor;
 import no.entur.logging.cloud.spring.rr.grpc.RequestResponseGrpcExceptionHandlerInterceptor;
@@ -14,7 +13,6 @@ import org.springframework.grpc.server.service.GrpcService;
 		GrpcLoggingScopeContextInterceptor.class,
 		// Trace
 		OrderedCorrelationIdGrpcMdcContextServerInterceptor.class, // add trace headers (correlation-id and such)
-		OrderedTraceIdGrpcMdcContextServerInterceptor.class, // add trace headers (correlation-id and such)
 
 		// logging
 		OrderedGrpcLoggingServerInterceptor.class,

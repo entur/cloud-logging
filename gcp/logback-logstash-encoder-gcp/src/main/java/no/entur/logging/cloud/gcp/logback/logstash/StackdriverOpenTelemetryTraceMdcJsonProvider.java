@@ -34,9 +34,6 @@ public class StackdriverOpenTelemetryTraceMdcJsonProvider extends AbstractJsonPr
     public void writeTo(JsonGenerator generator, ILoggingEvent event) {
         Map<String, String> mdcProperties = event.getMDCPropertyMap();
         if (mdcProperties != null && !mdcProperties.isEmpty()) {
-            String traceId = mdcProperties.get(OPENTELEMETRY_TRACE_ID_KEY);
-            String spanId = mdcProperties.get(OPENTELEMETRY_SPAN_ID_KEY);
-
             for (Map.Entry<String, String> entry : mdcProperties.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue();
@@ -44,18 +41,13 @@ public class StackdriverOpenTelemetryTraceMdcJsonProvider extends AbstractJsonPr
                     continue;
                 }
 
-                if ((GCP_TRACE_KEY.equals(key) && traceId != null)
-                        || (GCP_SPAN_ID_KEY.equals(key) && spanId != null)) {
-                    continue;
-                }
-
                 if (OPENTELEMETRY_TRACE_ID_KEY.equals(key)) {
-                    key = GCP_TRACE_KEY;
-                } else if (OPENTELEMETRY_SPAN_ID_KEY.equals(key)) {
-                    key = GCP_SPAN_ID_KEY;
+                    generator.writeStringProperty(GCP_TRACE_KEY, value);
+                } else if(OPENTELEMETRY_SPAN_ID_KEY.equals(key)) {
+                    generator.writeStringProperty(GCP_SPAN_ID_KEY, value);
+                } else {
+                    generator.writeStringProperty(key, value);
                 }
-
-                generator.writeStringProperty(key, value);
             }
         }
     }

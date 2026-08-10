@@ -2,10 +2,12 @@ package org.entur.example.web;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControlClosable;
 import org.entur.example.web.rest.MyEntity;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +20,9 @@ import org.springframework.http.ResponseEntity;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
 public class WebLoggingFormatTest {
+
+	@RegisterExtension
+	static final OpenTelemetryExtension otelTesting = OpenTelemetryExtension.create();
 
 	@LocalServerPort
     private int randomServerPort;

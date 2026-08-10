@@ -47,12 +47,7 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 			} else if(jsonProvider instanceof MdcJsonProvider p) {
 				loggingEventJsonProviders.removeProvider(jsonProvider);
 
-				boolean openTelemetry = detectOpenTelemetry();
-				if (openTelemetry) {
-					loggingEventJsonProviders.addProvider(new StackdriverOpenTelemetryTraceMdcJsonProvider());
-				} else {
-					loggingEventJsonProviders.addProvider(new SimpleMdcJsonProvider());
-				}
+				loggingEventJsonProviders.addProvider(new StackdriverOpenTelemetryTraceMdcJsonProvider());
 			}
 		}
 
@@ -62,12 +57,4 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 		return formatter;
 	}
 
-	private boolean detectOpenTelemetry() {
-		try {
-			Class.forName("io.opentelemetry.api.OpenTelemetry");
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
-	}
 }
