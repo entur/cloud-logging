@@ -36,7 +36,7 @@ dependencies {
     testImplementation ("com.google.truth:truth:${googleTruthVersion}")
     testImplementation ("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
 
-    implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
+    implementation "org.springframework.boot:spring-boot-starter-opentelemetry"
     testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
 }

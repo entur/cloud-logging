@@ -1,0 +1,41 @@
+package org.entur.example.web.otel.starter;
+
+import org.entur.example.web.rest.MyEntity;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
+
+import static com.google.common.truth.Truth.assertThat;
+
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@TestPropertySource(properties = {
+		"entur.logging.style=HumanReadableJson",
+})
+@AutoConfigureTestRestTemplate
+public class WebLoggingFormatViaPropertyTest {
+
+	@LocalServerPort
+	private int randomServerPort;
+	
+	@Autowired
+	private TestRestTemplate restTemplate;
+
+	@Test 
+	public void useHumanReadableJsonEncoderTest() throws InterruptedException {
+		MyEntity entity = new MyEntity();
+		entity.setName("Entur");
+		entity.setSecret("mySecret");
+
+		ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method", entity, MyEntity.class);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+	}
+
+
+}

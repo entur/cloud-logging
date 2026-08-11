@@ -1,4 +1,4 @@
-package org.entur.example.web;
+package org.entur.example.web.otel.starter;
 
 import static com.google.common.truth.Truth.assertThat;
 

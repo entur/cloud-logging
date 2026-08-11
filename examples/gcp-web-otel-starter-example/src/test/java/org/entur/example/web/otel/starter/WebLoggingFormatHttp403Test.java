@@ -1,14 +1,9 @@
-package org.entur.example.web;
+package org.entur.example.web.otel.starter;
 
-import static com.google.common.truth.Truth.assertThat;
-
-import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControlClosable;
 import org.entur.example.web.rest.MyEntity;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,15 +12,16 @@ import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.TestPropertySource;
+
+import static com.google.common.truth.Truth.assertThat;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@TestPropertySource(properties = {
+		"logbook.secure-filter.enabled=false"
+})
 @AutoConfigureTestRestTemplate
-@ExtendWith(SpringExtension.class)
-public class WebLoggingFormatTest {
-
-	@RegisterExtension
-	static final OpenTelemetryExtension otelTesting = OpenTelemetryExtension.create();
+public class WebLoggingFormatHttp403Test {
 
 	@LocalServerPort
     private int randomServerPort;
@@ -39,8 +35,8 @@ public class WebLoggingFormatTest {
 		entity.setName("Entur");
 		entity.setSecret("mySecret");
 
-		ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method", entity, MyEntity.class);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/secured/endpoint", entity, MyEntity.class);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 	}
 
 	@Test 
@@ -50,8 +46,8 @@ public class WebLoggingFormatTest {
 		entity.setSecret("mySecret");
 
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useHumanReadableJsonEncoder()) {
-			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method", entity, MyEntity.class);
-			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/secured/endpoint", entity, MyEntity.class);
+			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 		}
 	}
 
@@ -62,8 +58,8 @@ public class WebLoggingFormatTest {
 		entity.setSecret("mySecret");
 
 		try (CompositeConsoleOutputControlClosable c = CompositeConsoleOutputControl.useMachineReadableJsonEncoder()) {
-			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method", entity, MyEntity.class);
-			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/secured/endpoint", entity, MyEntity.class);
+			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 		}
 	}
 
