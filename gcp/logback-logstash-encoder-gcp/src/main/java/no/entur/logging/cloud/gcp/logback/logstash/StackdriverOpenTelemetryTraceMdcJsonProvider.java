@@ -4,7 +4,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import tools.jackson.core.JsonGenerator;
 import net.logstash.logback.composite.AbstractJsonProvider;
 
-import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +53,7 @@ public class StackdriverOpenTelemetryTraceMdcJsonProvider extends AbstractJsonPr
         }
     }
 
-    public static boolean isOtelAgentLoaded() {
+    public static boolean isOtelAgent() {
         // 1. Check direct JVM command-line arguments (-javaagent)
         List<String> jvmArgs = ManagementFactory.getRuntimeMXBean().getInputArguments();
         for (String arg : jvmArgs) {

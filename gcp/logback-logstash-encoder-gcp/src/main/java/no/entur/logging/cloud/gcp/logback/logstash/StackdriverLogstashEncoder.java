@@ -47,7 +47,7 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 			} else if(jsonProvider instanceof MdcJsonProvider p) {
 				loggingEventJsonProviders.removeProvider(jsonProvider);
 
-				if(StackdriverOpenTelemetryTraceMdcJsonProvider.isOtelAgentLoaded()) {
+				if(StackdriverOpenTelemetryTraceMdcJsonProvider.isOtelAgent()) {
 					loggingEventJsonProviders.addProvider(new StackdriverOpenTelemetryTraceMdcJsonProvider());
 				} else {
 					loggingEventJsonProviders.addProvider(new StackdriverMicrometerTraceMdcJsonProvider());
