@@ -26,28 +26,33 @@ public class StackdriverMicrometerTraceMdcJsonProvider extends AbstractJsonProvi
 
     public static final String MICROMETER_TRACE_ID_KEY = "traceId";
     public static final String MICROMETER_SPAN_ID_KEY = "spanId";
+    public static final String MICROMETER_SAMPLED_KEY = "traceSampled";
 
     public static final String GCP_TRACE_KEY = "logging.googleapis.com/trace";
     public static final String GCP_SPAN_ID_KEY = "logging.googleapis.com/spanId";
+    public static final String GCP_TRACE_SAMPLED = "logging.googleapis.com/trace_sampled";
 
     @Override
     public void writeTo(JsonGenerator generator, ILoggingEvent event) {
         Map<String, String> mdcProperties = event.getMDCPropertyMap();
-        if (mdcProperties != null && !mdcProperties.isEmpty()) {
-            for (Map.Entry<String, String> entry : mdcProperties.entrySet()) {
-                String key = entry.getKey();
-                String value = entry.getValue();
-                if(key == null || value == null) {
-                    continue;
-                }
+        if (mdcProperties == null || mdcProperties.isEmpty()) {
+            return;
+        }
 
-                if (MICROMETER_TRACE_ID_KEY.equals(key)) {
-                    generator.writeStringProperty(GCP_TRACE_KEY, value);
-                } else if(MICROMETER_SPAN_ID_KEY.equals(key)) {
-                    generator.writeStringProperty(GCP_SPAN_ID_KEY, value);
-                } else {
-                    generator.writeStringProperty(key, value);
+        // map micrometer MDC keys to GCP special fields; write all others as-is.
+        for (Map.Entry<String, String> entry : mdcProperties.entrySet()) {
+            String key = entry.getKey();
+            if (key == null) continue;
+            String value = entry.getValue();
+            if (value == null) continue;
+
+            switch (key) {
+                case MICROMETER_TRACE_ID_KEY -> generator.writeStringProperty(GCP_TRACE_KEY, value);
+                case MICROMETER_SPAN_ID_KEY  -> generator.writeStringProperty(GCP_SPAN_ID_KEY, value);
+                case MICROMETER_SAMPLED_KEY -> {
+                    generator.writeBooleanProperty(GCP_TRACE_SAMPLED, Boolean.parseBoolean(value));
                 }
+                default -> generator.writeStringProperty(key, value);
             }
         }
     }

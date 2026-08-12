@@ -15,12 +15,8 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
 
     implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
-
-    testImplementation project(":gcp:spring-boot-starter-gcp-web-test");
-    testImplementation project(":gcp:request-response-spring-boot-starter-gcp-web-test");
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-restclient")
@@ -38,10 +34,3 @@ dependencies {
 
 }
 
-bootRun {
-    // example for running locally with one-line logging
-    dependencies {
-        implementation project(":gcp:spring-boot-starter-gcp-web-test");
-        implementation project(":gcp:request-response-spring-boot-starter-gcp-web-test");
-    }
-}

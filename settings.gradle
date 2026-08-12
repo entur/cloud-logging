@@ -49,4 +49,4 @@ include 'examples:gcp-grpc-spring-example', 'examples:gcp-web-apache-client-exam
 include 'examples:azure-web-example', 'examples:azure-grpc-spring-example', 'examples:gcp-grpc-spring-without-test-artifacts-example'
 
 // OTEL
-include 'examples:gcp-web-without-test-artifacts-otel-agent-example', 'examples:gcp-web-otel-starter-example'
+include 'examples:gcp-web-without-test-artifacts-otel-agent-example', 'examples:gcp-web-otel-starter-example', 'examples:gcp-web-without-test-artifacts-otel-starter-example'

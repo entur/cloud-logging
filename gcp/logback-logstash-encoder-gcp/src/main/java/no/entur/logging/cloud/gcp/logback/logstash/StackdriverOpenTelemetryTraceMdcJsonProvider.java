@@ -37,33 +37,36 @@ public class StackdriverOpenTelemetryTraceMdcJsonProvider extends AbstractJsonPr
     @Override
     public void writeTo(JsonGenerator generator, ILoggingEvent event) {
         Map<String, String> mdcProperties = event.getMDCPropertyMap();
-        if (mdcProperties != null && !mdcProperties.isEmpty()) {
-            for (Map.Entry<String, String> entry : mdcProperties.entrySet()) {
-                String key = entry.getKey();
-                String value = entry.getValue();
-                if(key == null || value == null) {
-                    continue;
-                }
+        if (mdcProperties == null || mdcProperties.isEmpty()) {
+            return;
+        }
 
-                if (OPENTELEMETRY_TRACE_ID_KEY.equals(key)) {
-                    generator.writeStringProperty(GCP_TRACE_KEY, value);
-                } else if(OPENTELEMETRY_SPAN_ID_KEY.equals(key)) {
-                    generator.writeStringProperty(GCP_SPAN_ID_KEY, value);
-                } else if(OPENTELEMETRY_TRACE_FLAGS_KEY.equals(key)) {
-                    // defaults to false
-                    if(parseSampled(value)) {
+        // map OTel MDC keys to GCP special fields; write all others as-is.
+        for (Map.Entry<String, String> entry : mdcProperties.entrySet()) {
+            String key = entry.getKey();
+            if (key == null) continue;
+            String value = entry.getValue();
+            if (value == null) continue;
+
+            switch (key) {
+                case OPENTELEMETRY_TRACE_ID_KEY -> generator.writeStringProperty(GCP_TRACE_KEY, value);
+                case OPENTELEMETRY_SPAN_ID_KEY  -> generator.writeStringProperty(GCP_SPAN_ID_KEY, value);
+                case OPENTELEMETRY_TRACE_FLAGS_KEY -> {
+                    if (isSampled(value)) {
                         generator.writeBooleanProperty(GCP_TRACE_SAMPLED, true);
                     }
-                } else {
-                    generator.writeStringProperty(key, value);
                 }
+                default -> generator.writeStringProperty(key, value);
             }
         }
     }
 
     // W3C trace-flags is a 2-character hex byte; bit 0 is the "sampled" flag.
-    private static boolean parseSampled(String traceFlags) {
-        return traceFlags.equals("01") || traceFlags.equals("03");
+    private static boolean isSampled(String traceFlags) {
+        if (traceFlags.length() != 2) return false;
+        char last = traceFlags.charAt(1);
+        // '1' (0x01) and '3' (0x03) have bit 0 set
+        return last == '1' || last == '3';
     }
 
     public static boolean isOtelAgent() {
