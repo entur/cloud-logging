@@ -17,7 +17,7 @@ ext {
     // Versions NOT in Spring Boot BOM - we manage these ourselves:
     googleTruthVersion = '1.4.5'
     logbackLogstashVersion = '9.0'
-    logbookVersion = '4.0.4'
+    logbookVersion = '4.1.0'
     jacksonSyntaxHighlightVersion = '2.0.3'
     logbackLogstashSyntaxHighlightingDecoratorsVersion = '2.0.3'
     commonsIoVersion = '2.22.0'
