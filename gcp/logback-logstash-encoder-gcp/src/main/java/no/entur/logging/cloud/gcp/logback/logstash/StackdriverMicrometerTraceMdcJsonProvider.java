@@ -1,12 +1,9 @@
 package no.entur.logging.cloud.gcp.logback.logstash;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import tools.jackson.core.JsonGenerator;
 import net.logstash.logback.composite.AbstractJsonProvider;
+import tools.jackson.core.JsonGenerator;
 
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,10 +22,10 @@ import java.util.Map;
  *     Special fields in structured payloads
  * </a>
  */
-public class StackdriverOpenTelemetryTraceMdcJsonProvider extends AbstractJsonProvider<ILoggingEvent> {
+public class StackdriverMicrometerTraceMdcJsonProvider extends AbstractJsonProvider<ILoggingEvent> {
 
-    static final String OPENTELEMETRY_TRACE_ID_KEY = "traceId";
-    static final String OPENTELEMETRY_SPAN_ID_KEY = "spanId";
+    static final String OPENTELEMETRY_TRACE_ID_KEY = "trace_id";
+    static final String OPENTELEMETRY_SPAN_ID_KEY = "span_id";
     static final String GCP_TRACE_KEY = "logging.googleapis.com/trace";
     static final String GCP_SPAN_ID_KEY = "logging.googleapis.com/spanId";
 
@@ -52,29 +49,6 @@ public class StackdriverOpenTelemetryTraceMdcJsonProvider extends AbstractJsonPr
                 }
             }
         }
-    }
-
-    public static boolean isOtelAgentLoaded() {
-        // 1. Check direct JVM command-line arguments (-javaagent)
-        List<String> jvmArgs = ManagementFactory.getRuntimeMXBean().getInputArguments();
-        for (String arg : jvmArgs) {
-            if (isOtelArgument(arg)) {
-                return true;
-            }
-        }
-
-        // 2. Backup check for environment variables that inject JVM arguments
-        String javaToolOptions = System.getenv("JAVA_TOOL_OPTIONS");
-        if (javaToolOptions != null && isOtelArgument(javaToolOptions)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private static boolean isOtelArgument(String argument) {
-        String lowerArg = argument.toLowerCase();
-        return lowerArg.contains("-javaagent:") && lowerArg.contains("opentelemetry");
     }
 
 }
