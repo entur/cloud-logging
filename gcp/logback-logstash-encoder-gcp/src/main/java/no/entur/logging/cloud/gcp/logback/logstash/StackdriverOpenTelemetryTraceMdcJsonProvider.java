@@ -26,10 +26,13 @@ import java.util.Map;
  */
 public class StackdriverOpenTelemetryTraceMdcJsonProvider extends AbstractJsonProvider<ILoggingEvent> {
 
-    static final String OPENTELEMETRY_TRACE_ID_KEY = "traceId";
-    static final String OPENTELEMETRY_SPAN_ID_KEY = "spanId";
-    static final String GCP_TRACE_KEY = "logging.googleapis.com/trace";
-    static final String GCP_SPAN_ID_KEY = "logging.googleapis.com/spanId";
+    public static final String OPENTELEMETRY_TRACE_ID_KEY = "trace_id";
+    public static final String OPENTELEMETRY_SPAN_ID_KEY = "span_id";
+    public static final String OPENTELEMETRY_TRACE_FLAGS_KEY = "trace_flags";
+
+    public static final String GCP_TRACE_KEY = "logging.googleapis.com/trace";
+    public static final String GCP_SPAN_ID_KEY = "logging.googleapis.com/spanId";
+    public static final String GCP_TRACE_SAMPLED = "logging.googleapis.com/trace_sampled";
 
     @Override
     public void writeTo(JsonGenerator generator, ILoggingEvent event) {
@@ -46,11 +49,21 @@ public class StackdriverOpenTelemetryTraceMdcJsonProvider extends AbstractJsonPr
                     generator.writeStringProperty(GCP_TRACE_KEY, value);
                 } else if(OPENTELEMETRY_SPAN_ID_KEY.equals(key)) {
                     generator.writeStringProperty(GCP_SPAN_ID_KEY, value);
+                } else if(OPENTELEMETRY_TRACE_FLAGS_KEY.equals(key)) {
+                    // defaults to false
+                    if(parseSampled(value)) {
+                        generator.writeBooleanProperty(GCP_TRACE_SAMPLED, true);
+                    }
                 } else {
                     generator.writeStringProperty(key, value);
                 }
             }
         }
+    }
+
+    // W3C trace-flags is a 2-character hex byte; bit 0 is the "sampled" flag.
+    private static boolean parseSampled(String traceFlags) {
+        return traceFlags.equals("01") || traceFlags.equals("03");
     }
 
     public static boolean isOtelAgent() {

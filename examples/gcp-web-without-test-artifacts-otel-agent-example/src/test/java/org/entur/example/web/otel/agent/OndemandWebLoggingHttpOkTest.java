@@ -1,5 +1,7 @@
 package org.entur.example.web.otel.agent;
 
+import no.entur.logging.cloud.logback.logstash.test.junit.CaptureLogStatements;
+import no.entur.logging.cloud.logback.logstash.test.junit.LogStatements;
 import org.entur.example.web.rest.MyEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 @TestPropertySource(properties = {"entur.logging.http.ondemand.enabled=true", "entur.logging.http.ondemand.failure.http.statusCode.equalOrHigherThan=400"})
 @AutoConfigureTestRestTemplate
+@CaptureLogStatements({"no.entur", "org.entur"})
 public class OndemandWebLoggingHttpOkTest {
 
 	@LocalServerPort
@@ -27,13 +30,15 @@ public class OndemandWebLoggingHttpOkTest {
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void useMachineReadableJsonEncoderExpectReducedLogging() {
+	public void useMachineReadableJsonEncoderExpectReducedLogging(LogStatements logStatements) {
 		MyEntity entity = new MyEntity();
 		entity.setName("Entur");
 		entity.setSecret("mySecret");
 
 		ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method", entity, MyEntity.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+		WebLoggingFormatTest.assertGcpTrace(logStatements);
 	}
 
 

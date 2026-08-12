@@ -19,6 +19,8 @@ dependencies {
 
     api ("org.codehaus.janino:janino")
 
+    implementation 'io.micrometer:micrometer-tracing'
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
 }

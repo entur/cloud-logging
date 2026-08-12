@@ -24,10 +24,11 @@ import java.util.Map;
  */
 public class StackdriverMicrometerTraceMdcJsonProvider extends AbstractJsonProvider<ILoggingEvent> {
 
-    static final String OPENTELEMETRY_TRACE_ID_KEY = "trace_id";
-    static final String OPENTELEMETRY_SPAN_ID_KEY = "span_id";
-    static final String GCP_TRACE_KEY = "logging.googleapis.com/trace";
-    static final String GCP_SPAN_ID_KEY = "logging.googleapis.com/spanId";
+    public static final String MICROMETER_TRACE_ID_KEY = "traceId";
+    public static final String MICROMETER_SPAN_ID_KEY = "spanId";
+
+    public static final String GCP_TRACE_KEY = "logging.googleapis.com/trace";
+    public static final String GCP_SPAN_ID_KEY = "logging.googleapis.com/spanId";
 
     @Override
     public void writeTo(JsonGenerator generator, ILoggingEvent event) {
@@ -40,9 +41,9 @@ public class StackdriverMicrometerTraceMdcJsonProvider extends AbstractJsonProvi
                     continue;
                 }
 
-                if (OPENTELEMETRY_TRACE_ID_KEY.equals(key)) {
+                if (MICROMETER_TRACE_ID_KEY.equals(key)) {
                     generator.writeStringProperty(GCP_TRACE_KEY, value);
-                } else if(OPENTELEMETRY_SPAN_ID_KEY.equals(key)) {
+                } else if(MICROMETER_SPAN_ID_KEY.equals(key)) {
                     generator.writeStringProperty(GCP_SPAN_ID_KEY, value);
                 } else {
                     generator.writeStringProperty(key, value);

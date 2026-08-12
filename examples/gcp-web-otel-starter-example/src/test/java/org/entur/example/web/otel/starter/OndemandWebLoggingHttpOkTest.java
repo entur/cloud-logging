@@ -2,6 +2,8 @@ package org.entur.example.web.otel.starter;
 
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
 import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControlClosable;
+import no.entur.logging.cloud.logback.logstash.test.junit.CaptureLogStatements;
+import no.entur.logging.cloud.logback.logstash.test.junit.LogStatements;
 import org.entur.example.web.rest.MyEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 @TestPropertySource(properties = {"entur.logging.http.ondemand.enabled=true"})
 @AutoConfigureTestRestTemplate
+@CaptureLogStatements({"no.entur", "org.entur"})
 public class OndemandWebLoggingHttpOkTest {
 
 	@LocalServerPort
@@ -31,17 +34,19 @@ public class OndemandWebLoggingHttpOkTest {
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void useHumanReadablePlainEncoderExpectReducedLogging() {
+	public void useHumanReadablePlainEncoderExpectReducedLogging(LogStatements statements) {
 		MyEntity entity = new MyEntity();
 		entity.setName("Entur");
 		entity.setSecret("mySecret");
 
 		ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method/infoLoggingOnly", entity, MyEntity.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+		WebLoggingFormatTest.assertGcpTrace(statements);
 	}
 
 	@Test
-	public void useHumanReadableJsonEncoderExpectReducedLogging() throws InterruptedException {
+	public void useHumanReadableJsonEncoderExpectReducedLogging(LogStatements statements) throws InterruptedException {
 		MyEntity entity = new MyEntity();
 		entity.setName("Entur");
 		entity.setSecret("mySecret");
@@ -50,10 +55,12 @@ public class OndemandWebLoggingHttpOkTest {
 			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method/infoLoggingOnly", entity, MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		}
+
+		WebLoggingFormatTest.assertGcpTrace(statements);
 	}
 
 	@Test
-	public void useMachineReadableJsonEncoderExpectReducedLogging() throws InterruptedException {
+	public void useMachineReadableJsonEncoderExpectReducedLogging(LogStatements statements) throws InterruptedException {
 		MyEntity entity = new MyEntity();
 		entity.setName("Entur");
 		entity.setSecret("mySecret");
@@ -62,6 +69,7 @@ public class OndemandWebLoggingHttpOkTest {
 			ResponseEntity<MyEntity> response = restTemplate.postForEntity("/api/document/some/method/infoLoggingOnly", entity, MyEntity.class);
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		}
+		WebLoggingFormatTest.assertGcpTrace(statements);
 	}
 
 

@@ -43,6 +43,7 @@ dependencies {
     testImplementation ("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
 
     testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+    testImplementation project(":test:test-logback-junit")
 
 }
 
