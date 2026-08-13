@@ -19,6 +19,8 @@ test {
     systemProperty 'otel.metrics.exporter', 'none'
     systemProperty 'otel.logs.exporter', 'none'
     systemProperty 'otel.service.name', 'junit5-tests'
+
+    systemProperty 'otel.instrumentation.http.server.exclude-paths', '/actuator/**'
 }
 
 dependencies {
@@ -42,7 +44,6 @@ dependencies {
     testImplementation ("com.google.truth:truth:${googleTruthVersion}")
     testImplementation ("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
 
-    testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
     testImplementation project(":test:test-logback-junit")
 
 }
