@@ -7,10 +7,12 @@ on:
     branches:
       - "main"
       - "5.x"
+      - "6.x"
   push:
     branches:
       - "main"
       - "5.x"
+      - "6.x"
   schedule:
     - cron: "0 3 * * MON" # Run Monday at 3AM UTC
 
