@@ -30,5 +30,6 @@ dependencies {
     testImplementation ("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
 
     testImplementation project(":test:test-logback-junit")
+
 }
 

@@ -87,7 +87,7 @@ configure(libraryProjects()) {
 }
 
 configure(jvmProjects()) {
-    apply plugin: 'com.github.ben-manes.versions'
+    apply plugin: 'io.github.ben-manes.versions'
 
     test {
         useJUnitPlatform {
