@@ -7,7 +7,7 @@ import tools.jackson.core.JsonGenerator;
 import java.util.Map;
 
 /**
- * An MDC provider that maps OpenTelemetry trace fields to the special JSON fields
+ * An MDC provider that maps Micrometer tracing MDC keys to the special JSON fields
  * recognized by Google Cloud Logging.
  *
  * <p>When the Google Cloud Logging agent ingests structured JSON written to stdout, it promotes
