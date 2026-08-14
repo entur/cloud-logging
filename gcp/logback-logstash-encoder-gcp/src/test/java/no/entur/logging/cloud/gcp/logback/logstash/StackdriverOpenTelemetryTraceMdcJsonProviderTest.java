@@ -21,8 +21,8 @@ public class StackdriverOpenTelemetryTraceMdcJsonProviderTest {
     @Test
     void writeTo_openTelemetryTraceFields_mappedToGcpSpecialFields() throws Exception {
         Map<String, String> mdc = new LinkedHashMap<>();
-        mdc.put("traceId", "06796866738c859f2f19b7cfb3214824");
-        mdc.put("spanId", "000000000000004a");
+        mdc.put(StackdriverOpenTelemetryTraceMdcJsonProvider.OPENTELEMETRY_TRACE_ID_KEY, "06796866738c859f2f19b7cfb3214824");
+        mdc.put(StackdriverOpenTelemetryTraceMdcJsonProvider.OPENTELEMETRY_SPAN_ID_KEY, "000000000000004a");
         mdc.put("correlationId", "abc123");
 
         JsonNode root = write(mdc);
@@ -42,8 +42,8 @@ public class StackdriverOpenTelemetryTraceMdcJsonProviderTest {
         Map<String, String> mdc = new LinkedHashMap<>();
         mdc.put("logging.googleapis.com/trace", "legacy-trace");
         mdc.put("logging.googleapis.com/spanId", "legacy-span");
-        mdc.put("traceId", "06796866738c859f2f19b7cfb3214824");
-        mdc.put("spanId", "000000000000004a");
+        mdc.put(StackdriverOpenTelemetryTraceMdcJsonProvider.OPENTELEMETRY_TRACE_ID_KEY, "06796866738c859f2f19b7cfb3214824");
+        mdc.put(StackdriverOpenTelemetryTraceMdcJsonProvider.OPENTELEMETRY_SPAN_ID_KEY, "000000000000004a");
 
         JsonNode root = write(mdc);
 
