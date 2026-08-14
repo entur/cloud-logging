@@ -52,6 +52,7 @@ public class WebLoggingFormatTest {
 		for (LogStatement statement : statements) {
 			assertThat(statement.getJsonPropertyString(StackdriverMicrometerTraceMdcJsonProvider.GCP_TRACE_KEY)).hasLength(32);
 			assertThat(statement.getJsonPropertyString(StackdriverMicrometerTraceMdcJsonProvider.GCP_SPAN_ID_KEY)).hasLength(16);
+			assertThat(statement.getJsonPropertyBoolean(StackdriverMicrometerTraceMdcJsonProvider.GCP_TRACE_SAMPLED)).isTrue();
 		}
 	}
 

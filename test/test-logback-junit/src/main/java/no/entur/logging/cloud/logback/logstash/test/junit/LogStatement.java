@@ -157,4 +157,30 @@ public class LogStatement {
 		}
 	}
 
+	public Boolean getJsonPropertyBoolean(String name) {
+		try {
+			try (JsonParser parser = objectMapper.createParser(getJson())) {
+				while (parser.nextToken() != null) {
+					if (parser.currentToken() == JsonToken.PROPERTY_NAME) {
+						String currentFieldName = parser.currentName();
+
+						if (name.equals(currentFieldName)) {
+							JsonToken token = parser.nextToken();
+							if (token == JsonToken.VALUE_TRUE) {
+								return Boolean.TRUE;
+							} else if (token == JsonToken.VALUE_FALSE) {
+								return Boolean.FALSE;
+							} else {
+								throw new IllegalArgumentException("Expected a boolean value for field '" + name + "' but found: " + token);
+							}
+						}
+					}
+				}
+			}
+			return null;
+		} catch (JacksonException e) {
+			throw new RuntimeException("Failed to parse JSON", e);
+		}
+	}
+
 }
