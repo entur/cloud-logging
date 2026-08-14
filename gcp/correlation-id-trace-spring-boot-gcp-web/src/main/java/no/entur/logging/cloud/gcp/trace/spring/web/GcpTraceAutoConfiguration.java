@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GcpTraceAutoConfiguration {
 
+    @Deprecated
     @Bean
     @ConditionalOnMissingClass("io.opentelemetry.api.OpenTelemetry") // otel spring boot starter
     @Conditional(NoOpenTelemetryAgentCondition.class) // otel agent

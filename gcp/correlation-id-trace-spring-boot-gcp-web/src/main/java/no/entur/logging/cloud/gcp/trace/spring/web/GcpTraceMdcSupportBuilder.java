@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+@Deprecated
 public class GcpTraceMdcSupportBuilder {
 
 	protected static final boolean[] VALUE_CHARACTERS;

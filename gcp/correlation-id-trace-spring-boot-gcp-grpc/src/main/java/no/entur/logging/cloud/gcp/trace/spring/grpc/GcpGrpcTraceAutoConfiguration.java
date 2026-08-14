@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Configuration;
 @AutoConfigureAfter(GrpcCorrelationIdAutoConfiguration.class)
 public class GcpGrpcTraceAutoConfiguration {
 
+    @Deprecated
     @Bean
     @ConditionalOnBean(OrderedCorrelationIdGrpcMdcContextServerInterceptor.class)
     @ConditionalOnMissingBean(OrderedTraceIdGrpcMdcContextServerInterceptor.class)
