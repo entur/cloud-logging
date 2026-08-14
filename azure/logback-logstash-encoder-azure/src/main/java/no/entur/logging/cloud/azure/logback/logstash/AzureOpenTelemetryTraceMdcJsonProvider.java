@@ -28,7 +28,7 @@ public class AzureOpenTelemetryTraceMdcJsonProvider extends AbstractJsonProvider
             return;
         }
 
-        // map OTel MDC keys to GCP special fields; write all others as-is.
+        // map OTel MDC keys to Azure trace fields; write all others as-is.
         for (Map.Entry<String, String> entry : mdcProperties.entrySet()) {
             String key = entry.getKey();
             if (key == null) continue;
