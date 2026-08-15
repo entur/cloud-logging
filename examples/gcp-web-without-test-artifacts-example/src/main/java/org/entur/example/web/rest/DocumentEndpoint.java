@@ -24,7 +24,7 @@ public class DocumentEndpoint {
 		logger.warn("Hello entity with secret / warn");
 		logger.error("Hello entity with secret / error");
 
-		logger.info("My MDC map is " + MDC.getCopyOfContextMap());
+		logger.info("My MDC map is {}", MDC.getCopyOfContextMap());
 
 		entity.setName("Entur response");
 		return entity;
