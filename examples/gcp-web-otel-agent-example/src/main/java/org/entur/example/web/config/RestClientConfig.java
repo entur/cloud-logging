@@ -1,6 +1,5 @@
 package org.entur.example.web.config;
 
-import io.micrometer.observation.ObservationRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
@@ -9,9 +8,8 @@ import org.springframework.web.client.RestClient;
 public class RestClientConfig {
 
     @Bean
-    public RestClient restClient(ObservationRegistry observationRegistry) {
+    public RestClient restClient() {
         return RestClient.builder()
-                .observationRegistry(observationRegistry)
                 .build();
     }
 }
