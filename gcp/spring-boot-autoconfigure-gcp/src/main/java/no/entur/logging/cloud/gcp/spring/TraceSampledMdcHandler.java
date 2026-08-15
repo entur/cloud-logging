@@ -1,4 +1,4 @@
-package org.entur.example.web.config;
+package no.entur.logging.cloud.gcp.spring;
 
 import io.micrometer.tracing.Tracer;
 import io.micrometer.observation.Observation;
@@ -12,12 +12,12 @@ import org.slf4j.MDC;
  * {@link StackdriverMicrometerTraceMdcJsonProvider} can map it to the
  * {@code logging.googleapis.com/trace_sampled} JSON field recognised by GCP Cloud Logging.
  *
- * <p>Register this as a Spring bean only when:
+ * <p>Registered automatically when:
  * <ul>
- *   <li>a {@link Tracer} bean exists (i.e. micrometer-tracing / Spring Boot OTel starter is enabled), and</li>
+ *   <li>{@code io.micrometer:micrometer-tracing} is on the classpath, and</li>
  *   <li>the OpenTelemetry Java agent is <em>not</em> attached (the agent provides its own MDC keys).</li>
  * </ul>
- * See {@link LogConfiguration} for conditional bean registration.
+ * See {@link GcpMicrometerTraceAutoConfiguration} for conditional bean registration.
  */
 public class TraceSampledMdcHandler implements ObservationHandler<Observation.Context> {
 
