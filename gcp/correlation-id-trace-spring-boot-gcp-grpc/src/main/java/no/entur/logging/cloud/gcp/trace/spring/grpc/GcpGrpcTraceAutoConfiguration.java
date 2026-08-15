@@ -11,15 +11,19 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClas
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @AutoConfigureAfter(GrpcCorrelationIdAutoConfiguration.class)
 public class GcpGrpcTraceAutoConfiguration {
 
+    @Deprecated
     @Bean
     @ConditionalOnBean(OrderedCorrelationIdGrpcMdcContextServerInterceptor.class)
     @ConditionalOnMissingBean(OrderedTraceIdGrpcMdcContextServerInterceptor.class)
+    @ConditionalOnMissingClass("io.opentelemetry.api.OpenTelemetry") // otel spring boot starter
+    @Conditional(NoOpenTelemetryAgentCondition.class) // otel agent
     public OrderedTraceIdGrpcMdcContextServerInterceptor orderedTraceIdGrpcMdcContextServerInterceptor(OrderedCorrelationIdGrpcMdcContextServerInterceptor interceptor) {
         int order = interceptor.getOrder();
 

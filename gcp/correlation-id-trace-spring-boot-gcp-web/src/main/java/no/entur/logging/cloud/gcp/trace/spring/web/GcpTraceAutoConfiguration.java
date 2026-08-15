@@ -5,13 +5,16 @@ import no.entur.logging.cloud.trace.spring.web.CorrelationIdAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class GcpTraceAutoConfiguration {
 
+    @Deprecated
     @Bean
-    @ConditionalOnMissingClass("io.opentelemetry.api.OpenTelemetry")
+    @ConditionalOnMissingClass("io.opentelemetry.api.OpenTelemetry") // otel spring boot starter
+    @Conditional(NoOpenTelemetryAgentCondition.class) // otel agent
     public FilterRegistrationBean<GcpTraceFilter> gcpTraceServletFilter() {
         FilterRegistrationBean<GcpTraceFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new GcpTraceFilter());

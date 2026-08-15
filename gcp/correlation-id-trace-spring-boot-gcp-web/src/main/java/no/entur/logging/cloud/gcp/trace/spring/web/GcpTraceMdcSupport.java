@@ -14,6 +14,7 @@ import java.util.concurrent.ThreadLocalRandom;
  *
  */
 
+@Deprecated
 public class GcpTraceMdcSupport implements Closeable {
 
     public static final String REQUEST_ID_MDC_KEY = CorrelationIdFilter.REQUEST_ID_MDC_KEY;
