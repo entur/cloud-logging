@@ -106,7 +106,7 @@ public class SpringGreetingTest extends SpringAbstractGrpcTest {
 				() -> {
 					GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
 					try {
-						GreetingResponse response = stub.exceptionLogging(greetingRequest);
+						GreetingResponse response = stub.statusRuntimeExceptionLogging(greetingRequest);
 					} finally {
 						shutdown(stub);
 					}

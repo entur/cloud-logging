@@ -39,3 +39,14 @@ bootRun {
         implementation project(":gcp:request-response-spring-boot-starter-gcp-web-test");
     }
 }
+
+sourceSets {
+    main {
+        java {
+            srcDirs '../gcp-web-without-test-artifacts-example/src/main/java'
+        }
+        resources {
+            srcDirs '../gcp-web-without-test-artifacts-example/src/main/resources'
+        }
+    }
+}

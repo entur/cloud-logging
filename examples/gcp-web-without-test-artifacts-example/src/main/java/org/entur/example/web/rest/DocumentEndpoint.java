@@ -1,13 +1,23 @@
 package org.entur.example.web.rest;
 
+import tools.jackson.core.JsonGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.core.json.JsonFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/document")
@@ -45,23 +55,46 @@ public class DocumentEndpoint {
 		return new ResponseEntity(HttpStatus.NOT_FOUND);
 	}
 
+	@GetMapping(value = "/some/newlines", produces = "application/json")
+	ResponseEntity<String> age() {
+		String json = "{\n}\n";
+
+		return new ResponseEntity<>(json, HttpStatus.OK);
+	}
+
+
+	@GetMapping(value = "/some/slow/method", produces = "application/json")
+	public ResponseEntity<String> age(@RequestParam("wait") Long wait) throws InterruptedException {
+		logger.info("This message should be delayed; printed for slow requests / info");
+
+		String json = "{\n}\n";
+		try {
+			Thread.sleep(wait);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+		return new ResponseEntity<>(json, HttpStatus.OK);
+	}
+
 
 	@GetMapping(value = "/some/bigResponse", produces = "application/json")
 	ResponseEntity<String> bigResponse() throws IOException {
-		tools.jackson.core.json.JsonFactory factory = new tools.jackson.core.json.JsonFactory();
+		JsonFactory factory = new JsonFactory();
 
 		CharArrayWriter writer = new CharArrayWriter();
 
-		try (tools.jackson.core.JsonGenerator generator = factory.createGenerator(writer)) {
-			generator.writeStartObject();
-			generator.writeStringProperty("start", "here");
-			for(int i = 0; i < 10; i++) {
-				generator.writeStringProperty("longValue" + i, generateLongString(25*1024));
-			}
-			generator.writeStringProperty("longValue", generateLongString(192*1024));
-			generator.writeStringProperty("end", "here");
-			generator.writeEndObject();
+		JsonGenerator generator = factory.createGenerator(writer);
+
+		generator.writeStartObject();
+		generator.writeStringProperty("start", "here");
+		for(int i = 0; i < 10; i++) {
+			generator.writeStringProperty("longValue" + i, generateLongString(25*1024));
 		}
+		generator.writeStringProperty("end", "here");
+		generator.writeEndObject();
+
+		generator.flush();
+
 		return new ResponseEntity<>(writer.toString(), HttpStatus.OK);
 	}
 
@@ -77,5 +110,25 @@ public class DocumentEndpoint {
 		return builder.toString();
 	}
 
+	@PostMapping("/some/method/infoLoggingOnly")
+	public MyEntity infoLoggingOnly(@RequestBody MyEntity entity) {
+		logger.info("Hello entity with secret / info");
+
+		entity.setName("Entur response");
+		return entity;
+	}
+
+    @PostMapping(value = "/some/authorizationDenied", produces = "application/json")
+    public ResponseEntity<String> authorizationDeniedException(@RequestBody MyEntity entity) {
+        logger.info("Hello entity with secret / info");
+        throw new AuthorizationDeniedException("Access Denied", () -> false);
+    }
+
+
+    @PostMapping(value = "/some/nullpointer", produces = "application/json")
+    public ResponseEntity<String> nullPointerException(@RequestBody MyEntity entity) {
+        logger.info("Hello entity with secret / info");
+        throw new NullPointerException();
+    }
 
 }
