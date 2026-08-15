@@ -45,5 +45,7 @@ include 'bom'
 // GCP
 include 'examples:gcp-web-example', 'examples:gcp-async-web-example', 'examples:gcp-web-without-test-artifacts-example', 'examples:gcp-web-without-test-or-ondemand-artifacts-example'
 include 'examples:gcp-grpc-spring-example', 'examples:gcp-web-apache-client-example'
+include 'examples:gcp-web-opentelemetry-example', 'examples:gcp-web-without-test-artifacts-opentelemetry-example'
+include 'examples:gcp-grpc-spring-opentelemetry-example', 'examples:gcp-grpc-spring-without-test-artifacts-opentelemetry-example'
 // Azure
 include 'examples:azure-web-example', 'examples:azure-grpc-spring-example', 'examples:gcp-grpc-spring-without-test-artifacts-example'
