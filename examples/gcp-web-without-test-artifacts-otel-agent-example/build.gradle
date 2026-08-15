@@ -1,0 +1,46 @@
+plugins {
+    id 'org.springframework.boot' version '4.1.0'
+}
+
+test {
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter'
+    }
+}
+
+dependencies {
+    implementation project(':on-demand:on-demand-spring-boot-starter-web')
+    implementation project(":gcp:spring-boot-starter-gcp-web");
+    implementation project(":gcp:request-response-spring-boot-starter-gcp-web");
+
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+
+    // Simulate having the OpenTelemetry Java agent on the classpath.
+    // The agent provides opentelemetry-api at runtime; listing it here ensures
+    // the GCP encoder uses StackdriverOpenTelemetryTraceMdcJsonProvider and the
+    // GcpTraceFilter (which would conflict) is not registered.
+    implementation("io.opentelemetry:opentelemetry-api")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-restclient")
+    testImplementation("org.springframework.boot:spring-boot-resttestclient")
+
+    // JUnit Jupiter API and TestEngine implementation
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
+
+    testImplementation ("com.google.truth:truth:${googleTruthVersion}")
+    testImplementation ("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs '../gcp-web-without-test-artifacts-example/src/main/java'
+        }
+        resources {
+            srcDirs '../gcp-web-without-test-artifacts-example/src/main/resources'
+        }
+    }
+}
