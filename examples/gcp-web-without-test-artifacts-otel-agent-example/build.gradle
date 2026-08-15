@@ -48,3 +48,13 @@ dependencies {
 
 }
 
+sourceSets {
+    main {
+        java {
+            srcDirs '../gcp-web-without-test-artifacts-example/src/main/java'
+        }
+        resources {
+            srcDirs '../gcp-web-without-test-artifacts-example/src/main/resources'
+        }
+    }
+}

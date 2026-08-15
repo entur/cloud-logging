@@ -41,6 +41,17 @@ dependencies {
 }
 
 sourceSets {
+    main {
+        java {
+            srcDirs '../gcp-grpc-spring-without-test-artifacts-example/src/main/java'
+        }
+        proto {
+            srcDirs '../gcp-grpc-spring-without-test-artifacts-example/src/main/proto'
+        }
+        resources {
+            srcDirs '../gcp-grpc-spring-without-test-artifacts-example/src/main/resources'
+        }
+    }
     test.java.srcDirs += "${protobuf.generatedFilesBaseDir}/test/java"
     test.java.srcDirs += "${protobuf.generatedFilesBaseDir}/test/grpc"
 }
