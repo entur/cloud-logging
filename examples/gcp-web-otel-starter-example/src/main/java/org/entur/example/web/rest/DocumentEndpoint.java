@@ -1,9 +1,11 @@
 package org.entur.example.web.rest;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.MDC;
 import tools.jackson.core.JsonGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -13,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClient;
 import tools.jackson.core.json.JsonFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -25,6 +27,9 @@ import java.util.concurrent.CompletableFuture;
 public class DocumentEndpoint {
 
     private final static Logger logger = LoggerFactory.getLogger(DocumentEndpoint.class);
+
+	@Autowired
+	private RestClient restClient;
 
 	@PostMapping("/some/method")
 	public MyEntity someMessage(@RequestBody MyEntity entity) {
@@ -133,5 +138,19 @@ public class DocumentEndpoint {
         logger.info("Hello entity with secret / info");
         throw new NullPointerException();
     }
+
+	@PostMapping("/some/downstream")
+	public MyEntity callDownstream(@RequestBody MyEntity entity, HttpServletRequest request) {
+		logger.info("Calling downstream service");
+		String url = "http://127.0.0.1:" + request.getServerPort() + "/api/dummy-service/some/method";
+		MyEntity result = restClient.post()
+				.uri(url)
+				.contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+				.body(entity)
+				.retrieve()
+				.body(MyEntity.class);
+		logger.info("Downstream service responded");
+		return result;
+	}
 
 }
