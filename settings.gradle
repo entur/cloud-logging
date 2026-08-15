@@ -45,6 +45,8 @@ include 'bom'
 // GCP
 include 'examples:gcp-web-example', 'examples:gcp-async-web-example', 'examples:gcp-web-without-test-artifacts-example', 'examples:gcp-web-without-test-or-ondemand-artifacts-example'
 include 'examples:gcp-web-without-test-artifacts-otel-agent-example', 'examples:gcp-web-without-test-artifacts-otel-starter-example'
+include 'examples:gcp-web-otel-agent-example', 'examples:gcp-web-otel-starter-example'
 include 'examples:gcp-grpc-spring-example', 'examples:gcp-web-apache-client-example'
 // Azure
-include 'examples:azure-web-example', 'examples:azure-grpc-spring-example', 'examples:gcp-grpc-spring-without-test-artifacts-example', 'examples:gcp-grpc-spring-without-test-artifacts-otel-agent-example'
+include 'examples:azure-web-example', 'examples:azure-grpc-spring-example', 'examples:gcp-grpc-spring-without-test-artifacts-example'
+include 'examples:gcp-grpc-spring-without-test-artifacts-otel-agent-example', 'examples:gcp-grpc-spring-without-test-artifacts-otel-starter-example'
