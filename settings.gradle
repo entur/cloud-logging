@@ -50,3 +50,4 @@ include 'examples:azure-web-example', 'examples:azure-grpc-spring-example', 'exa
 
 // OTEL
 include 'examples:gcp-web-without-test-artifacts-otel-agent-example', 'examples:gcp-web-otel-starter-example', 'examples:gcp-web-without-test-artifacts-otel-starter-example', 'examples:gcp-web-otel-agent-example', 'examples:gcp-grpc-spring-without-test-artifacts-otel-agent-example', 'examples:gcp-grpc-spring-without-test-artifacts-otel-starter-example'
+include 'examples:gcp-grpc-spring-otel-agent-example', 'examples:gcp-grpc-spring-otel-starter-example'
