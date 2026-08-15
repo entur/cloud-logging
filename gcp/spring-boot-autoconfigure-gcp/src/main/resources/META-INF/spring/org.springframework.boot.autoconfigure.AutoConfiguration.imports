@@ -1,1 +1,2 @@
 no.entur.logging.cloud.gcp.spring.GcpLoggingAutoConfiguration
+no.entur.logging.cloud.gcp.spring.GcpMicrometerTraceAutoConfiguration
