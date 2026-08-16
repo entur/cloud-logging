@@ -33,3 +33,10 @@ dependencies {
 
 }
 
+sourceSets {
+    main {
+        java {
+            srcDirs '../gcp-web-otel-starter-example/src/main/java'
+        }
+    }
+}
