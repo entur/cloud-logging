@@ -38,8 +38,5 @@ sourceSets {
         java {
             srcDirs '../gcp-web-otel-starter-example/src/main/java'
         }
-        resources {
-            srcDirs '../gcp-web-otel-starter-example/src/main/resources'
-        }
     }
 }
