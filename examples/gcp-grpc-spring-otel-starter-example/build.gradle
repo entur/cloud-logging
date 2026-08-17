@@ -29,6 +29,8 @@ dependencies {
     implementation("io.grpc:grpc-util:$grpcVersion")
     implementation("org.springframework.boot:spring-boot-starter")
 
+    testImplementation project(":gcp:spring-boot-starter-gcp-grpc-spring-test")
+    testImplementation project(':gcp:request-response-spring-boot-starter-gcp-grpc-spring-test')
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     // added due to grpc plugin dependency resolution problem

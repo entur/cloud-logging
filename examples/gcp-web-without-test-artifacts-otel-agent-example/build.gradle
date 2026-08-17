@@ -48,3 +48,13 @@ dependencies {
 
 }
 
+sourceSets {
+    main {
+        java {
+            srcDirs '../gcp-web-otel-agent-example/src/main/java'
+        }
+        resources {
+            srcDirs '../gcp-web-otel-agent-example/src/main/resources'
+        }
+    }
+}
