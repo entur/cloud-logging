@@ -1,0 +1,23 @@
+name: Build snapshot and deploy to Maven Central
+on:
+  workflow_dispatch:
+    inputs:
+      version-increment:
+        description: 'Version-increment'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  deploy-snapshot-gradle:
+    uses: entur/gha-maven-central/.github/workflows/gradle-publish-snapshot.yml@copilot/gradle-publish-snapshot
+    secrets: inherit
+    permissions:
+      contents: read
+    with:
+      next_version: ${{ inputs.version-increment }}
+      version_strategy: tag
+
