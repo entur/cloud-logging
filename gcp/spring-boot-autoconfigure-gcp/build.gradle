@@ -5,8 +5,6 @@ dependencies {
     api project(':appender')
     api project(':on-demand:on-demand-spring-boot-autoconfigure')
 
-    api project(':trace:server:correlation-id-trace-spring-boot-web')
-
     api("org.slf4j:slf4j-api")
     api ("org.codehaus.janino:commons-compiler")
     api ("org.codehaus.janino:commons-compiler-jdk")
