@@ -16,8 +16,7 @@ jobs:
     uses: entur/gha-maven-central/.github/workflows/gradle-publish-snapshot.yml@copilot/gradle-publish-snapshot
     secrets: inherit
     permissions:
-      contents: write
-      issues: write
+      contents: read
     with:
       next_version: ${{ inputs.version-increment }}
       version_strategy: tag
