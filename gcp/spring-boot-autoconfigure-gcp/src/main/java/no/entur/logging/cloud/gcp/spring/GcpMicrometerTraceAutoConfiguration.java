@@ -1,15 +1,11 @@
 package no.entur.logging.cloud.gcp.spring;
 
 import io.micrometer.tracing.Tracer;
-import no.entur.logging.cloud.gcp.logback.logstash.StackdriverOpenTelemetryTraceMdcJsonProvider;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
-import org.springframework.context.annotation.Condition;
-import org.springframework.context.annotation.ConditionContext;
-import org.springframework.core.type.AnnotatedTypeMetadata;
 
 /**
  * Autoconfiguration that registers {@link TraceSampledMdcHandler} when:
@@ -29,18 +25,8 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  */
 @AutoConfiguration(afterName = "org.springframework.boot.micrometer.tracing.autoconfigure.TracingAutoConfiguration")
 @ConditionalOnClass(Tracer.class)
-@Conditional(GcpMicrometerTraceAutoConfiguration.NoOpenTelemetryAgentCondition.class)
+@Conditional(NoOpenTelemetryAgentCondition.class)
 public class GcpMicrometerTraceAutoConfiguration {
-
-    /**
-     * Condition that matches when the OpenTelemetry Java agent is <em>not</em> present.
-     */
-    static class NoOpenTelemetryAgentCondition implements Condition {
-        @Override
-        public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-            return !StackdriverOpenTelemetryTraceMdcJsonProvider.isOtelAgent();
-        }
-    }
 
     /**
      * Registers {@link TraceSampledMdcHandler}.

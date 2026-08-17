@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.gcp.trace.spring.web;
 
 import jakarta.servlet.DispatcherType;
+import no.entur.logging.cloud.gcp.spring.NoOpenTelemetryAgentCondition;
 import no.entur.logging.cloud.trace.spring.web.CorrelationIdAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
