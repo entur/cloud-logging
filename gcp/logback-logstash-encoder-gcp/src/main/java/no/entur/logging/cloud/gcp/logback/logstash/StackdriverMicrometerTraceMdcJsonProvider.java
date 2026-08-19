@@ -32,10 +32,10 @@ public class StackdriverMicrometerTraceMdcJsonProvider extends AbstractJsonProvi
     public static final String GCP_SPAN_ID_KEY = "logging.googleapis.com/spanId";
     public static final String GCP_TRACE_SAMPLED = "logging.googleapis.com/trace_sampled";
 
-    protected final String projectId;
+    protected final String tracePrefix;
 
     public StackdriverMicrometerTraceMdcJsonProvider(String projectId) {
-        this.projectId = projectId;
+        this.tracePrefix = projectId != null ? "projects/" + projectId + "/traces/" : null;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class StackdriverMicrometerTraceMdcJsonProvider extends AbstractJsonProvi
             if (value == null) continue;
 
             switch (key) {
-                case MICROMETER_TRACE_ID_KEY -> generator.writeStringProperty(GCP_TRACE_KEY, projectId != null ? "projects/" + projectId + "/traces/" + value : value);
+                case MICROMETER_TRACE_ID_KEY -> generator.writeStringProperty(GCP_TRACE_KEY, tracePrefix != null ? tracePrefix + value : value);
                 case MICROMETER_SPAN_ID_KEY  -> generator.writeStringProperty(GCP_SPAN_ID_KEY, value);
                 case MICROMETER_SAMPLED_KEY -> {
                     generator.writeBooleanProperty(GCP_TRACE_SAMPLED, Boolean.parseBoolean(value));
