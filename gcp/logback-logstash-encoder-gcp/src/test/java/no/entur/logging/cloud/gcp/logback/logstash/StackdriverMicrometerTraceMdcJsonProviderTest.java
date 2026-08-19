@@ -14,15 +14,15 @@ import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class StackdriverOpenTelemetryTraceMdcJsonProviderTest {
+public class StackdriverMicrometerTraceMdcJsonProviderTest {
 
     private static final JsonMapper MAPPER = JsonMapper.builder().build();
 
     @Test
     void writeTo_openTelemetryTraceFields_mappedToGcpSpecialFields() throws Exception {
         Map<String, String> mdc = new LinkedHashMap<>();
-        mdc.put(StackdriverOpenTelemetryTraceMdcJsonProvider.OPENTELEMETRY_TRACE_ID_KEY, "06796866738c859f2f19b7cfb3214824");
-        mdc.put(StackdriverOpenTelemetryTraceMdcJsonProvider.OPENTELEMETRY_SPAN_ID_KEY, "000000000000004a");
+        mdc.put(StackdriverMicrometerTraceMdcJsonProvider.MICROMETER_TRACE_ID_KEY, "06796866738c859f2f19b7cfb3214824");
+        mdc.put(StackdriverMicrometerTraceMdcJsonProvider.MICROMETER_SPAN_ID_KEY, "000000000000004a");
         mdc.put("correlationId", "abc123");
 
         JsonNode root = write(mdc);
@@ -50,8 +50,8 @@ public class StackdriverOpenTelemetryTraceMdcJsonProviderTest {
     }
 
     private static JsonNode write(Map<String, String> mdcMap) throws Exception {
-        StackdriverOpenTelemetryTraceMdcJsonProvider provider =
-                new StackdriverOpenTelemetryTraceMdcJsonProvider("myProject");
+        StackdriverMicrometerTraceMdcJsonProvider provider =
+                new StackdriverMicrometerTraceMdcJsonProvider("myProject");
         ILoggingEvent event = Mockito.mock(ILoggingEvent.class);
         Mockito.when(event.getMDCPropertyMap()).thenReturn(mdcMap);
 

@@ -34,6 +34,12 @@ public class StackdriverOpenTelemetryTraceMdcJsonProvider extends AbstractJsonPr
     public static final String GCP_SPAN_ID_KEY = "logging.googleapis.com/spanId";
     public static final String GCP_TRACE_SAMPLED = "logging.googleapis.com/trace_sampled";
 
+    protected final String tracePrefix;
+
+    public StackdriverOpenTelemetryTraceMdcJsonProvider(String projectId) {
+        this.tracePrefix = projectId != null ? "projects/" + projectId + "/traces/" : null;
+    }
+
     @Override
     public void writeTo(JsonGenerator generator, ILoggingEvent event) {
         Map<String, String> mdcProperties = event.getMDCPropertyMap();
@@ -49,7 +55,7 @@ public class StackdriverOpenTelemetryTraceMdcJsonProvider extends AbstractJsonPr
             if (value == null) continue;
 
             switch (key) {
-                case OPENTELEMETRY_TRACE_ID_KEY -> generator.writeStringProperty(GCP_TRACE_KEY, value);
+                case OPENTELEMETRY_TRACE_ID_KEY -> generator.writeStringProperty(GCP_TRACE_KEY, tracePrefix != null ? tracePrefix + value : value);
                 case OPENTELEMETRY_SPAN_ID_KEY  -> generator.writeStringProperty(GCP_SPAN_ID_KEY, value);
                 case OPENTELEMETRY_TRACE_FLAGS_KEY -> {
                     if (isSampled(value)) {
