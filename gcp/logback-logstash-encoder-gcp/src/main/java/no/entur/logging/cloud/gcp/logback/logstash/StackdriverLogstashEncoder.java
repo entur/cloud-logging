@@ -64,18 +64,12 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 	}
 
 	private static String resolveProjectId() {
-		String projectId = System.getenv("GOOGLE_CLOUD_PROJECT");
-		if (isUsable(projectId)) {
-			return projectId;
-		}
-		projectId = System.getenv("GCP_PROJECT_ID");
-		if (isUsable(projectId)) {
-			return projectId;
-		}
-		return null;
-	}
-
-	private static boolean isUsable(String value) {
-		return value != null && !value.isBlank();
+	    for (String envName : new String[]{"GOOGLE_CLOUD_PROJECT", "GCP_PROJECT_ID"}) {
+	        String projectId = System.getenv(envName);
+	        if (projectId != null && !projectId.isBlank()) {
+	            return projectId;
+	        }
+	    }
+	    return null;
 	}
 }
