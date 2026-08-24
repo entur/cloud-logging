@@ -19,6 +19,7 @@ jobs:
       contents: write
       issues: write
     with:
+      java_version: 25
       next_version: ${{ inputs.version-increment }}
       version_strategy: tag
       snapshot: true
