@@ -71,8 +71,15 @@ public class StackdriverOpenTelemetryTraceMdcJsonProvider extends AbstractJsonPr
     private static boolean isSampled(String traceFlags) {
         if (traceFlags.length() != 2) return false;
         char last = traceFlags.charAt(1);
-        // '1' (0x01) and '3' (0x03) have bit 0 set
-        return last == '1' || last == '3';
+        // '1' (0x01) and '3' (0x03) have bit 0 set. also handle any future values
+        switch(last) {
+            case '0': case '2': case '4': case '6':
+            case '8': case 'a': case 'c': case 'e':
+            case 'A': case 'C': case 'E':
+                return false;
+            default:
+                return true;
+        }
     }
 
     public static boolean isOtelAgent() {
