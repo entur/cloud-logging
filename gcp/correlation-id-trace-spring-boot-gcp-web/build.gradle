@@ -4,6 +4,8 @@ dependencies {
     api("org.springframework.boot:spring-boot-autoconfigure")
     api("jakarta.servlet:jakarta.servlet-api")
     api project(':trace:server:correlation-id-trace-spring-boot-web')
+    api project(':gcp:logback-logstash-encoder-gcp')
+    api project(':gcp:spring-boot-autoconfigure-gcp')
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 

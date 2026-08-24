@@ -1,0 +1,60 @@
+plugins {
+    id 'org.springframework.boot' version '4.1.0'
+}
+
+configurations {
+    otelAgent
+}
+
+test {
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter'
+    }
+
+    doFirst {
+        jvmArgs "-javaagent:${configurations.otelAgent.singleFile}"
+    }
+
+    systemProperty 'otel.traces.exporter', 'logging'
+    systemProperty 'otel.metrics.exporter', 'none'
+    systemProperty 'otel.logs.exporter', 'none'
+    systemProperty 'otel.service.name', 'junit5-tests'
+    systemProperty 'otel.instrumentation.http.server.exclude-paths', '/actuator/**'
+}
+
+dependencies {
+    otelAgent "io.opentelemetry.javaagent:opentelemetry-javaagent:2.30.0"
+
+    implementation project(':on-demand:on-demand-spring-boot-starter-web')
+    implementation project(":gcp:spring-boot-starter-gcp-web");
+    implementation project(":gcp:request-response-spring-boot-starter-gcp-web");
+
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+
+    testImplementation project(":gcp:spring-boot-starter-gcp-web-test");
+    testImplementation project(":gcp:request-response-spring-boot-starter-gcp-web-test");
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-restclient")
+    testImplementation("org.springframework.boot:spring-boot-resttestclient")
+
+    // JUnit Jupiter API and TestEngine implementation
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
+
+    testImplementation ("com.google.truth:truth:${googleTruthVersion}")
+    testImplementation ("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
+
+    testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+    testImplementation project(":test:test-logback-junit")
+}
+
+bootRun {
+    // example for running locally with one-line logging
+    dependencies {
+        implementation project(":gcp:spring-boot-starter-gcp-web-test");
+        implementation project(":gcp:request-response-spring-boot-starter-gcp-web-test");
+    }
+}

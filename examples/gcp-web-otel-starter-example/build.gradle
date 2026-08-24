@@ -1,0 +1,47 @@
+plugins {
+    id 'org.springframework.boot' version '4.1.0'
+}
+
+test {
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter'
+    }
+}
+
+dependencies {
+    implementation project(':on-demand:on-demand-spring-boot-starter-web')
+    implementation project(":gcp:spring-boot-starter-gcp-web");
+    implementation project(":gcp:request-response-spring-boot-starter-gcp-web");
+
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+
+    implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
+
+    testImplementation project(":gcp:spring-boot-starter-gcp-web-test");
+    testImplementation project(":gcp:request-response-spring-boot-starter-gcp-web-test");
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-restclient")
+    testImplementation("org.springframework.boot:spring-boot-resttestclient")
+
+    // JUnit Jupiter API and TestEngine implementation
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
+
+    testImplementation ("com.google.truth:truth:${googleTruthVersion}")
+    testImplementation ("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
+
+    testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+    testImplementation project(":test:test-logback-junit")
+
+}
+
+bootRun {
+    // example for running locally with one-line logging
+    dependencies {
+        implementation project(":gcp:spring-boot-starter-gcp-web-test");
+        implementation project(":gcp:request-response-spring-boot-starter-gcp-web-test");
+    }
+}

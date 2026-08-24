@@ -10,6 +10,7 @@ import org.springframework.core.Ordered;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+@Deprecated
 public class OrderedTraceIdGrpcMdcContextServerInterceptor implements ServerInterceptor, Ordered {
 
     // The span ID is expected to be a 16-character, hexadecimal encoding of an 8-byte array and should not be zero. It should be unique within the trace and should, ideally, be generated in a manner that is uniformly random.

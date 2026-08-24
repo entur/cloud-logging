@@ -13,11 +13,15 @@ on:
 
 jobs:
   deploy-snapshot-gradle:
-    uses: entur/gha-maven-central/.github/workflows/gradle-publish-snapshot.yml@copilot/gradle-publish-snapshot
+    uses: entur/gha-maven-central/.github/workflows/gradle-publish.yml@v1
     secrets: inherit
     permissions:
-      contents: read
+      contents: write
+      issues: write
     with:
+      java_version: 25
       next_version: ${{ inputs.version-increment }}
       version_strategy: tag
+      snapshot: true
+      push_to_repo: false
 
