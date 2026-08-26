@@ -20,7 +20,7 @@ public class GcpGrpcTraceAutoConfiguration {
     @Bean
     @ConditionalOnBean(OrderedCorrelationIdGrpcMdcContextServerInterceptor.class)
     @ConditionalOnMissingBean(OrderedTraceIdGrpcMdcContextServerInterceptor.class)
-    @ConditionalOnMissingClass("io.opentelemetry.api.OpenTelemetry") // otel spring boot starter
+    @ConditionalOnMissingClass("org.springframework.boot.opentelemetry.autoconfigure.OpenTelemetrySdkAutoConfiguration") // otel spring boot starter
     @Conditional(NoOpenTelemetryAgentCondition.class) // otel agent
     public OrderedTraceIdGrpcMdcContextServerInterceptor orderedTraceIdGrpcMdcContextServerInterceptor(OrderedCorrelationIdGrpcMdcContextServerInterceptor interceptor) {
         int order = interceptor.getOrder();

@@ -14,7 +14,7 @@ public class GcpTraceAutoConfiguration {
 
     @Deprecated
     @Bean
-    @ConditionalOnMissingClass("io.opentelemetry.api.OpenTelemetry") // otel spring boot starter
+    @ConditionalOnMissingClass("org.springframework.boot.opentelemetry.autoconfigure.OpenTelemetrySdkAutoConfiguration") // otel spring boot starter
     @Conditional(NoOpenTelemetryAgentCondition.class) // otel agent
     public FilterRegistrationBean<GcpTraceFilter> gcpTraceServletFilter() {
         FilterRegistrationBean<GcpTraceFilter> registration = new FilterRegistrationBean<>();
