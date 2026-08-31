@@ -67,15 +67,13 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 
 	/**
 	 * Resolves the GCP project that traces are stored in, so it can be embedded in the
-	 * {@code projects/{projectId}/traces/{traceId}} value written to the log entry.
-	 * <p>
-	 * On Kubernetes, traces are exported to the cluster's host project (e.g. {@code ent-kub-<env>}),
+	 * 'projects/{projectId}/traces/{traceId}' value written to the log entry.
+	 * 
+	 * On Kubernetes, traces are exported to the cluster's host project (ent-kub-<env>),
 	 * which differs from the workload's own project. That destination project is carried in the
-	 * {@code gcp.project_id} OpenTelemetry resource attribute, so it takes precedence. Runtimes that
+	 * 'gcp.project_id' OpenTelemetry resource attribute, so it takes precedence. Runtimes that
 	 * still export traces to their own project (e.g. Cloud Run, Firebase) fall back to
-	 * {@code GOOGLE_CLOUD_PROJECT}.
-	 *
-	 * @see <a href="https://entur.atlassian.net/browse/CLOUD-4435">CLOUD-4435</a>
+	 * 'GOOGLE_CLOUD_PROJECT'.
 	 */
 	private static String resolveProjectId() {
 		String projectId = resolveOtelResourceAttribute(OTEL_GCP_PROJECT_ID_ATTRIBUTE);
