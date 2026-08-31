@@ -47,7 +47,7 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 			} else if(jsonProvider instanceof MdcJsonProvider p) {
 				loggingEventJsonProviders.removeProvider(jsonProvider);
 
-				String projectId = System.getenv("GOOGLE_CLOUD_PROJECT");
+				String projectId = resolveProjectId();
 
 				if(StackdriverOpenTelemetryTraceMdcJsonProvider.isOtelAgent()) {
 					loggingEventJsonProviders.addProvider(new StackdriverOpenTelemetryTraceMdcJsonProvider(projectId));
@@ -61,6 +61,46 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 		loggingEventJsonProviders.addProvider(new StackdriverMessageJsonProvider(formatter));
 
 		return formatter;
+	}
+
+	private static final String OTEL_GCP_PROJECT_ID_ATTRIBUTE = "gcp.project_id";
+
+	/**
+	 * Resolves the GCP project that traces are stored in, so it can be embedded in the
+	 * {@code projects/{projectId}/traces/{traceId}} value written to the log entry.
+	 * <p>
+	 * On Kubernetes, traces are exported to the cluster's host project (e.g. {@code ent-kub-<env>}),
+	 * which differs from the workload's own project. That destination project is carried in the
+	 * {@code gcp.project_id} OpenTelemetry resource attribute, so it takes precedence. Runtimes that
+	 * still export traces to their own project (e.g. Cloud Run, Firebase) fall back to
+	 * {@code GOOGLE_CLOUD_PROJECT}.
+	 *
+	 * @see <a href="https://entur.atlassian.net/browse/CLOUD-4435">CLOUD-4435</a>
+	 */
+	private static String resolveProjectId() {
+		String projectId = resolveOtelResourceAttribute(OTEL_GCP_PROJECT_ID_ATTRIBUTE);
+		if (projectId != null) {
+			return projectId;
+		}
+		return System.getenv("GOOGLE_CLOUD_PROJECT");
+	}
+
+	private static String resolveOtelResourceAttribute(String attributeName) {
+		String otelResourceAttributes = System.getenv("OTEL_RESOURCE_ATTRIBUTES");
+		if (otelResourceAttributes == null || otelResourceAttributes.isBlank()) {
+			return null;
+		}
+		for (String pair : otelResourceAttributes.split(",")) {
+			int separatorIndex = pair.indexOf('=');
+			if (separatorIndex < 0) {
+				continue;
+			}
+			if (pair.substring(0, separatorIndex).trim().equals(attributeName)) {
+				String value = pair.substring(separatorIndex + 1).trim();
+				return value.isBlank() ? null : value;
+			}
+		}
+		return null;
 	}
 
 }
