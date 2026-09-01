@@ -80,7 +80,8 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 		if (projectId != null) {
 			return projectId;
 		}
-		return System.getenv("GOOGLE_CLOUD_PROJECT");
+		String fallback = System.getenv("GOOGLE_CLOUD_PROJECT");
+		return (fallback == null || fallback.isBlank()) ? null : fallback;
 	}
 
 	private static String resolveOtelResourceAttribute(String attributeName) {
