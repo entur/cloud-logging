@@ -18,8 +18,15 @@ import java.util.Map;
  * </ul>
  * Unrecognized fields remain in {@code LogEntry.jsonPayload}.
  *
+ * <p>The trace field is written as the bare trace id, which is the preferred format for both
+ * Logs Explorer correlation and the Cloud Trace integration; the
+ * {@code projects/[PROJECT-ID]/traces/[TRACE-ID]} resource name is a legacy format.
+ *
  * @see <a href="https://docs.cloud.google.com/logging/docs/agent/logging/configuration#special-fields">
  *     Special fields in structured payloads
+ * </a>
+ * @see <a href="https://docs.cloud.google.com/trace/docs/trace-log-integration">
+ *     Link log entries with traces
  * </a>
  */
 public class StackdriverMicrometerTraceMdcJsonProvider extends AbstractJsonProvider<ILoggingEvent> {
@@ -31,12 +38,6 @@ public class StackdriverMicrometerTraceMdcJsonProvider extends AbstractJsonProvi
     public static final String GCP_TRACE_KEY = "logging.googleapis.com/trace";
     public static final String GCP_SPAN_ID_KEY = "logging.googleapis.com/spanId";
     public static final String GCP_TRACE_SAMPLED = "logging.googleapis.com/trace_sampled";
-
-    protected final String tracePrefix;
-
-    public StackdriverMicrometerTraceMdcJsonProvider(String projectId) {
-        this.tracePrefix = projectId != null ? "projects/" + projectId + "/traces/" : null;
-    }
 
     @Override
     public void writeTo(JsonGenerator generator, ILoggingEvent event) {
@@ -53,7 +54,7 @@ public class StackdriverMicrometerTraceMdcJsonProvider extends AbstractJsonProvi
             if (value == null) continue;
 
             switch (key) {
-                case MICROMETER_TRACE_ID_KEY -> generator.writeStringProperty(GCP_TRACE_KEY, tracePrefix != null ? tracePrefix + value : value);
+                case MICROMETER_TRACE_ID_KEY -> generator.writeStringProperty(GCP_TRACE_KEY, value);
                 case MICROMETER_SPAN_ID_KEY  -> generator.writeStringProperty(GCP_SPAN_ID_KEY, value);
                 case MICROMETER_SAMPLED_KEY -> {
                     generator.writeBooleanProperty(GCP_TRACE_SAMPLED, Boolean.parseBoolean(value));

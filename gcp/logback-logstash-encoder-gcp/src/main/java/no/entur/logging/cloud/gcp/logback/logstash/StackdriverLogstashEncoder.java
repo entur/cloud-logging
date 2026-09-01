@@ -47,12 +47,10 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 			} else if(jsonProvider instanceof MdcJsonProvider p) {
 				loggingEventJsonProviders.removeProvider(jsonProvider);
 
-				String projectId = resolveProjectId();
-
 				if(StackdriverOpenTelemetryTraceMdcJsonProvider.isOtelAgent()) {
-					loggingEventJsonProviders.addProvider(new StackdriverOpenTelemetryTraceMdcJsonProvider(projectId));
+					loggingEventJsonProviders.addProvider(new StackdriverOpenTelemetryTraceMdcJsonProvider());
 				} else {
-					loggingEventJsonProviders.addProvider(new StackdriverMicrometerTraceMdcJsonProvider(projectId));
+					loggingEventJsonProviders.addProvider(new StackdriverMicrometerTraceMdcJsonProvider());
 				}
 			}
 		}
@@ -61,15 +59,5 @@ public class StackdriverLogstashEncoder extends LogstashEncoder {
 		loggingEventJsonProviders.addProvider(new StackdriverMessageJsonProvider(formatter));
 
 		return formatter;
-	}
-
-	private static String resolveProjectId() {
-	    for (String envName : new String[]{"GOOGLE_CLOUD_PROJECT", "GCP_PROJECT_ID"}) {
-	        String projectId = System.getenv(envName);
-	        if (projectId != null && !projectId.isBlank()) {
-	            return projectId;
-	        }
-	    }
-	    return null;
 	}
 }
