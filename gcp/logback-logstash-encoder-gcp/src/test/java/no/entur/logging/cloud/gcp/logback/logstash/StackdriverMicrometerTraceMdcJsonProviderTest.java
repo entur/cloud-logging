@@ -28,7 +28,7 @@ public class StackdriverMicrometerTraceMdcJsonProviderTest {
         JsonNode root = write(mdc);
 
         assertThat(root.get("logging.googleapis.com/trace").asText())
-                .isEqualTo("projects/myProject/traces/06796866738c859f2f19b7cfb3214824");
+                .isEqualTo("06796866738c859f2f19b7cfb3214824");
         assertThat(root.get("logging.googleapis.com/spanId").asText())
                 .isEqualTo("000000000000004a");
         assertThat(root.get("correlationId").asText()).isEqualTo("abc123");
@@ -51,7 +51,7 @@ public class StackdriverMicrometerTraceMdcJsonProviderTest {
 
     private static JsonNode write(Map<String, String> mdcMap) throws Exception {
         StackdriverMicrometerTraceMdcJsonProvider provider =
-                new StackdriverMicrometerTraceMdcJsonProvider("myProject");
+                new StackdriverMicrometerTraceMdcJsonProvider();
         ILoggingEvent event = Mockito.mock(ILoggingEvent.class);
         Mockito.when(event.getMDCPropertyMap()).thenReturn(mdcMap);
 
