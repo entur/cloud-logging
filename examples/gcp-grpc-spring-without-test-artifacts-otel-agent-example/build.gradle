@@ -25,7 +25,7 @@ test {
 }
 
 dependencies {
-    otelAgent "io.opentelemetry.javaagent:opentelemetry-javaagent:2.30.0"
+    otelAgent "io.opentelemetry.javaagent:opentelemetry-javaagent:2.31.0"
 
     implementation project(':on-demand:on-demand-spring-boot-starter-grpc')
     implementation project(':gcp:spring-boot-starter-gcp-grpc-spring')
