@@ -128,8 +128,8 @@ configure(jvmProjects()) {
     configurations.all {
         resolutionStrategy.eachDependency { DependencyResolveDetails details ->
             if (details.requested.group == 'org.apache.tomcat.embed') {
-                if (isLowerThanMin(details.requested.version, "11.0.22")) {
-                    details.useVersion '11.0.22'
+                if (isLowerThanMin(details.requested.version, "11.0.25")) {
+                    details.useVersion '11.0.25'
                     details.because 'Security issues'
                 }
             }
