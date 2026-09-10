@@ -14,9 +14,9 @@ public class LogbookGcpAutoConfiguration {
     public LogbookLoggingCloudProperties logbookCloudConfiguration() {
         LogbookLoggingCloudProperties c = new LogbookLoggingCloudProperties();
         // hard limit as of April 2026: 256 KiB - where KiB is 1024 bytes
-        // Body: set it to 192 KiB to be on the safe side,
+        // Body: set it to 200 KiB to be on the safe side,
         // and to allow for a lot of overhead in the logging framework, MDC, HTTP headers, bytes vs chars, etc.
-        c.setMaxBodySize(196608);
+        c.setMaxBodySize(204800);
         c.setMaxSize(262144 - 2 * 1024); // inaccurate + currently not enforced
         return c;
     }
