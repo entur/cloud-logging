@@ -2,7 +2,7 @@
 plugins {
     id 'io.github.ben-manes.versions' version '0.61.0' apply false // ./gradlew dependencyUpdates
     id "org.sonarqube" version "7.4.0.8496"
-    id 'org.jreleaser' version '1.25.0' apply false
+    id 'org.jreleaser' version '1.26.0' apply false
 }
 
 // Define version variables at root level so they're available everywhere
