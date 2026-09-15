@@ -27,7 +27,7 @@ ext {
     grpcNettyVersion = '1.83.1'
     grpcVersion = '1.83.1'
     grpcCommonsVersion = '2.75.0'
-    grpcProtobufVersion = '4.36.0'
+    grpcProtobufVersion = '4.36.1'
 
     jsonAssertVersion = '0.8.0'
 }
