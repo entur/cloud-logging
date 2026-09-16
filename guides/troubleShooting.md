@@ -126,6 +126,8 @@ indicate this is happening.
 
 Resolution: Apps should put their app-specific fields in a subtree rather than on the root.
 
+**Local/test-scope enforcement:** the GCP test-scope module (`gcp/spring-boot-autoconfigure-gcp-test`) wires `no.entur.logging.cloud.gcp.spring.test.GcpLogStatementFieldNameValidator` onto `CompositeConsoleAsyncAppenderLogging` (see `logback-test.xml`), which runs `no.entur.logging.cloud.gcp.spring.test.LogStatementFieldNameValidator` synchronously, on the calling thread, for every log statement - before it is handed off to the async appender. It inspects the event's MDC plus the known logstash-logback `Marker`/`StructuredArgument` types (`Markers`/`StructuredArguments`) used to attach fields, and throws `IllegalStateException` immediately if a field name is either reserved by one of the encoder's built-in providers (e.g. `message`, `severity`, `timestamp`) or repeated - so this class of mistake blows up right where the offending log statement was made, instead of surfacing later as dropped production logs (or on a background worker thread, far from the log call site). The production `StackdriverLogstashEncoder` itself is unaffected; this check only runs in test scope.
+
 ### Invalid JSON
 Does not always translate into `textPayload`.
 

@@ -5,6 +5,7 @@
     <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.logback.logstash.test.CompositeConsoleAsyncAppenderLogging">
         <discardingThreshold>0</discardingThreshold>
         <maxFlushTime>0</maxFlushTime>
+        <validator class="no.entur.logging.cloud.gcp.spring.test.GcpLogStatementFieldNameValidator"/>
         <appender-ref ref="STDOUT" />
     </appender>
 

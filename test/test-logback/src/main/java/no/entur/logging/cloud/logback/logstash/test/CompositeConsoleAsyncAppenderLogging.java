@@ -7,12 +7,27 @@ public class CompositeConsoleAsyncAppenderLogging extends LoggingScopeAsyncAppen
 
     private CompositeConsoleLoggingEventListener listener;
 
+    private LoggingEventValidator validator;
+
     public void setListener(CompositeConsoleLoggingEventListener listener) {
         this.listener = listener;
     }
 
+    public void setValidator(LoggingEventValidator validator) {
+        this.validator = validator;
+    }
+
     @Override
     protected void append(ILoggingEvent eventObject) {
+        // Run synchronously, on the calling thread (this method executes as part of the logger's
+        // doAppend call, before the event is handed off to the async worker thread) - so a thrown
+        // exception surfaces right where the offending log statement was made, instead of only on the
+        // background thread that eventually encodes the event.
+        LoggingEventValidator validator = this.validator; // defensive copy
+        if (validator != null) {
+            validator.validate(eventObject);
+        }
+
         CompositeConsoleOutputType output = CompositeConsoleOutputControl.getOutput();
 
         DefaultCompositeConsoleOutputLoggingEvent event = new DefaultCompositeConsoleOutputLoggingEvent(eventObject, output);
