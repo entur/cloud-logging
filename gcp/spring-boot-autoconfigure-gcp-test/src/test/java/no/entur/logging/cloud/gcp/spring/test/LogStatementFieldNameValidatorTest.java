@@ -4,11 +4,16 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.LoggingEvent;
+import no.entur.logging.cloud.appender.MdcContributer;
+import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleAsyncAppenderLogging;
+import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputType;
+import no.entur.logging.cloud.logback.logstash.test.DefaultCompositeConsoleOutputLoggingEvent;
 import net.logstash.logback.argument.StructuredArguments;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Marker;
+import org.slf4j.LoggerFactory;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 
@@ -48,6 +53,11 @@ class LogStatementFieldNameValidatorTest {
         return event;
     }
 
+    private LoggingEvent newRealEventForMdcSnapshot() {
+        Logger logger = (Logger) LoggerFactory.getLogger(LogStatementFieldNameValidatorTest.class);
+        return new LoggingEvent("fqcn", logger, Level.INFO, "msg", null, null);
+    }
+
     // --- MDC ---
 
     @Test
@@ -63,6 +73,22 @@ class LogStatementFieldNameValidatorTest {
         LoggingEvent event = newEventWithMdc(Map.of("myAppField", "value"));
 
         assertDoesNotThrow(() -> LogStatementFieldNameValidator.validate(event));
+    }
+
+    @Test
+    void validate_runsAfterContributedMdcHasBeenSnapshotted() {
+        CompositeConsoleAsyncAppenderLogging appender = new CompositeConsoleAsyncAppenderLogging();
+        appender.setMdcContributer(new MdcContributer() {
+            @Override
+            public Map<String, String> getMdc() {
+                return Map.of("grpcKey", "grpcValue");
+            }
+        });
+        appender.setValidator(event -> assertThat(event.getMDCPropertyMap()).containsEntry("grpcKey", "grpcValue"));
+
+        LoggingEvent event = newRealEventForMdcSnapshot();
+
+        assertDoesNotThrow(() -> appender.preprocess(new DefaultCompositeConsoleOutputLoggingEvent(event, CompositeConsoleOutputType.humanReadableJson)));
     }
 
     // --- StructuredArguments.kv / Markers.append (SingleFieldAppendingMarker fast path) ---
