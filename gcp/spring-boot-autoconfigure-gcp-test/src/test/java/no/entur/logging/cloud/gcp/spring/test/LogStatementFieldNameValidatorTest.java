@@ -177,13 +177,33 @@ class LogStatementFieldNameValidatorTest {
     }
 
     @Test
-    void validate_mdcKeyLiterallyUsingGcpTraceField_throwsForbiddenField() {
-        // Blindly checked: a raw MDC key that literally matches a GCP tracing field name is forbidden,
-        // regardless of whether a tracing MDC provider would otherwise remap some other key to it.
+    void validate_mdcKeyLiterallyUsingGcpTraceField_doesNotThrow() {
+        // GCP trace field names are a supported, legitimate raw MDC key - used directly by e.g.
+        // GcpTraceFilter/GcpTraceMdcSupport and the gRPC trace interceptors so the default MDC provider
+        // writes the field straight through - so this must not be flagged.
         LoggingEvent event = newEvent("msg", null, Map.of("logging.googleapis.com/trace", "abc123"));
+
+        assertDoesNotThrow(() -> LogStatementFieldNameValidator.validate(event));
+    }
+
+    @Test
+    void validate_markerUsingGcpTraceFieldName_throwsForbiddenField() {
+        // Unlike MDC, there is no legitimate way to contribute a GCP tracing field via a Marker/structured
+        // argument, so it remains forbidden there.
+        LoggingEvent event = newEvent("msg {}", null, Map.of(), StructuredArguments.kv("logging.googleapis.com/trace", "abc123"));
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> LogStatementFieldNameValidator.validate(event));
         assertThat(exception).hasMessageThat().contains("Forbidden");
+    }
+
+    @Test
+    void validate_mdcGcpTraceFieldCollidingWithMarker_throwsField() {
+        // The MDC value is legitimate on its own, but a marker also contributing the very same field name
+        // must still be rejected (as the marker itself uses a forbidden field name here).
+        LoggingEvent event = newEvent("msg {}", null, Map.of("logging.googleapis.com/trace", "abc123"),
+                StructuredArguments.kv("logging.googleapis.com/trace", "def456"));
+
+        assertThrows(IllegalStateException.class, () -> LogStatementFieldNameValidator.validate(event));
     }
 
     // --- application-defined LogstashMarker subclasses (not StructuredArgument) ---

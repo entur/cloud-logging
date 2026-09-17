@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Validates that a log statement does not contribute a jsonPayload field name which is either
@@ -46,12 +48,10 @@ public final class LogStatementFieldNameValidator {
     /**
      * Field names always written by {@link StackdriverLogstashEncoder}'s built-in providers (see
      * {@link StackdriverLogSeverityJsonProvider}, {@code StackdriverMessageJsonProvider},
-     * {@code StackdriverTimestampJsonProvider}, {@link StackdriverServiceContextJsonProvider}), the GCP
-     * tracing fields written by {@link StackdriverOpenTelemetryTraceMdcJsonProvider}/
-     * {@code StackdriverMicrometerTraceMdcJsonProvider}, plus the remaining default
-     * logstash-logback-encoder fields. Using one of these names yourself - including as a raw MDC key -
-     * is blindly forbidden, regardless of whether the corresponding provider would actually end up
-     * writing it in a given log statement.
+     * {@code StackdriverTimestampJsonProvider}, {@link StackdriverServiceContextJsonProvider}), plus the
+     * remaining default logstash-logback-encoder fields. Using one of these names yourself - including as
+     * a raw MDC key - is blindly forbidden, regardless of whether the corresponding provider would
+     * actually end up writing it in a given log statement.
      */
     public static final Set<String> RESERVED_FIELD_NAMES = Set.of(
             "@version",
@@ -61,11 +61,33 @@ public final class LogStatementFieldNameValidator {
             StackdriverLogSeverityJsonProvider.FIELD_SEVERITY,
             "message",
             "timestamp",
-            StackdriverServiceContextJsonProvider.SERVICE_CONTEXT,
+            StackdriverServiceContextJsonProvider.SERVICE_CONTEXT
+    );
+
+    /**
+     * The GCP tracing field names, written by {@link StackdriverOpenTelemetryTraceMdcJsonProvider}/
+     * {@code StackdriverMicrometerTraceMdcJsonProvider} when remapping another MDC key (e.g. {@code
+     * traceId}/{@code trace_id}) - but also the officially supported way to set these fields directly,
+     * used e.g. by {@code GcpTraceFilter}/{@code GcpTraceMdcSupport} and the gRPC trace interceptors,
+     * which put the MDC entry under the literal GCP field name themselves so that the (unremapping)
+     * default MDC provider writes it straight through. Since using one of these names as a raw MDC key is
+     * therefore a legitimate, supported mechanism - not a mistake - they are only forbidden here when
+     * written via a Marker or structured argument, which have no such legitimate use for them.
+     */
+    public static final Set<String> GCP_TRACE_FIELD_NAMES = Set.of(
             StackdriverOpenTelemetryTraceMdcJsonProvider.GCP_TRACE_KEY,
             StackdriverOpenTelemetryTraceMdcJsonProvider.GCP_SPAN_ID_KEY,
             StackdriverOpenTelemetryTraceMdcJsonProvider.GCP_TRACE_SAMPLED
     );
+
+    /**
+     * Field names forbidden when contributed via a Marker or structured argument: {@link
+     * #RESERVED_FIELD_NAMES} plus {@link #GCP_TRACE_FIELD_NAMES} (see there for why the latter aren't
+     * also forbidden as a raw MDC key).
+     */
+    private static final Set<String> MARKER_OR_ARGUMENT_RESERVED_FIELD_NAMES = Stream.concat(
+            RESERVED_FIELD_NAMES.stream(), GCP_TRACE_FIELD_NAMES.stream()
+    ).collect(Collectors.toUnmodifiableSet());
 
     private static final JsonMapper MAPPER = JsonMapper.builder().build();
 
@@ -80,11 +102,13 @@ public final class LogStatementFieldNameValidator {
         Map<String, String> mdc = event.getMDCPropertyMap();
         if (mdc != null) {
             // MDC keys come from a Map, so they are inherently unique among themselves - only the reserved
-            // check applies here, and it needs no field-name set at all.
+            // check applies here, and it needs no field-name set at all. GCP trace field names are
+            // deliberately not checked against here - see GCP_TRACE_FIELD_NAMES.
             for (String key : mdc.keySet()) {
-                checkReserved(key);
+                checkReserved(key, RESERVED_FIELD_NAMES);
             }
         }
+
 
         List<Marker> markers = event.getMarkerList();
         Object[] arguments = event.getArgumentArray();
@@ -169,7 +193,7 @@ public final class LogStatementFieldNameValidator {
         // root of the log statement (stack size 1 == the object opened by validate() itself), so re-using
         // one of them in a nested sub-object is fine and not flagged here.
         if (fieldNamesPerLevel.size() == 1) {
-            checkReserved(fieldName);
+            checkReserved(fieldName, MARKER_OR_ARGUMENT_RESERVED_FIELD_NAMES);
         }
 
         Set<String> siblingFieldNames = fieldNamesPerLevel.peek();
@@ -178,8 +202,8 @@ public final class LogStatementFieldNameValidator {
         }
     }
 
-    private static void checkReserved(String fieldName) {
-        if (RESERVED_FIELD_NAMES.contains(fieldName)) {
+    private static void checkReserved(String fieldName, Set<String> reservedFieldNames) {
+        if (reservedFieldNames.contains(fieldName)) {
             throw new IllegalStateException(
                     "Forbidden JSON field '" + fieldName + "' detected in a log statement (added via MDC, a Marker "
                             + "or a structured argument). This field name is reserved by StackdriverLogstashEncoder's "
