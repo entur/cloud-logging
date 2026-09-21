@@ -1,7 +1,7 @@
 
 plugins {
     id 'io.github.ben-manes.versions' version '0.61.0' apply false // ./gradlew dependencyUpdates
-    id "org.sonarqube" version "7.4.0.8496"
+    id "org.sonarqube" version "7.5.0.8588"
     id 'org.jreleaser' version '1.26.0' apply false
 }
 
@@ -24,7 +24,7 @@ ext {
     commonsTextVersion = '1.15.0'
     nettyTcnativeBoringsslStaticVersion = '2.0.83.Final'
 
-    grpcNettyVersion = '1.83.1'
+    grpcNettyVersion = '1.84.0'
     grpcVersion = '1.84.0'
     grpcCommonsVersion = '2.75.0'
     grpcProtobufVersion = '4.36.1'
