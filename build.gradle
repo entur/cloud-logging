@@ -1,13 +1,13 @@
 
 plugins {
-    id 'com.github.ben-manes.versions' version '0.54.0' apply false // ./gradlew dependencyUpdates
-    id "org.sonarqube" version "7.3.1.8318"
-    id 'org.jreleaser' version '1.24.0' apply false
+    id 'io.github.ben-manes.versions' version '0.61.0' apply false // ./gradlew dependencyUpdates
+    id "org.sonarqube" version "7.4.0.8496"
+    id 'org.jreleaser' version '1.25.0' apply false
 }
 
 // Define version variables at root level so they're available everywhere
 ext {
-    springBootVersion = '4.0.7' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
+    springBootVersion = '4.0.8' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
     // The following versions are managed by Spring Boot BOM (no need to define here):
     // junitJupiterVersion, mockitoVersion, slf4jVersion, logbackVersion, 
     // jacksonVersion, jacksonDatabindVersion, micrometerVersion, janinoVersion,
@@ -22,12 +22,12 @@ ext {
     logbackLogstashSyntaxHighlightingDecoratorsVersion = '2.0.3'
     commonsIoVersion = '2.22.0'
     commonsTextVersion = '1.15.0'
-    nettyTcnativeBoringsslStaticVersion = '2.0.79.Final'
+    nettyTcnativeBoringsslStaticVersion = '2.0.81.Final'
 
-    grpcNettyVersion = '1.82.0'
-    grpcVersion = '1.82.0'
-    grpcCommonsVersion = '2.72.0'
-    grpcProtobufVersion = '4.35.1'
+    grpcNettyVersion = '1.83.1'
+    grpcVersion = '1.83.1'
+    grpcCommonsVersion = '2.75.0'
+    grpcProtobufVersion = '4.36.0'
     springGrpcVersion = '1.0.3'
 
     jsonAssertVersion = '0.8.0'
@@ -88,7 +88,7 @@ configure(libraryProjects()) {
 }
 
 configure(jvmProjects()) {
-    apply plugin: 'com.github.ben-manes.versions'
+    apply plugin: 'io.github.ben-manes.versions'
 
     test {
         useJUnitPlatform {
@@ -129,8 +129,8 @@ configure(jvmProjects()) {
     configurations.all {
         resolutionStrategy.eachDependency { DependencyResolveDetails details ->
             if (details.requested.group == 'org.apache.tomcat.embed') {
-                if (isLowerThanMin(details.requested.version, "11.0.22")) {
-                    details.useVersion '11.0.22'
+                if (isLowerThanMin(details.requested.version, "11.0.25")) {
+                    details.useVersion '11.0.25'
                     details.because 'Security issues'
                 }
             }
