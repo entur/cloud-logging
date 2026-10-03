@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.rr.grpc;
 
 import com.google.protobuf.AbstractMessage;
+import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
 import io.grpc.Context;
 import io.grpc.Deadline;
@@ -15,6 +16,7 @@ import io.grpc.ServerInterceptor;
 import io.grpc.Status;
 import no.entur.logging.cloud.rr.grpc.message.GrpcConnect;
 import no.entur.logging.cloud.rr.grpc.message.GrpcDisconnect;
+import no.entur.logging.cloud.rr.grpc.message.GrpcPayload;
 import no.entur.logging.cloud.rr.grpc.message.GrpcRequest;
 import no.entur.logging.cloud.rr.grpc.message.GrpcResponse;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcLogFilter;
@@ -55,6 +57,8 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
 
         private GrpcSink sink;
 
+        private boolean deferredBodyMapping;
+
         public Builder withFilters(GrpcServerLoggingFilters filters) {
             this.filters = filters;
             return this;
@@ -75,6 +79,19 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
             return this;
         }
 
+        /**
+         * Defer mapping message bodies to JSON until the log statement is actually written.
+         * Saves work when log statements are discarded, i.e. by on-demand logging.
+         *
+         * @param deferredBodyMapping true if mapping should be deferred
+         * @return this builder
+         */
+
+        public Builder withDeferredBodyMapping(boolean deferredBodyMapping) {
+            this.deferredBodyMapping = deferredBodyMapping;
+            return this;
+        }
+
         public GrpcLoggingServerInterceptor build() {
             if(payloadJsonMapper == null) {
                 throw new IllegalStateException();
@@ -89,7 +106,7 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
                 throw new IllegalStateException();
             }
 
-            return new GrpcLoggingServerInterceptor(sink, filters, metadataJsonMapper, payloadJsonMapper);
+            return new GrpcLoggingServerInterceptor(sink, filters, metadataJsonMapper, payloadJsonMapper, deferredBodyMapping);
         }
 
 
@@ -101,11 +118,18 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
     protected final GrpcPayloadJsonMapper payloadJsonMapper;
     protected final GrpcSink sink;
 
+    protected final boolean deferredBodyMapping;
+
     public GrpcLoggingServerInterceptor(GrpcSink sink, GrpcServerLoggingFilters filters, GrpcMetadataJsonMapper metadataJsonMapper, GrpcPayloadJsonMapper payloadJsonMapper) {
+        this(sink, filters, metadataJsonMapper, payloadJsonMapper, false);
+    }
+
+    public GrpcLoggingServerInterceptor(GrpcSink sink, GrpcServerLoggingFilters filters, GrpcMetadataJsonMapper metadataJsonMapper, GrpcPayloadJsonMapper payloadJsonMapper, boolean deferredBodyMapping) {
         this.sink = sink;
         this.filters = filters;
         this.metadataJsonMapper = metadataJsonMapper;
         this.payloadJsonMapper = payloadJsonMapper;
+        this.deferredBodyMapping = deferredBodyMapping;
     }
 
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, final Metadata headers, ServerCallHandler<ReqT, RespT> next) {
@@ -179,17 +203,19 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
 
                         int count = responseCounter.incrementAndGet();
 
-                        String body = null;
-                        try {
-                            body = payloadJsonMapper.map(m, filter.getResponseBodyFilter());
-                        } catch (Throwable e) {
-                            // came from us, log as warn
-                            log.warn("Cannot format protobuf response message", e);
+                        GrpcPayload payload = new GrpcPayload(m, filter.getResponseBodyFilter(), payloadJsonMapper);
+                        if (!isDeferredBodyMapping(m)) {
+                            try {
+                                payload.map();
+                            } catch (Throwable e) {
+                                // came from us, log as warn
+                                log.warn("Cannot format protobuf response message", e);
+                            }
                         }
 
                         long duration = System.currentTimeMillis() - timestamp;
 
-                        GrpcResponse responseMessage = new GrpcResponse(responseHeaders, remoteAddress, path, body, "local", count, Status.Code.OK, duration);
+                        GrpcResponse responseMessage = new GrpcResponse(responseHeaders, remoteAddress, path, payload, "local", count, Status.Code.OK, duration);
 
                         sink.responseMessage(responseMessage);
                     } else if (filter.isDisconnect()) {
@@ -222,7 +248,7 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
 
                             long duration = System.currentTimeMillis() - timestamp;
 
-                            GrpcResponse responseMessage = new GrpcResponse(headers, remoteAddress, path, null, "local", count, status.getCode(), duration);
+                            GrpcResponse responseMessage = new GrpcResponse(headers, remoteAddress, path, (GrpcPayload) null, "local", count, status.getCode(), duration);
 
                             sink.responseMessage(responseMessage);
                         }
@@ -264,15 +290,17 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
 
                         long timeRemainingUntilDeadlineInMilliseconds = getTimeRemainingUntilDeadlineInMilliseconds();
 
-                        String body = null;
-                        try {
-                            body = payloadJsonMapper.map(m, filter.getRequestBodyFilter());
-                        } catch (Throwable e) {
-                            // came from someone else, so log as info
-                            log.info("Cannot format protobuf request message", e);
+                        GrpcPayload payload = new GrpcPayload(m, filter.getRequestBodyFilter(), payloadJsonMapper);
+                        if (!isDeferredBodyMapping(m)) {
+                            try {
+                                payload.map();
+                            } catch (Throwable e) {
+                                // came from someone else, so log as info
+                                log.info("Cannot format protobuf request message", e);
+                            }
                         }
 
-                        GrpcRequest requestMessage = new GrpcRequest(requestHeaders, remoteAddress, path, body, "remote", count, timeRemainingUntilDeadlineInMilliseconds);
+                        GrpcRequest requestMessage = new GrpcRequest(requestHeaders, remoteAddress, path, payload, "remote", count, timeRemainingUntilDeadlineInMilliseconds);
 
                         sink.requestMessage(requestMessage);
                     } else if (filter.isDisconnect()) {
@@ -296,6 +324,11 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
             };
         }
         return next.startCall(interceptCall, headers);
+    }
+
+    protected boolean isDeferredBodyMapping(MessageOrBuilder message) {
+        // builders are mutable, so map them right away
+        return deferredBodyMapping && message instanceof Message;
     }
 
     private Map<String, Object> toHeaders(Status status, Metadata trailers, GrpcMetadataFilter filter) {
