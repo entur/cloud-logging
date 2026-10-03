@@ -73,19 +73,27 @@ public abstract class GrpcConnectionMarker<T extends GrpcMessage> extends Logsta
 						if (value instanceof List) {
 							List<Object> values = (List) value;
 							for (Object listValue : values) {
-								generator.writePOJO(listValue);
+								writeHeaderValue(generator, listValue);
 							}
 						} else {
-							generator.writePOJO(value);
+							writeHeaderValue(generator, value);
 						}
 					}
 					generator.writeEndArray();
 				}
 			}
-		
+
 		}
 		generator.writeEndObject();
 
+	}
+
+	protected void writeHeaderValue(JsonGenerator generator, Object value) {
+		if (value instanceof String string) {
+			generator.writeString(string);
+		} else {
+			generator.writePOJO(value);
+		}
 	}
 	
 	

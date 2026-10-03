@@ -38,6 +38,10 @@ public class RequestResponseGrpcAutoConfiguration extends AbstractRequestRespons
     @Value("${entur.logging.request-response.grpc.client.interceptor-order:0}")
     private int clientInterceptorOrder;
 
+    // on-demand logging discards most log statements, so only map bodies to JSON for those which are written
+    @Value("${entur.logging.grpc.ondemand.enabled:false}")
+    private boolean deferredBodyMapping;
+
     protected int getMaxBodySize() {
         if(maxBodySize == -1) {
             return grpcLoggingCloudProperties.getMaxBodySize();
@@ -94,7 +98,7 @@ public class RequestResponseGrpcAutoConfiguration extends AbstractRequestRespons
     @Bean
     @ConditionalOnMissingBean(OrderedGrpcLoggingClientInterceptor.class)
     public OrderedGrpcLoggingClientInterceptor orderedGrpcLoggingClientInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcClientLoggingFilters grpcServiceLoggingFilters) {
-        return new OrderedGrpcLoggingClientInterceptor(grpcSink, grpcServiceLoggingFilters, grpcMetadataJsonMapper, grpcPayloadJsonMapper, clientInterceptorOrder);
+        return new OrderedGrpcLoggingClientInterceptor(grpcSink, grpcServiceLoggingFilters, grpcMetadataJsonMapper, grpcPayloadJsonMapper, deferredBodyMapping, clientInterceptorOrder);
     }
 
     @Bean
