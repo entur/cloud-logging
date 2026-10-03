@@ -6,12 +6,13 @@ import com.google.protobuf.CodedOutputStream;
  * Factory for {@linkplain CodedOutputStream}s which forward all writes to a {@linkplain CodedOutputStreamSink}.
  * <br><br>
  * This version is unavailable; the Java 24+ version (in the multi-release jar) generates a subclass of
- * {@linkplain CodedOutputStream} using the ClassFile API.
+ * {@linkplain CodedOutputStream} using the ClassFile API. This version is also loaded on Java 24+ if the jar
+ * was repackaged without the 'Multi-Release: true' manifest attribute.
  */
 
 final class JsonCodedOutputStreamFactory {
 
-    private static final Throwable UNAVAILABLE_CAUSE = new UnsupportedOperationException("Requires Java 24 or later, running on Java " + Runtime.version().feature());
+    private static final Throwable UNAVAILABLE_CAUSE = MultiReleaseSupport.unavailableCause(Runtime.version().feature());
 
     private JsonCodedOutputStreamFactory() {
     }

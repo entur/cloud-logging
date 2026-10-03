@@ -39,6 +39,12 @@ Strings are written as UTF-8 without decoding, where possible.
 
 The module targets Java 17; it is a multi-release jar, with the ClassFile API code in `src/main/java24`.
 
+**Note:** if the jar is repackaged, i.e. shaded or merged into an uber jar, the repackaged jar's manifest must contain
+`Multi-Release: true`, otherwise the Java 24+ classes are ignored and `CodedOutputStreamProtobufJsonWriter` silently
+falls back to transcoding (`CodedOutputStreamProtobufJsonWriter.getUnavailableCause()` explains why). Spring Boot
+executable jars keep dependencies as nested jars, so they are not affected. For the Maven Shade Plugin, add the
+attribute with a `ManifestResourceTransformer`; for Gradle `Jar` tasks, use `manifest { attributes('Multi-Release': 'true') }`.
+
 ### Performance
 Time and allocation per message, written to a byte-based JSON generator (JMH, Java 25):
 
