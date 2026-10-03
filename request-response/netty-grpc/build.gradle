@@ -1,9 +1,11 @@
 
 plugins {
-    id "com.google.protobuf" version "0.10.0"
+    id "com.google.protobuf"
 }
 
 dependencies {
+    api project(':request-response:protobuf-json')
+
     api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
 
     api("com.fasterxml.jackson.core:jackson-databind")

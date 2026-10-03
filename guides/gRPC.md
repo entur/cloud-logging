@@ -197,9 +197,24 @@ Optionally also configure the `OrderedGrpcLoggingClientInterceptor` order using
 entur.logging.request-response.grpc.client.interceptor-order=0
 ```
 
+Message bodies are written as JSON using `JsonFormat` by default. Faster implementations (see [protobuf-json](../request-response/protobuf-json/README.md)) can be enabled using
+
+```
+entur.logging.request-response.grpc.json-writer=json-format|transcoding|coded-output-stream
+```
+
+where
+
+ * `json-format`: `JsonFormat` (default)
+ * `transcoding`: serializes the message to bytes, then transcodes the bytes to JSON; about 3-4 times faster
+ * `coded-output-stream`: the message's generated code writes JSON directly; the fastest, requires Java 24+ (otherwise falls back to `transcoding`)
+
+The output is the same as for `JsonFormat`, except for extensions (not written) and values `JsonFormat` cannot write (i.e. out of range timestamps). Use `JsonFormatComparison` to verify this for your messages in a unit test.
+
 Also create your own beans for 
 
  * `JsonFormat.TypeRegistry`
+ * `ProtobufJsonWriter`
  * `GrpcStatusMapper`
 * `GrpcPayloadJsonMapper`
 * `GrpcMetadataJsonMapper`

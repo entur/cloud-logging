@@ -3,6 +3,7 @@ plugins {
     id 'io.github.ben-manes.versions' version '0.64.0' apply false // ./gradlew dependencyUpdates
     id "org.sonarqube" version "7.5.0.8588"
     id 'org.jreleaser' version '1.26.0' apply false
+    id 'com.google.protobuf' version '0.10.0' apply false
 }
 
 // Define version variables at root level so they're available everywhere
@@ -30,6 +31,8 @@ ext {
     grpcProtobufVersion = '4.36.1'
 
     jsonAssertVersion = '0.8.0'
+
+    jmhVersion = '1.37'
 }
 
 // Split projects into buildable: examples and libraries. 

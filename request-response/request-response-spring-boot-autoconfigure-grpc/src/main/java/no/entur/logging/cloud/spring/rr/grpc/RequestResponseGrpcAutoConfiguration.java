@@ -1,6 +1,10 @@
 package no.entur.logging.cloud.spring.rr.grpc;
 
 import com.google.protobuf.util.JsonFormat;
+import no.entur.logging.cloud.protobuf.json.ProtobufJsonWriter;
+import no.entur.logging.cloud.protobuf.json.codedoutputstream.CodedOutputStreamProtobufJsonWriter;
+import no.entur.logging.cloud.protobuf.json.jsonformat.JsonFormatProtobufJsonWriter;
+import no.entur.logging.cloud.protobuf.json.transcode.TranscodingProtobufJsonWriter;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcClientLoggingFilters;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcServerLoggingFilters;
@@ -26,6 +30,36 @@ import java.util.HashMap;
 @Configuration
 public class RequestResponseGrpcAutoConfiguration extends AbstractRequestResponseGrpcSinkAutoConfiguration {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestResponseGrpcAutoConfiguration.class);
+
+    /**
+     * Create a JSON writer for gRPC message bodies.
+     *
+     * @param name json-format (default), transcoding or coded-output-stream
+     * @param typeRegistry types for resolving google.protobuf.Any
+     * @return writer
+     */
+
+    public static ProtobufJsonWriter createProtobufJsonWriter(String name, JsonFormat.TypeRegistry typeRegistry) {
+        switch (name.toLowerCase().replace("-", "").replace("_", "")) {
+            case "jsonformat": {
+                return new JsonFormatProtobufJsonWriter(JsonPrinterFactory.createPrinter(false, typeRegistry));
+            }
+            case "transcoding": {
+                return TranscodingProtobufJsonWriter.newBuilder().withTypeRegistry(typeRegistry).build();
+            }
+            case "codedoutputstream": {
+                if (!CodedOutputStreamProtobufJsonWriter.isAvailable()) {
+                    LOGGER.warn("JSON-writing CodedOutputStream for gRPC request-response logging is not available ({}), using transcoding instead", CodedOutputStreamProtobufJsonWriter.getUnavailableCause().toString());
+                }
+                return CodedOutputStreamProtobufJsonWriter.newBuilder().withTypeRegistry(typeRegistry).build();
+            }
+            default: {
+                throw new IllegalStateException("Unknown gRPC request-response JSON writer '" + name + "', expected json-format, transcoding or coded-output-stream");
+            }
+        }
+    }
+
     @Value("${entur.logging.request-response.max-size:-1}")
     private int maxSize;
 
@@ -37,6 +71,9 @@ public class RequestResponseGrpcAutoConfiguration extends AbstractRequestRespons
 
     @Value("${entur.logging.request-response.grpc.client.interceptor-order:0}")
     private int clientInterceptorOrder;
+
+    @Value("${entur.logging.request-response.grpc.json-writer:json-format}")
+    private String jsonWriter;
 
     protected int getMaxBodySize() {
         if(maxBodySize == -1) {
@@ -66,11 +103,16 @@ public class RequestResponseGrpcAutoConfiguration extends AbstractRequestRespons
     }
 
     @Bean
+    @ConditionalOnMissingBean(ProtobufJsonWriter.class)
+    public ProtobufJsonWriter grpcProtobufJsonWriter(JsonFormat.TypeRegistry typeRegistry) {
+        return createProtobufJsonWriter(jsonWriter, typeRegistry);
+    }
+
+    @Bean
     @ConditionalOnMissingBean(GrpcPayloadJsonMapper.class)
-    public GrpcPayloadJsonMapper grpcPayloadJsonMapper(JsonFormat.TypeRegistry typeRegistry) {
-        JsonFormat.Printer printer = JsonPrinterFactory.createPrinter(false, typeRegistry);
+    public GrpcPayloadJsonMapper grpcPayloadJsonMapper(ProtobufJsonWriter protobufJsonWriter) {
         int max = getMaxBodySize();
-        return new DefaultGrpcPayloadJsonMapper(printer, max, max / 2);
+        return new DefaultGrpcPayloadJsonMapper(protobufJsonWriter, max, max / 2);
     }
 
     @Bean

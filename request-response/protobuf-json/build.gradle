@@ -1,0 +1,92 @@
+plugins {
+    id "com.google.protobuf"
+}
+
+dependencies {
+    api("com.google.protobuf:protobuf-java:${grpcProtobufVersion}")
+    api("com.google.protobuf:protobuf-java-util:${grpcProtobufVersion}")
+    api("tools.jackson.core:jackson-core")
+
+    testImplementation("tools.jackson.core:jackson-databind")
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${grpcProtobufVersion}"
+    }
+}
+
+// Multi-release jar: the JSON-writing CodedOutputStream uses the ClassFile API (Java 24+),
+// the rest of the module targets Java 17 like the other libraries.
+sourceSets {
+    java24 {
+        java {
+            srcDirs = ['src/main/java24']
+        }
+    }
+}
+
+configurations {
+    java24Implementation.extendsFrom(implementation)
+}
+
+dependencies {
+    java24Implementation(sourceSets.main.output)
+}
+
+def java25Compiler = javaToolchains.compilerFor {
+    languageVersion = JavaLanguageVersion.of(25)
+}
+def java25Launcher = javaToolchains.launcherFor {
+    languageVersion = JavaLanguageVersion.of(25)
+}
+
+tasks.named('compileJava24Java', JavaCompile) {
+    javaCompiler = java25Compiler
+    options.release = 24
+}
+
+tasks.named('jar', Jar) {
+    into('META-INF/versions/24') {
+        from sourceSets.java24.output
+    }
+    manifest {
+        attributes('Multi-Release': 'true')
+    }
+}
+
+// run tests on Java 25, with the Java 24+ classes first
+tasks.named('test', Test) {
+    javaLauncher = java25Launcher
+    classpath = sourceSets.java24.output + classpath
+}
+
+// JMH benchmarks, run with
+// ./gradlew :request-response:protobuf-json:jmh
+// optionally with JMH arguments, i.e.
+// ./gradlew :request-response:protobuf-json:jmh -Pjmh="-prof gc ProtobufJsonWriterBenchmark"
+sourceSets {
+    jmh {
+        compileClasspath += sourceSets.main.output + sourceSets.test.output
+        runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+    }
+}
+
+configurations {
+    jmhImplementation.extendsFrom testImplementation
+    jmhRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+dependencies {
+    jmhImplementation("org.openjdk.jmh:jmh-core:${jmhVersion}")
+    jmhAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:${jmhVersion}")
+}
+
+tasks.register('jmh', JavaExec) {
+    description = 'Runs the JMH benchmarks'
+    group = 'verification'
+    javaLauncher = java25Launcher
+    classpath = sourceSets.java24.output + sourceSets.jmh.runtimeClasspath
+    mainClass = 'org.openjdk.jmh.Main'
+    args = (project.findProperty('jmh') ?: '').toString().tokenize()
+}
