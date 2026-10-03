@@ -2,6 +2,7 @@ package no.entur.logging.cloud.rr.grpc.marker;
 
 import tools.jackson.core.JsonGenerator;
 import net.logstash.logback.marker.LogstashMarker;
+import no.entur.logging.cloud.rr.grpc.mapper.RawJson;
 import no.entur.logging.cloud.rr.grpc.message.GrpcMessage;
 
 import java.io.IOException;
@@ -73,19 +74,27 @@ public abstract class GrpcConnectionMarker<T extends GrpcMessage> extends Logsta
 						if (value instanceof List) {
 							List<Object> values = (List) value;
 							for (Object listValue : values) {
-								generator.writePOJO(listValue);
+								writeHeaderValue(generator, listValue);
 							}
 						} else {
-							generator.writePOJO(value);
+							writeHeaderValue(generator, value);
 						}
 					}
 					generator.writeEndArray();
 				}
 			}
-		
+
 		}
 		generator.writeEndObject();
 
+	}
+
+	protected void writeHeaderValue(JsonGenerator generator, Object value) {
+		if (value instanceof RawJson rawJson) {
+			generator.writeRawValue(rawJson.getJson());
+		} else {
+			generator.writePOJO(value);
+		}
 	}
 	
 	
