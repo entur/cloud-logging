@@ -45,7 +45,7 @@ public class JsonFormatConformanceTest {
 
     @Test
     public void codedOutputStreamIsAvailable() {
-        // tests run on Java 25, with the Java 24 classes of the multi-release jar
+        // tests run on Java 25, with the Java 24 classes
         assertThat(CodedOutputStreamProtobufJsonWriter.getUnavailableCause()).isNull();
         assertThat(CodedOutputStreamProtobufJsonWriter.isAvailable()).isTrue();
     }

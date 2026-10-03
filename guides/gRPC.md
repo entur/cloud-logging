@@ -207,7 +207,7 @@ where
 
  * `json-format`: `JsonFormat` (default)
  * `transcoding`: serializes the message to bytes, then transcodes the bytes to JSON; about 3-4 times faster
- * `coded-output-stream`: the message's generated code writes JSON directly; the fastest, requires Java 24+ (otherwise falls back to `transcoding`, with a warning). If the application is repackaged into a shaded or uber jar (not Spring Boot's executable jar), its manifest must contain `Multi-Release: true`.
+ * `coded-output-stream`: the message's generated code writes JSON directly; the fastest, requires Java 24+ (otherwise falls back to `transcoding`, with a warning).
 
 The output is the same as for `JsonFormat`, except for extensions (not written) and values `JsonFormat` cannot write (i.e. out of range timestamps). Use `JsonFormatComparison` to verify this for your messages in a unit test.
 

@@ -16,8 +16,9 @@ protobuf {
     }
 }
 
-// Multi-release jar: the JSON-writing CodedOutputStream uses the ClassFile API (Java 24+),
-// the rest of the module targets Java 17 like the other libraries.
+// The JSON-writing CodedOutputStream uses the ClassFile API (Java 24+), the rest of the module targets Java 17
+// like the other libraries. The Java 24 classes are added to the jar as-is (not as a multi-release jar);
+// they are only loaded by name when running on Java 24+.
 sourceSets {
     java24 {
         java {
@@ -47,18 +48,17 @@ tasks.named('compileJava24Java', JavaCompile) {
 }
 
 tasks.named('jar', Jar) {
-    into('META-INF/versions/24') {
-        from sourceSets.java24.output
-    }
-    manifest {
-        attributes('Multi-Release': 'true')
-    }
+    from sourceSets.java24.output
 }
 
-// run tests on Java 25, with the Java 24+ classes first
+tasks.named('sourcesJar', Jar) {
+    from sourceSets.java24.allSource
+}
+
+// run tests on Java 25, with the Java 24 classes
 tasks.named('test', Test) {
     javaLauncher = java25Launcher
-    classpath = sourceSets.java24.output + classpath
+    classpath += sourceSets.java24.output
 }
 
 // JMH benchmarks, run with
@@ -86,7 +86,7 @@ tasks.register('jmh', JavaExec) {
     description = 'Runs the JMH benchmarks'
     group = 'verification'
     javaLauncher = java25Launcher
-    classpath = sourceSets.java24.output + sourceSets.jmh.runtimeClasspath
+    classpath = sourceSets.jmh.runtimeClasspath + sourceSets.java24.output
     mainClass = 'org.openjdk.jmh.Main'
     args = (project.findProperty('jmh') ?: '').toString().tokenize()
 }

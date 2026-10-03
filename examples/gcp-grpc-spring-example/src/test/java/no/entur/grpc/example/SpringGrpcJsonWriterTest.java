@@ -27,7 +27,7 @@ public class SpringGrpcJsonWriterTest extends SpringAbstractGrpcTest {
 	@Test
 	public void useCodedOutputStreamJsonWriter() throws InterruptedException {
 		assertThat(protobufJsonWriter).isInstanceOf(CodedOutputStreamProtobufJsonWriter.class);
-		// running on Java 24+, using the multi-release jar
+		// running on Java 24+
 		assertThat(CodedOutputStreamProtobufJsonWriter.getUnavailableCause()).isNull();
 
 		GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();

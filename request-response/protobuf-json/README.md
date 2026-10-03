@@ -37,13 +37,10 @@ many small strings. The other two let the message's generated serialization code
 Both use a per-message-type plan (package `plan`; field names, enum names, well-known types), indexed by field number.
 Strings are written as UTF-8 without decoding, where possible.
 
-The module targets Java 17; it is a multi-release jar, with the ClassFile API code in `src/main/java24`.
-
-**Note:** if the jar is repackaged, i.e. shaded or merged into an uber jar, the repackaged jar's manifest must contain
-`Multi-Release: true`, otherwise the Java 24+ classes are ignored and `CodedOutputStreamProtobufJsonWriter` silently
-falls back to transcoding (`CodedOutputStreamProtobufJsonWriter.getUnavailableCause()` explains why). Spring Boot
-executable jars keep dependencies as nested jars, so they are not affected. For the Maven Shade Plugin, add the
-attribute with a `ManifestResourceTransformer`; for Gradle `Jar` tasks, use `manifest { attributes('Multi-Release': 'true') }`.
+The module targets Java 17. The ClassFile API code (`src/main/java24`, `ClassFileCodedOutputStreamFactory`) is
+compiled for Java 24 and included in the jar as-is (not as a multi-release jar); it is only loaded by name when running
+on Java 24+. If the jar is repackaged with unused classes removed (i.e. `minimizeJar` in the Maven Shade Plugin), keep
+this class. `CodedOutputStreamProtobufJsonWriter.getUnavailableCause()` explains why the writer is unavailable.
 
 ### Performance
 Time and allocation per message, written to a byte-based JSON generator (JMH, Java 25):

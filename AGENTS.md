@@ -27,7 +27,7 @@
 - `gcp/` – GCP-specific Spring Boot starters, autoconfiguration, and Stackdriver/Cloud Logging encoder
 - `azure/` – Azure-specific Spring Boot starters, autoconfiguration, and Azure Monitor encoder
 - `request-response/` – Logbook-based for REST services. Custom gRPC request/response logging.
-  - `request-response/protobuf-json` – fast protobuf-to-JSON writer for Jackson 3, output compatible with `JsonFormat`. Targets Java 17; the `CodedOutputStream` writer requires Java 24+ (multi-release jar, `src/main/java24`). JMH benchmarks in `src/jmh`
+  - `request-response/protobuf-json` – fast protobuf-to-JSON writer for Jackson 3, output compatible with `JsonFormat`. Targets Java 17; the `CodedOutputStream` writer requires Java 24+ (Java 24 classes in `src/main/java24`, loaded by name). JMH benchmarks in `src/jmh`
 - `on-demand/` – Selective on-demand logging: caches log statements per request and only emits them for failed/slow/flagged requests
 - `trace/` – Correlation-id and MDC tracing for HTTP and gRPC
 - `micrometer/` – Log severity metrics (GCP and Azure variants)
