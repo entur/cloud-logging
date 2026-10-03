@@ -36,7 +36,9 @@ import no.entur.logging.cloud.protobuf.json.plan.WellKnownType;
 import tools.jackson.core.JsonGenerator;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * {@linkplain ProtobufJsonWriter} which transcodes from the protobuf binary format: the message is serialized by its
@@ -141,6 +143,7 @@ public class TranscodingProtobufJsonWriter implements ProtobufJsonWriter {
         FieldInfo open = null;   // current repeated or map field
         boolean opened = false;  // whether the array or object has been started (unknown closed enum values are not written)
         int last = 0;            // last field number
+        Set<String> keys = null; // keys of the current map field
         while (true) {
             int tag = input.readTag();
             if (tag == 0) {
@@ -172,6 +175,13 @@ public class TranscodingProtobufJsonWriter implements ProtobufJsonWriter {
                 if (field.repeated) {
                     open = field;
                     opened = false;
+                    if (field.map) {
+                        if (keys == null) {
+                            keys = new HashSet<>();
+                        } else {
+                            keys.clear();
+                        }
+                    }
                 }
             }
             if (!field.accepts(wireType)) {
@@ -180,7 +190,7 @@ public class TranscodingProtobufJsonWriter implements ProtobufJsonWriter {
             }
 
             if (field.map) {
-                opened = writeMapEntry(input, bytes, base, field, generator, opened);
+                opened = writeMapEntry(input, bytes, base, field, generator, opened, keys);
             } else if (field.repeated) {
                 if (field.packable && wireType == WireFormat.WIRETYPE_LENGTH_DELIMITED) {
                     int limit = input.pushLimit(input.readRawVarint32());
@@ -295,7 +305,15 @@ public class TranscodingProtobufJsonWriter implements ProtobufJsonWriter {
      * @return whether the map object has been started
      */
 
-    private boolean writeMapEntry(CodedInputStream input, byte[] bytes, int base, FieldInfo field, JsonGenerator generator, boolean opened) throws IOException {
+    /**
+     * Write a map entry. Entries with a key already written are skipped, so that no JSON key is written twice
+     * (generated messages never have duplicate keys, but i.e. a {@linkplain com.google.protobuf.DynamicMessage} can).
+     *
+     * @param keys keys already written for the map field
+     * @return whether the object has been started
+     */
+
+    private boolean writeMapEntry(CodedInputStream input, byte[] bytes, int base, FieldInfo field, JsonGenerator generator, boolean opened, Set<String> keys) throws IOException {
         FieldInfo keyField = field.mapKey;
         FieldInfo valueField = field.mapValue;
 
@@ -313,27 +331,33 @@ public class TranscodingProtobufJsonWriter implements ProtobufJsonWriter {
                 key = readKey(input, keyField, wireType);
             } else if (!done && number == 2 && valueField.accepts(wireType)) {
                 done = true;
+                String name = key != null ? key : JsonValues.defaultKey(keyField);
                 if (valueField.closedEnum) {
                     int value = (int) input.readRawVarint64();
                     // protobuf keeps entries with unknown closed enum values as unknown fields
-                    if (isKnown(valueField, value)) {
+                    if (isKnown(valueField, value) && keys.add(name)) {
                         opened = open(generator, field, opened);
-                        generator.writeName(key != null ? key : JsonValues.defaultKey(keyField));
+                        generator.writeName(name);
                         JsonValues.writeEnum(generator, valueField.enumNames, value);
                     }
-                } else {
+                } else if (keys.add(name)) {
                     opened = open(generator, field, opened);
-                    generator.writeName(key != null ? key : JsonValues.defaultKey(keyField));
+                    generator.writeName(name);
                     writeValue(input, bytes, base, valueField, generator);
+                } else {
+                    input.skipField(tag);
                 }
             } else {
                 input.skipField(tag);
             }
         }
         if (!done) {
-            opened = open(generator, field, opened);
-            generator.writeName(key != null ? key : JsonValues.defaultKey(keyField));
-            writeDefault(valueField, generator);
+            String name = key != null ? key : JsonValues.defaultKey(keyField);
+            if (keys.add(name)) {
+                opened = open(generator, field, opened);
+                generator.writeName(name);
+                writeDefault(valueField, generator);
+            }
         }
         input.popLimit(limit);
         return opened;

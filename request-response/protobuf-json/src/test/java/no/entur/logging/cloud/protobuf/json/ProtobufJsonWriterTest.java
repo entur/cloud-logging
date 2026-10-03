@@ -3,7 +3,10 @@ package no.entur.logging.cloud.protobuf.json;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.CodedOutputStream;
+import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Duration;
+import com.google.protobuf.DynamicMessage;
 import com.google.protobuf.Empty;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int64Value;
@@ -174,5 +177,29 @@ public class ProtobufJsonWriterTest {
                 .build();
 
         assertThat(write(message)).containsExactly("{\"optionalValue\":\"NaN\"}", "{\"optionalValue\":\"NaN\"}");
+    }
+
+    @Test
+    public void skipsDuplicateMapKeys() throws Exception {
+        // a DynamicMessage can have map entries with the same key, generated messages cannot
+        Descriptor descriptor = TestAllTypesProto3.getDescriptor();
+        FieldDescriptor map = descriptor.findFieldByName("map_string_string");
+        DynamicMessage message = DynamicMessage.newBuilder(descriptor)
+                .addRepeatedField(map, entry(map, "a", "1"))
+                .addRepeatedField(map, entry(map, "b", "2"))
+                .addRepeatedField(map, entry(map, "a", "3"))
+                .build();
+
+        assertThat(write(message)).containsExactly(
+                "{\"mapStringString\":{\"a\":\"1\",\"b\":\"2\"}}",
+                "{\"mapStringString\":{\"a\":\"1\",\"b\":\"2\"}}");
+    }
+
+    private static DynamicMessage entry(FieldDescriptor map, String key, String value) {
+        Descriptor type = map.getMessageType();
+        return DynamicMessage.newBuilder(type)
+                .setField(type.findFieldByName("key"), key)
+                .setField(type.findFieldByName("value"), value)
+                .build();
     }
 }

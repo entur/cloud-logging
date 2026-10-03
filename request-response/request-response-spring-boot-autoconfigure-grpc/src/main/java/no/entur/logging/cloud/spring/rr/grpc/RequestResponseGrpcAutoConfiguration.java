@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.HashMap;
+import java.util.Locale;
 
 @Configuration
 public class RequestResponseGrpcAutoConfiguration extends AbstractRequestResponseGrpcSinkAutoConfiguration {
@@ -41,7 +42,7 @@ public class RequestResponseGrpcAutoConfiguration extends AbstractRequestRespons
      */
 
     public static ProtobufJsonWriter createProtobufJsonWriter(String name, JsonFormat.TypeRegistry typeRegistry) {
-        switch (name.toLowerCase().replace("-", "").replace("_", "")) {
+        switch (name.toLowerCase(Locale.ROOT).replace("-", "").replace("_", "")) {
             case "jsonformat": {
                 return new JsonFormatProtobufJsonWriter(JsonPrinterFactory.createPrinter(false, typeRegistry));
             }

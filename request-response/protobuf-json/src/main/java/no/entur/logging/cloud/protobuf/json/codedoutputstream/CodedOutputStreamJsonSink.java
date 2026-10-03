@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Writes JSON by letting a message's generated serialization code write to a {@linkplain CodedOutputStream} which
@@ -47,6 +49,7 @@ final class CodedOutputStreamJsonSink implements CodedOutputStreamSink {
         FieldInfo open;             // current repeated or map field
         boolean opened;             // whether the array or object has been started
         int last;                   // last field number
+        Set<String> keys;           // keys of the current map field
 
         // tag written, value to follow
         int pendingNumber;
@@ -174,6 +177,13 @@ final class CodedOutputStreamJsonSink implements CodedOutputStreamSink {
             if (field.repeated) {
                 f.open = field;
                 f.opened = false;
+                if (field.map) {
+                    if (f.keys == null) {
+                        f.keys = new HashSet<>();
+                    } else {
+                        f.keys.clear();
+                    }
+                }
             }
         }
         if (!field.accepts(wireType)) {
@@ -209,9 +219,22 @@ final class CodedOutputStreamJsonSink implements CodedOutputStreamSink {
 
     // ---- map entries ----
 
-    private void writeEntryName() {
+    /**
+     * Write the name of a map entry, unless an entry with the same key was already written, so that no JSON key is
+     * written twice (generated messages never have duplicate keys).
+     *
+     * @return true if the name was written and the value should follow
+     */
+
+    private boolean writeEntryName() {
         Frame f = frame;
-        generator.writeName(f.key != null ? f.key : JsonValues.defaultKey(f.entry.mapKey));
+        String name = f.key != null ? f.key : JsonValues.defaultKey(f.entry.mapKey);
+        // the keys are tracked by the frame of the message with the map field
+        if (!frames[depth - 1].keys.add(name)) {
+            return false;
+        }
+        generator.writeName(name);
+        return true;
     }
 
     /**
@@ -235,8 +258,9 @@ final class CodedOutputStreamJsonSink implements CodedOutputStreamSink {
         Frame f = frame;
         if (f.entry != null && f.entryTagged) {
             if (!f.entryDone) {
-                writeEntryName();
-                transcoder.writeDefault(f.entry.mapValue, generator);
+                if (writeEntryName()) {
+                    transcoder.writeDefault(f.entry.mapValue, generator);
+                }
             }
             pop();
         }
@@ -256,8 +280,9 @@ final class CodedOutputStreamJsonSink implements CodedOutputStreamSink {
                 FieldInfo valueField = f.entry.mapValue;
                 // protobuf keeps entries with unknown closed enum values as unknown fields
                 if (!valueField.closedEnum || isKnown(valueField, value)) {
-                    writeEntryName();
-                    JsonValues.writeVarint(generator, valueField, value);
+                    if (writeEntryName()) {
+                        JsonValues.writeVarint(generator, valueField, value);
+                    }
                 }
                 entryValueDone();
             }
@@ -301,8 +326,9 @@ final class CodedOutputStreamJsonSink implements CodedOutputStreamSink {
             if (fieldNumber == 1 && f.entry.mapKey.accepts(WireFormat.WIRETYPE_FIXED32)) {
                 f.key = JsonValues.fixed32Key(f.entry.mapKey, value);
             } else if (fieldNumber == 2 && !f.entryDone && f.entry.mapValue.accepts(WireFormat.WIRETYPE_FIXED32)) {
-                writeEntryName();
-                JsonValues.writeFixed32(generator, f.entry.mapValue, value);
+                if (writeEntryName()) {
+                    JsonValues.writeFixed32(generator, f.entry.mapValue, value);
+                }
                 entryValueDone();
             }
             return;
@@ -324,8 +350,9 @@ final class CodedOutputStreamJsonSink implements CodedOutputStreamSink {
             if (fieldNumber == 1 && f.entry.mapKey.accepts(WireFormat.WIRETYPE_FIXED64)) {
                 f.key = JsonValues.fixed64Key(f.entry.mapKey, value);
             } else if (fieldNumber == 2 && !f.entryDone && f.entry.mapValue.accepts(WireFormat.WIRETYPE_FIXED64)) {
-                writeEntryName();
-                JsonValues.writeFixed64(generator, f.entry.mapValue, value);
+                if (writeEntryName()) {
+                    JsonValues.writeFixed64(generator, f.entry.mapValue, value);
+                }
                 entryValueDone();
             }
             return;
@@ -347,8 +374,9 @@ final class CodedOutputStreamJsonSink implements CodedOutputStreamSink {
             if (fieldNumber == 1 && f.entry.mapKey.type == Type.STRING) {
                 f.key = value;
             } else if (fieldNumber == 2 && !f.entryDone && f.entry.mapValue.type == Type.STRING) {
-                writeEntryName();
-                generator.writeString(value);
+                if (writeEntryName()) {
+                    generator.writeString(value);
+                }
                 entryValueDone();
             }
             return;
@@ -397,8 +425,9 @@ final class CodedOutputStreamJsonSink implements CodedOutputStreamSink {
             } else if (fieldNumber == 2 && !f.entryDone) {
                 FieldInfo valueField = f.entry.mapValue;
                 if (valueField.type == Type.STRING || valueField.type == Type.BYTES) {
-                    writeEntryName();
-                    writeBytesValue(valueField, byteString, bytes, offset, length);
+                    if (writeEntryName()) {
+                        writeBytesValue(valueField, byteString, bytes, offset, length);
+                    }
                     entryValueDone();
                 }
             }
@@ -434,8 +463,9 @@ final class CodedOutputStreamJsonSink implements CodedOutputStreamSink {
         if (f.entry != null) {
             FieldInfo valueField = f.entry.mapValue;
             if (fieldNumber == 2 && !f.entryDone && valueField.type == Type.MESSAGE) {
-                writeEntryName();
-                writeMessageValue(valueField, value);
+                if (writeEntryName()) {
+                    writeMessageValue(valueField, value);
+                }
                 entryValueDone();
             }
             return;
@@ -450,8 +480,9 @@ final class CodedOutputStreamJsonSink implements CodedOutputStreamSink {
             push(null, field);
             value.writeTo(output);
             if (!frame.entryDone) {
-                writeEntryName();
-                transcoder.writeDefault(field.mapValue, generator);
+                if (writeEntryName()) {
+                    transcoder.writeDefault(field.mapValue, generator);
+                }
             }
             pop();
         } else if (field.type == Type.MESSAGE) {

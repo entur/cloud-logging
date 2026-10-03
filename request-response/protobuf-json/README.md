@@ -60,8 +60,13 @@ Time and allocation per message, written to a byte-based JSON generator (JMH, Ja
  * out of range `google.protobuf.Timestamp` and `google.protobuf.Duration` values are written as objects, rather than failing
  * NaN and infinity `google.protobuf.Value` numbers are written as strings, rather than failing
 
-Fields are expected in increasing field number order, as protobuf serializes them; a field number seen again after
-a higher one (i.e. in the unknown fields) is skipped. This guarantees that no JSON key is written twice.
+No JSON key is written twice:
+
+ * fields are expected in increasing field number order, as protobuf serializes them; a field number seen again after
+   a higher one (i.e. in the unknown fields) is skipped.
+ * map entries with a key already written are skipped, keeping the first entry (protobuf keeps the last when
+   parsing). Generated messages never have duplicate keys, but i.e. a `DynamicMessage` can; `JsonFormat` then writes
+   the key twice.
 
 ## Checking the output
 Use `JsonFormatComparison` to check that an implementation writes the same as `JsonFormat` for your messages,
@@ -77,7 +82,7 @@ comparison.verify(myMessage); // throws IllegalStateException with the differenc
 ```
 
 Outputs are compared as JSON values, so escaping and number notation do not matter (`JsonFormat` escapes i.e. `=`
-as `=`). Duplicate properties are reported.
+as `\u003d`). Duplicate properties are reported.
 
 ## Tests
 `JsonFormatConformanceTest` compares the output with `JsonFormat` for random messages of the protobuf conformance
