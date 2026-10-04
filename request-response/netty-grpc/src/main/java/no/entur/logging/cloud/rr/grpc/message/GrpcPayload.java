@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.rr.grpc.message;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcBodyFilter;
 import no.entur.logging.cloud.rr.grpc.mapper.GrpcPayloadJsonMapper;
@@ -22,7 +23,10 @@ import tools.jackson.core.io.JsonStringEncoder;
  *     <li>the mapped body is published via volatile fields</li>
  * </ul>
  * Builders are not thread-safe (see the guide's <a href="https://protobuf.dev/reference/java/java-generated/#builders">Builders</a> section),
- * so they are mapped right away rather than deferred.
+ * so a builder is snapshot (as an immutable message) when the payload is created; later changes to the builder are not reflected.
+ * <br><br>
+ * The reference to the protobuf message is released once the message has been mapped (also if mapping failed), so that
+ * the (possibly large) message does not stay in memory for as long as the payload.
  */
 
 public class GrpcPayload {
@@ -38,7 +42,7 @@ public class GrpcPayload {
         return new GrpcPayload(body);
     }
 
-    protected final MessageOrBuilder message;
+    protected volatile MessageOrBuilder message;
     protected final GrpcBodyFilter filter;
     protected final GrpcPayloadJsonMapper mapper;
 
@@ -46,7 +50,8 @@ public class GrpcPayload {
     protected volatile String body;
 
     public GrpcPayload(MessageOrBuilder message, GrpcBodyFilter filter, GrpcPayloadJsonMapper mapper) {
-        this.message = message;
+        // builders are mutable and not thread-safe, so take an immutable snapshot
+        this.message = message instanceof Message.Builder builder ? builder.buildPartial() : message;
         this.filter = filter;
         this.mapper = mapper;
     }
@@ -73,6 +78,7 @@ public class GrpcPayload {
                         body = mapper.map(message, filter);
                     } finally {
                         mapped = true;
+                        message = null;
                     }
                 }
             }
@@ -98,6 +104,7 @@ public class GrpcPayload {
                         body = getUnableToMapMessage(e);
                     } finally {
                         mapped = true;
+                        message = null;
                     }
                 }
             }
@@ -112,7 +119,7 @@ public class GrpcPayload {
     /**
      * Get the message
      *
-     * @return the protobuf message, or null if created from an already mapped body.
+     * @return the protobuf message, or null if it has been mapped (the reference is then released) or if created from an already mapped body.
      */
 
     public MessageOrBuilder getMessage() {

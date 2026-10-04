@@ -71,4 +71,36 @@ public class GrpcPayloadTest {
         assertThat(payload.getMessage()).isNull();
         assertThat(payload.getBody()).isEqualTo("{\"message\":\"Hello\"}");
     }
+
+    @Test
+    public void releasesMessageAfterMapping() {
+        GrpcPayload payload = new GrpcPayload(request, NoneGrpcBodyFilter.getInstance(), (m, filter) -> "{}");
+        assertThat(payload.getMessage()).isSameInstanceAs(request);
+
+        payload.getBody();
+
+        assertThat(payload.getMessage()).isNull();
+    }
+
+    @Test
+    public void releasesMessageAfterMappingFailure() {
+        GrpcPayload payload = new GrpcPayload(request, NoneGrpcBodyFilter.getInstance(), (m, filter) -> {
+            throw new InvalidProtocolBufferException("fail");
+        });
+
+        assertThrows(InvalidProtocolBufferException.class, payload::map);
+
+        assertThat(payload.getMessage()).isNull();
+    }
+
+    @Test
+    public void snapshotsBuilder() {
+        GreetingRequest.Builder builder = GreetingRequest.newBuilder().setMessage("Hello");
+        // map the message which was passed to the mapper
+        GrpcPayload payload = new GrpcPayload(builder, NoneGrpcBodyFilter.getInstance(), (m, filter) -> ((GreetingRequest) m).getMessage());
+
+        builder.setMessage("Changed");
+
+        assertThat(payload.getBody()).isEqualTo("Hello");
+    }
 }
