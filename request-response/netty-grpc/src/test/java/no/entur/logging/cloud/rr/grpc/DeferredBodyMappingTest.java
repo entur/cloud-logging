@@ -1,10 +1,13 @@
 package no.entur.logging.cloud.rr.grpc;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import no.entur.logging.cloud.rr.grpc.filter.GrpcBodyFilter;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcClientLoggingFilters;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcServerLoggingFilters;
 import no.entur.logging.cloud.rr.grpc.mapper.DefaultGrpcPayloadJsonMapper;
@@ -81,6 +84,22 @@ public class DeferredBodyMappingTest {
 	}
 
 	@Test
+	public void mapsTooLargeBodiesRightAway() throws Exception {
+		// messages larger than the max binary size are only described, so they are mapped (and released) right away
+		call(true, new DefaultGrpcPayloadJsonMapper(printer, AbstractGrpcTest.DEFAULT_JSON_MESSAGE_SIZE, 1));
+
+		assertThat(mapCount.get()).isEqualTo(4);
+		for (GrpcRequest request : sink.requests) {
+			assertThat(request.getPayload().isMapped()).isTrue();
+			assertThat(request.getPayload().getMessage()).isNull();
+			assertThat(request.getBody()).startsWith("\"Omitted binary message size ");
+		}
+		for (GrpcResponse response : sink.responses) {
+			assertThat(response.getPayload().isMapped()).isTrue();
+		}
+	}
+
+	@Test
 	public void markerPostProcessingMapsDeferredBody() throws Exception {
 		call(true);
 
@@ -96,10 +115,21 @@ public class DeferredBodyMappingTest {
 	}
 
 	private void call(boolean deferredBodyMapping) throws Exception {
-		GrpcPayloadJsonMapper delegate = new DefaultGrpcPayloadJsonMapper(printer, AbstractGrpcTest.DEFAULT_JSON_MESSAGE_SIZE, AbstractGrpcTest.DEFAULT_BINARY_MESSAGE_SIZE);
-		GrpcPayloadJsonMapper payloadJsonMapper = (m, filter) -> {
-			mapCount.incrementAndGet();
-			return delegate.map(m, filter);
+		call(deferredBodyMapping, new DefaultGrpcPayloadJsonMapper(printer, AbstractGrpcTest.DEFAULT_JSON_MESSAGE_SIZE, AbstractGrpcTest.DEFAULT_BINARY_MESSAGE_SIZE));
+	}
+
+	private void call(boolean deferredBodyMapping, GrpcPayloadJsonMapper delegate) throws Exception {
+		GrpcPayloadJsonMapper payloadJsonMapper = new GrpcPayloadJsonMapper() {
+			@Override
+			public String map(MessageOrBuilder m, GrpcBodyFilter filter) throws InvalidProtocolBufferException {
+				mapCount.incrementAndGet();
+				return delegate.map(m, filter);
+			}
+
+			@Override
+			public boolean isDeferrable(MessageOrBuilder m) {
+				return delegate.isDeferrable(m);
+			}
 		};
 		GrpcMetadataJsonMapper metadataJsonMapper = new DefaultMetadataJsonMapper(new JsonPrinterStatusMapper(printer), new HashMap<>());
 

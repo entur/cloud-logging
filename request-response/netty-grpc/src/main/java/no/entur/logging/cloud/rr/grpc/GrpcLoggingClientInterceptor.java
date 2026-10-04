@@ -336,8 +336,8 @@ public class GrpcLoggingClientInterceptor implements ClientInterceptor {
 	}
 
 	protected boolean isDeferredBodyMapping(MessageOrBuilder message) {
-		// builders are mutable, so map them right away
-		return deferredBodyMapping && message instanceof Message;
+		// builders are mutable, and too large messages are cheap to map (and would be retained), so map them right away
+		return deferredBodyMapping && message instanceof Message && payloadJsonMapper.isDeferrable(message);
 	}
 
 	private Map<String, Object> toHeaders(Status status, Metadata trailers, GrpcMetadataFilter filter) {
