@@ -1,7 +1,6 @@
 name: PR
 on:
   pull_request:
-    branches: [main]
     types: [opened, synchronize, reopened, edited]
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
