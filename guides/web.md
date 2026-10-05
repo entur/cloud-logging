@@ -137,13 +137,31 @@ Please note:
     ```
     See also: [Too long lines](troubleShooting.md#too-long-lines).
 
-Some Logbook excludes ([actuator, openapi](https://github.com/entur/cloud-logging/blob/main/request-response/logbook-spring-boot-autoconfigure/src/main/java/no/entur/logging/cloud/spring/logbook/LogbookLoggingAutoConfiguration.java)) are included by default. Add more using
+Some Logbook excludes ([actuator, openapi](https://github.com/entur/cloud-logging/blob/main/request-response/logbook-spring-boot-autoconfigure/src/main/java/no/entur/logging/cloud/spring/logbook/LogbookLoggingAutoConfiguration.java)) are included by default. They only apply to incoming requests, i.e. calls to the application's own `/actuator/health`. Outgoing requests made by the application, for example calls to another service's actuator or OpenAPI endpoints, are still logged. Disable the default excludes using
+
+```
+entur.logging.request-response.logbook.default-excludes=false
+```
+
+Add more excludes using Logbook's predicates, either for both directions or for incoming (server) or outgoing (client) requests only:
 
 ```yml
 logbook:
-   exclude:
-      - /too/much/data/here
+  predicate:     # incoming and outgoing requests
+    exclude:
+      - path: /too/much/data/here
+  server:        # incoming requests only
+    predicate:
+      exclude:
+        - path: /internal/**
+          methods: [GET]
+  client:        # outgoing requests only
+    predicate:
+      exclude:
+        - path: /other/service/status
 ```
+
+The older `logbook.exclude` list (a list of paths) still works, but is deprecated by Logbook. It applies to both incoming and outgoing requests.
 
 See [Logbook](https://github.com/zalando/logbook) for additional configuration options.
 
