@@ -1,14 +1,9 @@
 package no.entur.logging.cloud.rr.grpc.mapper;
 
-import tools.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import io.grpc.Metadata;
 import io.grpc.protobuf.ProtoUtils;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcMetadataFilter;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -50,31 +45,6 @@ public class DefaultMetadataJsonMapper implements GrpcMetadataJsonMapper {
                 "x-envoy-original-path");
 
         return keys.stream().collect(Collectors.toMap(Function.identity(), key -> Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER)));
-    }
-
-    @JsonSerialize(using = RawSerializer.class)
-    public static class RawString {
-        private final String string;
-
-        public RawString(String string) {
-            this.string = string;
-        }
-
-        public String getString() {
-            return string;
-        }
-    }
-
-    public static class RawSerializer extends StdSerializer<RawString> {
-
-        protected RawSerializer() {
-            super(RawString.class);
-        }
-
-        @Override
-        public void serialize(RawString value, com.fasterxml.jackson.core.JsonGenerator gen, SerializerProvider provider) throws IOException {
-            gen.writeRaw(value.getString());
-        }
     }
 
     protected final GrpcStatusMapper statusMapper;
