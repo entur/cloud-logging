@@ -4,6 +4,8 @@ import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
+import no.entur.logging.cloud.protobuf.json.ProtobufJsonWriter;
+import no.entur.logging.cloud.protobuf.json.jsonformat.JsonFormatProtobufJsonWriter;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcBodyFilter;
 
 import java.io.IOException;
@@ -12,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultGrpcPayloadJsonMapper implements GrpcPayloadJsonMapper {
 
-    private final JsonFormat.Printer printer;
+    private final ProtobufJsonWriter writer;
     private Map<Class<?>, Integer> previouslyTooLargeBinaryMessageLengths = new ConcurrentHashMap<>();
 
     // Max length of logged JSON message
@@ -22,7 +24,11 @@ public class DefaultGrpcPayloadJsonMapper implements GrpcPayloadJsonMapper {
     private final int maxBinaryMessageLength;
 
     public DefaultGrpcPayloadJsonMapper(JsonFormat.Printer printer, int maxJsonMessageLength, int maxBinaryMessageLength) {
-        this.printer = printer;
+        this(new JsonFormatProtobufJsonWriter(printer), maxJsonMessageLength, maxBinaryMessageLength);
+    }
+
+    public DefaultGrpcPayloadJsonMapper(ProtobufJsonWriter writer, int maxJsonMessageLength, int maxBinaryMessageLength) {
+        this.writer = writer;
         this.maxJsonMessageLength = maxJsonMessageLength;
         this.maxBinaryMessageLength = maxBinaryMessageLength;
     }
@@ -57,17 +63,7 @@ public class DefaultGrpcPayloadJsonMapper implements GrpcPayloadJsonMapper {
                 message = getTruncatedBinaryMessage(serializedSize);
             } else {
                 // serialize to JSON, check if too big
-                StringBuilder builder = new StringBuilder(serializedSize * 4);
-                try {
-                    printer.appendTo(m, builder);
-                } catch (InvalidProtocolBufferException e) {
-                    throw e;
-                } catch (IOException e) {
-                    // Unexpected IOException.
-                    throw new IllegalStateException(e);
-                }
-
-                CharSequence filteredMessage = filter.filterBody(builder);
+                CharSequence filteredMessage = filter.filterBody((CharSequence) writeAsString(m));
 
                 if (filteredMessage.length() > maxJsonMessageLength) {
                     message = getTruncatedJsonMessage(filteredMessage);
@@ -81,7 +77,7 @@ public class DefaultGrpcPayloadJsonMapper implements GrpcPayloadJsonMapper {
                 }
             }
         } else if (m != null) {
-            message = filter.filterBody(printer.print(m));
+            message = filter.filterBody(writeAsString(m));
 
             if (message.length() > maxJsonMessageLength) {
                 message = getTruncatedJsonMessage(message);
@@ -90,6 +86,17 @@ public class DefaultGrpcPayloadJsonMapper implements GrpcPayloadJsonMapper {
             message = "{}"; // i.e. empty. This kicks in when throwing StatusRuntimeExceptions
         }
         return message;
+    }
+
+    private String writeAsString(MessageOrBuilder m) throws InvalidProtocolBufferException {
+        try {
+            return writer.writeAsString(m);
+        } catch (InvalidProtocolBufferException e) {
+            throw e;
+        } catch (IOException e) {
+            // Unexpected IOException.
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
