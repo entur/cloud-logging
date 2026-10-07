@@ -1,3 +1,21 @@
+// Security: the jreleaser plugin pulls in vulnerable jackson-core/jackson-databind 2.22.x
+// and Apache HttpComponents 5 versions. Remove once the plugin ships patched versions.
+buildscript {
+    dependencies {
+        classpath(platform("com.fasterxml.jackson:jackson-bom:2.22.3"))
+        constraints {
+            classpath("org.apache.httpcomponents.client5:httpclient5:5.6.4") {
+                because 'Security issues'
+            }
+            classpath("org.apache.httpcomponents.core5:httpcore5:5.4.3") {
+                because 'Security issues'
+            }
+            classpath("org.apache.httpcomponents.core5:httpcore5-h2:5.4.3") {
+                because 'Security issues'
+            }
+        }
+    }
+}
 
 plugins {
     id 'io.github.ben-manes.versions' version '0.64.0' apply false // ./gradlew dependencyUpdates
@@ -30,6 +48,11 @@ ext {
     grpcProtobufVersion = '4.36.2'
 
     jsonAssertVersion = '0.8.0'
+
+    // Security: override the Jackson versions from the Spring Boot BOM.
+    // Remove once springBootVersion manages these (or newer) versions.
+    jacksonBomVersion = '3.1.7'
+    jackson2BomVersion = '2.21.7'
 }
 
 // Split projects into buildable: examples and libraries. 
@@ -67,6 +90,8 @@ configure(exampleProjects()) {
     dependencies {
         // Use Spring Boot BOM for dependency management
         implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+        implementation platform("tools.jackson:jackson-bom:${jacksonBomVersion}")
+        implementation platform("com.fasterxml.jackson:jackson-bom:${jackson2BomVersion}")
     }
 }
 
@@ -83,6 +108,8 @@ configure(libraryProjects()) {
         // Use api(platform(...)) to enforce Spring Boot BOM versions for all dependency configurations
         // This ensures both api and implementation dependencies get pinned versions
         api(platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}"))
+        api(platform("tools.jackson:jackson-bom:${jacksonBomVersion}"))
+        api(platform("com.fasterxml.jackson:jackson-bom:${jackson2BomVersion}"))
     }
 }
 
