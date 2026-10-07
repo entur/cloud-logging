@@ -68,7 +68,7 @@ ext {
 
     // Security: override the Jackson versions from the Spring Boot BOM.
     // Remove once springBootVersion manages these (or newer) versions.
-    jacksonBomVersion = '3.1.7'
+    jacksonBomVersion = '3.2.3'
     jackson2BomVersion = '2.22.3'
 }
 
