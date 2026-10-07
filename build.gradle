@@ -23,6 +23,23 @@ plugins {
     id 'org.jreleaser' version '1.26.0' apply false
 }
 
+// Security: the Spring Boot Gradle plugin (declared locally in examples/*) pulls in
+// vulnerable tools.jackson 3.1.x versions. Remove once springBootVersion ships patched versions.
+subprojects {
+    buildscript {
+        dependencies {
+            constraints {
+                classpath("tools.jackson.core:jackson-core:3.1.7") {
+                    because 'Security issues'
+                }
+                classpath("tools.jackson.core:jackson-databind:3.1.7") {
+                    because 'Security issues'
+                }
+            }
+        }
+    }
+}
+
 // Define version variables at root level so they're available everywhere
 ext {
     springBootVersion = '4.1.1' // https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/
