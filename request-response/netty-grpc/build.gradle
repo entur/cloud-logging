@@ -6,9 +6,8 @@ plugins {
 dependencies {
     api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
 
-    api("com.fasterxml.jackson.core:jackson-databind")
-    api("com.fasterxml.jackson.core:jackson-annotations")
     api("tools.jackson.core:jackson-core")
+    api("tools.jackson.core:jackson-databind")
 
     api("io.grpc:grpc-netty:${grpcNettyVersion}")
     api("io.grpc:grpc-services:${grpcNettyVersion}")
