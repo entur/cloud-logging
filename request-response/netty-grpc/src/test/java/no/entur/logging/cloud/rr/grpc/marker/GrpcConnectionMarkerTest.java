@@ -1,12 +1,12 @@
 package no.entur.logging.cloud.rr.grpc.marker;
 
 import io.grpc.Status;
-import no.entur.logging.cloud.rr.grpc.mapper.RawJson;
 import no.entur.logging.cloud.rr.grpc.message.GrpcResponse;
 import org.junit.jupiter.api.Test;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.util.RawValue;
 
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -19,9 +19,9 @@ public class GrpcConnectionMarkerTest {
     private final JsonMapper mapper = JsonMapper.builder().build();
 
     @Test
-    public void writesRawJsonHeaderValueAsStructuredJson() {
+    public void writesRawValueHeaderValueAsStructuredJson() {
         Map<String, Object> headers = new HashMap<>();
-        headers.put("grpc-status-details", new RawJson("{\"code\":3,\"message\":\"My error message\"}"));
+        headers.put("grpc-status-details", new RawValue("{\"code\":3,\"message\":\"My error message\"}"));
         headers.put("grpc-message", "My error message");
 
         GrpcResponse response = new GrpcResponse(headers, null, "/my.Service/method", null, "local", 1, Status.Code.INVALID_ARGUMENT, 10);

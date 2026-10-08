@@ -5,6 +5,7 @@ import com.google.protobuf.util.JsonFormat;
 import com.google.rpc.ErrorInfo;
 import com.google.rpc.Status;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.util.RawValue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -21,9 +22,9 @@ public class JsonPrinterStatusMapperTest {
 
 
         Object result = statusMapper.map(statusWithErrorInfo);
-        assertTrue(result instanceof RawJson);
+        assertTrue(result instanceof RawValue);
 
-        String statusJson = ((RawJson) result).getJson();
+        String statusJson = String.valueOf(((RawValue) result).rawValue());
         assertTrue(statusJson.contains(errorInfoDetail.getDomain()));
         assertTrue(statusJson.contains(errorInfoDetail.getReason()));
     }
