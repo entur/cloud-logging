@@ -69,7 +69,6 @@ ext {
     // Security: override the Jackson versions from the Spring Boot BOM.
     // Remove once springBootVersion manages these (or newer) versions.
     jacksonBomVersion = '3.2.3'
-    jackson2BomVersion = '2.22.3'
 }
 
 // Split projects into buildable: examples and libraries. 
@@ -108,7 +107,6 @@ configure(exampleProjects()) {
         // Use Spring Boot BOM for dependency management
         implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
         implementation platform("tools.jackson:jackson-bom:${jacksonBomVersion}")
-        implementation platform("com.fasterxml.jackson:jackson-bom:${jackson2BomVersion}")
     }
 }
 
@@ -126,7 +124,6 @@ configure(libraryProjects()) {
         // This ensures both api and implementation dependencies get pinned versions
         api(platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}"))
         api(platform("tools.jackson:jackson-bom:${jacksonBomVersion}"))
-        api(platform("com.fasterxml.jackson:jackson-bom:${jackson2BomVersion}"))
     }
 }
 
