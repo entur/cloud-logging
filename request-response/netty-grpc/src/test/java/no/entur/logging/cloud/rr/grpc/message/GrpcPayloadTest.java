@@ -103,4 +103,59 @@ public class GrpcPayloadTest {
 
         assertThat(payload.getBody()).isEqualTo("Hello");
     }
+
+    @Test
+    public void prepareForAsyncAppenderMapsMessageByDefault() {
+        GrpcPayload payload = new GrpcPayload(request, NoneGrpcBodyFilter.getInstance(), (m, filter) -> "{}");
+        assertThat(payload.isMapOnAsyncAppenderThread()).isFalse();
+
+        payload.prepareForAsyncAppender();
+
+        assertThat(payload.isMapped()).isTrue();
+    }
+
+    @Test
+    public void prepareForAsyncAppenderLeavesMessageForAsyncAppenderThreadWhenAllowed() {
+        AtomicInteger count = new AtomicInteger();
+        GrpcPayload payload = new GrpcPayload(request, NoneGrpcBodyFilter.getInstance(), (m, filter) -> {
+            count.incrementAndGet();
+            return "{}";
+        }, true);
+        assertThat(payload.isMapOnAsyncAppenderThread()).isTrue();
+
+        payload.prepareForAsyncAppender();
+
+        assertThat(payload.isMapped()).isFalse();
+        assertThat(payload.getMessage()).isSameInstanceAs(request);
+        assertThat(count.get()).isEqualTo(0);
+
+        // i.e. when written by the async appender
+        assertThat(payload.getBody()).isEqualTo("{}");
+        assertThat(payload.isMapped()).isTrue();
+        assertThat(count.get()).isEqualTo(1);
+    }
+
+    @Test
+    public void prepareForAsyncAppenderDoesNotMapTwice() {
+        AtomicInteger count = new AtomicInteger();
+        GrpcPayload payload = new GrpcPayload(request, NoneGrpcBodyFilter.getInstance(), (m, filter) -> {
+            count.incrementAndGet();
+            return "{}";
+        });
+
+        payload.prepareForAsyncAppender();
+        payload.prepareForAsyncAppender();
+        payload.getBody();
+
+        assertThat(count.get()).isEqualTo(1);
+    }
+
+    @Test
+    public void prepareForAsyncAppenderIgnoresMappedBody() {
+        GrpcPayload payload = GrpcPayload.of("{}");
+
+        payload.prepareForAsyncAppender();
+
+        assertThat(payload.getBody()).isEqualTo("{}");
+    }
 }

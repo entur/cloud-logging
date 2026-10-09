@@ -251,6 +251,14 @@ Add the `GrpcLoggingScopeContextInterceptor` interceptor to your gRPC services (
 
 With on-demand logging enabled, request-response logging only converts message bodies to JSON for log statements which are actually written, so discarded statements cost very little. The interceptors keep a reference to the protobuf message and convert it later, possibly on another thread (the one that flushes the on-demand scope, before the log statement is handed over to the async appender). This is safe because generated protobuf messages are immutable (see [Java Generated Code Guide: Messages](https://protobuf.dev/reference/java/java-generated/#message) and [Protocol Buffer Basics: Java](https://protobuf.dev/getting-started/javatutorial/)), and gRPC's protobuf marshaller does not let received messages refer to its reused read buffer (see [ProtoLiteUtils](https://github.com/grpc/grpc-java/blob/master/protobuf-lite/src/main/java/io/grpc/protobuf/lite/ProtoLiteUtils.java)). Message builders are not thread-safe, so they are converted right away. Messages which are too large to be logged (binary size larger than half of `entur.logging.request-response.max-body-size`) are also converted right away, as that only produces a short description, so that they are not kept in memory until the call completes.
 
+By default, a body is converted just before the log statement is handed over to the async appender, i.e. on the thread which flushes the on-demand scope, so the async appender's (single) worker thread is not burdened with protobuf-to-JSON conversion. To instead leave the conversion to the async appender's thread, which takes the work off the thread which flushes the scope (i.e. the thread which handles the failing call), use
+
+```
+entur.logging.request-response.grpc.map-body-on-async-appender-thread=true
+```
+
+Whichever thread converts the body, it is converted at most once. If a log statement never passes through the on-demand async appender, the body is converted when the log statement is written. The property has no effect unless on-demand logging is enabled; bodies are then converted right away.
+
 Then configure log levels
 
 ```

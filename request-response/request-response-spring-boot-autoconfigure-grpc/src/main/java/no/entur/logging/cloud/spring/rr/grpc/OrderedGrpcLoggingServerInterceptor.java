@@ -18,7 +18,7 @@ public class OrderedGrpcLoggingServerInterceptor extends GrpcLoggingServerInterc
             GrpcMetadataJsonMapper metadataJsonMapper,
             GrpcPayloadJsonMapper payloadJsonMapper,
             int order) {
-        this(sink, filters, metadataJsonMapper, payloadJsonMapper, false, order);
+        this(sink, filters, metadataJsonMapper, payloadJsonMapper, false, false, order);
     }
 
     public OrderedGrpcLoggingServerInterceptor(
@@ -27,8 +27,9 @@ public class OrderedGrpcLoggingServerInterceptor extends GrpcLoggingServerInterc
             GrpcMetadataJsonMapper metadataJsonMapper,
             GrpcPayloadJsonMapper payloadJsonMapper,
             boolean deferredBodyMapping,
+            boolean mapBodyOnAsyncAppenderThread,
             int order) {
-        super(sink, filters, metadataJsonMapper, payloadJsonMapper, deferredBodyMapping);
+        super(sink, filters, metadataJsonMapper, payloadJsonMapper, deferredBodyMapping, mapBodyOnAsyncAppenderThread);
         this.order = order;
     }
 

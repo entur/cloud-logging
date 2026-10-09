@@ -7,6 +7,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import net.logstash.logback.marker.LogstashMarker;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcBodyFilter;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcClientLoggingFilters;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcServerLoggingFilters;
@@ -27,10 +28,15 @@ import org.entur.oidc.grpc.test.GreetingRequest;
 import org.entur.oidc.grpc.test.GreetingResponse;
 import org.entur.oidc.grpc.test.GreetingServiceGrpc;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.json.JsonFactory;
 
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -42,7 +48,11 @@ public class DeferredBodyMappingTest {
 
 	private final JsonFormat.Printer printer = JsonPrinterFactory.createPrinter(false, TypeRegistryFactory.createDefaultTypeRegistry());
 
+	private static final String ASYNC_APPENDER_THREAD_NAME = "test-async-appender";
+
 	private final AtomicInteger mapCount = new AtomicInteger();
+
+	private final List<Thread> mappingThreads = new CopyOnWriteArrayList<>();
 
 	private final CapturingGrpcSink sink = new CapturingGrpcSink();
 
@@ -114,15 +124,124 @@ public class DeferredBodyMappingTest {
 		assertThat(mapCount.get()).isEqualTo(2);
 	}
 
+	@Test
+	public void markerPostProcessingMapsBeforeAsyncAppenderByDefault() throws Exception {
+		call(true);
+
+		GrpcRequest request = sink.requests.get(0);
+		GrpcResponse response = sink.responses.get(0);
+
+		// the thread which flushes the on-demand scope
+		new GrpcRequestMarker(request).performPostProcessing();
+		new GrpcResponseMarker(response).performPostProcessing();
+
+		assertThat(request.getPayload().isMapped()).isTrue();
+		assertThat(response.getPayload().isMapped()).isTrue();
+		assertThat(mappingThreads).containsExactly(Thread.currentThread(), Thread.currentThread());
+
+		// the async appender's thread only gets the mapped body
+		ExecutorService asyncAppender = newAsyncAppenderThread();
+		try {
+			assertThat(asyncAppender.submit(request::getBody).get()).isEqualTo("{\"message\":\"Hello deferred\"}");
+			assertThat(asyncAppender.submit(response::getBody).get()).contains("\"message\":\"Hello\"");
+		} finally {
+			asyncAppender.shutdown();
+		}
+		assertThat(mappingThreads).hasSize(2);
+	}
+
+	@Test
+	public void markerPostProcessingLeavesMappingToAsyncAppenderThreadWhenAllowed() throws Exception {
+		call(true, true);
+
+		GrpcRequest request = sink.requests.get(0);
+		GrpcResponse response = sink.responses.get(0);
+
+		// the thread which flushes the on-demand scope
+		new GrpcRequestMarker(request).performPostProcessing();
+		new GrpcResponseMarker(response).performPostProcessing();
+
+		assertThat(request.getPayload().isMapped()).isFalse();
+		assertThat(response.getPayload().isMapped()).isFalse();
+		assertThat(mapCount.get()).isEqualTo(0);
+
+		// the async appender's thread maps the body when the log statement is written
+		ExecutorService asyncAppender = newAsyncAppenderThread();
+		try {
+			assertThat(asyncAppender.submit(request::getBody).get()).isEqualTo("{\"message\":\"Hello deferred\"}");
+			assertThat(asyncAppender.submit(response::getBody).get()).contains("\"message\":\"Hello\"");
+		} finally {
+			asyncAppender.shutdown();
+		}
+		assertThat(request.getPayload().isMapped()).isTrue();
+		assertThat(response.getPayload().isMapped()).isTrue();
+		assertThat(mappingThreads).hasSize(2);
+		for (Thread thread : mappingThreads) {
+			assertThat(thread.getName()).isEqualTo(ASYNC_APPENDER_THREAD_NAME);
+		}
+	}
+
+	@Test
+	public void markerMapsBodyWhenWrittenIfNotMappedBefore() throws Exception {
+		// no post-processing, i.e. as if the async appender's thread is the first to need the body
+		call(true, true);
+
+		GrpcRequest request = sink.requests.get(0);
+		GrpcResponse response = sink.responses.get(0);
+
+		assertThat(write(new GrpcRequestMarker(request))).contains("\"body\":{\"message\":\"Hello deferred\"}");
+		assertThat(write(new GrpcResponseMarker(response))).contains("\"body\":{");
+
+		assertThat(request.getPayload().isMapped()).isTrue();
+		assertThat(response.getPayload().isMapped()).isTrue();
+		assertThat(mapCount.get()).isEqualTo(2);
+	}
+
+	private static String write(LogstashMarker marker) throws Exception {
+		StringWriter writer = new StringWriter();
+		try (JsonGenerator generator = new JsonFactory().createGenerator(writer)) {
+			generator.writeStartObject();
+			marker.writeTo(generator);
+			generator.writeEndObject();
+		}
+		return writer.toString();
+	}
+
+	@Test
+	public void asyncAppenderThreadSettingDoesNotAffectEagerMapping() throws Exception {
+		call(false, true);
+
+		assertThat(mapCount.get()).isEqualTo(4);
+		for (GrpcRequest request : sink.requests) {
+			assertThat(request.getPayload().isMapped()).isTrue();
+		}
+		for (GrpcResponse response : sink.responses) {
+			assertThat(response.getPayload().isMapped()).isTrue();
+		}
+	}
+
+	private static ExecutorService newAsyncAppenderThread() {
+		return Executors.newSingleThreadExecutor(r -> new Thread(r, ASYNC_APPENDER_THREAD_NAME));
+	}
+
 	private void call(boolean deferredBodyMapping) throws Exception {
-		call(deferredBodyMapping, new DefaultGrpcPayloadJsonMapper(printer, AbstractGrpcTest.DEFAULT_JSON_MESSAGE_SIZE, AbstractGrpcTest.DEFAULT_BINARY_MESSAGE_SIZE));
+		call(deferredBodyMapping, false);
+	}
+
+	private void call(boolean deferredBodyMapping, boolean mapBodyOnAsyncAppenderThread) throws Exception {
+		call(deferredBodyMapping, mapBodyOnAsyncAppenderThread, new DefaultGrpcPayloadJsonMapper(printer, AbstractGrpcTest.DEFAULT_JSON_MESSAGE_SIZE, AbstractGrpcTest.DEFAULT_BINARY_MESSAGE_SIZE));
 	}
 
 	private void call(boolean deferredBodyMapping, GrpcPayloadJsonMapper delegate) throws Exception {
+		call(deferredBodyMapping, false, delegate);
+	}
+
+	private void call(boolean deferredBodyMapping, boolean mapBodyOnAsyncAppenderThread, GrpcPayloadJsonMapper delegate) throws Exception {
 		GrpcPayloadJsonMapper payloadJsonMapper = new GrpcPayloadJsonMapper() {
 			@Override
 			public String map(MessageOrBuilder m, GrpcBodyFilter filter) throws InvalidProtocolBufferException {
 				mapCount.incrementAndGet();
+				mappingThreads.add(Thread.currentThread());
 				return delegate.map(m, filter);
 			}
 
@@ -139,6 +258,7 @@ public class DeferredBodyMappingTest {
 				.withSink(sink)
 				.withFilters(GrpcServerLoggingFilters.classic())
 				.withDeferredBodyMapping(deferredBodyMapping)
+				.withMapBodyOnAsyncAppenderThread(mapBodyOnAsyncAppenderThread)
 				.build();
 
 		GrpcLoggingClientInterceptor clientInterceptor = GrpcLoggingClientInterceptor.newBuilder()
@@ -147,6 +267,7 @@ public class DeferredBodyMappingTest {
 				.withSink(sink)
 				.withFilters(GrpcClientLoggingFilters.classic())
 				.withDeferredBodyMapping(deferredBodyMapping)
+				.withMapBodyOnAsyncAppenderThread(mapBodyOnAsyncAppenderThread)
 				.build();
 
 		Server server = ServerBuilder.forPort(0)

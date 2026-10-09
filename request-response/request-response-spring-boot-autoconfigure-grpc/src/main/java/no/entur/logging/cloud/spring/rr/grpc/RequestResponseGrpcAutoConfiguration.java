@@ -42,6 +42,11 @@ public class RequestResponseGrpcAutoConfiguration extends AbstractRequestRespons
     @Value("${entur.logging.grpc.ondemand.enabled:false}")
     private boolean deferredBodyMapping;
 
+    // a deferred body is by default mapped before the log statement is handed over to the async appender;
+    // this leaves the mapping to the async appender's thread instead
+    @Value("${entur.logging.request-response.grpc.map-body-on-async-appender-thread:false}")
+    private boolean mapBodyOnAsyncAppenderThread;
+
     protected int getMaxBodySize() {
         if(maxBodySize == -1) {
             return grpcLoggingCloudProperties.getMaxBodySize();
@@ -98,7 +103,7 @@ public class RequestResponseGrpcAutoConfiguration extends AbstractRequestRespons
     @Bean
     @ConditionalOnMissingBean(OrderedGrpcLoggingClientInterceptor.class)
     public OrderedGrpcLoggingClientInterceptor orderedGrpcLoggingClientInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcClientLoggingFilters grpcServiceLoggingFilters) {
-        return new OrderedGrpcLoggingClientInterceptor(grpcSink, grpcServiceLoggingFilters, grpcMetadataJsonMapper, grpcPayloadJsonMapper, deferredBodyMapping, clientInterceptorOrder);
+        return new OrderedGrpcLoggingClientInterceptor(grpcSink, grpcServiceLoggingFilters, grpcMetadataJsonMapper, grpcPayloadJsonMapper, deferredBodyMapping, mapBodyOnAsyncAppenderThread, clientInterceptorOrder);
     }
 
     @Bean

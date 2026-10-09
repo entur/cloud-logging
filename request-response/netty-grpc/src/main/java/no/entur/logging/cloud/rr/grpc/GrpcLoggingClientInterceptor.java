@@ -77,6 +77,8 @@ public class GrpcLoggingClientInterceptor implements ClientInterceptor {
 
 		private boolean deferredBodyMapping;
 
+		private boolean mapBodyOnAsyncAppenderThread;
+
 		public Builder withFilters(GrpcClientLoggingFilters filters) {
 			this.filters = filters;
 			return this;
@@ -110,6 +112,24 @@ public class GrpcLoggingClientInterceptor implements ClientInterceptor {
 			return this;
 		}
 
+		/**
+		 * Whether a deferred message body can be mapped to JSON on the async appender's thread (i.e. when the log statement
+		 * is written). Has no effect unless {@linkplain #withDeferredBodyMapping(boolean)} is enabled.
+		 * <br><br>
+		 * If false (the default), the body is mapped before the log statement is handed over to the async appender, i.e.
+		 * on the thread which flushes the on-demand logging scope, so that the async appender's thread is not burdened.
+		 * If true, mapping is left to the async appender's thread, which takes the work off the thread which flushes the
+		 * on-demand logging scope at the cost of occupying the (single) async appender thread.
+		 *
+		 * @param mapBodyOnAsyncAppenderThread true if the async appender's thread can map the body
+		 * @return this builder
+		 */
+
+		public Builder withMapBodyOnAsyncAppenderThread(boolean mapBodyOnAsyncAppenderThread) {
+			this.mapBodyOnAsyncAppenderThread = mapBodyOnAsyncAppenderThread;
+			return this;
+		}
+
 		public GrpcLoggingClientInterceptor build() {
 			if(payloadJsonMapper == null) {
 				throw new IllegalStateException();
@@ -124,7 +144,7 @@ public class GrpcLoggingClientInterceptor implements ClientInterceptor {
 				throw new IllegalStateException();
 			}
 
-			return new GrpcLoggingClientInterceptor(sink, filters, metadataJsonMapper, payloadJsonMapper, deferredBodyMapping);
+			return new GrpcLoggingClientInterceptor(sink, filters, metadataJsonMapper, payloadJsonMapper, deferredBodyMapping, mapBodyOnAsyncAppenderThread);
 		}
 	}
 
@@ -136,16 +156,19 @@ public class GrpcLoggingClientInterceptor implements ClientInterceptor {
 
 	protected final boolean deferredBodyMapping;
 
+	protected final boolean mapBodyOnAsyncAppenderThread;
+
 	public GrpcLoggingClientInterceptor(GrpcSink sink, GrpcClientLoggingFilters filters, GrpcMetadataJsonMapper metadataJsonMapper, GrpcPayloadJsonMapper payloadJsonMapper) {
-		this(sink, filters, metadataJsonMapper, payloadJsonMapper, false);
+		this(sink, filters, metadataJsonMapper, payloadJsonMapper, false, false);
 	}
 
-	public GrpcLoggingClientInterceptor(GrpcSink sink, GrpcClientLoggingFilters filters, GrpcMetadataJsonMapper metadataJsonMapper, GrpcPayloadJsonMapper payloadJsonMapper, boolean deferredBodyMapping) {
+	public GrpcLoggingClientInterceptor(GrpcSink sink, GrpcClientLoggingFilters filters, GrpcMetadataJsonMapper metadataJsonMapper, GrpcPayloadJsonMapper payloadJsonMapper, boolean deferredBodyMapping, boolean mapBodyOnAsyncAppenderThread) {
 		this.sink = sink;
 		this.filters = filters;
 		this.metadataJsonMapper = metadataJsonMapper;
 		this.payloadJsonMapper = payloadJsonMapper;
 		this.deferredBodyMapping = deferredBodyMapping;
+		this.mapBodyOnAsyncAppenderThread = mapBodyOnAsyncAppenderThread;
 	}
 
 	@Override
@@ -214,7 +237,7 @@ public class GrpcLoggingClientInterceptor implements ClientInterceptor {
 
 								int count = responseCounter.incrementAndGet();
 
-								GrpcPayload payload = new GrpcPayload(m, filter.getResponseBodyFilter(), payloadJsonMapper);
+								GrpcPayload payload = new GrpcPayload(m, filter.getResponseBodyFilter(), payloadJsonMapper, mapBodyOnAsyncAppenderThread);
 								if (!isDeferredBodyMapping(m)) {
 									try {
 										payload.map();
@@ -301,7 +324,7 @@ public class GrpcLoggingClientInterceptor implements ClientInterceptor {
 
 					int count = requestCounter.incrementAndGet();
 
-					GrpcPayload payload = new GrpcPayload(m, filter.getRequestBodyFilter(), payloadJsonMapper);
+					GrpcPayload payload = new GrpcPayload(m, filter.getRequestBodyFilter(), payloadJsonMapper, mapBodyOnAsyncAppenderThread);
 					if (!isDeferredBodyMapping(m)) {
 						try {
 							payload.map();
