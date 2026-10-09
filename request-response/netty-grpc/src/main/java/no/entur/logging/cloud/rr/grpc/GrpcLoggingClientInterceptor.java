@@ -237,14 +237,18 @@ public class GrpcLoggingClientInterceptor implements ClientInterceptor {
 
 								int count = responseCounter.incrementAndGet();
 
-								GrpcPayload payload = new GrpcPayload(m, filter.getResponseBodyFilter(), payloadJsonMapper, mapBodyOnAsyncAppenderThread);
-								if (!isDeferredBodyMapping(m)) {
+								GrpcPayload payload;
+								if (isDeferredBodyMapping(m)) {
+									payload = new GrpcPayload(m, filter.getResponseBodyFilter(), payloadJsonMapper, mapBodyOnAsyncAppenderThread);
+								} else {
+									String body = null;
 									try {
-										payload.map();
+										body = payloadJsonMapper.map(m, filter.getResponseBodyFilter());
 									} catch (Throwable e) {
 										// came from others, log as info
 										log.info("Cannot format protobuf response message", e);
 									}
+									payload = GrpcPayload.of(body);
 								}
 
 								long duration = System.currentTimeMillis() - timestamp;
@@ -324,14 +328,18 @@ public class GrpcLoggingClientInterceptor implements ClientInterceptor {
 
 					int count = requestCounter.incrementAndGet();
 
-					GrpcPayload payload = new GrpcPayload(m, filter.getRequestBodyFilter(), payloadJsonMapper, mapBodyOnAsyncAppenderThread);
-					if (!isDeferredBodyMapping(m)) {
+					GrpcPayload payload;
+					if (isDeferredBodyMapping(m)) {
+						payload = new GrpcPayload(m, filter.getRequestBodyFilter(), payloadJsonMapper, mapBodyOnAsyncAppenderThread);
+					} else {
+						String body = null;
 						try {
-							payload.map();
+							body = payloadJsonMapper.map(m, filter.getRequestBodyFilter());
 						} catch (Throwable e) {
 							// came from us, so log as warn
 							log.warn("Cannot format protobuf request message", e);
 						}
+						payload = GrpcPayload.of(body);
 					}
 
 					GrpcRequest requestMessage = new GrpcRequest(requestHeaders, null, path, payload, "local", count, -1L);

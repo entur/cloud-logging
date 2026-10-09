@@ -98,18 +98,7 @@ public class GrpcPayload {
      */
 
     public void map() throws InvalidProtocolBufferException {
-        if (!mapped) {
-            synchronized (this) {
-                if (!mapped) {
-                    try {
-                        body = mapper.map(message, filter);
-                    } finally {
-                        mapped = true;
-                        message = null;
-                    }
-                }
-            }
-        }
+        map(false);
     }
 
     /**
@@ -122,12 +111,26 @@ public class GrpcPayload {
      */
 
     public String getBody() {
+        try {
+            map(true);
+        } catch (InvalidProtocolBufferException e) {
+            // unreachable: failures are described by the body
+            throw new IllegalStateException(e);
+        }
+        return body;
+    }
+
+    private void map(boolean describeFailure) throws InvalidProtocolBufferException {
         if (!mapped) {
             synchronized (this) {
                 if (!mapped) {
                     try {
                         body = mapper.map(message, filter);
                     } catch (Throwable e) {
+                        if (!describeFailure) {
+                            throw e;
+                        }
+                        // set the body before publishing it as mapped
                         body = getUnableToMapMessage(e);
                     } finally {
                         mapped = true;
@@ -136,7 +139,6 @@ public class GrpcPayload {
                 }
             }
         }
-        return body;
     }
 
     /**
