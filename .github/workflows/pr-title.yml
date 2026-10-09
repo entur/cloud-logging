@@ -1,0 +1,13 @@
+name: PR
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify-pr-title:
+    name: PR
+    permissions:
+      pull-requests: read
+    uses: entur/gha-meta/.github/workflows/verify-pr.yml@v1

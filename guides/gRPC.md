@@ -165,7 +165,7 @@ testImplementation ("no.entur.logging.cloud:request-response-spring-boot-starter
 
 Please note:
 
- * GCP `LogEntry` has a hard size limit of 256 KiB. Request/response bodies are truncated at 224 KiB by default to stay safely within this limit, accounting for headers, MDC fields, and other log-framework overhead. Override the default using:
+ * GCP `LogEntry` has a hard size limit of 256 KiB. Request/response bodies are truncated at 200 KiB by default to stay safely within this limit, accounting for headers, MDC fields, and other log-framework overhead. Override the default using:
     ```
     entur.logging.request-response.max-body-size=<bytes>
     entur.logging.request-response.max-size=<bytes>

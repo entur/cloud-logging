@@ -5,6 +5,7 @@ import com.google.protobuf.util.JsonFormat;
 import com.google.rpc.ErrorInfo;
 import com.google.rpc.Status;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.util.RawValue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -20,7 +21,10 @@ public class JsonPrinterStatusMapperTest {
         Status statusWithErrorInfo = Status.newBuilder().addDetails(Any.pack(errorInfoDetail)).build();
 
 
-        String statusJson = statusMapper.map(statusWithErrorInfo);
+        Object result = statusMapper.map(statusWithErrorInfo);
+        assertTrue(result instanceof RawValue);
+
+        String statusJson = String.valueOf(((RawValue) result).rawValue());
         assertTrue(statusJson.contains(errorInfoDetail.getDomain()));
         assertTrue(statusJson.contains(errorInfoDetail.getReason()));
     }
@@ -32,7 +36,7 @@ public class JsonPrinterStatusMapperTest {
         ErrorInfo errorInfoDetail = ErrorInfo.newBuilder().setDomain("ErrorDomain").setReason("errorReason").build();
         Status statusWithErrorInfo = Status.newBuilder().addDetails(Any.pack(errorInfoDetail)).build();
 
-        String statusJson = statusMapper.map(statusWithErrorInfo);
+        Object statusJson = statusMapper.map(statusWithErrorInfo);
         assertEquals("[logging interceptor could not print status: Cannot find type for url: type.googleapis.com/google.rpc.ErrorInfo]", statusJson);
     }
 }

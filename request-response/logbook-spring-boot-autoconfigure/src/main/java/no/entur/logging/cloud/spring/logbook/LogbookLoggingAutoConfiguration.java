@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.zalando.logbook.Sink;
 import org.zalando.logbook.autoconfigure.LogbookAutoConfiguration;
 import org.zalando.logbook.autoconfigure.LogbookProperties;
+import org.zalando.logbook.autoconfigure.LogbookProperties.LogbookPredicate;
 
 import java.util.List;
 
@@ -34,25 +35,33 @@ public class LogbookLoggingAutoConfiguration extends AbstractLogbookLoggingAutoC
         // this somewhat of a hack for getting default excludes appended to the app configuration
 
         if(defaultExcludes) {
-            List<String> excludes = properties.getExclude();
+            // these paths only ever exist on the server side of this application, so only exclude
+            // them from server (incoming request) logging; outgoing client requests are unaffected.
+            List<LogbookPredicate> excludes = properties.getServer().getPredicate().getExclude();
 
-            excludes.add("/actuator/health");
-            excludes.add("/actuator/health/liveness");
-            excludes.add("/actuator/health/readiness");
-            excludes.add("/actuator/prometheus");
-            excludes.add("/actuator/info");
-            excludes.add("/actuator/env");
-            excludes.add("/actuator/metrics");
-            excludes.add("/actuator/loggers");
+            excludes.add(pathPredicate("/actuator/health"));
+            excludes.add(pathPredicate("/actuator/health/liveness"));
+            excludes.add(pathPredicate("/actuator/health/readiness"));
+            excludes.add(pathPredicate("/actuator/prometheus"));
+            excludes.add(pathPredicate("/actuator/info"));
+            excludes.add(pathPredicate("/actuator/env"));
+            excludes.add(pathPredicate("/actuator/metrics"));
+            excludes.add(pathPredicate("/actuator/loggers"));
             // swagger-related
-            excludes.add("/favicon.*");
-            excludes.add("/v2/api-docs");
-            excludes.add("/v2/api-docs/**");
-            excludes.add("/v3/api-docs");
-            excludes.add("/v3/api-docs/**");
-            excludes.add("/swagger");
-            excludes.add("/metrics");
+            excludes.add(pathPredicate("/favicon.*"));
+            excludes.add(pathPredicate("/v2/api-docs"));
+            excludes.add(pathPredicate("/v2/api-docs/**"));
+            excludes.add(pathPredicate("/v3/api-docs"));
+            excludes.add(pathPredicate("/v3/api-docs/**"));
+            excludes.add(pathPredicate("/swagger"));
+            excludes.add(pathPredicate("/metrics"));
         }
+    }
+
+    private static LogbookPredicate pathPredicate(String path) {
+        LogbookPredicate predicate = new LogbookPredicate();
+        predicate.setPath(path);
+        return predicate;
     }
 
     @Bean
