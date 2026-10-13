@@ -13,6 +13,7 @@ import org.slf4j.MDC;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -58,6 +59,90 @@ public class CompositeConsoleAsyncAppenderLoggingTest {
 
         assertThat(exception).hasMessageThat().contains("boom");
         assertThat(MDC.get("grpcKey")).isNull();
+    }
+
+    @Test
+    public void testLoggingFromWithinValidatorDoesNotRecurse() {
+        CompositeConsoleAsyncAppenderLogging appender = new CompositeConsoleAsyncAppenderLogging();
+        appender.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
+        appender.setName("TEST");
+        appender.addAppender(new NoopAppender());
+
+        // e.g. a marker or getter which the validator replays, which itself logs
+        AtomicInteger validations = new AtomicInteger();
+        appender.setValidator(event -> {
+            validations.incrementAndGet();
+            appender.doAppend(realEvent());
+        });
+        appender.start();
+
+        try {
+            appender.doAppend(realEvent());
+        } finally {
+            appender.stop();
+        }
+
+        assertThat(validations.get()).isEqualTo(1);
+    }
+
+    @Test
+    public void testValidatorRunsAgainAfterEarlierValidationThrew() {
+        CompositeConsoleAsyncAppenderLogging appender = new CompositeConsoleAsyncAppenderLogging();
+        appender.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
+        appender.setName("TEST");
+        appender.addAppender(new NoopAppender());
+
+        AtomicInteger validations = new AtomicInteger();
+        appender.setValidator(event -> {
+            validations.incrementAndGet();
+            throw new IllegalStateException("boom");
+        });
+        appender.start();
+
+        try {
+            assertThrows(IllegalStateException.class, () -> appender.doAppend(realEvent()));
+            assertThrows(IllegalStateException.class, () -> appender.doAppend(realEvent()));
+        } finally {
+            appender.stop();
+        }
+
+        assertThat(validations.get()).isEqualTo(2);
+    }
+
+    @Test
+    public void testEventIsStillAppendedWhenValidationFails() {
+        CompositeConsoleAsyncAppenderLogging appender = new CompositeConsoleAsyncAppenderLogging();
+        appender.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
+        appender.setName("TEST");
+        CountingAppender counting = new CountingAppender();
+        appender.addAppender(counting);
+        appender.setValidator(event -> {
+            throw new IllegalStateException("boom");
+        });
+        appender.start();
+
+        try {
+            assertThrows(IllegalStateException.class, () -> appender.doAppend(realEvent()));
+            // the async queue is drained on stop
+        } finally {
+            appender.stop();
+        }
+
+        assertThat(counting.count.get()).isEqualTo(1);
+    }
+
+    private static class CountingAppender extends AppenderBase<ILoggingEvent> {
+
+        private final AtomicInteger count = new AtomicInteger();
+
+        private CountingAppender() {
+            start();
+        }
+
+        @Override
+        protected void append(ILoggingEvent eventObject) {
+            count.incrementAndGet();
+        }
     }
 
     private static class NoopAppender extends AppenderBase<ILoggingEvent> {

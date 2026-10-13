@@ -5,6 +5,10 @@
     <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.logback.logstash.test.CompositeConsoleAsyncAppenderLogging">
         <discardingThreshold>0</discardingThreshold>
         <maxFlushTime>0</maxFlushTime>
+        <validator class="no.entur.logging.cloud.azure.spring.test.AzureLogStatementFieldNameValidator">
+            <!-- reserved/duplicate JSON field names fail the log statement; disable with -Dentur.logging.test.field-name-validation.enabled=false -->
+            <enabled>${entur.logging.test.field-name-validation.enabled:-true}</enabled>
+        </validator>
         <appender-ref ref="STDOUT" />
     </appender>
 

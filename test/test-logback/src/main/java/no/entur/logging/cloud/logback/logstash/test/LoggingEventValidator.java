@@ -4,9 +4,10 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 
 /**
  * Validates a log statement, throwing if it is invalid. Invoked synchronously, on the calling
- * thread, before the event is handed off to the async appender - so a thrown exception propagates
- * straight back to the code that made the log statement, instead of surfacing later (or being lost)
- * on the appender's background worker thread.
+ * thread, right after the event has been handed off to the async appender - so a thrown exception
+ * propagates straight back to the code that made the log statement, instead of surfacing later (or
+ * being lost) on the appender's background worker thread. The offending event is therefore still
+ * written, but appenders attached to the same logger after the async appender do not receive it.
  *
  * @see CompositeConsoleAsyncAppenderLogging#setValidator(LoggingEventValidator)
  */

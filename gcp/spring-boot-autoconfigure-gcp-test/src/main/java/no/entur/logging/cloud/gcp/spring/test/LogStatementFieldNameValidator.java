@@ -1,7 +1,9 @@
 package no.entur.logging.cloud.gcp.spring.test;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import net.logstash.logback.argument.DeferredStructuredArgument;
 import net.logstash.logback.argument.StructuredArgument;
+import net.logstash.logback.marker.DeferredLogstashMarker;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.SingleFieldAppendingMarker;
 import no.entur.logging.cloud.gcp.logback.logstash.StackdriverLogSeverityJsonProvider;
@@ -9,8 +11,10 @@ import no.entur.logging.cloud.gcp.logback.logstash.StackdriverLogstashEncoder;
 import no.entur.logging.cloud.gcp.logback.logstash.StackdriverOpenTelemetryTraceMdcJsonProvider;
 import no.entur.logging.cloud.gcp.logback.logstash.StackdriverServiceContextJsonProvider;
 import org.slf4j.Marker;
+import org.slf4j.event.KeyValuePair;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.SerializableString;
 import tools.jackson.core.util.JsonGeneratorDelegate;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -22,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,11 +40,20 @@ import java.util.stream.Stream;
  *
  * <p>Rather than inspecting the fully rendered JSON (which would mean re-parsing/re-walking the whole
  * log statement, including its message, stacktrace, service context, etc.), this only looks at the
- * places a mistake can actually originate from: the event's MDC, any {@link net.logstash.logback.marker.LogstashMarker}
- * (including application-defined subclasses, not just the built-in ones from {@code Markers}), and any
- * known {@link StructuredArgument} type (from {@code StructuredArguments}) passed as a log argument.
- * This keeps the check both fast (bounded by the number of fields an application actually adds, not the
- * size of the whole log statement) and precise (no false positives from unrelated built-in content).
+ * places a mistake can actually originate from: the event's MDC, its SLF4J key/value pairs, any
+ * {@link net.logstash.logback.marker.LogstashMarker} (including application-defined subclasses, not just the
+ * built-in ones from {@code Markers}), and any {@link StructuredArgument} (from {@code StructuredArguments})
+ * passed as a log argument. This keeps the check both fast (bounded by the number of fields an application
+ * actually adds, not the size of the whole log statement) and precise (no false positives from unrelated
+ * built-in content).
+ *
+ * <p>Markers and structured arguments are replayed against a discarding generator, so only the names
+ * they write are looked at: values passed via {@code writePOJO} are never serialized, and
+ * {@link DeferredStructuredArgument}/{@link DeferredLogstashMarker} are skipped altogether, as resolving
+ * them would run the application's supplier on the calling thread rather than lazily in the encoder.
+ * The properties of an object unwrapped by {@code fields}/{@code appendFields} are discovered by serializing
+ * it with a plain, unconfigured mapper; if that fails, the element is skipped rather than failing the log
+ * statement, as the application's own mapper may well serialize it fine.
  *
  * @see <a href="https://cloud.google.com/logging/docs/agent/logging/configuration#special-fields">Special fields in structured payloads</a>
  */
@@ -109,27 +123,36 @@ public final class LogStatementFieldNameValidator {
             }
         }
 
-
+        List<KeyValuePair> keyValuePairs = event.getKeyValuePairs();
         List<Marker> markers = event.getMarkerList();
         Object[] arguments = event.getArgumentArray();
-        if ((markers == null || markers.isEmpty()) && (arguments == null || arguments.length == 0)) {
-            // by far the most common case: a log statement with no Marker and no argument at all
-            // contributes nothing beyond MDC, so skip allocating rootFieldNames/a JsonGenerator entirely.
+        if (!mayContributeFields(keyValuePairs, markers, arguments)) {
+            // by far the most common case: a log statement with no key/value pair, Marker or structured
+            // argument contributes nothing beyond MDC, so skip allocating rootFieldNames/a JsonGenerator entirely.
             return;
         }
 
-        // rootFieldNames (and fieldNamesPerLevel) are only created once markers/arguments are actually
-        // known to be present, seeded with the MDC keys so they still participate in the duplicate checks
-        // below (against markers/arguments).
+        // rootFieldNames (and fieldNamesPerLevel) are only created once something which can contribute fields
+        // is known to be present, seeded with the MDC keys so they still participate in the duplicate checks
+        // below (against key/value pairs, markers and arguments).
         Set<String> rootFieldNames = mdc != null ? new HashSet<>(mdc.keySet()) : new HashSet<>();
         Deque<Set<String>> fieldNamesPerLevel = new ArrayDeque<>();
         fieldNamesPerLevel.push(rootFieldNames);
 
         // A real (but discarding) generator is only allocated lazily, the first time it is actually
         // needed to safely replay a known structured element which writes its fields via generator calls
-        // (e.g. map entries) - most log statements either have no markers/arguments, or only ones handled
+        // (e.g. map entries) - most log statements either have nothing to replay, or only elements handled
         // by the single-field fast path below, and never need it at all.
         try (LazyFieldNameCollectingJsonGenerator lazyCollector = new LazyFieldNameCollectingJsonGenerator(fieldNamesPerLevel)) {
+            if (keyValuePairs != null) {
+                for (KeyValuePair keyValuePair : keyValuePairs) {
+                    // mirrors KeyValuePairsJsonProvider, which skips pairs lacking a key or a value
+                    if (keyValuePair.key != null && keyValuePair.value != null) {
+                        checkAndAdd(fieldNamesPerLevel, keyValuePair.key);
+                    }
+                }
+            }
+
             if (markers != null) {
                 for (Marker marker : markers) {
                     collectFromMarker(marker, lazyCollector, fieldNamesPerLevel);
@@ -138,19 +161,40 @@ public final class LogStatementFieldNameValidator {
 
             if (arguments != null) {
                 for (Object argument : arguments) {
-                    collectFromMarkerOrArgument(argument, lazyCollector, fieldNamesPerLevel);
+                    // mirrors ArgumentsJsonProvider, which only writes StructuredArgument arguments as fields
+                    if (argument instanceof StructuredArgument structuredArgument) {
+                        collect(structuredArgument, lazyCollector, fieldNamesPerLevel);
+                    }
                 }
             }
-        } catch (JacksonException e) {
-            throw new IllegalStateException("Failed to validate structured log fields for log statement", e);
         }
+    }
+
+    private static boolean mayContributeFields(List<KeyValuePair> keyValuePairs, List<Marker> markers, Object[] arguments) {
+        if (keyValuePairs != null && !keyValuePairs.isEmpty()) {
+            return true;
+        }
+        if (markers != null && !markers.isEmpty()) {
+            return true;
+        }
+        if (arguments != null) {
+            for (Object argument : arguments) {
+                if (argument instanceof StructuredArgument) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static void collectFromMarker(Marker marker, LazyFieldNameCollectingJsonGenerator lazyCollector, Deque<Set<String>> fieldNamesPerLevel) {
         if (marker == null) {
             return;
         }
-        collectFromMarkerOrArgument(marker, lazyCollector, fieldNamesPerLevel);
+        // mirrors LogstashMarkersJsonProvider, which only writes LogstashMarkers (and, recursively, their references)
+        if (marker instanceof LogstashMarker logstashMarker) {
+            collect(logstashMarker, lazyCollector, fieldNamesPerLevel);
+        }
         if (marker.hasReferences()) {
             Iterator<Marker> it = marker.iterator();
             while (it.hasNext()) {
@@ -159,23 +203,29 @@ public final class LogStatementFieldNameValidator {
         }
     }
 
-    private static void collectFromMarkerOrArgument(Object markerOrArgument, LazyFieldNameCollectingJsonGenerator lazyCollector, Deque<Set<String>> fieldNamesPerLevel) {
-        if (markerOrArgument instanceof SingleFieldAppendingMarker single) {
+    /**
+     * @param element a {@link LogstashMarker} and/or {@link StructuredArgument} which the encoder would write
+     */
+    private static void collect(Object element, LazyFieldNameCollectingJsonGenerator lazyCollector, Deque<Set<String>> fieldNamesPerLevel) {
+        if (element instanceof DeferredStructuredArgument || element instanceof DeferredLogstashMarker) {
+            // resolved lazily by the encoder; resolving it here would run the application's supplier eagerly,
+            // on the calling thread.
+            return;
+        }
+
+        if (element instanceof SingleFieldAppendingMarker single) {
             // known, common case (StructuredArguments.kv/value/keyValue, Markers.append): a single named
             // field - fast path, no need to involve the generator at all.
             checkAndAdd(fieldNamesPerLevel, single.getFieldName());
-        } else if (markerOrArgument instanceof StructuredArgument structuredArgument) {
-            // other known structured elements (e.g. Markers.appendEntries/StructuredArguments.entries) only
-            // use simple, context-free generator calls, so it is safe to replay them here to discover the
-            // field names they contribute. Elements which unwrap an arbitrary object's own fields (e.g.
-            // appendFields/StructuredArguments.fields) require a live Jackson SerializationContext that isn't
-            // meaningfully available here, and are a no-op in that case (best effort only).
-            structuredArgument.writeTo(lazyCollector.get());
-        } else if (markerOrArgument instanceof LogstashMarker logstashMarker) {
+        } else if (element instanceof StructuredArgument structuredArgument) {
+            // other known structured elements (e.g. Markers.appendEntries/StructuredArguments.entries/fields)
+            // are replayed against the discarding generator to discover the field names they contribute.
+            lazyCollector.replay(structuredArgument::writeTo);
+        } else if (element instanceof LogstashMarker logstashMarker) {
             // any other LogstashMarker subclass (including application-defined ones, not just the built-in
             // ones which happen to also implement StructuredArgument) always exposes writeTo(JsonGenerator)
-            // - safe to replay here for the same reason as above, with the same SerializationContext caveat.
-            logstashMarker.writeTo(lazyCollector.get());
+            // - safe to replay here for the same reason as above.
+            lazyCollector.replay(logstashMarker::writeTo);
         }
     }
 
@@ -203,8 +253,9 @@ public final class LogStatementFieldNameValidator {
     }
 
     private static void checkReserved(String fieldName, Set<String> reservedFieldNames) {
-        if (reservedFieldNames.contains(fieldName)) {
-            throw new IllegalStateException(
+        // null: the encoder skips nameless fields, and Set.of(..).contains(null) would throw
+        if (fieldName != null && reservedFieldNames.contains(fieldName)) {
+            throw new FieldNameViolationException(
                     "Forbidden JSON field '" + fieldName + "' detected in a log statement (added via MDC, a Marker "
                             + "or a structured argument). This field name is reserved by StackdriverLogstashEncoder's "
                             + "built-in providers; re-using it yourself will duplicate it in the jsonPayload, which "
@@ -214,7 +265,7 @@ public final class LogStatementFieldNameValidator {
     }
 
     private static IllegalStateException duplicateFieldException(String fieldName) {
-        return new IllegalStateException(
+        return new FieldNameViolationException(
                 "Duplicate JSON field '" + fieldName + "' detected in a log statement (added via MDC, a Marker or "
                         + "a structured argument). Fluentbit cannot handle repeated jsonPayload field names "
                         + "correctly: this can corrupt values or cause several seconds of logs to be dropped. "
@@ -240,7 +291,29 @@ public final class LogStatementFieldNameValidator {
             this.fieldNamesPerLevel = fieldNamesPerLevel;
         }
 
-        JsonGenerator get() {
+        /**
+         * Replays a structured element against the discarding generator, so that the names it writes are checked.
+         *
+         * <p>Failing to serialize the element for inspection - say an unwrapped object whose getter throws, or
+         * which needs modules only the application's own mapper has registered - is not a field name problem,
+         * so that element is skipped (best effort), rather than failing the log statement. A violation found
+         * along the way always propagates, though, even when Jackson has wrapped it on its way out of a
+         * serializer.
+         */
+        void replay(Consumer<JsonGenerator> writeTo) {
+            try {
+                writeTo.accept(get());
+            } catch (JacksonException e) {
+                for (Throwable t = e; t != null; t = t.getCause()) {
+                    if (t instanceof FieldNameViolationException violation) {
+                        throw violation;
+                    }
+                }
+                reset();
+            }
+        }
+
+        private JsonGenerator get() {
             if (collector == null) {
                 discard = MAPPER.createGenerator(OutputStream.nullOutputStream());
                 // opened directly on the real generator (bypassing FieldNameCollectingJsonGenerator's own
@@ -252,10 +325,27 @@ public final class LogStatementFieldNameValidator {
             return collector;
         }
 
+        /**
+         * Drops the generator, which is left in an unusable state when an element fails halfway through
+         * writing, and unwinds back to the root level so that the next element starts afresh.
+         */
+        private void reset() {
+            close();
+            discard = null;
+            collector = null;
+            while (fieldNamesPerLevel.size() > 1) {
+                fieldNamesPerLevel.pop();
+            }
+        }
+
         @Override
         public void close() {
             if (discard != null) {
-                discard.close();
+                try {
+                    discard.close();
+                } catch (JacksonException e) {
+                    // nothing was ever written anywhere; a generator which cannot be closed cleanly is of no interest
+                }
             }
         }
     }
@@ -302,6 +392,43 @@ public final class LogStatementFieldNameValidator {
         public JsonGenerator writeName(String name) throws JacksonException {
             checkAndAdd(fieldNamesPerLevel, name);
             return super.writeName(name);
+        }
+
+        /**
+         * Used by e.g. Jackson's bean serializers, so this is how the properties of an object unwrapped by
+         * {@code fields}/{@code appendFields} are written.
+         */
+        @Override
+        public JsonGenerator writeName(SerializableString name) throws JacksonException {
+            checkAndAdd(fieldNamesPerLevel, name.getValue());
+            return super.writeName(name);
+        }
+
+        @Override
+        public JsonGenerator writePropertyId(long id) throws JacksonException {
+            checkAndAdd(fieldNamesPerLevel, Long.toString(id));
+            return super.writePropertyId(id);
+        }
+
+        /**
+         * Only the names are of interest, so rather than serializing the value (with a mapper which is not the
+         * application's own, and may not be able to), a placeholder is written in its place. This also covers
+         * {@code writePOJOProperty}, which is a name followed by this.
+         */
+        @Override
+        public JsonGenerator writePOJO(Object pojo) throws JacksonException {
+            return super.writeNull();
+        }
+    }
+
+    /**
+     * Thrown for a reserved or repeated field name. A dedicated type so that it can be told apart from
+     * unrelated failures, and found again when Jackson has wrapped it.
+     */
+    private static final class FieldNameViolationException extends IllegalStateException {
+
+        private FieldNameViolationException(String message) {
+            super(message);
         }
     }
 }
