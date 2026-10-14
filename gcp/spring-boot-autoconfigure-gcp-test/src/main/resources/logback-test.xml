@@ -6,7 +6,17 @@
         <discardingThreshold>0</discardingThreshold>
         <maxFlushTime>0</maxFlushTime>
         <validator class="no.entur.logging.cloud.gcp.spring.test.GcpLogStatementFieldNameValidator">
-            <!-- reserved/duplicate JSON field names fail the log statement; disable with -Dentur.logging.test.field-name-validation.enabled=false -->
+            <!--
+                Reserved/duplicate JSON field names fail the log statement. Disable with the JVM system property
+                -Dentur.logging.test.field-name-validation.enabled=false
+
+                This cannot be controlled by a Spring property (application.properties, @SpringBootTest(properties = ...)),
+                because logging is global state: there is a single logback configuration per JVM, which Spring Boot
+                re-initializes, replacing these appenders, every time a new application context is created. A value
+                bound to one context would therefore apply to whichever context was created last, including test
+                classes which reuse a cached context but asked for something else. Only a JVM-wide setting matches
+                that scope.
+            -->
             <enabled>${entur.logging.test.field-name-validation.enabled:-true}</enabled>
         </validator>
         <appender-ref ref="STDOUT" />

@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.gcp.spring.test;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.LoggerContextVO;
 import net.logstash.logback.argument.DeferredStructuredArgument;
 import net.logstash.logback.argument.StructuredArgument;
 import net.logstash.logback.marker.DeferredLogstashMarker;
@@ -20,6 +21,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.io.OutputStream;
 import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -40,7 +42,8 @@ import java.util.stream.Stream;
  *
  * <p>Rather than inspecting the fully rendered JSON (which would mean re-parsing/re-walking the whole
  * log statement, including its message, stacktrace, service context, etc.), this only looks at the
- * places a mistake can actually originate from: the event's MDC, its SLF4J key/value pairs, any
+ * places a mistake can actually originate from: the event's MDC, the logback context properties (which the
+ * encoder also writes inline at the root), its SLF4J key/value pairs, any
  * {@link net.logstash.logback.marker.LogstashMarker} (including application-defined subclasses, not just the
  * built-in ones from {@code Markers}), and any {@link StructuredArgument} (from {@code StructuredArguments})
  * passed as a log argument. This keeps the check both fast (bounded by the number of fields an application
@@ -113,13 +116,19 @@ public final class LogStatementFieldNameValidator {
      * @throws IllegalStateException if the event would produce a repeated/reserved jsonPayload field name
      */
     public static void validate(ILoggingEvent event) {
+        // the encoder's ContextJsonProvider writes the logback context properties inline at the root too
+        Set<String> contextPropertyNames = contextPropertyNames(event);
+
         Map<String, String> mdc = event.getMDCPropertyMap();
         if (mdc != null) {
             // MDC keys come from a Map, so they are inherently unique among themselves - only the reserved
-            // check applies here, and it needs no field-name set at all. GCP trace field names are
-            // deliberately not checked against here - see GCP_TRACE_FIELD_NAMES.
+            // check (and the context properties) apply here, and neither needs a field-name set at all. GCP
+            // trace field names are deliberately not checked against here - see GCP_TRACE_FIELD_NAMES.
             for (String key : mdc.keySet()) {
                 checkReserved(key, RESERVED_FIELD_NAMES);
+                if (contextPropertyNames.contains(key)) {
+                    throw duplicateFieldException(key);
+                }
             }
         }
 
@@ -133,9 +142,12 @@ public final class LogStatementFieldNameValidator {
         }
 
         // rootFieldNames (and fieldNamesPerLevel) are only created once something which can contribute fields
-        // is known to be present, seeded with the MDC keys so they still participate in the duplicate checks
-        // below (against key/value pairs, markers and arguments).
-        Set<String> rootFieldNames = mdc != null ? new HashSet<>(mdc.keySet()) : new HashSet<>();
+        // is known to be present, seeded with the MDC keys and context properties so they still participate in
+        // the duplicate checks below (against key/value pairs, markers and arguments).
+        Set<String> rootFieldNames = new HashSet<>(contextPropertyNames);
+        if (mdc != null) {
+            rootFieldNames.addAll(mdc.keySet());
+        }
         Deque<Set<String>> fieldNamesPerLevel = new ArrayDeque<>();
         fieldNamesPerLevel.push(rootFieldNames);
 
@@ -168,6 +180,13 @@ public final class LogStatementFieldNameValidator {
                 }
             }
         }
+    }
+
+    private static Set<String> contextPropertyNames(ILoggingEvent event) {
+        LoggerContextVO loggerContext = event.getLoggerContextVO();
+        Map<String, String> properties = loggerContext != null ? loggerContext.getPropertyMap() : null;
+        // not Set.of(): its contains(null) throws, and MDC keys may be null
+        return properties != null ? properties.keySet() : Collections.emptySet();
     }
 
     private static boolean mayContributeFields(List<KeyValuePair> keyValuePairs, List<Marker> markers, Object[] arguments) {
@@ -266,9 +285,10 @@ public final class LogStatementFieldNameValidator {
 
     private static IllegalStateException duplicateFieldException(String fieldName) {
         return new FieldNameViolationException(
-                "Duplicate JSON field '" + fieldName + "' detected in a log statement (added via MDC, a Marker or "
-                        + "a structured argument). Fluentbit cannot handle repeated jsonPayload field names "
-                        + "correctly: this can corrupt values or cause several seconds of logs to be dropped. "
+                "Duplicate JSON field '" + fieldName + "' detected in a log statement (added via MDC, a Marker, "
+                        + "a structured argument, a key/value pair or a logback context property). Fluentbit cannot "
+                        + "handle repeated jsonPayload field names correctly: this can corrupt values or cause "
+                        + "several seconds of logs to be dropped. "
                         + "Rename the offending key, or nest it in a sub-object instead."
         );
     }

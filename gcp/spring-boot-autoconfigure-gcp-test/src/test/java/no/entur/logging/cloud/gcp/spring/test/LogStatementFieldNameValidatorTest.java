@@ -396,6 +396,72 @@ class LogStatementFieldNameValidatorTest {
         assertThat(exception).hasMessageThat().contains("Duplicate");
     }
 
+    // --- logback context properties, which the encoder writes inline at the root ---
+
+    private LoggingEvent newEventWithContextProperty(String name, Map<String, String> mdc, Marker marker, Object... arguments) {
+        // the event captures the context properties when it is created
+        context.putProperty(name, "from-context");
+        return newEvent("msg {}", marker, mdc, arguments);
+    }
+
+    @Test
+    void validate_contextPropertyCollidingWithStructuredArgument_throwsDuplicateField() {
+        LoggingEvent event = newEventWithContextProperty("tenant", Map.of(), null, StructuredArguments.kv("tenant", "from-argument"));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> LogStatementFieldNameValidator.validate(event));
+        assertThat(exception).hasMessageThat().contains("Duplicate");
+        assertThat(exception).hasMessageThat().contains("'tenant'");
+    }
+
+    @Test
+    void validate_contextPropertyCollidingWithMarker_throwsDuplicateField() {
+        LoggingEvent event = newEventWithContextProperty("tenant", Map.of(), Markers.append("tenant", "from-marker"), "plain");
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> LogStatementFieldNameValidator.validate(event));
+        assertThat(exception).hasMessageThat().contains("Duplicate");
+    }
+
+    @Test
+    void validate_contextPropertyCollidingWithMdcKey_throwsDuplicateField() {
+        // nothing else contributes fields, so this must be detected without the fast path skipping it
+        LoggingEvent event = newEventWithContextProperty("tenant", Map.of("tenant", "from-mdc"), null, "plain");
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> LogStatementFieldNameValidator.validate(event));
+        assertThat(exception).hasMessageThat().contains("Duplicate");
+    }
+
+    @Test
+    void validate_contextPropertyCollidingWithKeyValuePair_throwsDuplicateField() {
+        context.putProperty("tenant", "from-context");
+        LoggingEvent event = newEventWithKeyValuePairs("tenant", "from-key-value-pair");
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> LogStatementFieldNameValidator.validate(event));
+        assertThat(exception).hasMessageThat().contains("Duplicate");
+    }
+
+    @Test
+    void validate_contextPropertyWithoutCollision_doesNotThrow() {
+        LoggingEvent event = newEventWithContextProperty("tenant", Map.of("mdcField", "d"), Markers.append("markerField", "m"), StructuredArguments.kv("argField", "a"));
+
+        assertDoesNotThrow(() -> LogStatementFieldNameValidator.validate(event));
+    }
+
+    @Test
+    void validate_contextPropertyAsNestedFieldName_doesNotThrow() {
+        // only the root of the statement is shared with the context properties
+        Marker nested = new LogstashMarker("NESTED") {
+            @Override
+            public void writeTo(JsonGenerator generator) throws JacksonException {
+                generator.writeObjectPropertyStart("order");
+                generator.writeStringProperty("tenant", "nested");
+                generator.writeEndObject();
+            }
+        };
+        LoggingEvent event = newEventWithContextProperty("tenant", Map.of(), nested, "plain");
+
+        assertDoesNotThrow(() -> LogStatementFieldNameValidator.validate(event));
+    }
+
     // --- StructuredArguments.fields / Markers.appendFields (properties of an unwrapped object) ---
 
     public static class MessagePojo {
