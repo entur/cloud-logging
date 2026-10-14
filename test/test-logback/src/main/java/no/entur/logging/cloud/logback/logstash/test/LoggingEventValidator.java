@@ -9,6 +9,8 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
  * being lost) on the appender's background worker thread. The offending event is therefore still
  * written, but appenders attached to the same logger after the async appender do not receive it.
  *
+ * <p>Validation can be switched off with {@link CompositeConsoleOutputControl#disableValidation()}.
+ *
  * @see CompositeConsoleAsyncAppenderLogging#setValidator(LoggingEventValidator)
  */
 @FunctionalInterface

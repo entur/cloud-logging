@@ -5,8 +5,11 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.util.LogbackMDCAdapter;
 import net.logstash.logback.argument.StructuredArguments;
+import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
+import java.io.Closeable;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -14,26 +17,23 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Verifies the {@code logback-test.xml} shipped by this module, i.e. that the field name validation is
- * wired onto the console appender, and can be switched off.
+ * wired onto the console appender, and can be switched off with {@link CompositeConsoleOutputControl}.
  */
 class LogbackTestConfigurationTest {
 
     private LoggerContext context;
 
     @AfterEach
-    void stopContext() {
+    void cleanUp() {
+        CompositeConsoleOutputControl.setValidationEnabled(true);
         if (context != null) {
             context.stop();
         }
     }
 
-    private Logger configure(String enabledPropertyValue) throws Exception {
+    private Logger configure() throws Exception {
         context = new LoggerContext();
         context.setMDCAdapter(new LogbackMDCAdapter());
-        if (enabledPropertyValue != null) {
-            // equivalent to -D<property>=<value>, which logback's variable substitution also resolves
-            context.putProperty(GcpLogStatementFieldNameValidator.ENABLED_PROPERTY, enabledPropertyValue);
-        }
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(context);
         configurator.doConfigure(getClass().getResource("/logback-test.xml"));
@@ -41,46 +41,51 @@ class LogbackTestConfigurationTest {
         return context.getLogger(LogbackTestConfigurationTest.class);
     }
 
+    private static void logOffendingStatement(Logger logger) {
+        logger.info("an order {}", StructuredArguments.kv("message", "oops"));
+    }
+
+    private static void logValidStatement(Logger logger) {
+        logger.info("an order {}", StructuredArguments.kv("orderId", "123"));
+    }
+
     @Test
     void validatesLogStatementsByDefault() throws Exception {
-        Logger logger = configure(null);
+        Logger logger = configure();
 
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
-                () -> logger.info("an order {}", StructuredArguments.kv("message", "oops")));
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> logOffendingStatement(logger));
         assertThat(exception).hasMessageThat().contains("Forbidden");
     }
 
     @Test
-    void validatesLogStatementsWhenExplicitlyEnabled() throws Exception {
-        Logger logger = configure("true");
-
-        assertThrows(IllegalStateException.class,
-                () -> logger.info("an order {}", StructuredArguments.kv("message", "oops")));
-    }
-
-    @Test
     void validDoesNotThrow() throws Exception {
-        Logger logger = configure(null);
+        Logger logger = configure();
 
-        assertDoesNotThrow(() -> logger.info("an order {}", StructuredArguments.kv("orderId", "123")));
+        assertDoesNotThrow(() -> logValidStatement(logger));
     }
 
     @Test
-    void validationCanBeDisabled() throws Exception {
-        Logger logger = configure("false");
+    void validationCanBeSwitchedOffAtRuntime() throws Exception {
+        Logger logger = configure();
 
-        assertDoesNotThrow(() -> logger.info("an order {}", StructuredArguments.kv("message", "oops")));
+        try (Closeable c = CompositeConsoleOutputControl.disableValidation()) {
+            assertDoesNotThrow(() -> logOffendingStatement(logger));
+        }
+
+        // closing restores the previous state
+        assertThrows(IllegalStateException.class, () -> logOffendingStatement(logger));
     }
 
     @Test
-    void validationCanBeDisabledWithSystemProperty() throws Exception {
-        System.setProperty(GcpLogStatementFieldNameValidator.ENABLED_PROPERTY, "false");
-        try {
-            Logger logger = configure(null);
+    void validationStaysSwitchedOffWhenLoggingIsReinitialized() throws Exception {
+        try (Closeable c = CompositeConsoleOutputControl.disableValidation()) {
+            configure();
 
-            assertDoesNotThrow(() -> logger.info("an order {}", StructuredArguments.kv("message", "oops")));
-        } finally {
-            System.clearProperty(GcpLogStatementFieldNameValidator.ENABLED_PROPERTY);
+            // Spring Boot does this for every new application context: a new configuration, with new appenders
+            context.stop();
+            Logger logger = configure();
+
+            assertDoesNotThrow(() -> logOffendingStatement(logger));
         }
     }
 }

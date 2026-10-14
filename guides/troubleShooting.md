@@ -134,7 +134,7 @@ Things to be aware of:
 
  * The offending log statement is still written - it is the call site which fails. As the exception propagates through logback's appender loop, any appender attached to the same logger *after* the async console appender does not receive the statement.
  * Only field names are checked, on a best-effort basis: values are never serialized, deferred arguments/markers (`StructuredArguments.defer`, `Markers.defer`) are not resolved, and an object unwrapped by `fields`/`appendFields` which cannot be serialized by a plain Jackson mapper is skipped.
- * The check can be switched off (in either module) with the system property `entur.logging.test.field-name-validation.enabled=false`, for example while a legacy code base (or third-party code) is being cleaned up. With Gradle: `test { systemProperty 'entur.logging.test.field-name-validation.enabled', 'false' }`.
+ * The check can be switched off at runtime with `CompositeConsoleOutputControl`, for example around code (or third-party code) which is known to log offending statements: `try (Closeable c = CompositeConsoleOutputControl.disableValidation()) { ... }`, which restores the previous state when closed. `CompositeConsoleOutputControl.setValidationEnabled(false)` switches it off for the rest of the JVM. The switch is static and applies to all threads (so tests running in parallel in the same JVM affect each other), and is deliberately not a Spring property: logging is global state which Spring Boot re-initializes for every new application context, so a per-context value would apply to whichever context was created last.
 
 ### Invalid JSON
 Does not always translate into `textPayload`.

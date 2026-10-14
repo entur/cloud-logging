@@ -142,17 +142,6 @@ class LogStatementFieldNameValidatorTest {
         }
     }
 
-    @Test
-    void validate_gcpValidatorDisabled_doesNotThrow() {
-        GcpLogStatementFieldNameValidator validator = new GcpLogStatementFieldNameValidator();
-        LoggingEvent event = newEventWithMdc(Map.of("message", "oops"));
-
-        assertThrows(IllegalStateException.class, () -> validator.validate(event));
-
-        validator.setEnabled(false);
-        assertDoesNotThrow(() -> validator.validate(event));
-    }
-
     // --- SLF4J key/value pairs (logger.atInfo().addKeyValue(..)) ---
 
     @Test

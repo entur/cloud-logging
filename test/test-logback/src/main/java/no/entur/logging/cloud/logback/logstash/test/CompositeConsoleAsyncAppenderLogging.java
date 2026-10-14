@@ -7,6 +7,10 @@ public class CompositeConsoleAsyncAppenderLogging extends LoggingScopeAsyncAppen
 
     private CompositeConsoleLoggingEventListener listener;
 
+    /**
+     * Validates every log statement, unless validation has been switched off, see
+     * {@link CompositeConsoleOutputControl#disableValidation()}.
+     */
     private LoggingEventValidator validator;
 
     /**
@@ -41,7 +45,9 @@ public class CompositeConsoleAsyncAppenderLogging extends LoggingScopeAsyncAppen
      * already been written/queued (including any contributed MDC) by the time it is validated, so the
      * offending log line still makes it out, and the validator sees exactly the MDC which will be logged.
      * The validator is applied to every event, regardless of this appender's filters and of whether the
-     * event was discarded due to a full queue.
+     * event was discarded due to a full queue, unless {@linkplain CompositeConsoleOutputControl#isValidationEnabled()
+     * validation has been switched off}. That switch is static, rather than state of this appender, so it is
+     * not lost when logback is re-initialized, which replaces this appender.
      *
      * <p>Since the exception propagates through logback's appender loop, appenders attached to the same
      * logger after this one do not receive an event which fails validation.
@@ -51,7 +57,7 @@ public class CompositeConsoleAsyncAppenderLogging extends LoggingScopeAsyncAppen
         super.doAppend(eventObject);
 
         LoggingEventValidator validator = this.validator; // defensive copy
-        if (validator == null || !isStarted() || validating.get() != null) {
+        if (validator == null || !isStarted() || !CompositeConsoleOutputControl.isValidationEnabled() || validating.get() != null) {
             return;
         }
 

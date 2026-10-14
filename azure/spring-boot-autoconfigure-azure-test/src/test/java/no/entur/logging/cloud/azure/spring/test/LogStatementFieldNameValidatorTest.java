@@ -326,15 +326,4 @@ class LogStatementFieldNameValidatorTest {
 
         assertDoesNotThrow(() -> LogStatementFieldNameValidator.validate(event));
     }
-
-    @Test
-    void validate_azureValidatorDisabled_doesNotThrow() {
-        AzureLogStatementFieldNameValidator validator = new AzureLogStatementFieldNameValidator();
-        LoggingEvent event = newEvent("msg", Markers.append("message", "oops"));
-
-        assertThrows(IllegalStateException.class, () -> validator.validate(event));
-
-        validator.setEnabled(false);
-        assertDoesNotThrow(() -> validator.validate(event));
-    }
 }

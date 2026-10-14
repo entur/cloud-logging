@@ -23,6 +23,7 @@ public class CompositeConsoleAsyncAppenderLoggingTest {
     @AfterEach
     public void cleanUp() {
         MDC.clear();
+        CompositeConsoleOutputControl.setValidationEnabled(true);
     }
 
     private static LoggingEvent realEvent() {
@@ -129,6 +130,37 @@ public class CompositeConsoleAsyncAppenderLoggingTest {
         }
 
         assertThat(counting.count.get()).isEqualTo(1);
+    }
+
+    @Test
+    public void testValidatorIsSkippedWhileValidationIsDisabledButEventsAreStillAppended() {
+        CompositeConsoleAsyncAppenderLogging appender = new CompositeConsoleAsyncAppenderLogging();
+        appender.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
+        appender.setName("TEST");
+        CountingAppender counting = new CountingAppender();
+        appender.addAppender(counting);
+
+        AtomicInteger validations = new AtomicInteger();
+        appender.setValidator(event -> {
+            validations.incrementAndGet();
+            throw new IllegalStateException("boom");
+        });
+        appender.start();
+
+        try {
+            try (CompositeConsoleValidationControlClosable c = CompositeConsoleOutputControl.disableValidation()) {
+                appender.doAppend(realEvent());
+            }
+            assertThat(validations.get()).isEqualTo(0);
+
+            // and validation resumes once the previous state has been restored
+            assertThrows(IllegalStateException.class, () -> appender.doAppend(realEvent()));
+            assertThat(validations.get()).isEqualTo(1);
+        } finally {
+            appender.stop();
+        }
+
+        assertThat(counting.count.get()).isEqualTo(2);
     }
 
     private static class CountingAppender extends AppenderBase<ILoggingEvent> {
