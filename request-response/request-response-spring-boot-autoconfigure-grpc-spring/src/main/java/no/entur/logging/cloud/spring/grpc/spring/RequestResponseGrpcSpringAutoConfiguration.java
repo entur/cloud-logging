@@ -28,10 +28,19 @@ public class RequestResponseGrpcSpringAutoConfiguration {
     @Value("${entur.logging.request-response.grpc.server.interceptor-order:300}")
     private int serverInterceptorOrder;
 
+    // on-demand logging discards most log statements, so only map bodies to JSON for those which are written
+    @Value("${entur.logging.grpc.ondemand.enabled:false}")
+    private boolean deferredBodyMapping;
+
+    // a deferred body is by default mapped before the log statement is handed over to the async appender;
+    // this leaves the mapping to the async appender's thread instead
+    @Value("${entur.logging.request-response.grpc.map-body-on-async-appender-thread:false}")
+    private boolean mapBodyOnAsyncAppenderThread;
+
     @Bean
     @ConditionalOnMissingBean(OrderedGrpcLoggingServerInterceptor.class)
     public OrderedGrpcLoggingServerInterceptor orderedGrpcLoggingServerInterceptor(GrpcPayloadJsonMapper grpcPayloadJsonMapper, GrpcMetadataJsonMapper grpcMetadataJsonMapper, GrpcSink grpcSink, GrpcServerLoggingFilters grpcServerLoggingFilters) {
-        return new OrderedGrpcLoggingServerInterceptor(grpcSink, grpcServerLoggingFilters, grpcMetadataJsonMapper, grpcPayloadJsonMapper, serverInterceptorOrder);
+        return new OrderedGrpcLoggingServerInterceptor(grpcSink, grpcServerLoggingFilters, grpcMetadataJsonMapper, grpcPayloadJsonMapper, deferredBodyMapping, mapBodyOnAsyncAppenderThread, serverInterceptorOrder);
     }
 
     @Bean

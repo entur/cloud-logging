@@ -89,7 +89,11 @@ public abstract class GrpcConnectionMarker<T extends GrpcMessage> extends Logsta
 	}
 
 	protected void writeHeaderValue(JsonGenerator generator, Object value) {
-		generator.writePOJO(value);
+		if (value instanceof String string) {
+			generator.writeString(string);
+		} else {
+			generator.writePOJO(value);
+		}
 	}
 	
 	

@@ -4,6 +4,8 @@ plugins {
 }
 
 dependencies {
+    api project(':appender')
+
     api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
 
     api("tools.jackson.core:jackson-core")
