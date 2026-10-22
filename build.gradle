@@ -53,7 +53,7 @@ ext {
     googleTruthVersion = '1.4.5'
     logbackLogstashVersion = '9.0'
     logbookVersion = '4.2.0'
-    jacksonSyntaxHighlightVersion = '2.0.3'
+    jacksonSyntaxHighlightVersion = '2.0.4'
     logbackLogstashSyntaxHighlightingDecoratorsVersion = '2.0.3'
     commonsIoVersion = '2.22.0'
     commonsTextVersion = '1.15.0'
