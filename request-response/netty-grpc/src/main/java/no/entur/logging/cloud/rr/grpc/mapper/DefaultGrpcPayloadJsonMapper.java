@@ -43,6 +43,25 @@ public class DefaultGrpcPayloadJsonMapper implements GrpcPayloadJsonMapper {
         return message;
     }
 
+    @Override
+    public boolean isDeferrable(MessageOrBuilder m) {
+        // too large messages are not mapped to JSON, so map them right away (to a short description) and release them
+        return !(m instanceof AbstractMessage am && isTooLarge(am, am.getSerializedSize()));
+    }
+
+    /**
+     * Check whether a message is too large to be logged: either the binary message is too large, or a message of the same
+     * type and size was too large as JSON before.
+     */
+
+    protected boolean isTooLarge(AbstractMessage m, int serializedSize) {
+        if (serializedSize > maxBinaryMessageLength) {
+            return true;
+        }
+        Integer maxPreviouslyTooLargeBinaryMessageLength = previouslyTooLargeBinaryMessageLengths.get(m.getClass());
+        return maxPreviouslyTooLargeBinaryMessageLength != null && serializedSize >= maxPreviouslyTooLargeBinaryMessageLength;
+    }
+
     private String serialize(MessageOrBuilder m, GrpcBodyFilter filter) throws InvalidProtocolBufferException {
 
         String message = null;
@@ -51,8 +70,7 @@ public class DefaultGrpcPayloadJsonMapper implements GrpcPayloadJsonMapper {
 
             int serializedSize = am.getSerializedSize();
 
-            Integer maxPreviouslyTooLargeBinaryMessageLength = previouslyTooLargeBinaryMessageLengths.get(m.getClass());
-            if (serializedSize > maxBinaryMessageLength || (maxPreviouslyTooLargeBinaryMessageLength != null && serializedSize >= maxPreviouslyTooLargeBinaryMessageLength)) {
+            if (isTooLarge(am, serializedSize)) {
                 // so it is too big, don't even try to serialize to JSON
                 message = getTruncatedBinaryMessage(serializedSize);
             } else {

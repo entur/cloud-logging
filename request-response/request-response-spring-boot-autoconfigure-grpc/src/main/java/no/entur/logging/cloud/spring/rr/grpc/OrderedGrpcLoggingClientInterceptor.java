@@ -11,7 +11,11 @@ public class OrderedGrpcLoggingClientInterceptor extends GrpcLoggingClientInterc
 
     protected final int order;
     public OrderedGrpcLoggingClientInterceptor(GrpcSink sink, GrpcClientLoggingFilters filters, GrpcMetadataJsonMapper metadataJsonMapper, GrpcPayloadJsonMapper payloadJsonMapper, int order) {
-        super(sink, filters, metadataJsonMapper, payloadJsonMapper);
+        this(sink, filters, metadataJsonMapper, payloadJsonMapper, false, false, order);
+    }
+
+    public OrderedGrpcLoggingClientInterceptor(GrpcSink sink, GrpcClientLoggingFilters filters, GrpcMetadataJsonMapper metadataJsonMapper, GrpcPayloadJsonMapper payloadJsonMapper, boolean deferredBodyMapping, boolean mapBodyOnAsyncAppenderThread, int order) {
+        super(sink, filters, metadataJsonMapper, payloadJsonMapper, deferredBodyMapping, mapBodyOnAsyncAppenderThread);
         this.order = order;
     }
 
