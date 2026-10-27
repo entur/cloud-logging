@@ -18,7 +18,7 @@ buildscript {
 }
 
 plugins {
-    id 'io.github.ben-manes.versions' version '0.65.0' apply false // ./gradlew dependencyUpdates
+    id 'io.github.ben-manes.versions' version '0.66.0' apply false // ./gradlew dependencyUpdates
     id "org.sonarqube" version "7.5.0.8588"
     id 'org.jreleaser' version '1.26.0' apply false
 }
