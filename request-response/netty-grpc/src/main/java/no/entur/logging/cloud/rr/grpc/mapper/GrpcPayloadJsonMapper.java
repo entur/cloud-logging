@@ -25,14 +25,18 @@ public interface GrpcPayloadJsonMapper {
      * @param m message
      * @param payloadFilter filter applied while writing the message as JSON
      * @param bodyFilter filter applied to the written JSON
-     * @return mapping which can be directly appended to a json writer as a valid field value
+     * @return mapping which can be directly appended to a json writer as a valid field value, and whether it was truncated
      */
 
-    default String map(MessageOrBuilder m, GrpcPayloadFilter payloadFilter, GrpcBodyFilter bodyFilter) throws InvalidProtocolBufferException {
+    default GrpcPayloadJson map(MessageOrBuilder m, GrpcPayloadFilter payloadFilter, GrpcBodyFilter bodyFilter) throws InvalidProtocolBufferException {
         if (!payloadFilter.isNone()) {
             throw new IllegalStateException(getClass().getName() + " does not support payload filters");
         }
-        return map(m, bodyFilter);
+        String json = map(m, bodyFilter);
+        if (json == null) {
+            return GrpcPayloadJson.NONE;
+        }
+        return new GrpcPayloadJson(json, false);
     }
 
 }

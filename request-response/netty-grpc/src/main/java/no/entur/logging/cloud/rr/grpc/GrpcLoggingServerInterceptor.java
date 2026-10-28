@@ -20,6 +20,7 @@ import no.entur.logging.cloud.rr.grpc.message.GrpcResponse;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcLogFilter;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcMetadataFilter;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcServerLoggingFilters;
+import no.entur.logging.cloud.rr.grpc.mapper.GrpcPayloadJson;
 import no.entur.logging.cloud.rr.grpc.mapper.GrpcPayloadJsonMapper;
 import no.entur.logging.cloud.rr.grpc.mapper.GrpcMetadataJsonMapper;
 import org.slf4j.Logger;
@@ -179,7 +180,7 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
 
                         int count = responseCounter.incrementAndGet();
 
-                        String body = null;
+                        GrpcPayloadJson body = GrpcPayloadJson.NONE;
                         try {
                             body = payloadJsonMapper.map(m, filter.getResponsePayloadFilter(), filter.getResponseBodyFilter());
                         } catch (Throwable e) {
@@ -189,7 +190,7 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
 
                         long duration = System.currentTimeMillis() - timestamp;
 
-                        GrpcResponse responseMessage = new GrpcResponse(responseHeaders, remoteAddress, path, body, "local", count, Status.Code.OK, duration);
+                        GrpcResponse responseMessage = new GrpcResponse(responseHeaders, remoteAddress, path, body.getJson(), "local", count, Status.Code.OK, duration, body.isTruncated());
 
                         sink.responseMessage(responseMessage);
                     } else if (filter.isDisconnect()) {
@@ -264,7 +265,7 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
 
                         long timeRemainingUntilDeadlineInMilliseconds = getTimeRemainingUntilDeadlineInMilliseconds();
 
-                        String body = null;
+                        GrpcPayloadJson body = GrpcPayloadJson.NONE;
                         try {
                             body = payloadJsonMapper.map(m, filter.getRequestPayloadFilter(), filter.getRequestBodyFilter());
                         } catch (Throwable e) {
@@ -272,7 +273,7 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
                             log.info("Cannot format protobuf request message", e);
                         }
 
-                        GrpcRequest requestMessage = new GrpcRequest(requestHeaders, remoteAddress, path, body, "remote", count, timeRemainingUntilDeadlineInMilliseconds);
+                        GrpcRequest requestMessage = new GrpcRequest(requestHeaders, remoteAddress, path, body.getJson(), "remote", count, timeRemainingUntilDeadlineInMilliseconds, body.isTruncated());
 
                         sink.requestMessage(requestMessage);
                     } else if (filter.isDisconnect()) {

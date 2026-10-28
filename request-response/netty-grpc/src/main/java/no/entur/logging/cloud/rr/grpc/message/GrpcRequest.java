@@ -9,6 +9,9 @@ public class GrpcRequest extends GrpcMessage {
     private final int number;
 
     private final long timeRemainingUntilDeadlineInMilliseconds;
+
+    private final boolean truncated;
+
     /**
      * Constructor
      *
@@ -22,10 +25,28 @@ public class GrpcRequest extends GrpcMessage {
      */
 
     public GrpcRequest(Map<String, ?> headers, String remote, String uri, String body, String origin, int number, long timeRemainingUntilDeadlineInMilliseconds) {
+        this(headers, remote, uri, body, origin, number, timeRemainingUntilDeadlineInMilliseconds, false);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param headers map with headers, or null
+     * @param remote  remote address, or null
+     * @param uri     request uri or path
+     * @param body    body or null
+     * @param origin  remote (i.e. for incoming) or local (i.e. for outgoing)
+     * @param number request number
+     * @param timeRemainingUntilDeadlineInMilliseconds remaining time before deadline in milliseconds, or -1 if not available
+     * @param truncated whether the body was truncated
+     */
+
+    public GrpcRequest(Map<String, ?> headers, String remote, String uri, String body, String origin, int number, long timeRemainingUntilDeadlineInMilliseconds, boolean truncated) {
         super(headers, remote, uri, "request", origin);
         this.body = body;
         this.number = number;
         this.timeRemainingUntilDeadlineInMilliseconds = timeRemainingUntilDeadlineInMilliseconds;
+        this.truncated = truncated;
     }
 
     public String getBody() {
@@ -38,5 +59,9 @@ public class GrpcRequest extends GrpcMessage {
 
     public long getTimeRemainingUntilDeadlineInMilliseconds() {
         return timeRemainingUntilDeadlineInMilliseconds;
+    }
+
+    public boolean isTruncated() {
+        return truncated;
     }
 }

@@ -25,6 +25,9 @@ public abstract class AbstractLogLevelGrpcSink implements GrpcSink {
         messageBuilder.append(request.getUri());
         messageBuilder.append(" #");
         messageBuilder.append(request.getNumber());
+        if (request.isTruncated()) {
+            messageBuilder.append(" [truncated]");
+        }
     }
 
     protected void responseMessage(GrpcResponse response, StringBuilder messageBuilder) {
@@ -38,7 +41,9 @@ public abstract class AbstractLogLevelGrpcSink implements GrpcSink {
         messageBuilder.append(" in ");
         messageBuilder.append(response.getDuration());
         messageBuilder.append("ms");
-
+        if (response.isTruncated()) {
+            messageBuilder.append(" [truncated]");
+        }
     }
 
     protected void connectMessage(GrpcConnect request, StringBuilder messageBuilder) {
