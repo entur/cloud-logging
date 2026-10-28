@@ -181,7 +181,7 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
 
                         String body = null;
                         try {
-                            body = payloadJsonMapper.map(m, filter.getResponseBodyFilter());
+                            body = payloadJsonMapper.map(m, filter.getResponsePayloadFilter(), filter.getResponseBodyFilter());
                         } catch (Throwable e) {
                             // came from us, log as warn
                             log.warn("Cannot format protobuf response message", e);
@@ -266,7 +266,7 @@ public class GrpcLoggingServerInterceptor implements ServerInterceptor {
 
                         String body = null;
                         try {
-                            body = payloadJsonMapper.map(m, filter.getRequestBodyFilter());
+                            body = payloadJsonMapper.map(m, filter.getRequestPayloadFilter(), filter.getRequestBodyFilter());
                         } catch (Throwable e) {
                             // came from someone else, so log as info
                             log.info("Cannot format protobuf request message", e);

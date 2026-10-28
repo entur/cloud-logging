@@ -24,14 +24,62 @@ public class GrpcServerLoggingFilters {
 
 	public static class Builder {
 
-		private Map<String, GrpcLogFilter> services = new HashMap<>(); // i.e. per-service defaults
-
-		private Map<String, Map<String, GrpcLogFilter>> methods = new HashMap<>();
-
-		private GrpcLogFilter defaultFilter; // i.e. global service defaults
+		private final ServiceMethodLogFilters filters = new ServiceMethodLogFilters();
 
 		public Builder defaultFilter(GrpcLogFilter filter) {
-			this.defaultFilter = filter;
+			filters.setDefaultLogFilter(filter);
+			return this;
+		}
+
+		/**
+		 * Filter request and response payloads of all services, unless another payload filter is configured for the service or method.
+		 *
+		 * @param filter payload filter
+		 * @return this builder
+		 */
+
+		public Builder defaultPayloadFilter(GrpcPayloadFilter filter) {
+			return defaultPayloadFilter(filter, filter);
+		}
+
+		public Builder defaultPayloadFilter(GrpcPayloadFilter requestFilter, GrpcPayloadFilter responseFilter) {
+			filters.setDefaultPayloadFilters(requestFilter, responseFilter);
+			return this;
+		}
+
+		/**
+		 * Filter request and response payloads of a service, independently of the logging configured for the service.
+		 *
+		 * @param serviceName service name
+		 * @param filter payload filter
+		 * @return this builder
+		 */
+
+		public Builder payloadFilterForService(String serviceName, GrpcPayloadFilter filter) {
+			return payloadFilterForService(serviceName, filter, filter, Collections.emptySet());
+		}
+
+		public Builder payloadFilterForService(String serviceName, GrpcPayloadFilter filter, String ... methods) {
+			return payloadFilterForService(serviceName, filter, filter, toSet(methods));
+		}
+
+		public Builder payloadFilterForService(String serviceName, GrpcPayloadFilter filter, MethodDescriptor ... methods) {
+			return payloadFilterForService(serviceName, filter, filter, toSet(methods));
+		}
+
+		/**
+		 * Filter request and/or response payloads of a service or some of its methods, independently of the logging configured
+		 * for the service or methods. The most specific payload filter applies: method, service, then default.
+		 *
+		 * @param serviceName service name
+		 * @param requestFilter request payload filter, or null to fall back to the service (or default) request payload filter
+		 * @param responseFilter response payload filter, or null to fall back to the service (or default) response payload filter
+		 * @param methods method names, or empty for the whole service
+		 * @return this builder
+		 */
+
+		public Builder payloadFilterForService(String serviceName, GrpcPayloadFilter requestFilter, GrpcPayloadFilter responseFilter, Set<String> methods) {
+			filters.putPayloadFilters(serviceName, methods, requestFilter, responseFilter);
 			return this;
 		}
 
@@ -97,19 +145,7 @@ public class GrpcServerLoggingFilters {
 		}
 
 		public Builder loggingForService(String serviceName, GrpcLogFilter filter, Set<String> methods) {
-			if(methods == null || methods.isEmpty()) {
-				services.put(serviceName, filter);
-			} else {
-				Map<String, GrpcLogFilter> map = this.methods.get(serviceName);
-				if(map == null) {
-					map = new HashMap<>();
-					this.methods.put(serviceName, map);
-				}
-				for (String methodName : methods) {
-					map.put(methodName, filter);
-				}
-			}
-
+			filters.putLogFilter(serviceName, methods, filter);
 			return this;
 		}
 
@@ -162,23 +198,27 @@ public class GrpcServerLoggingFilters {
 		}
 
 		public GrpcServerLoggingFilters build() {
-			if(defaultFilter == null) {
+			if(filters.getDefaultLogFilter() == null) {
 				throw new IllegalStateException("Expected default behaviour");
 			}
 
 			Map<String, ServiceFilter> results = new HashMap<>();
 
-			for (Map.Entry<String, GrpcLogFilter> entry : services.entrySet()) {
-				ServiceFilter serviceFilter = results.computeIfAbsent(entry.getKey(), (k) -> new ServiceFilter());
-				serviceFilter.setServiceFilter(entry.getValue());
+			for (Map.Entry<String, Set<String>> entry : filters.getNames().entrySet()) {
+				String serviceName = entry.getKey();
+
+				Map<String, GrpcLogFilter> methodFilters = new HashMap<>();
+				for (String methodName : entry.getValue()) {
+					methodFilters.put(methodName, filters.resolve(serviceName, methodName));
+				}
+
+				ServiceFilter serviceFilter = new ServiceFilter();
+				serviceFilter.setServiceFilter(filters.resolve(serviceName, null));
+				serviceFilter.setMethodFilters(methodFilters);
+				results.put(serviceName, serviceFilter);
 			}
 
-			for (Map.Entry<String, Map<String, GrpcLogFilter>> entry : methods.entrySet()) {
-				ServiceFilter serviceFilter = results.computeIfAbsent(entry.getKey(), (k) -> new ServiceFilter());
-				serviceFilter.setMethodFilters(entry.getValue());
-			}
-
-			return new GrpcServerLoggingFilters(results, defaultFilter);
+			return new GrpcServerLoggingFilters(results, filters.resolve(null, null));
 		}
 	}
 
