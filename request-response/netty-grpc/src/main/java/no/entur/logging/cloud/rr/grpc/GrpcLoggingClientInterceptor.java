@@ -38,6 +38,7 @@ import no.entur.logging.cloud.rr.grpc.filter.GrpcClientLoggingFilters;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcLogFilter;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcMetadataFilter;
 import no.entur.logging.cloud.rr.grpc.mapper.GrpcMetadataJsonMapper;
+import no.entur.logging.cloud.rr.grpc.mapper.GrpcPayloadJson;
 import no.entur.logging.cloud.rr.grpc.mapper.GrpcPayloadJsonMapper;
 import no.entur.logging.cloud.rr.grpc.message.GrpcConnect;
 import no.entur.logging.cloud.rr.grpc.message.GrpcDisconnect;
@@ -190,7 +191,7 @@ public class GrpcLoggingClientInterceptor implements ClientInterceptor {
 
 								int count = responseCounter.incrementAndGet();
 
-								String body = null;
+								GrpcPayloadJson body = GrpcPayloadJson.NONE;
 								try {
 									body = payloadJsonMapper.map(m, filter.getResponsePayloadFilter(), filter.getResponseBodyFilter());
 								} catch (Throwable e) {
@@ -200,7 +201,7 @@ public class GrpcLoggingClientInterceptor implements ClientInterceptor {
 
 								long duration = System.currentTimeMillis() - timestamp;
 
-								GrpcResponse responseMessage = new GrpcResponse(responseHeaders, remoteAddress, path, body, "remote", count, Status.Code.OK, duration);
+								GrpcResponse responseMessage = new GrpcResponse(responseHeaders, remoteAddress, path, body.getJson(), "remote", count, Status.Code.OK, duration, body.isTruncated());
 
 								sink.responseMessage(responseMessage);
 							} else if (filter.isDisconnect()) {
@@ -275,7 +276,7 @@ public class GrpcLoggingClientInterceptor implements ClientInterceptor {
 
 					int count = requestCounter.incrementAndGet();
 
-					String body = null;
+					GrpcPayloadJson body = GrpcPayloadJson.NONE;
 					try {
 						body = payloadJsonMapper.map(m, filter.getRequestPayloadFilter(), filter.getRequestBodyFilter());
 					} catch (Throwable e) {
@@ -283,7 +284,7 @@ public class GrpcLoggingClientInterceptor implements ClientInterceptor {
 						log.warn("Cannot format protobuf request message", e);
 					}
 
-					GrpcRequest requestMessage = new GrpcRequest(requestHeaders, null, path, body, "local", count, -1L);
+					GrpcRequest requestMessage = new GrpcRequest(requestHeaders, null, path, body.getJson(), "local", count, -1L, body.isTruncated());
 
 					sink.requestMessage(requestMessage);
 				} else if (filter.isDisconnect()) {

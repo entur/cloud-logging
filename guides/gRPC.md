@@ -245,7 +245,8 @@ public GrpcServerLoggingFilters grpcServerLoggingFilters() {
 The most specific payload filter applies: method, service, then default. Paths refer to the JSON field names, i.e.
 `$.customer.email`, `$.*.email` or `$..email` (any depth).
 
-Payloads larger than the max body size are truncated, as valid JSON. The default writer is protobuf-to-json's transcoding
+Payloads larger than the max body size are truncated, as valid JSON, and the request or response log message is
+marked with `[truncated]`, i.e. `RESP OK /my.Service/GetDocument #1 in 12ms [truncated]`. The default writer is protobuf-to-json's transcoding
 writer; on Java 24+, the faster accessor writer can be used via a `ProtobufJsonWriterFactory` bean:
 
 ```java

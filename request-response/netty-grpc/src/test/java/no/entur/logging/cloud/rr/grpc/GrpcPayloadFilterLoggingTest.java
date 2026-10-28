@@ -122,17 +122,27 @@ public class GrpcPayloadFilterLoggingTest {
 
             assertThat(stub.greeting1(request).getMessage()).isEqualTo("Hello");
             assertThat(stub.greeting5(request).getMessage()).isEqualTo("Hello");
+
+            // response larger than max size
+            assertThat(stub.greeting5(GreetingRequest.newBuilder().setReturnMessageSize(2048).build()).getMessage()).startsWith("Hello");
         } finally {
             channel.shutdownNow();
             server.shutdownNow();
         }
 
-        assertThat(serverSink.requestBodies()).containsExactly("{\"message\":\"*\"}", "{\"message\":\"secret\"}").inOrder();
+        assertThat(serverSink.requestBodies()).containsExactly("{\"message\":\"*\"}", "{\"message\":\"secret\"}", "{\"returnMessageSize\":\"2048\"}").inOrder();
         assertThat(serverSink.responseBodies().get(0)).contains("\"message\":\"*\"");
         assertThat(serverSink.responseBodies().get(1)).contains("\"message\":\"Hello\"");
 
-        assertThat(clientSink.requestBodies()).containsExactly("{\"message\":\"[removed]\"}", "{\"message\":\"secret\"}").inOrder();
+        assertThat(clientSink.requestBodies()).containsExactly("{\"message\":\"[removed]\"}", "{\"message\":\"secret\"}", "{\"returnMessageSize\":\"2048\"}").inOrder();
         assertThat(clientSink.responseBodies().get(0)).contains("\"message\":\"[removed]\"");
         assertThat(clientSink.responseBodies().get(1)).contains("\"message\":\"Hello\"");
+
+        // truncated
+        for (CapturingGrpcSink sink : List.of(serverSink, clientSink)) {
+            assertThat(sink.requests.stream().map(GrpcRequest::isTruncated).collect(Collectors.toList())).containsExactly(false, false, false).inOrder();
+            assertThat(sink.responses.stream().map(GrpcResponse::isTruncated).collect(Collectors.toList())).containsExactly(false, false, true).inOrder();
+            assertThat(sink.responseBodies().get(2)).doesNotContain("Hello");
+        }
     }
 }

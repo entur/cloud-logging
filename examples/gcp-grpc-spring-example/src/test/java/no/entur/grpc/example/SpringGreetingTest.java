@@ -320,6 +320,7 @@ public class SpringGreetingTest extends SpringAbstractGrpcTest {
 			LogStatements http = statements.forLogger("no.entur.logging.cloud");
 			LogStatement request = http.get(1);
 			request.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+			assertThat(request.getJsonAsNode().path("message").asText()).contains("[truncated]");
 
 			// check that correlation-id was set back as a header in the response
 			LogStatement response = http.get(2);
@@ -343,6 +344,7 @@ public class SpringGreetingTest extends SpringAbstractGrpcTest {
 			// the message field does not fit within the max body size, so the body is truncated after the status field
 			response.assertThatHttpBody().field("status").matches("[0-9]+");
 			assertThat(response.getJsonAsNode().path("http").path("body").has("message")).isFalse();
+			assertThat(response.getJsonAsNode().path("message").asText()).contains("[truncated]");
 		} finally {
 			shutdown(stub);
 		}
@@ -364,10 +366,12 @@ public class SpringGreetingTest extends SpringAbstractGrpcTest {
 			LogStatements http = statements.forLogger("no.entur.logging.cloud");
 			LogStatement request = http.get(1);
 			request.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+			assertThat(request.getJsonAsNode().path("message").asText()).contains("[truncated]");
 			LogStatement response = http.get(http.size() - 2);
 			// the message field does not fit within the max body size, so the body is truncated after the status field
 			response.assertThatHttpBody().field("status").matches("[0-9]+");
 			assertThat(response.getJsonAsNode().path("http").path("body").has("message")).isFalse();
+			assertThat(response.getJsonAsNode().path("message").asText()).contains("[truncated]");
 		} finally {
 			shutdown(stub);
 		}
@@ -400,6 +404,7 @@ public class SpringGreetingTest extends SpringAbstractGrpcTest {
 			LogStatements http = statements.forLogger("no.entur.logging.cloud");
 			LogStatement request = http.get(0);
 			request.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+			assertThat(request.getJsonAsNode().path("message").asText()).contains("[truncated]");
 		} finally {
 			shutdown(stub);
 		}
@@ -419,6 +424,7 @@ public class SpringGreetingTest extends SpringAbstractGrpcTest {
 			// the message field does not fit within the max body size, so the body is truncated after the status field
 			response.assertThatHttpBody().field("status").matches("[0-9]+");
 			assertThat(response.getJsonAsNode().path("http").path("body").has("message")).isFalse();
+			assertThat(response.getJsonAsNode().path("message").asText()).contains("[truncated]");
 		} finally {
 			shutdown(stub);
 		}
@@ -440,10 +446,12 @@ public class SpringGreetingTest extends SpringAbstractGrpcTest {
 			LogStatements http = statements.forLogger("no.entur.logging.cloud");
 			LogStatement request = http.get(0);
 			request.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+			assertThat(request.getJsonAsNode().path("message").asText()).contains("[truncated]");
 			LogStatement response = http.get(http.size() - 1);
 			// the message field does not fit within the max body size, so the body is truncated after the status field
 			response.assertThatHttpBody().field("status").matches("[0-9]+");
 			assertThat(response.getJsonAsNode().path("http").path("body").has("message")).isFalse();
+			assertThat(response.getJsonAsNode().path("message").asText()).contains("[truncated]");
 		} finally {
 			shutdown(stub);
 		}
