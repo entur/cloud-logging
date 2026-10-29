@@ -28,7 +28,7 @@ so that `grep` returns a whole trace. Only INFO and above is written; override w
 `entur.logging.ai.level` (for example `DEBUG`). A second file, `<file>.full`, gets the same events with DEBUG and above, timestamps, thread names and full stack traces,
 for drill-down when the compact file is not enough; its level is set with `entur.logging.ai.full.level` (default `DEBUG`) (for example `grep -n 'some message' /tmp/test.log.full`).
 
-When `entur.logging.ai.enabled=true`, HTTP and gRPC request-response logging is also compact (`CompactLogbackLogstashSink` for HTTP, `CompactLogbackLogstashGrpcSink` for gRPC): a single line without pretty-printing or colours (`message | header: value; ... | body`). Bodies are not truncated by default; set `entur.logging.ai.body.max=2000` to cut longer bodies (a `...[truncated, N chars]` marker is appended).
+When `entur.logging.ai.enabled=true`, HTTP and gRPC request-response logging is also compact (`CompactLogbackLogstashSink` for HTTP, `CompactLogbackLogstashGrpcSink` for gRPC): a single line without pretty-printing or colours (`message | header: value; ... | body`). Bodies are not truncated by default; set `entur.logging.ai.body.size.max=2000` to cut longer bodies (a `...[truncated, N chars]` marker is appended).
 Events are appended; delete both files first for a clean run.
 
 ```
@@ -48,7 +48,7 @@ Requires the `*-test` artifact of this library on the test classpath.
 
 ```groovy
 test {
-    ['entur.logging.ai.enabled', 'entur.logging.ai.file', 'entur.logging.ai.level', 'entur.logging.ai.full.level', 'entur.logging.ai.body.max'].each { key ->
+    ['entur.logging.ai.enabled', 'entur.logging.ai.file', 'entur.logging.ai.level', 'entur.logging.ai.full.level', 'entur.logging.ai.body.size.max'].each { key ->
         if (System.getProperty(key) != null) {
             systemProperty key, System.getProperty(key)
         }
