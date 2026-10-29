@@ -2,6 +2,7 @@ package no.entur.logging.cloud.gcp.spring.test;
 
 import ch.qos.logback.classic.pattern.RootCauseFirstThrowableProxyConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import no.entur.logging.cloud.logback.logstash.test.AiLoggingControl;
 
 /**
  * Root-cause-first stack trace rendered on a single line, so that a trace can be found and read with grep.
@@ -22,18 +23,40 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
 
         int maxLines = no.entur.logging.cloud.logback.logstash.test.AiLoggingControl.stackTraceMaxLines();
         int count = 0;
+        int maxFrames = AiLoggingControl.stackTraceMaxLines();
+        int maxCauses = AiLoggingControl.stackTraceMaxCauses();
+
         StringBuilder builder = new StringBuilder(multiLine.length() + 16);
+        int causes = 0;
+        int frames = 0;
+        int omittedFrames = 0;
+        boolean skipCause = false;
         for (String line : multiLine.split("\\R")) {
             String trimmed = line.strip();
             if (trimmed.isEmpty()) {
                 continue;
             }
-            if (maxLines > 0 && count >= maxLines) {
-                int total = (int) multiLine.lines().filter(l -> !l.isBlank()).count();
-                builder.append(" ...[truncated, ").append(total).append(" lines]");
-                break;
+            boolean frame = trimmed.startsWith("at ");
+            boolean marker = trimmed.startsWith("[") || trimmed.startsWith("...");
+            if (!frame && !marker) {
+                // header of a new exception
+                appendOmitted(builder, omittedFrames);
+                omittedFrames = 0;
+                frames = 0;
+                causes++;
+                if (maxCauses > 0 && causes > maxCauses) {
+                    builder.append(SEPARATOR).append("[... more causes omitted]");
+                    return builder.toString();
+                }
+            } else if (frame) {
+                frames++;
+                if (maxFrames > 0 && frames > maxFrames) {
+                    omittedFrames++;
+                    continue;
+                }
+            } else if (omittedFrames > 0) {
+                continue;
             }
-            count++;
             // a lone "[N skipped]" marker belongs to the preceding frame
             if (trimmed.startsWith("[") && builder.length() > 0) {
                 builder.append(' ');
@@ -42,6 +65,13 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
             }
             builder.append(trimmed);
         }
+        appendOmitted(builder, omittedFrames);
         return builder.toString();
+    }
+
+    private static void appendOmitted(StringBuilder builder, int omittedFrames) {
+        if (omittedFrames > 0) {
+            builder.append(SEPARATOR).append("[... ").append(omittedFrames).append(" frames omitted]");
+        }
     }
 }

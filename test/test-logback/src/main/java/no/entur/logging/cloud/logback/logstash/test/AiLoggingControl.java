@@ -26,10 +26,17 @@ public class AiLoggingControl {
         return body;
     }
 
-    /** JVM system property; max number of lines (exception headers and frames) of a stack trace in compact output. Unlimited if not set (or 0). */
+    /** JVM system property; max number of frames kept per exception of a stack trace in compact output. Unlimited if not set (or 0). */
     public static final String AI_STACKTRACE_MAX_LINES_PROPERTY = "entur.logging.ai.stacktrace.max-lines";
+
+    /** JVM system property; max number of exceptions (root cause first) kept of a stack trace in compact output. Unlimited if not set (or 0). */
+    public static final String AI_STACKTRACE_MAX_CAUSES_PROPERTY = "entur.logging.ai.stacktrace.max-causes";
 
     public static int stackTraceMaxLines() {
         return Integer.getInteger(AI_STACKTRACE_MAX_LINES_PROPERTY, 0);
+    }
+
+    public static int stackTraceMaxCauses() {
+        return Integer.getInteger(AI_STACKTRACE_MAX_CAUSES_PROPERTY, 0);
     }
 }
