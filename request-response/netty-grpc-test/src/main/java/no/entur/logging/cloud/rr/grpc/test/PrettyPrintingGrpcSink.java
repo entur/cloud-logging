@@ -1,6 +1,5 @@
 package no.entur.logging.cloud.rr.grpc.test;
 
-import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
 import org.entur.jackson.tools.jsh.AnsiSyntaxHighlight;
 import org.entur.jackson.tools.jsh.SyntaxHighlighter;
 import org.entur.jackson.tools.jsh.SyntaxHighlightingJsonGenerator;
@@ -25,10 +24,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
-/**
- * Pretty printing + coloring of request-response logging message.
- * If {@link CompositeConsoleOutputControl#isAiEnabled()}, the output is instead compact: a single line without pretty-printing or colors.
- */
+/** Pretty printing + coloring of request-response logging message. */
 
 public class PrettyPrintingGrpcSink extends LogbackLogstashGrpcSink {
 
@@ -66,10 +62,6 @@ public class PrettyPrintingGrpcSink extends LogbackLogstashGrpcSink {
 
     protected final SyntaxHighlighter syntaxHighlighter;
 
-    protected final boolean compact = CompositeConsoleOutputControl.isAiEnabled();
-
-    protected final JsonMapper compactJsonMapper = JsonMapper.builder().build();
-
     public PrettyPrintingGrpcSink(BooleanSupplier logLevelEnabled, BiConsumer<Marker, String> logConsumer, JsonMapper mapper, SyntaxHighlighter syntaxHighlighter) {
         super(logConsumer, logLevelEnabled);
         this.logConsumer = logConsumer;
@@ -89,10 +81,6 @@ public class PrettyPrintingGrpcSink extends LogbackLogstashGrpcSink {
     @Override
     protected void connectMessage(GrpcConnect connect, StringBuilder messageBuilder) {
         super.connectMessage(connect, messageBuilder);
-        if (compact) {
-            writeCompact(connect.getHeaders(), null, messageBuilder);
-            return;
-        }
         Map<String, ?> headers = connect.getHeaders();
         if(headers != null && !headers.isEmpty()) {
             messageBuilder.append('\n');
@@ -114,11 +102,6 @@ public class PrettyPrintingGrpcSink extends LogbackLogstashGrpcSink {
     protected void requestMessage(GrpcRequest request, StringBuilder messageBuilder) {
         super.requestMessage(request, messageBuilder);
 
-        if (compact) {
-            writeCompact(request.getHeaders(), request.getBody(), messageBuilder);
-            return;
-        }
-
         String body = request.getBody();
         Map<String, ?> headers = request.getHeaders();
         if(headers != null && !headers.isEmpty()) {
@@ -134,11 +117,6 @@ public class PrettyPrintingGrpcSink extends LogbackLogstashGrpcSink {
     @Override
     protected void responseMessage(GrpcResponse response, StringBuilder messageBuilder) {
         super.responseMessage(response, messageBuilder);
-
-        if (compact) {
-            writeCompact(response.getHeaders(), response.getBody(), messageBuilder);
-            return;
-        }
 
         Map<String, ?> headers = response.getHeaders();
         if(headers != null && !headers.isEmpty()) {
@@ -156,44 +134,10 @@ public class PrettyPrintingGrpcSink extends LogbackLogstashGrpcSink {
     protected void disconnectMessage(GrpcConnect connectMessage, GrpcDisconnect disconnectMessage, StringBuilder messageBuilder) {
         super.disconnectMessage(connectMessage, disconnectMessage, messageBuilder);
 
-        if (compact) {
-            writeCompact(disconnectMessage.getHeaders(), null, messageBuilder);
-            return;
-        }
-
         Map<String, ?> headers = disconnectMessage.getHeaders();
         if(headers != null && !headers.isEmpty()) {
             messageBuilder.append('\n');
             writeHeaders(headers, messageBuilder);
-        }
-    }
-
-    /** Single line: message | header: value; header: value | body */
-    private void writeCompact(Map<String, ?> headers, String body, StringBuilder output) {
-        String message = output.toString().strip().replaceAll("\\s*\\R\\s*", " ");
-        output.setLength(0);
-        output.append(message);
-
-        if (headers != null && !headers.isEmpty()) {
-            output.append(" | ");
-            boolean first = true;
-            for (Map.Entry<String, ?> entry : headers.entrySet()) {
-                if (!first) {
-                    output.append("; ");
-                }
-                first = false;
-                output.append(entry.getKey().toLowerCase()).append(": ").append(entry.getValue());
-            }
-        }
-
-        if (body != null && !body.isBlank()) {
-            String compactBody;
-            try {
-                compactBody = compactJsonMapper.readTree(body).toString();
-            } catch (Exception e) {
-                compactBody = body.strip().replaceAll("\\s*\\R\\s*", "");
-            }
-            output.append(" | ").append(compactBody);
         }
     }
 
