@@ -26,8 +26,13 @@ public class EventIdConverter extends ClassicConverter {
         if (!always && event.getThrowableProxy() == null && !isBodyTruncated(message)) {
             return "";
         }
-        long hash = Objects.hash(event.getTimeStamp(), event.getNanoseconds(), event.getLoggerName(), event.getLevel(), message);
-        return " #" + String.format("%06x", hash & 0xFFFFFFL);
+        return " #" + idOf(event);
+    }
+
+    /** The id without the leading <code>" #"</code>. */
+    public static String idOf(ILoggingEvent event) {
+        long hash = Objects.hash(event.getTimeStamp(), event.getNanoseconds(), event.getLoggerName(), event.getLevel(), event.getFormattedMessage());
+        return String.format("%06x", hash & 0xFFFFFFL);
     }
 
     private static boolean isBodyTruncated(String message) {

@@ -23,6 +23,11 @@
 		</encoder>
 	</appender>
 
+	<!-- collapses repeated WARN/ERROR events in the compact file ("repeated N more times"); disable with -Dentur.logging.ai.dedupe=false -->
+	<appender name="AI_DEDUP" class="no.entur.logging.cloud.logback.logstash.test.DeduplicatingAppender">
+		<appender-ref ref="AI_FILE" />
+	</appender>
+
 	<!-- Drill-down: the same events unfiltered and untrimmed (all levels, full stack traces) in <file>.full -->
 	<appender name="AI_FILE_FULL" class="ch.qos.logback.core.FileAppender">
 		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai.log}.full</file>
@@ -80,7 +85,7 @@
 
 	<!-- logback async appenders accept a single child, so fan out to both files -->
 	<appender name="AI_FANOUT" class="no.entur.logging.cloud.azure.spring.test.ListAppender">
-		<appender-ref ref="AI_FILE" />
+		<appender-ref ref="AI_DEDUP" />
 		<appender-ref ref="AI_FILE_FULL" />
 		<appender-ref ref="AI_ENCODER_ONLY" />
 	</appender>

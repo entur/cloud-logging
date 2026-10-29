@@ -43,4 +43,11 @@ public class AiLoggingControl {
     public static int stackTraceMaxCauses() {
         return Integer.getInteger(AI_STACKTRACE_MAX_CAUSES_PROPERTY, 0);
     }
+
+    /** JVM system property; set to <code>false</code> to disable collapsing of repeated WARN/ERROR events in the compact file. Default true. */
+    public static final String AI_DEDUPE_PROPERTY = "entur.logging.ai.dedupe";
+
+    public static boolean isDedupeEnabled() {
+        return !"false".equalsIgnoreCase(System.getProperty(AI_DEDUPE_PROPERTY));
+    }
 }
