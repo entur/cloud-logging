@@ -65,11 +65,11 @@ When running tests, enable compact log output to save context. Logs then go to a
 
     rm -f /tmp/test.log /tmp/test.log.full
     # Gradle
-    ./gradlew test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test.log
-    # Maven
-    mvn -q test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test.log
+    ./gradlew test -q --console=plain -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test.log 2>&1 | head -40
+    # Maven (keep only the Maven/test error lines, not the plugin and JVM warnings or client stack traces)
+    mvn -q test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test.log 2>&1 | grep '^\[ERROR\]' | cut -c1-300 | head -30
 
-- Console output only contains the test summary and failures. Do not use `-i`/`--info` (Gradle) or `-X` (Maven); they are not needed.
+- Console output only contains the test summary and failures (filtered as above, about 1.5 KB). Do not use `-i`/`--info` (Gradle) or `-X` (Maven); they are not needed.
 - `/tmp/test.log`: compact, one event per line (`LEVEL logger [mdc] : message`), INFO and above. Stack traces are on the same line as the
   message, root cause first, framework frames removed. Use `grep` (for example `grep -n 'ERROR\|WARN' /tmp/test.log`), do not read the whole file.
 - `/tmp/test.log.full`: same events with timestamps, thread names, DEBUG and above and full stack traces.
