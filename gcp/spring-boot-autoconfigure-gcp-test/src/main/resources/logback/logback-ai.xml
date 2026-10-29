@@ -16,7 +16,7 @@
 		<immediateFlush>true</immediateFlush>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 			<!-- compact plain text for AI: no timestamp, thread or colours; stack traces on a single line (grep friendly), root-cause-first, max 15 frames, framework frames removed -->
-			<pattern>%-5level %logger{30} : %msg%sEx{15,org.springframework,org.junit,org.gradle,worker.org.gradle,org.apache,jdk.internal,jdk.proxy,java.lang.reflect,java.util,sun.reflect}%n%nopex</pattern>
+			<pattern>%-5level %logger{30}%replace(%mdc){'^(.+)$',' [$1]'} : %msg%sEx{15,org.springframework,org.junit,org.gradle,worker.org.gradle,org.apache,jdk.internal,jdk.proxy,java.lang.reflect,java.util,sun.reflect}%n%nopex</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>

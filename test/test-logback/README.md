@@ -22,7 +22,7 @@ When using an async appender, there is a race condition for in-flight log events
 # AI / tooling: compact log file
 Set the JVM system property `entur.logging.ai.enabled=true` to write all log events to a file instead of the console.
 The file is given by `entur.logging.ai.file` (default: `entur-logging-ai.log` in the temp directory).
-The format is compact plain text, one event per line, without timestamp, thread or colours. Stack traces are
+The format is compact plain text, one event per line, without timestamp, thread or colours. MDC entries (present during requests) are appended to the logger as `[key=value, …]`. Stack traces are
 on the same line as the log message (separated by ` | `), root-cause-first, limited to 15 frames, with framework frames removed,
 so that `grep` returns a whole trace. Only INFO and above is written; override with
 `entur.logging.ai.level` (for example `DEBUG`). A second file, `<file>.full`, gets the same events with DEBUG and above, timestamps, thread names and full stack traces,
@@ -70,7 +70,7 @@ When running tests, enable compact log output to save context. Logs then go to a
     mvn -q test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test.log
 
 - Console output only contains the test summary and failures. Do not use `-i`/`--info` (Gradle) or `-X` (Maven); they are not needed.
-- `/tmp/test.log`: compact, one event per line (`LEVEL logger : message`), INFO and above. Stack traces are on the same line as the
+- `/tmp/test.log`: compact, one event per line (`LEVEL logger [mdc] : message`), INFO and above. Stack traces are on the same line as the
   message, root cause first, framework frames removed. Use `grep` (for example `grep -n 'ERROR\|WARN' /tmp/test.log`), do not read the whole file.
 - `/tmp/test.log.full`: same events with timestamps, thread names, DEBUG and above and full stack traces.
   Only consult it (with `grep -n -C 5`) when the compact file is not enough.
