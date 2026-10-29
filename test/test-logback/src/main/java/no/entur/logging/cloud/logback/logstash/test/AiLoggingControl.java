@@ -28,14 +28,16 @@ public class AiLoggingControl {
         return body;
     }
 
-    /** JVM system property; max number of frames kept per exception of a stack trace in compact output. Unlimited if not set (or 0). */
+    /** JVM system property; max number of frames kept per exception of a stack trace in compact output. Default 2; 0 means unlimited. */
     public static final String AI_STACKTRACE_MAX_LINES_PROPERTY = "entur.logging.ai.stacktrace.max-lines";
+
+    public static final int DEFAULT_STACKTRACE_MAX_LINES = 2;
 
     /** JVM system property; max number of exceptions (root cause first) kept of a stack trace in compact output. Unlimited if not set (or 0). */
     public static final String AI_STACKTRACE_MAX_CAUSES_PROPERTY = "entur.logging.ai.stacktrace.max-causes";
 
     public static int stackTraceMaxLines() {
-        return Integer.getInteger(AI_STACKTRACE_MAX_LINES_PROPERTY, 0);
+        return Integer.getInteger(AI_STACKTRACE_MAX_LINES_PROPERTY, DEFAULT_STACKTRACE_MAX_LINES);
     }
 
     public static int stackTraceMaxCauses() {
