@@ -26,7 +26,7 @@ The format is compact plain text, one event per line, without timestamp, thread 
 on the same line as the log message (separated by ` | `), root-cause-first, limited to 15 frames, with framework frames removed,
 so that `grep` returns a whole trace. Only INFO and above is written; override with
 `entur.logging.ai.level` (for example `DEBUG`). A second file, `<file>.full`, gets the same events with all levels, timestamps, thread names and full stack traces,
-for drill-down when the compact file is not enough (for example `grep -n 'some message' /tmp/test.log.full`).
+for drill-down when the compact file is not enough; its level can be limited with `entur.logging.ai.full.level` (default `ALL`) (for example `grep -n 'some message' /tmp/test.log.full`).
 
 When `entur.logging.ai.enabled=true`, HTTP and gRPC request-response logging is also compact: a single line without pretty-printing or colours (`message | header: value; ... | body`).
 Events are appended; delete both files first for a clean run.
@@ -48,7 +48,7 @@ Requires the `*-test` artifact of this library on the test classpath.
 
 ```groovy
 test {
-    ['entur.logging.ai.enabled', 'entur.logging.ai.file', 'entur.logging.ai.level'].each { key ->
+    ['entur.logging.ai.enabled', 'entur.logging.ai.file', 'entur.logging.ai.level', 'entur.logging.ai.full.level'].each { key ->
         if (System.getProperty(key) != null) {
             systemProperty key, System.getProperty(key)
         }
@@ -74,6 +74,6 @@ When running tests, enable compact log output to save context. Logs then go to a
   message, root cause first, framework frames removed. Use `grep` (for example `grep -n 'ERROR\|WARN' /tmp/test.log`), do not read the whole file.
 - `/tmp/test.log.full`: same events with timestamps, thread names, all levels (including DEBUG) and full stack traces.
   Only consult it (with `grep -n -C 5`) when the compact file is not enough.
-- Include `-Dentur.logging.ai.level=DEBUG` to also get DEBUG in the compact file.
+- Include `-Dentur.logging.ai.level=DEBUG` to also get DEBUG in the compact file (`-Dentur.logging.ai.full.level=INFO` limits the `.full` file).
 - Request/response logging (HTTP, gRPC) is a single line: `message | header: value; ... | body`.
 ````

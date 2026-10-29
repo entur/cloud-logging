@@ -1,0 +1,98 @@
+<included>
+
+	<conversionRule conversionWord="sEx" class="no.entur.logging.cloud.azure.spring.test.SingleLineRootCauseFirstThrowableProxyConverter" />
+
+	<!--
+		Compact plain text (one event per line) written to the file given by -Dentur.logging.ai.file (default: entur-logging-ai.log in the temp directory),
+		nothing on the console. Included from logback-test.xml only if -Dentur.logging.ai.enabled=true.
+	-->
+	<appender name="AI_FILE" class="ch.qos.logback.core.FileAppender">
+		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai.log}</file>
+		<!-- compact file level, override with -Dentur.logging.ai.level=DEBUG -->
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>${entur.logging.ai.level:-INFO}</level>
+		</filter>
+		<append>true</append>
+		<immediateFlush>true</immediateFlush>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<!-- compact plain text for AI: no timestamp, thread or colours; stack traces on a single line (grep friendly), root-cause-first, max 15 frames, framework frames removed -->
+			<pattern>%-5level %logger{30} : %msg%sEx{15,org.springframework,org.junit,org.gradle,worker.org.gradle,org.apache,jdk.internal,jdk.proxy,java.lang.reflect,java.util,sun.reflect}%n%nopex</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+
+	<!-- Drill-down: the same events unfiltered and untrimmed (all levels, full stack traces) in <file>.full -->
+	<appender name="AI_FILE_FULL" class="ch.qos.logback.core.FileAppender">
+		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai.log}.full</file>
+		<!-- override with -Dentur.logging.ai.full.level=INFO -->
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>${entur.logging.ai.full.level:-ALL}</level>
+		</filter>
+		<append>true</append>
+		<immediateFlush>true</immediateFlush>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger : %msg%n%ex</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+
+	<!-- writes nothing; exposes the JSON encoder which LogStatements / LogbackTestExtension use to evaluate assertions -->
+	<appender name="AI_ENCODER_ONLY" class="no.entur.logging.cloud.azure.spring.test.EncoderOnlyAppender">
+		<encoder class="no.entur.logging.cloud.azure.logback.logstash.AzureLogstashEncoder">
+			<providers>
+				<timestamp>
+					<fieldName>timestamp</fieldName>
+					<timeZone>UTC</timeZone>
+				</timestamp>
+				<loggerName>
+					<fieldName>logger</fieldName>
+				</loggerName>
+				<logLevel>
+					<fieldName>level</fieldName>
+				</logLevel>
+				<threadName>
+					<fieldName>thread</fieldName>
+				</threadName>
+				<nestedField>
+					<fieldName>mdc</fieldName>
+					<providers>
+						<mdc />
+					</providers>
+				</nestedField>
+				<stackTrace>
+					<fieldName>stackTrace</fieldName>
+					<throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+						<maxDepthPerThrowable>200</maxDepthPerThrowable>
+						<maxLength>14000</maxLength>
+						<rootCauseFirst>true</rootCauseFirst>
+					</throwableConverter>
+				</stackTrace>
+				<logstashMarkers/>
+				<message />
+				<throwableClassName>
+					<fieldName>exceptionClass</fieldName>
+				</throwableClassName>
+			</providers>
+		</encoder>
+	</appender>
+
+	<!-- logback async appenders accept a single child, so fan out to both files -->
+	<appender name="AI_FANOUT" class="no.entur.logging.cloud.azure.spring.test.FanOutAppender">
+		<appender-ref ref="AI_FILE" />
+		<appender-ref ref="AI_FILE_FULL" />
+		<appender-ref ref="AI_ENCODER_ONLY" />
+	</appender>
+
+	<!-- on-demand logging requires a LoggingScopeAsyncAppender -->
+	<appender name="AI_FILE_ASYNC" class="no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender">
+		<discardingThreshold>0</discardingThreshold>
+		<maxFlushTime>0</maxFlushTime>
+		<appender-ref ref="AI_FANOUT" />
+	</appender>
+
+
+	<root>
+		<appender-ref ref="AI_FILE_ASYNC" />
+	</root>
+
+</included>

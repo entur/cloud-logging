@@ -8,7 +8,7 @@
 	-->
 	<appender name="AI_FILE" class="ch.qos.logback.core.FileAppender">
 		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai.log}</file>
-		<!-- override with -Dentur.logging.ai.level=DEBUG -->
+		<!-- compact file level, override with -Dentur.logging.ai.level=DEBUG -->
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>${entur.logging.ai.level:-INFO}</level>
 		</filter>
@@ -24,6 +24,10 @@
 	<!-- Drill-down: the same events unfiltered and untrimmed (all levels, full stack traces) in <file>.full -->
 	<appender name="AI_FILE_FULL" class="ch.qos.logback.core.FileAppender">
 		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai.log}.full</file>
+		<!-- override with -Dentur.logging.ai.full.level=INFO -->
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>${entur.logging.ai.full.level:-ALL}</level>
+		</filter>
 		<append>true</append>
 		<immediateFlush>true</immediateFlush>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
