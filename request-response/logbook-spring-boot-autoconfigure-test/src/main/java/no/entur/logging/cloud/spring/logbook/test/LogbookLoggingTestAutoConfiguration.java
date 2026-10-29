@@ -3,7 +3,7 @@ package no.entur.logging.cloud.spring.logbook.test;
 import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupplierSource;
 import no.entur.logging.cloud.logbook.ondemand.state.ResponseHttpMessageStateSupplierSource;
-import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
+import no.entur.logging.cloud.logback.logstash.test.AiLoggingControl;
 import no.entur.logging.cloud.logbook.logbook.test.CompactLogbackLogstashSink;
 import no.entur.logging.cloud.logbook.logbook.test.CompositeSink;
 import no.entur.logging.cloud.logbook.logbook.test.PrettyPrintingLogLevelLogstashLogbackSink;
@@ -42,7 +42,7 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
 
-        if (CompositeConsoleOutputControl.isAiEnabled()) {
+        if (AiLoggingControl.isAiEnabled()) {
             // AI mode: single-line output, no pretty-printing or colors
             return new CompactLogbackLogstashSink.Builder()
                     .withLogger(logger)
@@ -99,7 +99,7 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
 
-        if (CompositeConsoleOutputControl.isAiEnabled()) {
+        if (AiLoggingControl.isAiEnabled()) {
             // AI mode: single-line output, no pretty-printing or colors
             return new CompactLogbackLogstashSink.Builder()
                     .withLogger(logger)

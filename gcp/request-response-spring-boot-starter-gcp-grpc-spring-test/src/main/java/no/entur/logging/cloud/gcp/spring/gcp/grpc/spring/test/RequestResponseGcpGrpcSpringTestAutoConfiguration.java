@@ -3,7 +3,7 @@ package no.entur.logging.cloud.gcp.spring.gcp.grpc.spring.test;
 import no.entur.logging.cloud.gcp.spring.gcp.grpc.spring.RequestResponseGcpGrpcSpringAutoConfiguration;
 import no.entur.logging.cloud.spring.rr.grpc.AbstractRequestResponseGrpcSinkAutoConfiguration;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;
-import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
+import no.entur.logging.cloud.logback.logstash.test.AiLoggingControl;
 import no.entur.logging.cloud.rr.grpc.test.CompactLogbackLogstashGrpcSink;
 import no.entur.logging.cloud.rr.grpc.test.CompositeSink;
 import no.entur.logging.cloud.rr.grpc.test.PrettyPrintingLogLevelLogstashLogbackGrpcSink;
@@ -31,7 +31,7 @@ public class RequestResponseGcpGrpcSpringTestAutoConfiguration extends AbstractR
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = parseLevel(loggerLevel);
 
-        if (CompositeConsoleOutputControl.isAiEnabled()) {
+        if (AiLoggingControl.isAiEnabled()) {
             // AI mode: single-line output, no pretty-printing or colors
             return new CompactLogbackLogstashGrpcSink.Builder()
                     .withLogger(logger)
