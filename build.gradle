@@ -134,6 +134,10 @@ configure(jvmProjects()) {
         useJUnitPlatform {
             includeEngines 'junit-jupiter'
         }
+        // e.g. ./gradlew test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test.log
+        ['entur.logging.ai.enabled', 'entur.logging.ai.file', 'entur.logging.ai.level'].each { name ->
+            System.getProperty(name)?.with { systemProperty name, it }
+        }
     }
 
     dependencies {

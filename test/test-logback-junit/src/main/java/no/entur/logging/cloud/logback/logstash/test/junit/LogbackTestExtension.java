@@ -390,8 +390,8 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 	protected CompositeJsonEncoder searchCompositeJsonEncoder(Iterator<Appender<ILoggingEvent>> appenderIterator) {
 		while (appenderIterator.hasNext()) {
 			Appender<ILoggingEvent> appender = appenderIterator.next();
-			if(appender instanceof ConsoleAppender<ILoggingEvent>) {
-				ConsoleAppender<ILoggingEvent> compositeConsoleAppender = (ConsoleAppender<ILoggingEvent>)appender;
+			if(appender instanceof ch.qos.logback.core.OutputStreamAppender<ILoggingEvent>) {
+				ch.qos.logback.core.OutputStreamAppender<ILoggingEvent> compositeConsoleAppender = (ch.qos.logback.core.OutputStreamAppender<ILoggingEvent>)appender;
 				Encoder<ILoggingEvent> encoder = compositeConsoleAppender.getEncoder();
 				if(encoder instanceof CompositeJsonEncoder) {
 					return (CompositeJsonEncoder) encoder;
@@ -441,27 +441,34 @@ public class LogbackTestExtension extends LogbackInitializerExtension implements
 			return compositeJsonEncoder;
 		}
 
-		// drill into async appender
-		Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders();
-		while (appenderIterator.hasNext()) {
-			Appender<ILoggingEvent> appender = appenderIterator.next();
-			if(appender instanceof AppenderAttachable) {
-				AppenderAttachable asyncAppender = (AppenderAttachable)appender;
-
-				 compositeJsonEncoder = searchMachineReadableJsonEncoder(asyncAppender.iteratorForAppenders());
-				if(compositeJsonEncoder != null) {
-					return compositeJsonEncoder;
-				}
-				compositeJsonEncoder = searchCompositeJsonEncoder(asyncAppender.iteratorForAppenders());
-				if(compositeJsonEncoder != null) {
-					return compositeJsonEncoder;
-				}
-			}
-
+		compositeJsonEncoder = searchNested(logger.iteratorForAppenders());
+		if(compositeJsonEncoder != null) {
+			return compositeJsonEncoder;
 		}
 		throw new IllegalStateException("Unable to get Appender with LogstashEncoder encoder, has logback initialize yet?");
 	}
 	
+	private CompositeJsonEncoder searchNested(Iterator<Appender<ILoggingEvent>> appenderIterator) {
+		while (appenderIterator.hasNext()) {
+			Appender<ILoggingEvent> appender = appenderIterator.next();
+			if(appender instanceof AppenderAttachable) {
+				AppenderAttachable<ILoggingEvent> attachable = (AppenderAttachable<ILoggingEvent>)appender;
+
+				CompositeJsonEncoder encoder = searchMachineReadableJsonEncoder(attachable.iteratorForAppenders());
+				if(encoder == null) {
+					encoder = searchCompositeJsonEncoder(attachable.iteratorForAppenders());
+				}
+				if(encoder == null) {
+					encoder = searchNested(attachable.iteratorForAppenders());
+				}
+				if(encoder != null) {
+					return encoder;
+				}
+			}
+		}
+		return null;
+	}
+
 	public long getFlushDelay() {
 		return flushDelay;
 	}

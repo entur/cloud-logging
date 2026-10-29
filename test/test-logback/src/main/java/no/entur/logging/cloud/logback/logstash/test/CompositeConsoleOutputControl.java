@@ -15,6 +15,13 @@ public class CompositeConsoleOutputControl {
         void run() throws Exception;
     }
 
+    /** JVM system property; if 'true', test logging is written as compact output meant for AI tooling. */
+    public static final String AI_ENABLED_PROPERTY = "entur.logging.ai.enabled";
+
+    public static boolean isAiEnabled() {
+        return Boolean.getBoolean(AI_ENABLED_PROPERTY);
+    }
+
     private static final CompositeConsoleOutputControlClosable HUMAN_READABLE_PLAIN = new CompositeConsoleOutputControlClosable(CompositeConsoleOutputType.humanReadablePlain);
     private static final CompositeConsoleOutputControlClosable HUMAN_READABLE_JSON = new CompositeConsoleOutputControlClosable(CompositeConsoleOutputType.humanReadableJson);
     private static final CompositeConsoleOutputControlClosable MACHINE_READABLE_JSON = new CompositeConsoleOutputControlClosable(CompositeConsoleOutputType.machineReadableJson);
