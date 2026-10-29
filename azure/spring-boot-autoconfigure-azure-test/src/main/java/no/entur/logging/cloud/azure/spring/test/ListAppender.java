@@ -11,7 +11,7 @@ import java.util.Iterator;
 /**
  * Forwards each event to all attached appenders. Needed because logback's async appenders accept only a single child.
  */
-public class FanOutAppender extends AppenderBase<ILoggingEvent> implements AppenderAttachable<ILoggingEvent> {
+public class ListAppender extends AppenderBase<ILoggingEvent> implements AppenderAttachable<ILoggingEvent> {
 
     private final AppenderAttachableImpl<ILoggingEvent> appenders = new AppenderAttachableImpl<>();
 

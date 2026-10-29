@@ -37,7 +37,7 @@
 	</appender>
 
 	<!-- writes nothing; exposes the JSON encoder which LogStatements / LogbackTestExtension use to evaluate assertions -->
-	<appender name="AI_ENCODER_ONLY" class="no.entur.logging.cloud.gcp.spring.test.EncoderOnlyAppender">
+	<appender name="AI_ENCODER_ONLY" class="no.entur.logging.cloud.gcp.spring.test.NoopAppender">
 		<encoder class="no.entur.logging.cloud.gcp.logback.logstash.StackdriverLogstashEncoder">
 			<fieldNames>
 				<version>[ignore]</version>
@@ -53,7 +53,7 @@
 	</appender>
 
 	<!-- logback async appenders accept a single child, so fan out to both files -->
-	<appender name="AI_FANOUT" class="no.entur.logging.cloud.gcp.spring.test.FanOutAppender">
+	<appender name="AI_FANOUT" class="no.entur.logging.cloud.gcp.spring.test.ListAppender">
 		<appender-ref ref="AI_FILE" />
 		<appender-ref ref="AI_FILE_FULL" />
 		<appender-ref ref="AI_ENCODER_ONLY" />
