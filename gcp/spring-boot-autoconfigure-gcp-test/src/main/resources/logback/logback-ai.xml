@@ -26,7 +26,7 @@
 		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai.log}.full</file>
 		<!-- override with -Dentur.logging.ai.full.level=INFO -->
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>${entur.logging.ai.full.level:-ALL}</level>
+			<level>${entur.logging.ai.full.level:-DEBUG}</level>
 		</filter>
 		<append>true</append>
 		<immediateFlush>true</immediateFlush>
