@@ -28,7 +28,7 @@ so that `grep` returns a whole trace. Only INFO and above is written; override w
 `entur.logging.ai.level` (for example `DEBUG`). A second file, `<file>.full`, gets the same events with DEBUG and above, timestamps, thread names and full stack traces,
 for drill-down when the compact file is not enough; its level is set with `entur.logging.ai.full.level` (default `DEBUG`) (for example `grep -n 'some message' /tmp/test.log.full`).
 
-When `entur.logging.ai.enabled=true`, HTTP and gRPC request-response logging is also compact (`CompactLogbackLogstashSink` for HTTP, `CompactLogbackLogstashGrpcSink` for gRPC): a single line without pretty-printing or colours (`message | header: value; ... | body`). Bodies are not truncated by default; set `entur.logging.ai.request-response.max-body-size=2000` to cut longer bodies (a `...[truncated, N chars]` marker is appended).
+When `entur.logging.ai.enabled=true`, HTTP and gRPC request-response logging is also compact (`CompactLogbackLogstashSink` for HTTP, `CompactLogbackLogstashGrpcSink` for gRPC): a single line without pretty-printing or colours (`message | header: value; ... | body: <body>`). Bodies are not truncated by default; set `entur.logging.ai.request-response.max-body-size=2000` to cut longer bodies (a `...[truncated, N chars]` marker is appended). Only the compact file is truncated; `<file>.full` keeps the full body.
 Events are appended; delete both files first for a clean run.
 
 ```
@@ -75,5 +75,5 @@ When running tests, enable compact log output to save context. Logs then go to a
 - `/tmp/test.log.full`: same events with timestamps, thread names, DEBUG and above and full stack traces.
   Only consult it (with `grep -n -C 5`) when the compact file is not enough.
 - Include `-Dentur.logging.ai.level=DEBUG` to also get DEBUG in the compact file (`-Dentur.logging.ai.full.level=INFO` limits the `.full` file).
-- Request/response logging (HTTP, gRPC) is a single line: `message | header: value; ... | body`.
+- Request/response logging (HTTP, gRPC) is a single line: `message | header: value; ... | body: <body>`.
 ````

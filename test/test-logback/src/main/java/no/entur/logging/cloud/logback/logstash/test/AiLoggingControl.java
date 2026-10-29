@@ -15,6 +15,9 @@ public class AiLoggingControl {
     /** JVM system property; max number of characters of a request/response body in compact output. Unlimited if not set (or 0). */
     public static final String AI_BODY_MAX_PROPERTY = "entur.logging.ai.request-response.max-body-size";
 
+    /** Separates the body from the rest of a compact request-response message. */
+    public static final String BODY_MARKER = " | body: ";
+
     public static String truncateBody(String body) {
         int max = Integer.getInteger(AI_BODY_MAX_PROPERTY, 0);
         if (max > 0 && body.length() > max) {

@@ -82,7 +82,7 @@ public class CompactLogbackLogstashSink extends AbstractLogLevelSink {
 
         boolean json = ContentType.isJsonMediaType(contentType);
         if ((json || isXmlMediaType(contentType)) && body != null && !body.isBlank()) {
-            output.append(" | ").append(AiLoggingControl.truncateBody(compactBody(body, json)));
+            output.append(AiLoggingControl.BODY_MARKER).append(compactBody(body, json));
         }
     }
 

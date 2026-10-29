@@ -88,7 +88,7 @@ public class CompactLogbackLogstashGrpcSink extends LogbackLogstashGrpcSink {
             } catch (Exception e) {
                 compactBody = body.strip().replaceAll("\\s*\\R\\s*", "");
             }
-            output.append(" | ").append(AiLoggingControl.truncateBody(compactBody));
+            output.append(AiLoggingControl.BODY_MARKER).append(compactBody);
         }
     }
 }
