@@ -28,7 +28,7 @@ so that `grep` returns a whole trace. Only INFO and above is written; override w
 `entur.logging.ai.level` (for example `DEBUG`). A second file, `<file>.full`, gets the same events with all levels, timestamps, thread names and full stack traces,
 for drill-down when the compact file is not enough; its level can be limited with `entur.logging.ai.full.level` (default `ALL`) (for example `grep -n 'some message' /tmp/test.log.full`).
 
-When `entur.logging.ai.enabled=true`, HTTP and gRPC request-response logging is also compact (gRPC via `CompactLogbackLogstashGrpcSink`): a single line without pretty-printing or colours (`message | header: value; ... | body`).
+When `entur.logging.ai.enabled=true`, HTTP and gRPC request-response logging is also compact (`CompactLogbackLogstashSink` for HTTP, `CompactLogbackLogstashGrpcSink` for gRPC): a single line without pretty-printing or colours (`message | header: value; ... | body`).
 Events are appended; delete both files first for a clean run.
 
 ```

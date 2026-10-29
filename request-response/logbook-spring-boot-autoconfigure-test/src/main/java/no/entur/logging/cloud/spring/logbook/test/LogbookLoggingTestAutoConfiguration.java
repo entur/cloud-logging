@@ -3,6 +3,8 @@ package no.entur.logging.cloud.spring.logbook.test;
 import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupplierSource;
 import no.entur.logging.cloud.logbook.ondemand.state.ResponseHttpMessageStateSupplierSource;
+import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
+import no.entur.logging.cloud.logbook.logbook.test.CompactLogbackLogstashSink;
 import no.entur.logging.cloud.logbook.logbook.test.CompositeSink;
 import no.entur.logging.cloud.logbook.logbook.test.PrettyPrintingLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.logbook.test.PrettyPrintingSink;
@@ -39,6 +41,18 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
             RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
+
+        if (CompositeConsoleOutputControl.isAiEnabled()) {
+            // AI mode: single-line output, no pretty-printing or colors
+            return new CompactLogbackLogstashSink.Builder()
+                    .withLogger(logger)
+                    .withLogLevel(level)
+                    .withMaxBodySize(getMaxBodySize())
+                    .withMaxSize(getMaxSize())
+                    .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
+                    .withMessageComposers(format.getServer().getMessage().toComposer(), format.getClient().getMessage().toComposer())
+                    .build();
+        }
 
         Sink machineReadableSink = createAsyncMachineReadableSink(logger, level, requestHttpMessageStateSupplierSource,
                 responseHttpMessageStateSupplierSource, remoteHttpMessageContextSupplier);
@@ -84,6 +98,18 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
     public Sink sink(RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
+
+        if (CompositeConsoleOutputControl.isAiEnabled()) {
+            // AI mode: single-line output, no pretty-printing or colors
+            return new CompactLogbackLogstashSink.Builder()
+                    .withLogger(logger)
+                    .withLogLevel(level)
+                    .withMaxBodySize(getMaxBodySize())
+                    .withMaxSize(getMaxSize())
+                    .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
+                    .withMessageComposers(format.getServer().getMessage().toComposer(), format.getClient().getMessage().toComposer())
+                    .build();
+        }
 
         Sink machineReadableSink = createMachineReadbleSink(logger, level, remoteHttpMessageContextSupplier);
 

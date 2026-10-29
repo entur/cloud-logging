@@ -1,6 +1,5 @@
 package no.entur.logging.cloud.logbook.logbook.test;
 
-import no.entur.logging.cloud.logback.logstash.test.CompositeConsoleOutputControl;
 import org.entur.jackson.tools.jsh.AnsiSyntaxHighlight;
 import org.entur.jackson.tools.jsh.SyntaxHighlighter;
 import org.entur.jackson.tools.jsh.SyntaxHighlightingJsonGenerator;
@@ -26,10 +25,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
-/**
- * Pretty printing + coloring of request-response logging.
- * If {@link CompositeConsoleOutputControl#isAiEnabled()}, the output is instead compact: a single line without pretty-printing or colors.
- */
+/** Pretty printing + coloring of request-response logging */
 
 public class PrettyPrintingSink extends AbstractLogLevelSink {
 
@@ -79,10 +75,6 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
 
     protected final SyntaxHighlighter syntaxHighlighter;
 
-    protected final boolean compact = CompositeConsoleOutputControl.isAiEnabled();
-
-    protected final JsonMapper compactJsonMapper = JsonMapper.builder().build();
-
     public PrettyPrintingSink(BooleanSupplier logLevelEnabled, BiConsumer<Marker, String> logConsumer,
                               JsonMapper jsonMapper, SyntaxHighlighter syntaxHighlighter, MessageComposer server,
             MessageComposer client) {
@@ -94,11 +86,6 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
     @Override
     protected void requestMessage(HttpRequest request, StringBuilder messageBuilder, int truncated) throws IOException {
         super.requestMessage(request, messageBuilder, truncated);
-
-        if (compact) {
-            writeCompact(request.getHeaders(), request.getContentType(), request.getBodyAsString(), messageBuilder);
-            return;
-        }
 
         messageBuilder.append('\n');
         writeHeaders(request.getHeaders(), messageBuilder);
@@ -118,11 +105,6 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
                                    StringBuilder messageBuilder, int truncated) throws IOException {
         super.responseMessage(correlation, request, response, messageBuilder, truncated);
 
-        if (compact) {
-            writeCompact(response.getHeaders(), response.getContentType(), response.getBodyAsString(), messageBuilder);
-            return;
-        }
-
         messageBuilder.append('\n');
         writeHeaders(response.getHeaders(), messageBuilder);
 
@@ -134,40 +116,6 @@ public class PrettyPrintingSink extends AbstractLogLevelSink {
             final String body = response.getBodyAsString();
             writeBody(body, contentType, messageBuilder);
         }
-    }
-
-    /** Single line: message | header: value; header: value | body */
-    private void writeCompact(Map<String, List<String>> headers, String contentType, String body, StringBuilder output) {
-        String message = output.toString().strip().replaceAll("\\s*\\R\\s*", " ");
-        output.setLength(0);
-        output.append(message);
-
-        if (!headers.isEmpty()) {
-            output.append(" | ");
-            boolean first = true;
-            for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-                if (!first) {
-                    output.append("; ");
-                }
-                first = false;
-                output.append(entry.getKey().toLowerCase()).append(": ").append(String.join(", ", entry.getValue()));
-            }
-        }
-
-        if ((ContentType.isJsonMediaType(contentType) || isXmlMediaType(contentType)) && body != null && !body.isBlank()) {
-            output.append(" | ").append(compactBody(body, ContentType.isJsonMediaType(contentType)));
-        }
-    }
-
-    private String compactBody(String body, boolean json) {
-        if (json) {
-            try {
-                return compactJsonMapper.readTree(body).toString();
-            } catch (Exception e) {
-                // fall through, collapse whitespace instead
-            }
-        }
-        return body.strip().replaceAll("\\s*\\R\\s*", "");
     }
 
     private void writeHeaders(final Map<String, List<String>> headers, final StringBuilder output) {
