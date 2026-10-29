@@ -1,5 +1,6 @@
 package no.entur.logging.cloud.rr.grpc.test;
 
+import no.entur.logging.cloud.logback.logstash.test.AiLoggingControl;
 import no.entur.logging.cloud.rr.grpc.AbstractSinkBuilder;
 import no.entur.logging.cloud.rr.grpc.LogbackLogstashGrpcSink;
 import no.entur.logging.cloud.rr.grpc.message.GrpcConnect;
@@ -87,7 +88,7 @@ public class CompactLogbackLogstashGrpcSink extends LogbackLogstashGrpcSink {
             } catch (Exception e) {
                 compactBody = body.strip().replaceAll("\\s*\\R\\s*", "");
             }
-            output.append(" | ").append(compactBody);
+            output.append(" | ").append(AiLoggingControl.truncateBody(compactBody));
         }
     }
 }

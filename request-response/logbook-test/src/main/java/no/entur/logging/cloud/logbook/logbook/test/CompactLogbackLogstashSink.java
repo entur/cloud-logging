@@ -1,5 +1,6 @@
 package no.entur.logging.cloud.logbook.logbook.test;
 
+import no.entur.logging.cloud.logback.logstash.test.AiLoggingControl;
 import no.entur.logging.cloud.logbook.AbstractLogLevelSink;
 import no.entur.logging.cloud.logbook.AbstractSinkBuilder;
 import no.entur.logging.cloud.logbook.MessageComposer;
@@ -81,7 +82,7 @@ public class CompactLogbackLogstashSink extends AbstractLogLevelSink {
 
         boolean json = ContentType.isJsonMediaType(contentType);
         if ((json || isXmlMediaType(contentType)) && body != null && !body.isBlank()) {
-            output.append(" | ").append(compactBody(body, json));
+            output.append(" | ").append(AiLoggingControl.truncateBody(compactBody(body, json)));
         }
     }
 
