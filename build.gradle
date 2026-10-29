@@ -135,7 +135,7 @@ configure(jvmProjects()) {
             includeEngines 'junit-jupiter'
         }
         // e.g. ./gradlew test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test.log
-        ['entur.logging.ai.enabled', 'entur.logging.ai.file', 'entur.logging.ai.level', 'entur.logging.ai.full.level', 'entur.logging.ai.body.size.max'].each { name ->
+        ['entur.logging.ai.enabled', 'entur.logging.ai.file', 'entur.logging.ai.level', 'entur.logging.ai.full.level', 'entur.logging.ai.request-response.max-body-size'].each { name ->
             System.getProperty(name)?.with { systemProperty name, it }
         }
     }
