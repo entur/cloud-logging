@@ -26,14 +26,10 @@ public class AiLoggingControl {
         return body;
     }
 
-    /** JVM system property; max number of characters of a stack trace in compact output. Unlimited if not set (or 0). */
-    public static final String AI_STACKTRACE_MAX_PROPERTY = "entur.logging.ai.stacktrace.max-size";
+    /** JVM system property; max number of lines (exception headers and frames) of a stack trace in compact output. Unlimited if not set (or 0). */
+    public static final String AI_STACKTRACE_MAX_LINES_PROPERTY = "entur.logging.ai.stacktrace.max-lines";
 
-    public static String truncateStackTrace(String stackTrace) {
-        int max = Integer.getInteger(AI_STACKTRACE_MAX_PROPERTY, 0);
-        if (max > 0 && stackTrace.length() > max) {
-            return stackTrace.substring(0, max) + "...[truncated, " + stackTrace.length() + " chars]";
-        }
-        return stackTrace;
+    public static int stackTraceMaxLines() {
+        return Integer.getInteger(AI_STACKTRACE_MAX_LINES_PROPERTY, 0);
     }
 }

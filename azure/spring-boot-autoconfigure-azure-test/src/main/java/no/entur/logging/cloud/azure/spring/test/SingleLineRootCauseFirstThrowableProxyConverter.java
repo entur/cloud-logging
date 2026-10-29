@@ -20,12 +20,20 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
             return "";
         }
 
+        int maxLines = no.entur.logging.cloud.logback.logstash.test.AiLoggingControl.stackTraceMaxLines();
+        int count = 0;
         StringBuilder builder = new StringBuilder(multiLine.length() + 16);
         for (String line : multiLine.split("\\R")) {
             String trimmed = line.strip();
             if (trimmed.isEmpty()) {
                 continue;
             }
+            if (maxLines > 0 && count >= maxLines) {
+                int total = (int) multiLine.lines().filter(l -> !l.isBlank()).count();
+                builder.append(" ...[truncated, ").append(total).append(" lines]");
+                break;
+            }
+            count++;
             // a lone "[N skipped]" marker belongs to the preceding frame
             if (trimmed.startsWith("[") && builder.length() > 0) {
                 builder.append(' ');
@@ -34,6 +42,6 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
             }
             builder.append(trimmed);
         }
-        return no.entur.logging.cloud.logback.logstash.test.AiLoggingControl.truncateStackTrace(builder.toString());
+        return builder.toString();
     }
 }
