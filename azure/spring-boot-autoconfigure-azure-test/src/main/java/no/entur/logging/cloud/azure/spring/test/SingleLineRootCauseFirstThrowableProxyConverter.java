@@ -34,6 +34,6 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
             }
             builder.append(trimmed);
         }
-        return builder.toString();
+        return no.entur.logging.cloud.logback.logstash.test.AiLoggingControl.truncateStackTrace(builder.toString());
     }
 }

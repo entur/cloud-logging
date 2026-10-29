@@ -28,7 +28,7 @@ so that `grep` returns a whole trace. Only INFO and above is written; override w
 `entur.logging.ai.level` (for example `DEBUG`). A second file, `<file>.full`, gets the same events with DEBUG and above, timestamps, thread names and full stack traces,
 for drill-down when the compact file is not enough. Events where the compact file loses information (stack trace, truncated body) carry an id (`#a1b2c3`) in both files, so `grep -n -C 5 '#a1b2c3' <file>.full` gives the complete event (all events have an id in `.full`); the MDC is included in both files; its level is set with `entur.logging.ai.full.level` (default `DEBUG`) (for example `grep -n 'some message' /tmp/test.log.full`).
 
-When `entur.logging.ai.enabled=true`, HTTP and gRPC request-response logging is also compact (`CompactLogbackLogstashSink` for HTTP, `CompactLogbackLogstashGrpcSink` for gRPC): a single line without pretty-printing or colours (`message | header: value; ... | body: <body>`). Bodies are not truncated by default; set `entur.logging.ai.request-response.max-body-size=2000` to cut longer bodies (a `...[truncated, N chars]` marker is appended). Only the compact file is truncated; `<file>.full` keeps the full body.
+When `entur.logging.ai.enabled=true`, HTTP and gRPC request-response logging is also compact (`CompactLogbackLogstashSink` for HTTP, `CompactLogbackLogstashGrpcSink` for gRPC): a single line without pretty-printing or colours (`message | header: value; ... | body: <body>`). Bodies are not truncated by default; set `entur.logging.ai.request-response.max-body-size=2000` to cut longer bodies (a `...[truncated, N chars]` marker is appended). Only the compact file is truncated; `<file>.full` keeps the full body. Likewise `entur.logging.ai.stacktrace.max-size=1500` cuts long single-line stack traces in the compact file only; use the `#id` to find the full trace in `<file>.full`.
 Events are appended; delete both files first for a clean run.
 
 ```
@@ -48,7 +48,7 @@ Requires the `*-test` artifact of this library on the test classpath.
 
 ```groovy
 test {
-    ['entur.logging.ai.enabled', 'entur.logging.ai.file', 'entur.logging.ai.level', 'entur.logging.ai.full.level', 'entur.logging.ai.request-response.max-body-size'].each { key ->
+    ['entur.logging.ai.enabled', 'entur.logging.ai.file', 'entur.logging.ai.level', 'entur.logging.ai.full.level', 'entur.logging.ai.request-response.max-body-size', 'entur.logging.ai.stacktrace.max-size'].each { key ->
         if (System.getProperty(key) != null) {
             systemProperty key, System.getProperty(key)
         }
