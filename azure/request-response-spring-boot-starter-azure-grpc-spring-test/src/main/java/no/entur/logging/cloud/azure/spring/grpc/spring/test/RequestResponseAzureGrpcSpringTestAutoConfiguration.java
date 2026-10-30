@@ -3,6 +3,8 @@ package no.entur.logging.cloud.azure.spring.grpc.spring.test;
 import no.entur.logging.cloud.azure.spring.grpc.spring.RequestResponseAzureGrpcSpringAutoConfiguration;
 import no.entur.logging.cloud.spring.rr.grpc.AbstractRequestResponseGrpcSinkAutoConfiguration;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;
+import no.entur.logging.cloud.logback.logstash.test.AiLoggingControl;
+import no.entur.logging.cloud.rr.grpc.test.CompactLogbackLogstashGrpcSink;
 import no.entur.logging.cloud.rr.grpc.test.CompositeSink;
 import no.entur.logging.cloud.rr.grpc.test.PrettyPrintingLogLevelLogstashLogbackGrpcSink;
 import no.entur.logging.cloud.rr.grpc.test.PrettyPrintingGrpcSink;
@@ -28,6 +30,14 @@ public class RequestResponseAzureGrpcSpringTestAutoConfiguration extends Abstrac
     public GrpcSink grpcSink() {
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = parseLevel(loggerLevel);
+
+        if (AiLoggingControl.isAiEnabled()) {
+            // AI mode: single-line output, no pretty-printing or colors
+            return new CompactLogbackLogstashGrpcSink.Builder()
+                    .withLogger(logger)
+                    .withLogLevel(level)
+                    .build();
+        }
 
         GrpcSink machineReadableSink = createMachineReadbleSink(logger, level);
 
