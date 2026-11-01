@@ -1,6 +1,7 @@
 <included>
 
 	<conversionRule conversionWord="aliasMdc" class="no.entur.logging.cloud.logback.logstash.test.MdcAliasConverter" />
+	<conversionRule conversionWord="aliasMsg" class="no.entur.logging.cloud.logback.logstash.test.AliasMessageConverter" />
 	<conversionRule conversionWord="eventId" class="no.entur.logging.cloud.logback.logstash.test.EventIdConverter" />
 	<conversionRule conversionWord="cMsg" class="no.entur.logging.cloud.logback.logstash.test.TruncateBodyMessageConverter" />
 	<conversionRule conversionWord="sEx" class="no.entur.logging.cloud.azure.spring.test.SingleLineRootCauseFirstThrowableProxyConverter" />
@@ -39,7 +40,7 @@
 		<append>true</append>
 		<immediateFlush>true</immediateFlush>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger%replace(%replace(%aliasMdc){'\s*[\r\n]+\s*',' '}){'^(.+)$',' [$1]'}%eventId{always} : %msg%n%ex</pattern>
+			<pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger%replace(%replace(%aliasMdc){'\s*[\r\n]+\s*',' '}){'^(.+)$',' [$1]'}%eventId{always} : %aliasMsg%n%ex</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>

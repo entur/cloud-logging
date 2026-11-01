@@ -16,7 +16,7 @@ public class TruncateBodyMessageConverter extends ClassicConverter {
             return "";
         }
         // keep one event per line
-        message = message.replaceAll("\\s*[\\r\\n]+\\s*", " ");
+        message = MdcAliasConverter.aliasUuids(message.replaceAll("\\s*[\\r\\n]+\\s*", " "));
         int index = message.indexOf(AiLoggingControl.BODY_MARKER);
         if (index == -1) {
             return message;

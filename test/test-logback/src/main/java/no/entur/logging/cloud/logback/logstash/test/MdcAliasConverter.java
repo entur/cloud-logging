@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 /**
- * Like <code>%mdc</code>, but UUID values are replaced by short aliases (<code>u1</code>, <code>u2</code>, ...), the same UUID
+ * Like <code>%mdc</code>, but UUID values (see also {@link #aliasUuids(String)}, used for messages incl. request-response headers) are replaced by short aliases (<code>u1</code>, <code>u2</code>, ...), the same UUID
  * always getting the same alias within a JVM. Meant for local AI mode only, to reduce the size of the log files.
  * Disable with <code>-Dentur.logging.ai.mdc.alias=false</code>.
  */
@@ -26,6 +26,14 @@ public class MdcAliasConverter extends ClassicConverter {
         }
     };
 
+    /** Replaces all UUIDs in the text with aliases, unless disabled with {@link AiLoggingControl#AI_MDC_ALIAS_PROPERTY}. */
+    public static String aliasUuids(String text) {
+        if (text == null || text.indexOf('-') == -1 || "false".equalsIgnoreCase(System.getProperty(AiLoggingControl.AI_MDC_ALIAS_PROPERTY))) {
+            return text;
+        }
+        return UUID.matcher(text).replaceAll(m -> aliasOf(m.group()));
+    }
+
     public static String aliasOf(String uuid) {
         synchronized (ALIASES) {
             return ALIASES.computeIfAbsent(uuid, k -> "u" + COUNTER.incrementAndGet());
@@ -38,16 +46,13 @@ public class MdcAliasConverter extends ClassicConverter {
         if (mdc == null || mdc.isEmpty()) {
             return "";
         }
-        boolean alias = !"false".equalsIgnoreCase(System.getProperty(AiLoggingControl.AI_MDC_ALIAS_PROPERTY));
         StringBuilder b = new StringBuilder();
         for (Map.Entry<String, String> e : mdc.entrySet()) {
             if (b.length() > 0) {
                 b.append(", ");
             }
             String value = e.getValue();
-            if (alias && value != null && value.indexOf('-') != -1) {
-                value = UUID.matcher(value).replaceAll(m -> aliasOf(m.group()));
-            }
+            value = aliasUuids(value);
             b.append(e.getKey()).append('=').append(value);
         }
         return b.toString();
