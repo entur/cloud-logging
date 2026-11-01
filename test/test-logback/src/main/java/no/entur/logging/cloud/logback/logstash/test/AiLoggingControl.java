@@ -50,4 +50,7 @@ public class AiLoggingControl {
     public static boolean isDedupeEnabled() {
         return !"false".equalsIgnoreCase(System.getProperty(AI_DEDUPE_PROPERTY));
     }
+
+    /** JVM system property; set to <code>false</code> to keep UUIDs in MDC values instead of replacing them with short aliases (u1, u2, ...). Default true. */
+    public static final String AI_MDC_ALIAS_PROPERTY = "entur.logging.ai.mdc.alias";
 }
