@@ -92,7 +92,8 @@ When running tests, enable compact log output to save context. Logs then go to a
   message, root cause first, framework frames removed, 2 frames per exception. Use `grep` (for example `grep -n 'ERROR\|WARN' /tmp/test.log`), do not read the whole file.
 - `/tmp/test.log.full`: the same events plus what the compact file leaves out: DEBUG, timestamps, thread names, full logger names,
   framework start-up/shutdown lines (server ports are kept in the compact file), transport headers (`user-agent`, `accept*`, `grpc-*encoding`, `date`, ...),
-  whole bodies and full stack traces. Look for those directly in this file with `grep -n`; an `#id` in the compact file (truncated stack trace or body)
+  whole bodies and full stack traces. Some things are only logged at DEBUG and so only appear here, for example requests rejected by
+  a security filter before request-response logging (`grep -n 'Response 4[0-9][0-9]\|Rejecting access' /tmp/test.log.full`). Look for those directly in this file with `grep -n`; an `#id` in the compact file (truncated stack trace or body)
   finds the complete event with `grep -n -C 5 '#id' /tmp/test.log.full`.
 - Include `-Dentur.logging.ai.level=DEBUG` to also get DEBUG in the compact file (`-Dentur.logging.ai.full.level=INFO` limits the `.full` file).
 - Request/response logging (HTTP, gRPC) is a single line: `message | header: value; ... | body: <body>`.
