@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs the agents on the logs collected by generate-logs.sh, all runs in parallel.
+# Runs the agents on the logs collected by generate-logs.sh, several runs in parallel.
 #
 # Usage: run-agents.sh <logs dir> [setups] [agents]
 #
@@ -12,7 +12,9 @@
 #
 # Both tools only get read-only shell commands (no writes). Output per run in <logs dir>/runs/:
 # <setup>-<tool>-<model>-<effort>.prompt, .out (answer and usage), .meta (exit code, seconds).
-# DRY_RUN=1 only writes the prompts. Print a table of the runs with summarize.py.
+# MAX_PARALLEL limits the number of concurrent runs (default 8), RUN_TIMEOUT stops a run after that many seconds
+# (default 1200, exit=124 in .meta). DRY_RUN=1 only writes the prompts.
+# Print a table of the runs with summarize.py.
 set -euo pipefail
 
 [ $# -ge 1 ] || { echo "usage: $0 <logs dir> [setups] [agents]" >&2; exit 2; }
@@ -47,13 +49,13 @@ run() { # setup tool model effort
   case $tool in
     copilot)
       for c in $COMMANDS; do args+=(--allow-tool "shell($c:*)"); done
-      (cd "$LOGS" && copilot -p "$(cat "$o.prompt")" --reasoning-effort "$effort" "${args[@]}" \
+      (cd "$LOGS" && timeout "${RUN_TIMEOUT:-1200}" copilot -p "$(cat "$o.prompt")" --reasoning-effort "$effort" "${args[@]}" \
         --deny-tool write --no-custom-instructions --no-color > "$o.out" 2>&1) || status=$?
       ;;
     claude)
       local allowed=Read,Grep,Glob
       for c in $COMMANDS; do allowed+=",Bash($c *)"; done
-      (cd "$LOGS" && claude -p "$(cat "$o.prompt")" --effort "$effort" "${args[@]}" \
+      (cd "$LOGS" && timeout "${RUN_TIMEOUT:-1200}" claude -p "$(cat "$o.prompt")" --effort "$effort" "${args[@]}" \
         --tools Bash,Read,Grep,Glob --allowedTools "$allowed" --strict-mcp-config --no-session-persistence \
         --output-format stream-json --verbose > "$o.out" 2> "$o.err") || status=$?
       ;;
@@ -65,6 +67,9 @@ run() { # setup tool model effort
 for setup in $SETUPS; do
   for agent in $AGENTS; do
     IFS=: read -r tool model effort <<< "$agent"
+    while [ "$(jobs -rp | wc -l)" -ge "${MAX_PARALLEL:-8}" ]; do
+      wait -n || true
+    done
     run "$setup" "$tool" "$model" "$effort" &
   done
 done
