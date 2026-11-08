@@ -44,11 +44,11 @@ Totals: mean score, runs with 4.00, tokens, tool calls, time, cost.
 | Strong models (Opus, Sonnet in both tools, GPT-6.1 Sol, Gemini 4 Argon, Grok 4.7) | 92 % (7/12 perfect), 24.9M tokens, 469 calls, 50 min, $11.94 | 97 % (10/12 perfect), 15.8M tokens, 440 calls, 41 min, $8.38 | 100 % (12/12 perfect), 3.8M tokens, 151 calls, 15 min, $2.60 |
 | Cheap models (Haiku 5.5, GPT-6 Luna, Gemini 3.8 Flash, MAI-Code-1.1-Flash) | 74 % (3/8 perfect), 62.8M tokens, 765 calls, 92 min, $5.78 | 78 % (3/8 perfect), 37.7M tokens, 515 calls, 51 min, $3.54 | 96 % (3/8 perfect), 14.6M tokens, 216 calls, 27 min, $1.52 |
 
-- AI mode was the most accurate setup (98 % against 90 % and 84 %) at a quarter to a third of the cost and time: $4.12
-  and 42 minutes for its 20 runs, against $11.92 / 92 minutes (careful) and $17.72 / 142 minutes (plain), with 18M tokens
-  against 54M and 88M.
+- AI mode was the most accurate setup (98 % against 90 % and 84 %) at a quarter to a third of the cost ($4.12 for its 20
+  runs, against $11.92 careful and $17.72 plain) and a third to a half of the time (42 against 92 and 142 minutes), with
+  18M tokens against 54M and 88M.
 - At low effort the gap is widest: 98 % against 80 % and 79 %. High effort lets the baselines catch up on accuracy (99 %
-  careful, 90 % plain) but costs 3-5 times as much as AI mode at high effort.
+  careful, 90 % plain) but costs 3.2 and 4.8 times as much as AI mode at high effort.
 - The strong models were perfect in all 12 AI-mode runs ($2.60 in total), against 10 of 12 with the careful baseline
   ($8.38) and 7 of 12 with the plain one ($11.94). GPT-6.1 Sol was perfect in every setup; for it AI mode meant 2-5 times
   fewer tokens and 2-4 times less time and cost.
