@@ -8,11 +8,11 @@
 	<conversionRule conversionWord="sEx" class="no.entur.logging.cloud.logback.logstash.test.SingleLineRootCauseFirstThrowableProxyConverter" />
 
 	<!--
-		Compact plain text (one event per line) written to the file given by -Dentur.logging.ai.file (default: entur-logging-ai.log in the temp directory),
+		Compact plain text (one event per line) written to <file>.compact, where <file> is given by -Dentur.logging.ai.file (default: entur-logging-ai in the temp directory),
 		nothing on the console. Included from logback-test.xml only if -Dentur.logging.ai.enabled=true.
 	-->
 	<appender name="AI_FILE" class="no.entur.logging.cloud.logback.logstash.test.AiFileAppender">
-		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai.log}</file>
+		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.compact</file>
 		<!-- framework start-up/shutdown chatter below WARN, override with -Dentur.logging.ai.quiet-loggers=a.b,c.d -->
 		<filter class="no.entur.logging.cloud.logback.logstash.test.QuietLoggersFilter" />
 		<!-- compact file level, override with -Dentur.logging.ai.level=DEBUG -->
@@ -38,7 +38,7 @@
 
 	<!-- Drill-down: the same events unfiltered and untrimmed (all levels, full stack traces) in <file>.full -->
 	<appender name="AI_FILE_FULL" class="no.entur.logging.cloud.logback.logstash.test.AiFileAppender">
-		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai.log}.full</file>
+		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.full</file>
 		<!-- override with -Dentur.logging.ai.full.level=INFO -->
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>${entur.logging.ai.full.level:-DEBUG}</level>

@@ -23,13 +23,13 @@ When using an async appender, there is a race condition for in-flight log events
 Set the JVM system property `entur.logging.ai.enabled=true` to write all log events to files instead of the console:
 
 ```
-./gradlew test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test.log
+./gradlew test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test
 ```
 
-The file is given by `entur.logging.ai.file` (default: `entur-logging-ai.log` in the temp directory). Events are appended; delete both files first for a clean run.
+The files are `<file>.compact` and `<file>.full`, where `<file>` is given by `entur.logging.ai.file` (default: `entur-logging-ai` in the temp directory). Events are appended; delete both files first for a clean run.
 All test JVMs (one per module) append to the same files; each JVM starts with a line `---- JVM pid N started <time> in <module dir> (aliases u1, h1, ... restart) ----`.
 
-### Compact file (`<file>`)
+### Compact file (`<file>.compact`)
 One event per line, `LEVEL Logger [mdc] #id : message | stack trace`, INFO and above (override with `entur.logging.ai.level`, for example `DEBUG`).
 
 - No timestamp, thread or colours. The logger is the simple class name (or the full name if the logger is not named after a class).
@@ -81,25 +81,25 @@ Then add this to the instructions file read by your AI agent:
 
 When running tests, enable compact log output to save context. Logs then go to a file instead of the console:
 
-    rm -f /tmp/test.log /tmp/test.log.full
+    rm -f /tmp/test.compact /tmp/test.full
     # Gradle
-    ./gradlew test -q --console=plain -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test.log 2>&1 | head -40
+    ./gradlew test -q --console=plain -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test 2>&1 | head -40
     # Maven (keep only the Maven/test error lines, not the plugin and JVM warnings or client stack traces)
-    mvn -q test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test.log 2>&1 | grep '^\[ERROR\]' | cut -c1-300 | head -30
+    mvn -q test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test 2>&1 | grep '^\[ERROR\]' | cut -c1-300 | head -30
 
 - Console output only contains the test summary and failures (filtered as above, about 1.5 KB). Do not use `-i`/`--info` (Gradle) or `-X` (Maven); they are not needed.
-- `/tmp/test.log`: compact, one event per line (`LEVEL SimpleClassName [mdc] #id : message`), INFO and above. Stack traces are on the same line as the
-  message, root cause first, framework frames removed, 2 frames per exception. Use `grep` (for example `grep -n 'ERROR\|WARN' /tmp/test.log`), do not read the whole file.
-- `/tmp/test.log.full`: the same events plus what the compact file leaves out: DEBUG, timestamps, thread names, full logger names,
+- `/tmp/test.compact`: compact, one event per line (`LEVEL SimpleClassName [mdc] #id : message`), INFO and above. Stack traces are on the same line as the
+  message, root cause first, framework frames removed, 2 frames per exception. Use `grep` (for example `grep -n 'ERROR\|WARN' /tmp/test.compact`), do not read the whole file.
+- `/tmp/test.full`: the same events plus what the compact file leaves out: DEBUG, timestamps, thread names, full logger names,
   framework start-up/shutdown lines (server ports are kept in the compact file), transport headers (`user-agent`, `accept*`, `grpc-*encoding`, `date`, ...),
   whole bodies and full stack traces. Some things are only logged at DEBUG and so only appear here, for example requests rejected by
-  a security filter before request-response logging (`grep -n 'Response 4[0-9][0-9]\|Rejecting access' /tmp/test.log.full`). Look for those directly in this file with `grep -n`; an `#id` in the compact file (truncated stack trace or body)
-  finds the complete event with `grep -n -C 5 '#id' /tmp/test.log.full`.
+  a security filter before request-response logging (`grep -n 'Response 4[0-9][0-9]\|Rejecting access' /tmp/test.full`). Look for those directly in this file with `grep -n`; an `#id` in the compact file (truncated stack trace or body)
+  finds the complete event with `grep -n -C 5 '#id' /tmp/test.full`.
 - Include `-Dentur.logging.ai.level=DEBUG` to also get DEBUG in the compact file (`-Dentur.logging.ai.full.level=INFO` limits the `.full` file).
 - Request/response logging (HTTP, gRPC) is a single line: `message | header: value; ... | body: <body>`.
-- Repeated WARN/ERROR events are collapsed in `/tmp/test.log`: the first is printed, the rest are summarized later in a line
+- Repeated WARN/ERROR events are collapsed in `/tmp/test.compact`: the first is printed, the rest are summarized later in a line
   `repeated N more times, N+1 in total (first #id, last #id): message` whose total includes that first event. Counting restarts when logging
-  is reconfigured (e.g. a new Spring context), so a message can have several such lines. For exact counts grep `/tmp/test.log.full` for the
-  logger and the message, as the same message can come from several loggers: `grep -c 'DocumentEndpoint .* : Hello world' /tmp/test.log.full`.
+  is reconfigured (e.g. a new Spring context), so a message can have several such lines. For exact counts grep `/tmp/test.full` for the
+  logger and the message, as the same message can come from several loggers: `grep -c 'DocumentEndpoint .* : Hello world' /tmp/test.full`.
 - UUIDs and hex ids are replaced by aliases (`u1`, `h1`, ...) in both files. Each test JVM starts with a `---- JVM pid ...` line; aliases restart there.
 ````
