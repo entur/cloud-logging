@@ -37,7 +37,7 @@ One event per line, `LEVEL Logger [mdc] #id : message | stack trace`, INFO and a
 - Stack traces are on the same line as the message (separated by ` | `), root cause first, with framework frames removed, so that `grep` returns a whole trace.
   `entur.logging.ai.stacktrace.max-lines` keeps the first 2 frames of each exception by default (`0` = unlimited) and `entur.logging.ai.stacktrace.max-causes=3` keeps the root cause and the next two wrapping exceptions (`[... N frames omitted]` / `[... more causes omitted]` markers).
 - Events below WARN from framework loggers which only report start-up and shutdown (Tomcat, Spring test context, gRPC server, Hikari, ...) are left out, except the line with the port a server listens on (`Tomcat started on port N`). Override the logger name prefixes with `entur.logging.ai.quiet-loggers=a.b,c.d` (empty value: keep everything).
-- Repeated WARN/ERROR events (same level, logger and root cause or message) are collapsed: the first is printed, the rest are counted and a line `repeated N more times (first #id, last #id): ...` is written when the cache (500 keys, least recently used evicted) overflows or the test JVM stops. Disable with `entur.logging.ai.dedupe=false`.
+- Repeated WARN/ERROR events (same level, logger and root cause or message) are collapsed: the first is printed, the rest are counted and a line `repeated N more times, N+1 in total (first #id, last #id): ...` is written (the total includes the first event) when the cache (500 keys, least recently used evicted) overflows or the test JVM stops. Disable with `entur.logging.ai.dedupe=false`.
 
 ### Full file (`<file>.full`)
 The same events with timestamps, thread names, full logger names, DEBUG and above (`entur.logging.ai.full.level`, default `DEBUG`), all request-response headers, whole bodies and full stack traces, for drill-down when the compact file is not enough.
@@ -96,5 +96,8 @@ When running tests, enable compact log output to save context. Logs then go to a
   finds the complete event with `grep -n -C 5 '#id' /tmp/test.log.full`.
 - Include `-Dentur.logging.ai.level=DEBUG` to also get DEBUG in the compact file (`-Dentur.logging.ai.full.level=INFO` limits the `.full` file).
 - Request/response logging (HTTP, gRPC) is a single line: `message | header: value; ... | body: <body>`.
+- Repeated WARN/ERROR events are collapsed in `/tmp/test.log`: the first is printed, the rest are summarized later in a line
+  `repeated N more times, N+1 in total (first #id, last #id): message` whose total includes that first event. Counting restarts when logging
+  is reconfigured (e.g. a new Spring context), so a message can have several such lines. For exact counts use `grep -c 'message' /tmp/test.log.full`.
 - UUIDs and hex ids are replaced by aliases (`u1`, `h1`, ...) in both files. Each test JVM starts with a `---- JVM pid ...` line; aliases restart there.
 ````

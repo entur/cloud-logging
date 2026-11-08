@@ -46,7 +46,7 @@ public class DeduplicatingAppenderTest {
         assertThat(collector.lines.stream().filter(l -> l.equals("INFO info")).count()).isEqualTo(5);
         assertThat(collector.lines.stream().filter(l -> l.equals("ERROR failed")).count()).isEqualTo(1);
         assertThat(collector.lines.stream().filter(l -> l.equals("WARN other")).count()).isEqualTo(1);
-        assertThat(collector.lines.stream().anyMatch(l -> l.startsWith("ERROR repeated 4 more times (first #") && l.endsWith("failed | java.lang.NumberFormatException: C"))).isTrue();
+        assertThat(collector.lines.stream().anyMatch(l -> l.startsWith("ERROR repeated 4 more times, 5 in total (first #") && l.endsWith("failed | java.lang.NumberFormatException: C"))).isTrue();
     }
 
     @Test
@@ -66,6 +66,6 @@ public class DeduplicatingAppenderTest {
             dedup.doAppend(new ch.qos.logback.classic.spi.LoggingEvent(Logger.class.getName(), logger, Level.WARN, message, null, null));
         }
 
-        assertThat(collector.lines.stream().anyMatch(l -> l.startsWith("WARN repeated 2 more times") && l.endsWith(": a"))).isTrue();
+        assertThat(collector.lines.stream().anyMatch(l -> l.startsWith("WARN repeated 2 more times, 3 in total (first #") && l.endsWith(": a"))).isTrue();
     }
 }

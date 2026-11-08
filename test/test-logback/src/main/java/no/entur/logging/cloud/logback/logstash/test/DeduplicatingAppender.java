@@ -17,7 +17,8 @@ import java.util.Map;
 /**
  * Collapses repeated WARN (and above) events before they reach the attached appenders: the first occurrence is forwarded,
  * later identical ones are dropped and counted, and a single line
- * <code>repeated N more times (first #id, last #id): message</code> is forwarded when the entry is evicted or the appender stops.
+ * <code>repeated N more times, N+1 in total (first #id, last #id): message</code> is forwarded when the entry is evicted or the appender stops.
+ * The total includes the first occurrence (printed earlier), so that readers do not have to work out whether to add it.
  * <p>
  * Events are identical if level, logger and root cause (or, without an exception, the message) are equal.
  * Memory is bounded: at most {@link #setMaxEntries(int) maxEntries} small entries are kept (least recently used evicted,
@@ -109,7 +110,7 @@ public class DeduplicatingAppender extends AppenderBase<ILoggingEvent> implement
         if (entry.suppressed == 0) {
             return;
         }
-        String message = "repeated " + entry.suppressed + " more times (first #" + entry.firstId + ", last #" + entry.lastId + "): " + entry.message;
+        String message = "repeated " + entry.suppressed + " more times, " + (entry.suppressed + 1) + " in total (first #" + entry.firstId + ", last #" + entry.lastId + "): " + entry.message;
         Logger logger = ((ch.qos.logback.classic.LoggerContext) getContext()).getLogger(entry.loggerName);
         appenders.appendLoopOnAppenders(new LoggingEvent(DeduplicatingAppender.class.getName(), logger, entry.level, message, null, null));
         entry.suppressed = 0;
