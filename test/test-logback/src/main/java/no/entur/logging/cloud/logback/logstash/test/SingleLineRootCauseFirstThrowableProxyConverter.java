@@ -1,18 +1,24 @@
-package no.entur.logging.cloud.gcp.spring.test;
+package no.entur.logging.cloud.logback.logstash.test;
 
 import ch.qos.logback.classic.pattern.RootCauseFirstThrowableProxyConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import no.entur.logging.cloud.logback.logstash.test.AiLoggingControl;
+import ch.qos.logback.core.CoreConstants;
+
+import java.util.regex.Pattern;
 
 /**
  * Root-cause-first stack trace rendered on a single line, so that a trace can be found and read with grep.
- * Supports the same options as {@code %rEx}: depth followed by exclude patterns.
+ * Supports the same options as {@code %rEx}: depth followed by exclude patterns (frames containing any of them are left out).
+ * Frames per exception and the number of exceptions are limited by {@link AiLoggingControl#stackTraceMaxLines()} and
+ * {@link AiLoggingControl#stackTraceMaxCauses()}; logback's own markers ({@code [N skipped]}, {@code ... N common frames omitted}) are dropped.
  * Output is empty if there is no exception, otherwise it starts with a separator, e.g.
- * {@code  | java.lang.RuntimeException: root | at a.B.c(B.java:1) | Wrapped by: java.lang.IllegalStateException: boom | ...}.
+ * {@code  | java.lang.RuntimeException: root | at a.B.c(B.java:1) | [... 3 frames omitted] | Wrapped by: java.lang.IllegalStateException: boom | ...}.
  */
 public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFirstThrowableProxyConverter {
 
     private static final String SEPARATOR = " | ";
+
+    private static final Pattern SKIPPED_SUFFIX = Pattern.compile("\\s*\\[\\d+ skipped]$");
 
     @Override
     public String convert(ILoggingEvent event) {
@@ -21,8 +27,6 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
             return "";
         }
 
-        int maxLines = no.entur.logging.cloud.logback.logstash.test.AiLoggingControl.stackTraceMaxLines();
-        int count = 0;
         int maxFrames = AiLoggingControl.stackTraceMaxLines();
         int maxCauses = AiLoggingControl.stackTraceMaxCauses();
 
@@ -30,16 +34,19 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
         int causes = 0;
         int frames = 0;
         int omittedFrames = 0;
-        boolean skipCause = false;
         for (String line : multiLine.split("\\R")) {
             String trimmed = line.strip();
-            if (trimmed.isEmpty()) {
+            if (trimmed.isEmpty() || isLogbackMarker(trimmed)) {
                 continue;
             }
-            boolean frame = trimmed.startsWith("at ");
-            boolean marker = trimmed.startsWith("[") || trimmed.startsWith("...");
-            if (!frame && !marker) {
-                // header of a new exception
+            if (trimmed.startsWith("at ")) {
+                frames++;
+                if (maxFrames > 0 && frames > maxFrames) {
+                    omittedFrames++;
+                    continue;
+                }
+                builder.append(SEPARATOR).append(SKIPPED_SUFFIX.matcher(trimmed).replaceFirst(""));
+            } else if (causes == 0 || isExceptionHeader(trimmed)) {
                 appendOmitted(builder, omittedFrames);
                 omittedFrames = 0;
                 frames = 0;
@@ -48,25 +55,22 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
                     builder.append(SEPARATOR).append("[... more causes omitted]");
                     return builder.toString();
                 }
-            } else if (frame) {
-                frames++;
-                if (maxFrames > 0 && frames > maxFrames) {
-                    omittedFrames++;
-                    continue;
-                }
-            } else if (omittedFrames > 0) {
-                continue;
-            }
-            // a lone "[N skipped]" marker belongs to the preceding frame
-            if (trimmed.startsWith("[") && builder.length() > 0) {
-                builder.append(' ');
+                builder.append(SEPARATOR).append(trimmed);
             } else {
-                builder.append(SEPARATOR);
+                // continuation of a multi-line exception message
+                builder.append(' ').append(trimmed);
             }
-            builder.append(trimmed);
         }
         appendOmitted(builder, omittedFrames);
         return builder.toString();
+    }
+
+    private static boolean isExceptionHeader(String line) {
+        return line.startsWith(CoreConstants.WRAPPED_BY) || line.startsWith(CoreConstants.SUPPRESSED) || line.startsWith(CoreConstants.CAUSED_BY);
+    }
+
+    private static boolean isLogbackMarker(String line) {
+        return (line.startsWith("[") && line.endsWith(" skipped]")) || (line.startsWith("... ") && line.endsWith(" omitted"));
     }
 
     private static void appendOmitted(StringBuilder builder, int omittedFrames) {

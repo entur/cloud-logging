@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.gcp.spring.test;
+package no.entur.logging.cloud.logback.logstash.test;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;

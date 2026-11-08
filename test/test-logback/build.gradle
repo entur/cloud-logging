@@ -7,6 +7,10 @@ dependencies {
     api ("ch.qos.logback:logback-classic")
     api ("ch.qos.logback:logback-core")
 
+    // CompactMessageMarker (AI mode)
+    api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
+    api ("tools.jackson.core:jackson-core")
+
     api ("org.entur.jackson:jackson-tools-syntax-highlight:${jacksonSyntaxHighlightVersion}")
     api ("org.entur.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
 

@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.rr.grpc.test;
 
-import no.entur.logging.cloud.logback.logstash.test.AiLoggingControl;
+import no.entur.logging.cloud.logback.logstash.test.CompactRequestResponse;
+import no.entur.logging.cloud.logback.logstash.test.CompactMessageMarker;
 import no.entur.logging.cloud.rr.grpc.AbstractSinkBuilder;
 import no.entur.logging.cloud.rr.grpc.LogbackLogstashGrpcSink;
 import no.entur.logging.cloud.rr.grpc.message.GrpcConnect;
@@ -16,9 +17,9 @@ import java.util.function.BooleanSupplier;
 
 /**
  * Compact request-response logging message for tooling (AI mode): a single line without pretty-printing or colors,
- * in the form <code>message | header: value; header: value | body</code>.
+ * in the form <code>message | header: value; header: value | body: &lt;body&gt;</code>. The compact file gets a shorter variant
+ * (see {@link CompactRequestResponse}).
  */
-
 public class CompactLogbackLogstashGrpcSink extends LogbackLogstashGrpcSink {
 
     public static class Builder extends AbstractSinkBuilder<Builder, Builder> {
@@ -41,54 +42,58 @@ public class CompactLogbackLogstashGrpcSink extends LogbackLogstashGrpcSink {
     }
 
     @Override
-    protected void connectMessage(GrpcConnect connect, StringBuilder messageBuilder) {
-        super.connectMessage(connect, messageBuilder);
-        compact(connect.getHeaders(), null, messageBuilder);
+    public void connectMessage(GrpcConnect connect) {
+        StringBuilder messageBuilder = new StringBuilder(256);
+        connectMessage(connect, messageBuilder);
+        log(createConnectMarker(connect), messageBuilder, connect.getHeaders(), null);
     }
 
     @Override
-    protected void requestMessage(GrpcRequest request, StringBuilder messageBuilder) {
-        super.requestMessage(request, messageBuilder);
-        compact(request.getHeaders(), request.getBody(), messageBuilder);
+    public void requestMessage(GrpcRequest request) {
+        StringBuilder messageBuilder = new StringBuilder(256);
+        requestMessage(request, messageBuilder);
+        log(createRequestMarker(request), messageBuilder, request.getHeaders(), request.getBody());
     }
 
     @Override
-    protected void responseMessage(GrpcResponse response, StringBuilder messageBuilder) {
-        super.responseMessage(response, messageBuilder);
-        compact(response.getHeaders(), response.getBody(), messageBuilder);
+    public void responseMessage(GrpcResponse response) {
+        StringBuilder messageBuilder = new StringBuilder(256);
+        responseMessage(response, messageBuilder);
+        log(createResponseMarker(response), messageBuilder, response.getHeaders(), response.getBody());
     }
 
     @Override
-    protected void disconnectMessage(GrpcConnect connectMessage, GrpcDisconnect disconnectMessage, StringBuilder messageBuilder) {
-        super.disconnectMessage(connectMessage, disconnectMessage, messageBuilder);
-        compact(disconnectMessage.getHeaders(), null, messageBuilder);
+    public void disconnectMessage(GrpcConnect connectMessage, GrpcDisconnect disconnectMessage) {
+        StringBuilder messageBuilder = new StringBuilder(256);
+        disconnectMessage(connectMessage, disconnectMessage, messageBuilder);
+        log(createDisconnectMarker(connectMessage, disconnectMessage), messageBuilder, disconnectMessage.getHeaders(), null);
     }
 
-    private void compact(Map<String, ?> headers, String body, StringBuilder output) {
-        String message = output.toString().strip().replaceAll("\\s*\\R\\s*", " ");
-        output.setLength(0);
-        output.append(message);
-
-        if (headers != null && !headers.isEmpty()) {
-            output.append(" | ");
-            boolean first = true;
+    private void log(Marker marker, CharSequence head, Map<String, ?> headers, String body) {
+        CompactRequestResponse message = new CompactRequestResponse(head, CompactRequestResponse.DEFAULT_EXCLUDED_GRPC_HEADERS);
+        if (headers != null) {
             for (Map.Entry<String, ?> entry : headers.entrySet()) {
-                if (!first) {
-                    output.append("; ");
-                }
-                first = false;
-                output.append(entry.getKey().toLowerCase()).append(": ").append(entry.getValue());
+                message.header(entry.getKey(), String.valueOf(entry.getValue()));
             }
         }
-
         if (body != null && !body.isBlank()) {
-            String compactBody;
-            try {
-                compactBody = mapper.readTree(body).toString();
-            } catch (Exception e) {
-                compactBody = body.strip().replaceAll("\\s*\\R\\s*", "");
-            }
-            output.append(AiLoggingControl.BODY_MARKER).append(compactBody);
+            message.body(compactBody(body));
+        }
+        CompactMessageMarker compactMarker = message.getMarker();
+        if (marker != null) {
+            // keep the request-response marker (JSON fields used by assertions)
+            marker.add(compactMarker);
+        } else {
+            marker = compactMarker;
+        }
+        logConsumer.accept(marker, message.getMessage());
+    }
+
+    private String compactBody(String body) {
+        try {
+            return mapper.readTree(body).toString();
+        } catch (Exception e) {
+            return body.strip().replaceAll("\\s*\\R\\s*", "");
         }
     }
 }

@@ -1,6 +1,6 @@
 package no.entur.logging.cloud.logbook.logbook.test;
 
-import no.entur.logging.cloud.logback.logstash.test.AiLoggingControl;
+import no.entur.logging.cloud.logback.logstash.test.CompactRequestResponse;
 import no.entur.logging.cloud.logbook.AbstractLogLevelSink;
 import no.entur.logging.cloud.logbook.AbstractSinkBuilder;
 import no.entur.logging.cloud.logbook.MessageComposer;
@@ -9,6 +9,7 @@ import org.zalando.logbook.ContentType;
 import org.zalando.logbook.Correlation;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.HttpResponse;
+import org.zalando.logbook.Precorrelation;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
@@ -19,9 +20,9 @@ import java.util.function.BooleanSupplier;
 
 /**
  * Compact request-response logging message for tooling (AI mode): a single line without pretty-printing or colors,
- * in the form <code>message | header: value; header: value | body</code>.
+ * in the form <code>message | header: value; header: value | body: &lt;body&gt;</code>. The compact file gets a shorter variant
+ * (see {@link CompactRequestResponse}).
  */
-
 public class CompactLogbackLogstashSink extends AbstractLogLevelSink {
 
     public static class Builder extends AbstractSinkBuilder<Builder, Builder> {
@@ -51,39 +52,29 @@ public class CompactLogbackLogstashSink extends AbstractLogLevelSink {
     }
 
     @Override
-    protected void requestMessage(HttpRequest request, StringBuilder messageBuilder, int truncated) throws IOException {
-        super.requestMessage(request, messageBuilder, truncated);
-        compact(request.getHeaders(), request.getContentType(), request.getBodyAsString(), messageBuilder);
+    public void write(Precorrelation precorrelation, HttpRequest request) throws IOException {
+        StringBuilder messageBuilder = new StringBuilder(256);
+        requestMessage(request, messageBuilder, -1);
+        log(messageBuilder, request.getHeaders(), request.getContentType(), request.getBodyAsString());
     }
 
     @Override
-    protected void responseMessage(Correlation correlation, HttpRequest request, HttpResponse response,
-                                   StringBuilder messageBuilder, int truncated) throws IOException {
-        super.responseMessage(correlation, request, response, messageBuilder, truncated);
-        compact(response.getHeaders(), response.getContentType(), response.getBodyAsString(), messageBuilder);
+    public void write(Correlation correlation, HttpRequest request, HttpResponse response) throws IOException {
+        StringBuilder messageBuilder = new StringBuilder(256);
+        responseMessage(correlation, request, response, messageBuilder, -1);
+        log(messageBuilder, response.getHeaders(), response.getContentType(), response.getBodyAsString());
     }
 
-    private void compact(Map<String, List<String>> headers, String contentType, String body, StringBuilder output) {
-        String message = output.toString().strip().replaceAll("\\s*\\R\\s*", " ");
-        output.setLength(0);
-        output.append(message);
-
-        if (!headers.isEmpty()) {
-            output.append(" | ");
-            boolean first = true;
-            for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-                if (!first) {
-                    output.append("; ");
-                }
-                first = false;
-                output.append(entry.getKey().toLowerCase()).append(": ").append(String.join(", ", entry.getValue()));
-            }
+    private void log(CharSequence head, Map<String, List<String>> headers, String contentType, String body) {
+        CompactRequestResponse message = new CompactRequestResponse(head, CompactRequestResponse.DEFAULT_EXCLUDED_HTTP_HEADERS);
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+            message.header(entry.getKey(), String.join(", ", entry.getValue()));
         }
-
         boolean json = ContentType.isJsonMediaType(contentType);
         if ((json || isXmlMediaType(contentType)) && body != null && !body.isBlank()) {
-            output.append(AiLoggingControl.BODY_MARKER).append(compactBody(body, json));
+            message.body(compactBody(body, json));
         }
+        logConsumer.accept(message.getMarker(), message.getMessage());
     }
 
     private String compactBody(String body, boolean json) {

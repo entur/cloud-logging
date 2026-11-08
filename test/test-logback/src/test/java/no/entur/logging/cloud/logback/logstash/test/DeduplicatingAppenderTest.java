@@ -1,4 +1,4 @@
-package no.entur.logging.cloud.gcp.spring.test;
+package no.entur.logging.cloud.logback.logstash.test;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -12,7 +12,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
-import no.entur.logging.cloud.logback.logstash.test.DeduplicatingAppender;
 
 public class DeduplicatingAppenderTest {
 

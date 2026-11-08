@@ -3,15 +3,18 @@
 	<conversionRule conversionWord="aliasMdc" class="no.entur.logging.cloud.logback.logstash.test.MdcAliasConverter" />
 	<conversionRule conversionWord="aliasMsg" class="no.entur.logging.cloud.logback.logstash.test.AliasMessageConverter" />
 	<conversionRule conversionWord="eventId" class="no.entur.logging.cloud.logback.logstash.test.EventIdConverter" />
-	<conversionRule conversionWord="cMsg" class="no.entur.logging.cloud.logback.logstash.test.TruncateBodyMessageConverter" />
-	<conversionRule conversionWord="sEx" class="no.entur.logging.cloud.gcp.spring.test.SingleLineRootCauseFirstThrowableProxyConverter" />
+	<conversionRule conversionWord="cMsg" class="no.entur.logging.cloud.logback.logstash.test.CompactMessageConverter" />
+	<conversionRule conversionWord="cLogger" class="no.entur.logging.cloud.logback.logstash.test.CompactLoggerConverter" />
+	<conversionRule conversionWord="sEx" class="no.entur.logging.cloud.logback.logstash.test.SingleLineRootCauseFirstThrowableProxyConverter" />
 
 	<!--
 		Compact plain text (one event per line) written to the file given by -Dentur.logging.ai.file (default: entur-logging-ai.log in the temp directory),
 		nothing on the console. Included from logback-test.xml only if -Dentur.logging.ai.enabled=true.
 	-->
-	<appender name="AI_FILE" class="ch.qos.logback.core.FileAppender">
+	<appender name="AI_FILE" class="no.entur.logging.cloud.logback.logstash.test.AiFileAppender">
 		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai.log}</file>
+		<!-- framework start-up/shutdown chatter below WARN, override with -Dentur.logging.ai.quiet-loggers=a.b,c.d -->
+		<filter class="no.entur.logging.cloud.logback.logstash.test.QuietLoggersFilter" />
 		<!-- compact file level, override with -Dentur.logging.ai.level=DEBUG -->
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>${entur.logging.ai.level:-INFO}</level>
@@ -19,8 +22,11 @@
 		<append>true</append>
 		<immediateFlush>true</immediateFlush>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<!-- compact plain text for AI: no timestamp, thread or colours; stack traces on a single line (grep friendly), root-cause-first, max 15 frames, framework frames removed -->
-			<pattern>%-5level %logger{30}%replace(%replace(%aliasMdc){'\s*[\r\n]+\s*',' '}){'^(.+)$',' [$1]'}%eventId : %cMsg%sEx{15,org.springframework,org.junit,org.gradle,worker.org.gradle,org.apache,jdk.internal,jdk.proxy,java.lang.reflect,java.util,sun.reflect}%n%nopex</pattern>
+			<!--
+				compact plain text for AI: no timestamp, thread or colours, simple class names, shorter MDC;
+				stack traces on a single line (grep friendly), root-cause-first, framework frames removed, frames limited by entur.logging.ai.stacktrace.max-lines
+			-->
+			<pattern>%level %cLogger%aliasMdc{compact}%eventId : %cMsg%sEx{full,org.springframework,org.junit,org.gradle,worker.org.gradle,org.apache,jakarta.,io.grpc,io.netty,io.micrometer,org.zalando.logbook,jdk.internal,jdk.proxy,java.lang.reflect,java.util,sun.reflect}%n%nopex</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
@@ -31,7 +37,7 @@
 	</appender>
 
 	<!-- Drill-down: the same events unfiltered and untrimmed (all levels, full stack traces) in <file>.full -->
-	<appender name="AI_FILE_FULL" class="ch.qos.logback.core.FileAppender">
+	<appender name="AI_FILE_FULL" class="no.entur.logging.cloud.logback.logstash.test.AiFileAppender">
 		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai.log}.full</file>
 		<!-- override with -Dentur.logging.ai.full.level=INFO -->
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -40,13 +46,13 @@
 		<append>true</append>
 		<immediateFlush>true</immediateFlush>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger%replace(%replace(%aliasMdc){'\s*[\r\n]+\s*',' '}){'^(.+)$',' [$1]'}%eventId{always} : %aliasMsg%n%ex</pattern>
+			<pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger%aliasMdc%eventId{always} : %aliasMsg%n%ex</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
 
 	<!-- writes nothing; exposes the JSON encoder which LogStatements / LogbackTestExtension use to evaluate assertions -->
-	<appender name="AI_ENCODER_ONLY" class="no.entur.logging.cloud.gcp.spring.test.NoopAppender">
+	<appender name="AI_ENCODER_ONLY" class="no.entur.logging.cloud.logback.logstash.test.NoopAppender">
 		<encoder class="no.entur.logging.cloud.gcp.logback.logstash.StackdriverLogstashEncoder">
 			<fieldNames>
 				<version>[ignore]</version>
@@ -61,8 +67,8 @@
 		</encoder>
 	</appender>
 
-	<!-- logback async appenders accept a single child, so fan out to both files -->
-	<appender name="AI_FANOUT" class="no.entur.logging.cloud.gcp.spring.test.ListAppender">
+	<!-- logback async appenders accept a single child, so fan out to both files and the encoder-only appender -->
+	<appender name="AI_FANOUT" class="no.entur.logging.cloud.logback.logstash.test.ListAppender">
 		<appender-ref ref="AI_DEDUP" />
 		<appender-ref ref="AI_FILE_FULL" />
 		<appender-ref ref="AI_ENCODER_ONLY" />
