@@ -98,6 +98,7 @@ When running tests, enable compact log output to save context. Logs then go to a
 - Request/response logging (HTTP, gRPC) is a single line: `message | header: value; ... | body: <body>`.
 - Repeated WARN/ERROR events are collapsed in `/tmp/test.log`: the first is printed, the rest are summarized later in a line
   `repeated N more times, N+1 in total (first #id, last #id): message` whose total includes that first event. Counting restarts when logging
-  is reconfigured (e.g. a new Spring context), so a message can have several such lines. For exact counts use `grep -c 'message' /tmp/test.log.full`.
+  is reconfigured (e.g. a new Spring context), so a message can have several such lines. For exact counts grep `/tmp/test.log.full` for the
+  logger and the message, as the same message can come from several loggers: `grep -c 'DocumentEndpoint .* : Hello world' /tmp/test.log.full`.
 - UUIDs and hex ids are replaced by aliases (`u1`, `h1`, ...) in both files. Each test JVM starts with a `---- JVM pid ...` line; aliases restart there.
 ````
