@@ -36,7 +36,7 @@ One event per line, `LEVEL Logger [mdc] #id : message | stack trace`, INFO and a
 - MDC entries (present during requests) are appended to the logger as `[key=value, ...]`. The `logging.googleapis.com/` key prefix is removed, and such entries are left out when their value equals another entry's value (by default the trace is the correlation id).
 - Stack traces are on the same line as the message (separated by ` | `), root cause first, with framework frames removed, so that `grep` returns a whole trace.
   `entur.logging.ai.stacktrace.max-lines` keeps the first 2 frames of each exception by default (`0` = unlimited) and `entur.logging.ai.stacktrace.max-causes=3` keeps the root cause and the next two wrapping exceptions (`[... N frames omitted]` / `[... more causes omitted]` markers).
-- Events below WARN from framework loggers which only report start-up and shutdown (Tomcat, Spring test context, gRPC server, Hikari, ...) are left out. Override the logger name prefixes with `entur.logging.ai.quiet-loggers=a.b,c.d` (empty value: keep everything).
+- Events below WARN from framework loggers which only report start-up and shutdown (Tomcat, Spring test context, gRPC server, Hikari, ...) are left out, except the line with the port a server listens on (`Tomcat started on port N`). Override the logger name prefixes with `entur.logging.ai.quiet-loggers=a.b,c.d` (empty value: keep everything).
 - Repeated WARN/ERROR events (same level, logger and root cause or message) are collapsed: the first is printed, the rest are counted and a line `repeated N more times (first #id, last #id): ...` is written when the cache (500 keys, least recently used evicted) overflows or the test JVM stops. Disable with `entur.logging.ai.dedupe=false`.
 
 ### Full file (`<file>.full`)
@@ -88,11 +88,13 @@ When running tests, enable compact log output to save context. Logs then go to a
     mvn -q test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test.log 2>&1 | grep '^\[ERROR\]' | cut -c1-300 | head -30
 
 - Console output only contains the test summary and failures (filtered as above, about 1.5 KB). Do not use `-i`/`--info` (Gradle) or `-X` (Maven); they are not needed.
-- `/tmp/test.log`: compact, one event per line (`LEVEL SimpleClassName [mdc] #id : message`), INFO and above, without framework start-up chatter.
-  Stack traces are on the same line as the message, root cause first, framework frames removed. Use `grep` (for example `grep -n 'ERROR\|WARN' /tmp/test.log`), do not read the whole file.
-- `/tmp/test.log.full`: same events with timestamps, thread names, full logger names, DEBUG and above, all headers, whole bodies and full stack traces.
-  Only consult it when the compact file is not enough: an `#id` in the compact file (truncated stack trace or body) finds the event with `grep -n -C 5 '#id' /tmp/test.log.full`.
+- `/tmp/test.log`: compact, one event per line (`LEVEL SimpleClassName [mdc] #id : message`), INFO and above. Stack traces are on the same line as the
+  message, root cause first, framework frames removed, 2 frames per exception. Use `grep` (for example `grep -n 'ERROR\|WARN' /tmp/test.log`), do not read the whole file.
+- `/tmp/test.log.full`: the same events plus what the compact file leaves out: DEBUG, timestamps, thread names, full logger names,
+  framework start-up/shutdown lines (server ports are kept in the compact file), transport headers (`user-agent`, `accept*`, `grpc-*encoding`, `date`, ...),
+  whole bodies and full stack traces. Look for those directly in this file with `grep -n`; an `#id` in the compact file (truncated stack trace or body)
+  finds the complete event with `grep -n -C 5 '#id' /tmp/test.log.full`.
 - Include `-Dentur.logging.ai.level=DEBUG` to also get DEBUG in the compact file (`-Dentur.logging.ai.full.level=INFO` limits the `.full` file).
-- Request/response logging (HTTP, gRPC) is a single line: `message | header: value; ... | body: <body>`; the compact file leaves out transport headers.
+- Request/response logging (HTTP, gRPC) is a single line: `message | header: value; ... | body: <body>`.
 - UUIDs and hex ids are replaced by aliases (`u1`, `h1`, ...) in both files. Each test JVM starts with a `---- JVM pid ...` line; aliases restart there.
 ````

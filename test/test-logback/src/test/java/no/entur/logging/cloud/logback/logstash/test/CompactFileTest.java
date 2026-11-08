@@ -47,6 +47,12 @@ public class CompactFileTest {
                 "org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer$Inner",
                 Level.INFO))).isEqualTo(FilterReply.DENY);
         assertThat(filter.decide(event(context, "com.example.App", Level.INFO))).isEqualTo(FilterReply.NEUTRAL);
+        assertThat(filter.decide(event(context, "org.springframework.boot.tomcat.TomcatWebServer", Level.INFO,
+                "Tomcat started on port 38013 (http) with context path '/'"))).isEqualTo(FilterReply.NEUTRAL);
+        assertThat(filter.decide(event(context, "org.springframework.boot.tomcat.TomcatWebServer", Level.INFO,
+                "Tomcat initialized with port 0 (http)"))).isEqualTo(FilterReply.DENY);
+        assertThat(filter.decide(event(context, "org.springframework.grpc.server.lifecycle.GrpcServerLifecycle", Level.INFO,
+                "gRPC Server started, listening on address: [/[0:0:0:0:0:0:0:0]:9090], port: 9090"))).isEqualTo(FilterReply.NEUTRAL);
 
         System.setProperty(AiLoggingControl.AI_QUIET_LOGGERS_PROPERTY, "");
         QuietLoggersFilter none = new QuietLoggersFilter();
@@ -79,7 +85,11 @@ public class CompactFileTest {
     }
 
     private static LoggingEvent event(LoggerContext context, String logger, Level level) {
-        LoggingEvent event = new LoggingEvent("f", context.getLogger(logger), level, "message", null, null);
+        return event(context, logger, level, "message");
+    }
+
+    private static LoggingEvent event(LoggerContext context, String logger, Level level, String message) {
+        LoggingEvent event = new LoggingEvent("f", context.getLogger(logger), level, message, null, null);
         event.setMDCPropertyMap(Map.of());
         return event;
     }
