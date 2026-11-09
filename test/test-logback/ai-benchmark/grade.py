@@ -223,12 +223,13 @@ def grade_q3(lines, key, notes):
     tomcat, grpc, port = key
     text = ' '.join(clean(l) for l in lines)
     sentences = re.split(r'(?<=[.;])\s+|\n', text)
+    # a count may end a sentence ('started: 15.'), but not be part of a decimal number or a port ('15.3', '15:')
     points = 0.0
-    if any('tomcat' in s.lower() and re.search(rf'(?<![\w.:]){tomcat}(?![\w.:])', s) for s in sentences):
+    if any('tomcat' in s.lower() and re.search(rf'(?<![\w.:]){tomcat}(?![\w:]|\.\d)', s) for s in sentences):
         points += 1
     else:
         notes.append(f'Q3 Tomcat starts: expected {tomcat}')
-    if any('grpc' in s.lower() and re.search(rf'(?<![\w.:]){grpc}(?![\w.:])', s) for s in sentences):
+    if any('grpc' in s.lower() and re.search(rf'(?<![\w.:]){grpc}(?![\w:]|\.\d)', s) for s in sentences):
         points += 1
     else:
         notes.append(f'Q3 gRPC server starts: expected {grpc}')
