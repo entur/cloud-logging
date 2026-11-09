@@ -38,7 +38,12 @@ public final class CompactRequestResponse {
             // the AI files have the whole body, so the note about the JSON output's body would contradict it
             text = withoutTruncatedNote(text);
         }
-        StringBuilder builder = new StringBuilder(256).append(MdcAliasConverter.aliasUuids(AiText.singleLine(text), !compact));
+        // sized for the body (not aliased yet: aliases are announced in the order they appear, message and headers first)
+        String singleLineBody = details.getSingleLineBody();
+        int bodyLength = singleLineBody == null ? 0 : singleLineBody.length();
+        int bodyMax = AiLoggingControl.bodyMax();
+        StringBuilder builder = new StringBuilder(256 + (compact && bodyMax > 0 ? Math.min(bodyLength, bodyMax + 64) : bodyLength))
+                .append(MdcAliasConverter.aliasUuids(AiText.singleLine(text), !compact));
         Set<String> excluded = compact ? AiLoggingControl.excludedHeaders(DEFAULT_EXCLUDED_HEADERS) : Set.of();
         Map<String, String> mdcByName = compact ? byNormalizedName(mdc) : Map.of();
         int count = 0;

@@ -137,11 +137,16 @@ public final class AiText {
      * space. Binary content (a NUL character, or more than 1 in 10 control characters) is replaced by <code>[binary, N chars]</code>.
      */
     public static String singleLineBody(String body, boolean json) {
+        return singleLineBody(body, json, false);
+    }
+
+    /** Like {@link #singleLineBody(String, boolean)}; <code>validJson</code> if the body is known to be valid JSON (not parsed again). */
+    static String singleLineBody(String body, boolean json, boolean validJson) {
         if (isBinary(body)) {
             return "[binary, " + body.length() + " chars]";
         }
         String stripped = body.strip();
-        if (json && isValidJson(stripped)) {
+        if (json && (validJson || isValidJson(stripped))) {
             return removeWhitespaceBetweenTokens(stripped);
         }
         return singleLine(stripped);
