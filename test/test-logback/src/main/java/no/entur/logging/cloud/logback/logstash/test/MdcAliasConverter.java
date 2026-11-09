@@ -27,7 +27,6 @@ public class MdcAliasConverter extends ClassicConverter {
 
     private static final Pattern UUID = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
     // e.g. span id (16 hex chars, leading zeros may be missing) and trace id (32 hex chars)
-    private static final Pattern HEX_ID = Pattern.compile("(?=.*[a-f])(?=.*[0-9])[0-9a-f]{12,32}");
     // UUIDs and hex ids as tokens within a text (for example the trace and span ids in a traceparent header), in one pass so that
     // the parts of a UUID (or an alias followed by its value) are not taken for hex ids
     private static final Pattern UUID_OR_HEX_ID_TOKEN = Pattern.compile("(" + UUID.pattern() + ")"
@@ -99,9 +98,29 @@ public class MdcAliasConverter extends ClassicConverter {
         }
     }
 
+    /** 12 to 32 lower-case hex characters with at least one letter and one digit, such as a span or trace id. */
+    static boolean isHexId(String value) {
+        if (value.length() < 12 || value.length() > 32) {
+            return false;
+        }
+        boolean letter = false;
+        boolean digit = false;
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (c >= '0' && c <= '9') {
+                digit = true;
+            } else if (c >= 'a' && c <= 'f') {
+                letter = true;
+            } else {
+                return false;
+            }
+        }
+        return letter && digit;
+    }
+
     /** Aliases a value which is a hex id as a whole; UUIDs within the value are aliased as in messages. */
     static String aliasValue(String value, boolean full) {
-        if (value != null && AiLoggingControl.isAliasEnabled() && HEX_ID.matcher(value).matches()) {
+        if (value != null && AiLoggingControl.isAliasEnabled() && isHexId(value)) {
             return alias(value, "h", HEX_COUNTER, full);
         }
         return aliasUuids(value, full);

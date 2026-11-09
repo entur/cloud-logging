@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * Renders request-response events (HTTP and gRPC) for the AI files: the event's message (unchanged, as without AI mode) followed by
@@ -26,8 +25,8 @@ public final class CompactRequestResponse {
             "user-agent", "vary", "x-content-type-options", "x-frame-options", "x-xss-protection",
             "grpc-accept-encoding", "grpc-encoding", "te");
 
-    // added by the sink's message composer if the body in the JSON output was cut
-    private static final Pattern TRUNCATED_NOTE = Pattern.compile("\\s*\\[truncated ~\\d+(?: bytes|KB)]$");
+    // added by the sink's message composer if the body in the JSON output was cut: ' [truncated ~123 bytes]' or ' [truncated ~4KB]'
+    private static final String TRUNCATED_NOTE = "[truncated ~";
 
     private CompactRequestResponse() {
     }
@@ -37,7 +36,7 @@ public final class CompactRequestResponse {
         String text = message.strip();
         if (details.isCompleteBody()) {
             // the AI files have the whole body, so the note about the JSON output's body would contradict it
-            text = TRUNCATED_NOTE.matcher(text).replaceFirst("");
+            text = withoutTruncatedNote(text);
         }
         StringBuilder builder = new StringBuilder(256).append(MdcAliasConverter.aliasUuids(AiText.singleLine(text), !compact));
         Set<String> excluded = compact ? AiLoggingControl.excludedHeaders(DEFAULT_EXCLUDED_HEADERS) : Set.of();
@@ -72,6 +71,30 @@ public final class CompactRequestResponse {
     private static String compactBody(AiEventDetails details) {
         String body = details.getCompactBody();
         return body == null ? null : AiLoggingControl.truncateBody(body);
+    }
+
+    /** The text without a trailing truncation note of the sink's message composer (and the whitespace before it). */
+    static String withoutTruncatedNote(String text) {
+        if (!text.endsWith("]")) {
+            return text;
+        }
+        int start = text.lastIndexOf(TRUNCATED_NOTE);
+        if (start == -1) {
+            return text;
+        }
+        int digits = start + TRUNCATED_NOTE.length();
+        int end = digits;
+        while (end < text.length() && text.charAt(end) >= '0' && text.charAt(end) <= '9') {
+            end++;
+        }
+        if (end == digits || !(text.startsWith(" bytes]", end) && end + 7 == text.length() || text.startsWith("KB]", end) && end + 3 == text.length())) {
+            return text;
+        }
+        int before = start;
+        while (before > 0 && Character.isWhitespace(text.charAt(before - 1))) {
+            before--;
+        }
+        return text.substring(0, before);
     }
 
     private static boolean isGrpcContentType(String name, String value) {

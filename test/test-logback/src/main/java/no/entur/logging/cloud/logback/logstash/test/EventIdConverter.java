@@ -53,7 +53,13 @@ public class EventIdConverter extends ClassicConverter {
         hash = hash * 31 + Objects.hashCode(event.getLoggerName());
         hash = hash * 31 + (event.getLevel() == null ? 0 : event.getLevel().toInt());
         hash = hash * 31 + Objects.hashCode(event.getFormattedMessage());
-        return String.format("%012x", mix(hash) & 0xFFFF_FFFF_FFFFL);
+        return hex12(mix(hash) & 0xFFFF_FFFF_FFFFL);
+    }
+
+    /** 12 hex digits with leading zeros (String.format parses its format on every call). */
+    static String hex12(long value) {
+        String hex = Long.toHexString(value);
+        return hex.length() >= 12 ? hex : "000000000000".substring(hex.length()) + hex;
     }
 
     /** MurmurHash3 finalizer: spreads every input bit over the output, so that the low 48 bits are well distributed. */

@@ -5,17 +5,12 @@ import tools.jackson.core.JsonParser;
 import tools.jackson.core.ObjectReadContext;
 import tools.jackson.core.json.JsonFactory;
 
-import java.util.regex.Pattern;
-
 /**
  * Text helpers for the AI files: every event on a single line, control characters escaped (a NUL byte makes grep treat the
  * whole file as binary), binary bodies replaced by a short note.
  */
 public final class AiText {
 
-    // line breaks with the whitespace around them; linear time: a match only starts at the first space or tab of a run, and the possessive
-    // [ \t]*+ does not backtrack (\s*\R\s* takes quadratic time on a long run of spaces without a line break)
-    private static final Pattern LINE_BREAKS = Pattern.compile("(?<![ \\t])[ \\t]*+\\R\\s*");
 
     private static final JsonFactory JSON_FACTORY = new JsonFactory();
 
@@ -27,10 +22,54 @@ public final class AiText {
         if (text == null) {
             return "";
         }
-        if (text.indexOf('\n') != -1 || text.indexOf('\r') != -1) {
-            text = LINE_BREAKS.matcher(text).replaceAll(" ");
+        if (hasLineBreak(text)) {
+            text = joinLines(text);
         }
         return escapeControlCharacters(text, false);
+    }
+
+    private static boolean isLineBreak(char c) {
+        return c == '\n' || c == '\r' || c == '\u000B' || c == '\f' || c == '\u0085' || c == '\u2028' || c == '\u2029';
+    }
+
+    private static boolean isSpaceOrLineBreak(char c) {
+        return c == ' ' || c == '\t' || isLineBreak(c);
+    }
+
+    private static boolean hasLineBreak(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            if (isLineBreak(text.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Every run of spaces, tabs and line breaks which contains a line break becomes a single space; one pass, no regular expression. */
+    private static String joinLines(String text) {
+        StringBuilder builder = new StringBuilder(text.length());
+        int i = 0;
+        while (i < text.length()) {
+            char c = text.charAt(i);
+            if (!isSpaceOrLineBreak(c)) {
+                builder.append(c);
+                i++;
+                continue;
+            }
+            int end = i;
+            boolean lineBreak = false;
+            while (end < text.length() && isSpaceOrLineBreak(text.charAt(end))) {
+                lineBreak |= isLineBreak(text.charAt(end));
+                end++;
+            }
+            if (lineBreak) {
+                builder.append(' ');
+            } else {
+                builder.append(text, i, end);
+            }
+            i = end;
+        }
+        return builder.toString();
     }
 
     /**
