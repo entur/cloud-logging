@@ -159,6 +159,7 @@ def q2_count(line, path, status):
     m = re.search(rf'(?<!\d){status}(?!\d)', after_path)
     tail = after_path[m.end():] if m else after_path
     tail = re.sub(r'localhost:\d+|\d+\s*ms\b|\b[1-5]xx\b', ' ', tail)
+    tail = re.sub(r'\b[xX](\d+)\b|\b(\d+)[xX]\b', lambda m: f' {m.group(1) or m.group(2)} ', tail)  # 'x3', '3x'
     m = re.search(r'(?<![\w.:/])(\d+)(?![\w:/]|\.\d)', tail)
     return m.group(1) if m else None
 
@@ -172,8 +173,16 @@ def q2_method(line, path):
     return before[-1] if before else (after[0] if after else None)
 
 
+def q2_items(line):
+    """A line listing several requests ('POST /a: 400 x3. POST /b: 404 x3.') split into one item per request."""
+    starts = [m.start() for m in re.finditer(r'\b(GET|POST|PUT|PATCH|DELETE)\s+/', line)]
+    if len(starts) < 2:
+        return [line]
+    return [line[a:b] for a, b in zip(starts, starts[1:] + [len(line)])]
+
+
 def grade_q2(lines, entries, notes):
-    lines = [clean(l) for l in lines]
+    lines = [item for l in lines for item in q2_items(clean(l))]
     points = 0.0
     for e in entries:
         found = None
