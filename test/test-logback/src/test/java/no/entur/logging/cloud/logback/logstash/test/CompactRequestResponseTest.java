@@ -198,6 +198,23 @@ public class CompactRequestResponseTest {
     }
 
     @Test
+    public void bodyIsOnlyParsedAgainIfItDiffersFromTheOneInTheJsonOutput() {
+        // the same body: valid JSON, as the event's JSON was parsed with it
+        LogstashMarker same = appendRaw("http", "{\"headers\":{},\"body\":{\"a\" : 1}}");
+        same.add(new AiBodyMarker("{\"a\" : 1}\n", true));
+        assertThat(full(event("RESP", same, null))).isEqualTo("RESP | body: {\"a\":1}");
+        assertThat(AiEventDetails.of(event("RESP", same, null)).isValidJsonBody()).isTrue();
+
+        // another body (for example the JSON output's is cut): parsed, and not valid JSON here, so its whitespace is kept
+        LogstashMarker other = appendRaw("http", "{\"headers\":{},\"body\":{\"a\":1}}");
+        other.add(new AiBodyMarker("{\"a\": tru\n e}", true));
+        assertThat(full(event("RESP", other, null))).isEqualTo("RESP | body: {\"a\": tru e}");
+        assertThat(AiEventDetails.of(event("RESP", other, null)).isValidJsonBody()).isFalse();
+        // without the AI body marker, the body is the one from the JSON output
+        assertThat(AiEventDetails.of(event("RESP", appendRaw("http", "{\"headers\":{},\"body\":[1, 2]}"), null)).isValidJsonBody()).isTrue();
+    }
+
+    @Test
     public void normalizedNames() {
         assertThat(CompactRequestResponse.normalizedName("X-Correlation-Id")).isEqualTo("correlationid");
         assertThat(CompactRequestResponse.normalizedName("correlation_id")).isEqualTo("correlationid");

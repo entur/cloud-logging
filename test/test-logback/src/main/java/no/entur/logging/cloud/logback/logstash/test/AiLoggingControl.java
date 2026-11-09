@@ -43,8 +43,12 @@ public class AiLoggingControl {
     /** Separates the body from the rest of a compact request-response message. */
     public static final String BODY_MARKER = " | body: ";
 
+    public static int bodyMax() {
+        return Integer.getInteger(AI_BODY_MAX_PROPERTY, DEFAULT_BODY_MAX);
+    }
+
     public static String truncateBody(String body) {
-        return truncate(body, Integer.getInteger(AI_BODY_MAX_PROPERTY, DEFAULT_BODY_MAX));
+        return truncate(body, bodyMax());
     }
 
     /** JVM system property; max number of characters of a message (and of an exception message) in compact output. Default 4096; 0 means unlimited. */

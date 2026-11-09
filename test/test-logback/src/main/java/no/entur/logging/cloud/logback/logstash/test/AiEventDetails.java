@@ -58,6 +58,7 @@ public final class AiEventDetails {
     private final String fields;
     private final String fullFields;
     private boolean completeBody;
+    private boolean validJsonBody;
 
     // computed once per event, as the event id, the compact file and the full file need them (the event is rendered on one thread)
     private String singleLineBody;
@@ -100,10 +101,15 @@ public final class AiEventDetails {
         return completeBody;
     }
 
+    /** True if the body is known to be valid JSON (it is the JSON body of the event's JSON output, which was parsed). */
+    boolean isValidJsonBody() {
+        return validJsonBody;
+    }
+
     /** The body on a single line (see {@link AiText#singleLineBody(String, boolean)}), or null if there is none. */
     public String getSingleLineBody() {
         if (!singleLineBodyDone) {
-            singleLineBody = body == null || body.isBlank() ? null : AiText.singleLineBody(body, jsonBody);
+            singleLineBody = body == null || body.isBlank() ? null : AiText.singleLineBody(body, jsonBody, validJsonBody);
             singleLineBodyDone = true;
         }
         return singleLineBody;
@@ -197,6 +203,7 @@ public final class AiEventDetails {
             }
             AiEventDetails details = new AiEventDetails(true, http.headers, http.body, http.jsonBody, otherFields, allFields);
             details.completeBody = http.completeBody;
+            details.validJsonBody = http.validJsonBody;
             return details;
         } catch (JacksonException | IndexOutOfBoundsException e) {
             // not valid JSON: keep it whole
@@ -246,13 +253,18 @@ public final class AiEventDetails {
             return null;
         }
         boolean completeBody = false;
+        // a JSON body written into the event's JSON has just been parsed, so it is valid JSON (no need to parse it again)
+        boolean validJsonBody = jsonBody;
         if (bodyMarker != null && bodyMarker.getBody() != null) {
+            String eventBody = jsonBody ? body : null;
             body = bodyMarker.getBody();
             jsonBody = bodyMarker.isJson();
             completeBody = true;
+            validJsonBody = jsonBody && eventBody != null && eventBody.equals(body.strip());
         }
         AiEventDetails details = new AiEventDetails(true, headers, body, jsonBody, rest.isEmpty() ? null : "{" + String.join(",", rest) + "}", null);
         details.completeBody = completeBody;
+        details.validJsonBody = validJsonBody;
         return details;
     }
 
@@ -364,14 +376,23 @@ public final class AiEventDetails {
         return null;
     }
 
+    // reused per thread (events are written on the async appender's thread), so that a large body does not grow a new buffer each time
+    private static final ThreadLocal<ByteArrayOutputStream> BUFFER = ThreadLocal.withInitial(() -> new ByteArrayOutputStream(4096));
+
+    private static final int MAX_KEPT_BUFFER = 1024 * 1024;
+
     private static String toJson(ILoggingEvent event) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream(256);
+        ByteArrayOutputStream out = BUFFER.get();
+        out.reset();
         try {
             FORMATTER.writeEvent(event, out);
         } catch (IOException | RuntimeException e) {
             return null;
         }
         String json = out.toString(StandardCharsets.UTF_8).strip();
+        if (out.size() > MAX_KEPT_BUFFER) {
+            BUFFER.remove();
+        }
         return json.isEmpty() || json.equals("{}") ? null : json;
     }
 
