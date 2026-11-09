@@ -49,7 +49,7 @@ def split(lines):
 
 
 def normalize(message):
-    message = re.sub(r'\b[uh]\d+\b', '<alias>', message)
+    message = re.sub(r'\b[uh]\d+(?:\([0-9a-f-]+\))?(?![\w(])', '<alias>', message)  # an alias, announced in .full as 'u7(<uuid>)'
     return re.sub(r'localhost:\d+', 'localhost:<port>', message)
 
 

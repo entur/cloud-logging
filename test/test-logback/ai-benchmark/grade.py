@@ -47,20 +47,32 @@ def read_key(path):
 
 HEADER = re.compile(r'^\s{0,3}(?:#+\s*)?(?:\*\*)?\s*(?:Q(?:uestion)?\s*)?([1-4])\s*[.):]')
 LEVEL = re.compile(r'\b(WARN|WARNING|ERROR)\b')
+Q1_LINE = re.compile(r'\b(WARN|WARNING|ERROR)\s*\|')  # '1. WARN | logger | ...' is an answer, not a header
+ITEM = re.compile(r'^\s{0,3}(\d+)[.)]\s')
 
 
 def sections(answer):
     """Splits the answer at the question headers 1. to 4. (in order); a question without a header gets the whole answer."""
     lines = answer.splitlines()
-    starts, expected, indent = {}, 1, None
+    starts, expected, indent, item = {}, 1, None, None
     for i, line in enumerate(lines):
         m = HEADER.match(line)
         depth = len(line) - len(line.lstrip())
-        if (m and int(m.group(1)) == expected and not (LEVEL.search(line) and '|' in line)
+        n = ITEM.match(line)
+        number = int(n.group(1)) if n else None
+        if starts and number is not None and (indent is None or depth <= indent):
+            # a numbered list under a header at the headers' indentation: starts again at 1, its items are not headers
+            # (the next header can continue its numbering only after a blank line)
+            header_after_blank = m and int(m.group(1)) == expected and not lines[i - 1].strip()
+            if number == 1 or (item is not None and number == item + 1 and not header_after_blank):
+                item = number
+                continue
+        if (m and int(m.group(1)) == expected and not Q1_LINE.search(line)
                 and (indent is None or depth <= indent)):  # nested numbered lists are not headers
             starts[expected] = i
             indent = depth if indent is None else indent
             expected += 1
+            item = None
             if expected > 4:
                 break
     result = {}
@@ -182,6 +194,10 @@ def q2_items(line):
 
 
 def grade_q2(lines, entries, notes):
+    # a method given once in the section header ('2. 4xx/5xx responses (all POST)') applies to every request
+    header = clean(lines[0]) if lines else ''
+    methods = set() if re.search(r'(?<![\w])/\w', header) else set(re.findall(r'\b(GET|POST|PUT|PATCH|DELETE)\b', header))
+    default_method = methods.pop() if len(methods) == 1 else None
     lines = [item for l in lines for item in q2_items(clean(l))]
     points = 0.0
     for e in entries:
@@ -194,6 +210,7 @@ def grade_q2(lines, entries, notes):
             notes.append(f"Q2 missing: {e['method']} {e['path']} -> {e['status']} x{e['count']}")
             continue
         method, count = found
+        method = method or default_method
         if method == e['method'] and count == e['count']:
             points += 1
         else:
