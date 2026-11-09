@@ -29,10 +29,19 @@ public class AiOndemandLogLevelLogstashLogbackSink extends OndemandLogLevelLogst
 
         @Override
         public AiOndemandLogLevelLogstashLogbackSink build() {
-            super.build(); // validates and sets defaults
-            return new AiOndemandLogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), jsonMapper,
-                    requestBodyWellformedDecisionSupplier, responseBodyWellformedDecisionSupplier, maxBodySize, maxSize,
-                    remoteHttpMessageContextSupplier, server, client);
+            return (AiOndemandLogLevelLogstashLogbackSink) super.build();
+        }
+
+        @Override
+        protected AiOndemandLogLevelLogstashLogbackSink newSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled,
+                                                                JsonMapper jsonMapper,
+                                                                RequestHttpMessageStateSupplierSource requestHttpMessageStateSupplierSource,
+                                                                ResponseHttpMessageStateSupplierSource responseHttpMessageStateSupplierSource,
+                                                                int maxBodySize, int maxSize,
+                                                                RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier,
+                                                                MessageComposer server, MessageComposer client) {
+            return new AiOndemandLogLevelLogstashLogbackSink(logConsumer, logLevelEnabled, jsonMapper, requestHttpMessageStateSupplierSource,
+                    responseHttpMessageStateSupplierSource, maxBodySize, maxSize, remoteHttpMessageContextSupplier, server, client);
         }
     }
 

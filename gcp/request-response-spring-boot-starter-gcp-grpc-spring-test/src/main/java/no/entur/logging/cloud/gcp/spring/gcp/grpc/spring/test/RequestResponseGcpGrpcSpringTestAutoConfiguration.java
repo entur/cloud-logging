@@ -30,7 +30,7 @@ public class RequestResponseGcpGrpcSpringTestAutoConfiguration extends AbstractR
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = parseLevel(loggerLevel);
 
-        if (AiLoggingControl.isAiEnabled()) {
+        if (AiLoggingControl.isAiActive()) {
             // AI mode: the machine-readable sink (same message and JSON fields as without AI mode); the AI files render
             // headers and body from its marker
             return createMachineReadbleSink(logger, level);

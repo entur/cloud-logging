@@ -15,6 +15,7 @@ public class SingleLineRootCauseFirstThrowableProxyConverterTest {
 
     @AfterEach
     public void cleanUp() {
+        System.clearProperty(AiLoggingControl.AI_MESSAGE_MAX_PROPERTY);
         System.clearProperty(AiLoggingControl.AI_STACKTRACE_MAX_LINES_PROPERTY);
         System.clearProperty(AiLoggingControl.AI_STACKTRACE_MAX_CAUSES_PROPERTY);
     }
@@ -65,6 +66,31 @@ public class SingleLineRootCauseFirstThrowableProxyConverterTest {
         String trace = full.convert(new LoggingEvent("f", context.getLogger("x"), Level.ERROR, "m", e, null));
         assertThat(trace).startsWith("java.lang.IllegalStateException: bad\\u0000value\\u001b[31m" + System.lineSeparator() + "\tat a.App.m(App.java:1)");
         assertThat(full.convert(new LoggingEvent("f", context.getLogger("x"), Level.ERROR, "m", null, null))).isEmpty();
+    }
+
+    @Test
+    public void suppressedExceptionsAndTheirCausesDoNotCountAsCauses() {
+        System.setProperty(AiLoggingControl.AI_STACKTRACE_MAX_LINES_PROPERTY, "1");
+        System.setProperty(AiLoggingControl.AI_STACKTRACE_MAX_CAUSES_PROPERTY, "3");
+        Exception root = exception("R", null, "a.R");
+        Exception middle = exception("T", root, "a.T");
+        middle.addSuppressed(exception("S", exception("S0", null, "a.S0"), "a.S"));
+        Exception top = exception("U", middle, "a.U");
+
+        // logback: R, Wrapped by T, (indented) Suppressed S0, Wrapped by S, then Wrapped by U
+        assertThat(convert(top, "full")).endsWith(" | Wrapped by: java.lang.IllegalStateException: U | at a.U.m(U.java:1)");
+    }
+
+    @Test
+    public void longExceptionMessagesAreCut() {
+        System.setProperty(AiLoggingControl.AI_MESSAGE_MAX_PROPERTY, "60");
+        // the first line has 54 characters, so 5 of the second line fit
+        Exception e = exception("first line " + "x".repeat(10) + "\nsecond line " + "y".repeat(30), null, "a.App");
+
+        assertThat(convert(e, "full")).isEqualTo(" | java.lang.IllegalStateException: first line xxxxxxxxxx"
+                + " secon...[truncated] | at a.App.m(App.java:1)");
+        assertThat(convert(exception("z".repeat(50), null, "a.App"), "full"))
+                .isEqualTo(" | java.lang.IllegalStateException: " + "z".repeat(27) + "...[truncated, 83 chars] | at a.App.m(App.java:1)");
     }
 
     @Test

@@ -16,6 +16,30 @@ public class AiTextTest {
     }
 
     @Test
+    public void lineBreaksTakeLinearTime() {
+        // quadratic before: 1.5 s for 40,000 spaces, so about 6 minutes for these 400,000
+        String text = "x" + " ".repeat(400_000) + "y\n \t z";
+        long start = System.nanoTime();
+        assertThat(AiText.singleLine(text)).isEqualTo("x" + " ".repeat(400_000) + "y z");
+        assertThat((System.nanoTime() - start) / 1_000_000).isLessThan(2_000L);
+
+        assertThat(AiText.singleLine("a \t\r\n \n  b\r\nc\n")).isEqualTo("a b c ");
+    }
+
+    @Test
+    public void cutsNotInsideAnAliasOrSurrogatePair() {
+        assertThat(AiText.cut("abc", 5)).isEqualTo("abc");
+        assertThat(AiText.cut("id u1234 x", 5)).isEqualTo("id ");
+        assertThat(AiText.cut("id u1234 x", 4)).isEqualTo("id ");
+        assertThat(AiText.cut("id u1234 x", 8)).isEqualTo("id u1234");
+        // not an alias: a digit run in a word, or a cut after the alias
+        assertThat(AiText.cut("abu1234", 5)).isEqualTo("abu12");
+        assertThat(AiText.cut("x 12345", 4)).isEqualTo("x 12");
+        assertThat(AiText.cut("ab\uD83D\uDE00c", 3)).isEqualTo("ab");
+        assertThat(AiLoggingControl.truncate("body u1234 end", 7)).isEqualTo("body ...[truncated, 14 chars]");
+    }
+
+    @Test
     public void onlyASingleValueIsJson() {
         assertThat(AiText.isValidJson("{\"a\":[1,2]}")).isTrue();
         assertThat(AiText.isValidJson("1\n2")).isFalse();

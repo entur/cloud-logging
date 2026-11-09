@@ -7,8 +7,8 @@ import java.util.Objects;
 
 /**
  * Prints a short id (<code> #1a2b3c4d5e6f</code>) derived from the event, so the same event has the same id in every log file.
- * By default only for events where the compact file loses information (a stack trace, or a request-response body or structured
- * fields which are truncated); with option <code>always</code> for all events (use in the full file).
+ * By default only for events where the compact file loses information (a stack trace, or a message, request-response body or
+ * structured fields which are truncated); with option <code>always</code> for all events (use in the full file).
  */
 public class EventIdConverter extends ClassicConverter {
 
@@ -36,7 +36,7 @@ public class EventIdConverter extends ClassicConverter {
         if (details.isRequestResponse() && CompactRequestResponse.isBodyTruncatedInCompactFile(details)) {
             return true;
         }
-        return StructuredFieldsConverter.isTruncatedInCompactFile(event);
+        return StructuredFieldsConverter.isTruncatedInCompactFile(event) || CompactMessageConverter.isTruncatedInCompactFile(event);
     }
 
     /**

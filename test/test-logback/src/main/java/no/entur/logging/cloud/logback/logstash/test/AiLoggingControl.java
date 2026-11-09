@@ -20,6 +20,21 @@ public class AiLoggingControl {
         return "true".equals(System.getProperty(AI_ENABLED_PROPERTY));
     }
 
+    private static volatile boolean aiFilesStarted;
+
+    /**
+     * True if AI mode is enabled and the AI log files are written, i.e. the starter's <code>logback-test.xml</code> included
+     * <code>logback-ai.xml</code> (a project's own <code>logback-test.xml</code> may shadow it). Request-response logging only switches
+     * to the AI sinks then, so that the human-readable console output is kept otherwise.
+     */
+    public static boolean isAiActive() {
+        return aiFilesStarted && isAiEnabled();
+    }
+
+    static void aiFileStarted() {
+        aiFilesStarted = true;
+    }
+
     /** JVM system property; max number of characters of a request/response body in compact output. Default 4096; 0 means unlimited. */
     public static final String AI_BODY_MAX_PROPERTY = "entur.logging.ai.request-response.max-body-size";
 
@@ -29,11 +44,28 @@ public class AiLoggingControl {
     public static final String BODY_MARKER = " | body: ";
 
     public static String truncateBody(String body) {
-        int max = Integer.getInteger(AI_BODY_MAX_PROPERTY, DEFAULT_BODY_MAX);
-        if (max > 0 && body.length() > max) {
-            return body.substring(0, max) + "...[truncated, " + body.length() + " chars]";
+        return truncate(body, Integer.getInteger(AI_BODY_MAX_PROPERTY, DEFAULT_BODY_MAX));
+    }
+
+    /** JVM system property; max number of characters of a message (and of an exception message) in compact output. Default 4096; 0 means unlimited. */
+    public static final String AI_MESSAGE_MAX_PROPERTY = "entur.logging.ai.message.max-size";
+
+    public static final int DEFAULT_MESSAGE_MAX = 4096;
+
+    public static int messageMax() {
+        return Integer.getInteger(AI_MESSAGE_MAX_PROPERTY, DEFAULT_MESSAGE_MAX);
+    }
+
+    public static String truncateMessage(String message) {
+        return truncate(message, messageMax());
+    }
+
+    /** Cut to <code>max</code> characters (not inside an alias), followed by <code>...[truncated, N chars]</code>. */
+    static String truncate(String text, int max) {
+        if (max > 0 && text.length() > max) {
+            return AiText.cut(text, max) + "...[truncated, " + text.length() + " chars]";
         }
-        return body;
+        return text;
     }
 
     /**

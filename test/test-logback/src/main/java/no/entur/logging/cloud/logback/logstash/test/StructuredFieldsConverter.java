@@ -27,21 +27,17 @@ public class StructuredFieldsConverter extends ClassicConverter {
     @Override
     public String convert(ILoggingEvent event) {
         AiEventDetails details = AiEventDetails.of(event);
-        String fields = compact ? details.getFields() : details.getFullFields();
-        if (fields == null) {
-            return "";
+        if (compact) {
+            String fields = details.getCompactFields();
+            return fields == null ? "" : PREFIX + AiLoggingControl.truncateBody(fields);
         }
-        String aliased = MdcAliasConverter.aliasUuids(fields, !compact);
-        return PREFIX + (compact ? AiLoggingControl.truncateBody(aliased) : aliased);
+        String fields = details.getFullFields();
+        return fields == null ? "" : PREFIX + MdcAliasConverter.aliasUuids(fields, true);
     }
 
     /** True if the compact file cuts the structured fields of the event. */
     public static boolean isTruncatedInCompactFile(ILoggingEvent event) {
-        String fields = AiEventDetails.of(event).getFields();
-        if (fields == null) {
-            return false;
-        }
-        String aliased = MdcAliasConverter.aliasUuids(fields);
-        return !AiLoggingControl.truncateBody(aliased).equals(aliased);
+        String fields = AiEventDetails.of(event).getCompactFields();
+        return fields != null && !AiLoggingControl.truncateBody(fields).equals(fields);
     }
 }

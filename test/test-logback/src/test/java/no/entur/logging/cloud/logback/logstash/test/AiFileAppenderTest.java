@@ -76,6 +76,42 @@ public class AiFileAppenderTest {
     }
 
     @Test
+    public void filesOfAnotherUserAreRefused(@TempDir Path directory) throws IOException {
+        assumeTrue(posix(directory));
+        Path existing = Files.createFile(directory.resolve("ai.full"));
+        LoggerContext context = new LoggerContext();
+        AiFileAppender appender = new AiFileAppender() {
+            @Override
+            boolean isOwnedByThisUser(Path path) {
+                return false;
+            }
+        };
+        appender.setContext(context);
+        appender.setFile(existing.toString());
+        PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+        encoder.setContext(context);
+        encoder.setPattern("%msg%n");
+        encoder.start();
+        appender.setEncoder(encoder);
+
+        appender.start();
+
+        assertThat(appender.isStarted()).isFalse();
+        assertThat(new AiFileAppender().isOwnedByThisUser(existing)).isTrue();
+    }
+
+    @Test
+    public void lockReachedThroughAnotherPathIsKept(@TempDir Path directory) {
+        AiFileAppender appender = new AiFileAppender();
+        appender.setContext(new LoggerContext());
+        Path lock = directory.resolve("kept.lock");
+
+        assertThat(appender.lock(lock.toString())).isEqualTo(AiFileAppender.LockState.HELD);
+        // the same file again (another path in the same JVM): still held, and the second channel is not closed (that could release the lock)
+        assertThat(appender.lock(directory.resolve(".").resolve("kept.lock").toString())).isEqualTo(AiFileAppender.LockState.HELD);
+    }
+
+    @Test
     public void noAliasesIfLockingFails(@TempDir Path directory) throws IOException {
         AiFileAppender appender = new AiFileAppender();
         appender.setContext(new LoggerContext());

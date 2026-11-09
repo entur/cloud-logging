@@ -57,6 +57,15 @@ public final class AiEventDetails {
     private final boolean jsonBody;
     private final String fields;
     private final String fullFields;
+    private boolean completeBody;
+
+    // computed once per event, as the event id, the compact file and the full file need them (the event is rendered on one thread)
+    private String singleLineBody;
+    private boolean singleLineBodyDone;
+    private String compactBody;
+    private boolean compactBodyDone;
+    private String compactFields;
+    private boolean compactFieldsDone;
 
     private AiEventDetails(boolean requestResponse, List<Header> headers, String body, boolean jsonBody, String fields, String fullFields) {
         this.requestResponse = requestResponse;
@@ -84,6 +93,39 @@ public final class AiEventDetails {
 
     public boolean isJsonBody() {
         return jsonBody;
+    }
+
+    /** True if the body is the whole body (from an {@link AiBodyMarker}), not the one in the JSON output, which may be cut. */
+    public boolean isCompleteBody() {
+        return completeBody;
+    }
+
+    /** The body on a single line (see {@link AiText#singleLineBody(String, boolean)}), or null if there is none. */
+    public String getSingleLineBody() {
+        if (!singleLineBodyDone) {
+            singleLineBody = body == null || body.isBlank() ? null : AiText.singleLineBody(body, jsonBody);
+            singleLineBodyDone = true;
+        }
+        return singleLineBody;
+    }
+
+    /** {@link #getSingleLineBody()} with UUIDs aliased for the compact file (not cut). */
+    public String getCompactBody() {
+        if (!compactBodyDone) {
+            String singleLine = getSingleLineBody();
+            compactBody = singleLine == null ? null : MdcAliasConverter.aliasUuids(singleLine, false);
+            compactBodyDone = true;
+        }
+        return compactBody;
+    }
+
+    /** {@link #getFields()} with UUIDs aliased for the compact file (not cut). */
+    public String getCompactFields() {
+        if (!compactFieldsDone) {
+            compactFields = fields == null ? null : MdcAliasConverter.aliasUuids(fields, false);
+            compactFieldsDone = true;
+        }
+        return compactFields;
     }
 
     /** The other structured fields as a JSON object, or null if there are none. */
@@ -153,7 +195,9 @@ public final class AiEventDetails {
             if (http == null) {
                 return otherFields == null ? NONE : new AiEventDetails(false, Collections.emptyList(), null, false, otherFields, allFields);
             }
-            return new AiEventDetails(true, http.headers, http.body, http.jsonBody, otherFields, allFields);
+            AiEventDetails details = new AiEventDetails(true, http.headers, http.body, http.jsonBody, otherFields, allFields);
+            details.completeBody = http.completeBody;
+            return details;
         } catch (JacksonException | IndexOutOfBoundsException e) {
             // not valid JSON: keep it whole
             String raw = AiText.singleLine(json.strip());
@@ -201,11 +245,15 @@ public final class AiEventDetails {
         if (headers == null) {
             return null;
         }
-        if (bodyMarker != null) {
+        boolean completeBody = false;
+        if (bodyMarker != null && bodyMarker.getBody() != null) {
             body = bodyMarker.getBody();
             jsonBody = bodyMarker.isJson();
+            completeBody = true;
         }
-        return new AiEventDetails(true, headers, body, jsonBody, rest.isEmpty() ? null : "{" + String.join(",", rest) + "}", null);
+        AiEventDetails details = new AiEventDetails(true, headers, body, jsonBody, rest.isEmpty() ? null : "{" + String.join(",", rest) + "}", null);
+        details.completeBody = completeBody;
+        return details;
     }
 
     /** Header values are arrays of strings, or of JSON values (for example rich gRPC error details). */
