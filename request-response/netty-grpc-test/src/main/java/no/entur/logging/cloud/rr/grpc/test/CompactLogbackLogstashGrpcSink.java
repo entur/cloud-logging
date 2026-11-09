@@ -9,7 +9,6 @@ import no.entur.logging.cloud.rr.grpc.message.GrpcDisconnect;
 import no.entur.logging.cloud.rr.grpc.message.GrpcRequest;
 import no.entur.logging.cloud.rr.grpc.message.GrpcResponse;
 import org.slf4j.Marker;
-import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -34,8 +33,6 @@ public class CompactLogbackLogstashGrpcSink extends LogbackLogstashGrpcSink {
             return new CompactLogbackLogstashGrpcSink(loggerToBiConsumer(), logEnabledToBooleanSupplier());
         }
     }
-
-    private final JsonMapper mapper = JsonMapper.builder().build();
 
     public CompactLogbackLogstashGrpcSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled) {
         super(logConsumer, logLevelEnabled);
@@ -77,7 +74,8 @@ public class CompactLogbackLogstashGrpcSink extends LogbackLogstashGrpcSink {
             }
         }
         if (body != null && !body.isBlank()) {
-            message.body(compactBody(body));
+            // gRPC bodies are JSON (protobuf printed as JSON)
+            message.body(CompactRequestResponse.singleLineBody(body, true));
         }
         CompactMessageMarker compactMarker = message.getMarker();
         if (marker != null) {
@@ -87,13 +85,5 @@ public class CompactLogbackLogstashGrpcSink extends LogbackLogstashGrpcSink {
             marker = compactMarker;
         }
         logConsumer.accept(marker, message.getMessage());
-    }
-
-    private String compactBody(String body) {
-        try {
-            return mapper.readTree(body).toString();
-        } catch (Exception e) {
-            return body.strip().replaceAll("\\s*\\R\\s*", "");
-        }
     }
 }

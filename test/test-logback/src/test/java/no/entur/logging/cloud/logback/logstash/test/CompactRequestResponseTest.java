@@ -48,6 +48,34 @@ public class CompactRequestResponseTest {
     }
 
     @Test
+    public void truncatedBodyOfSameLengthIsStillTruncated() {
+        // 4096 characters plus "...[truncated, 4122 chars]" (26 characters) is as long as the original body
+        String body = "x".repeat(4122);
+        CompactRequestResponse message = new CompactRequestResponse("RESP", CompactRequestResponse.DEFAULT_EXCLUDED_GRPC_HEADERS).body(body);
+
+        assertThat(message.getCompactMessage().length()).isEqualTo(message.getMessage().length());
+        assertThat(message.getMarker().isTruncated()).isTrue();
+    }
+
+    @Test
+    public void nullMdcValuesAreAllowed() {
+        MDC.put("empty", null);
+        CompactRequestResponse message = new CompactRequestResponse("REQ", CompactRequestResponse.DEFAULT_EXCLUDED_HTTP_HEADERS)
+                .header("x-a", null);
+
+        assertThat(message.getCompactMessage()).isEqualTo("REQ | x-a: null");
+    }
+
+    @Test
+    public void singleLineBodyKeepsJsonContentAndSeparatesOtherTokens() {
+        assertThat(CompactRequestResponse.singleLineBody("{\n  \"id\" : 1,\n  \"id\" : 1.10, \"s\": \"a \\\" b\\u00e9\"\n}\n", true))
+                .isEqualTo("{\"id\":1,\"id\":1.10,\"s\":\"a \\\" b\\u00e9\"}");
+        // not valid JSON: only line breaks are replaced, by a space
+        assertThat(CompactRequestResponse.singleLineBody("{\"a\": tru\n e}", true)).isEqualTo("{\"a\": tru e}");
+        assertThat(CompactRequestResponse.singleLineBody("<item\n   id=\"1\"/>\n", false)).isEqualTo("<item id=\"1\"/>");
+    }
+
+    @Test
     public void excludedHeadersCanBeOverridden() {
         System.setProperty(AiLoggingControl.AI_EXCLUDED_HEADERS_PROPERTY, "X-Secret, other");
         CompactRequestResponse message = new CompactRequestResponse("REQ", CompactRequestResponse.DEFAULT_EXCLUDED_GRPC_HEADERS)

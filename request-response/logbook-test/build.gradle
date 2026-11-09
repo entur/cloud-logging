@@ -13,8 +13,6 @@ dependencies {
     api ("tools.jackson.core:jackson-core")
 
     api("org.apache.commons:commons-text:${commonsTextVersion}")
+
+    testImplementation("org.zalando:logbook-test:${logbookVersion}")
 }
-
-
-
-

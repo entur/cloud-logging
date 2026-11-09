@@ -1,9 +1,14 @@
 package no.entur.logging.cloud.logback.logstash.test;
 
 import org.slf4j.MDC;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.ObjectReadContext;
+import tools.jackson.core.json.JsonFactory;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +34,8 @@ public class CompactRequestResponse {
 
     private static final Pattern LINE_BREAKS = Pattern.compile("\\s*\\R\\s*");
 
+    private static final JsonFactory JSON_FACTORY = new JsonFactory();
+
     private final StringBuilder full;
     private final StringBuilder compact;
     private final Set<String> excludedHeaders;
@@ -44,7 +51,8 @@ public class CompactRequestResponse {
         this.compact = new StringBuilder(256).append(line);
         this.excludedHeaders = AiLoggingControl.excludedHeaders(defaultExcludedHeaders);
         Map<String, String> mdc = MDC.getCopyOfContextMap();
-        this.mdcValues = mdc == null ? Collections.emptySet() : Set.copyOf(mdc.values());
+        // not Set.copyOf: MDC values may be null
+        this.mdcValues = mdc == null ? Collections.emptySet() : new HashSet<>(mdc.values());
     }
 
     public CompactRequestResponse header(String name, String value) {
@@ -65,7 +73,7 @@ public class CompactRequestResponse {
         if (body != null && !body.isBlank()) {
             full.append(AiLoggingControl.BODY_MARKER).append(body);
             String truncatedBody = AiLoggingControl.truncateBody(body);
-            truncated = truncatedBody.length() != body.length();
+            truncated = !truncatedBody.equals(body);
             compact.append(AiLoggingControl.BODY_MARKER).append(truncatedBody);
         }
         return this;
@@ -82,5 +90,52 @@ public class CompactRequestResponse {
 
     public CompactMessageMarker getMarker() {
         return new CompactMessageMarker(getCompactMessage(), truncated);
+    }
+
+    /**
+     * The body on a single line. Valid JSON (if <code>json</code>) only loses the whitespace between tokens, so the content (duplicate
+     * fields, number formats, escapes) is unchanged; anything else has line breaks and the whitespace around them replaced by a single space.
+     */
+    public static String singleLineBody(String body, boolean json) {
+        String stripped = body.strip();
+        if (json && isValidJson(stripped)) {
+            return removeWhitespaceBetweenTokens(stripped);
+        }
+        return LINE_BREAKS.matcher(stripped).replaceAll(" ");
+    }
+
+    private static boolean isValidJson(String body) {
+        try (JsonParser parser = JSON_FACTORY.createParser(ObjectReadContext.empty(), body)) {
+            while (parser.nextToken() != null) {
+                // parse to the end
+            }
+            return true;
+        } catch (JacksonException e) {
+            return false;
+        }
+    }
+
+    private static String removeWhitespaceBetweenTokens(String json) {
+        StringBuilder builder = new StringBuilder(json.length());
+        boolean inString = false;
+        boolean escaped = false;
+        for (int i = 0; i < json.length(); i++) {
+            char c = json.charAt(i);
+            if (inString) {
+                if (escaped) {
+                    escaped = false;
+                } else if (c == '\\') {
+                    escaped = true;
+                } else if (c == '"') {
+                    inString = false;
+                }
+            } else if (c == '"') {
+                inString = true;
+            } else if (Character.isWhitespace(c)) {
+                continue;
+            }
+            builder.append(c);
+        }
+        return builder.toString();
     }
 }

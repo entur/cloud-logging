@@ -6,6 +6,10 @@
 	<conversionRule conversionWord="cMsg" class="no.entur.logging.cloud.logback.logstash.test.CompactMessageConverter" />
 	<conversionRule conversionWord="cLogger" class="no.entur.logging.cloud.logback.logstash.test.CompactLoggerConverter" />
 	<conversionRule conversionWord="sEx" class="no.entur.logging.cloud.logback.logstash.test.SingleLineRootCauseFirstThrowableProxyConverter" />
+	<conversionRule conversionWord="fields" class="no.entur.logging.cloud.logback.logstash.test.StructuredFieldsConverter" />
+
+	<!-- stop logging at JVM exit also without Spring Boot, so that queued events and pending "repeated N more times" lines are written -->
+	<shutdownHook class="no.entur.logging.cloud.logback.logstash.test.AiShutdownHook" />
 
 	<!--
 		Compact plain text (one event per line) written to <file>.compact, where <file> is given by -Dentur.logging.ai.file (default: entur-logging-ai in the temp directory),
@@ -13,6 +17,8 @@
 	-->
 	<appender name="AI_FILE" class="no.entur.logging.cloud.logback.logstash.test.AiFileAppender">
 		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.compact</file>
+		<!-- held by the test JVM which uses aliases, see AiFileAppender -->
+		<lockFile>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.lock</lockFile>
 		<!-- framework start-up/shutdown chatter below WARN, override with -Dentur.logging.ai.quiet-loggers=a.b,c.d -->
 		<filter class="no.entur.logging.cloud.logback.logstash.test.QuietLoggersFilter" />
 		<!-- compact file level, override with -Dentur.logging.ai.level=DEBUG -->
@@ -24,9 +30,10 @@
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 			<!--
 				compact plain text for AI: no timestamp, thread or colours, simple class names, shorter MDC;
+				structured fields (Logstash markers, key-value pairs) as JSON, truncated like request-response bodies;
 				stack traces on a single line (grep friendly), root-cause-first, framework frames removed, frames limited by entur.logging.ai.stacktrace.max-lines
 			-->
-			<pattern>%level %cLogger%aliasMdc{compact}%eventId : %cMsg%sEx{full,org.springframework,org.junit,org.gradle,worker.org.gradle,org.apache,jakarta.,io.grpc,io.netty,io.micrometer,org.zalando.logbook,jdk.internal,jdk.proxy,java.lang.reflect,java.util,sun.reflect}%n%nopex</pattern>
+			<pattern>%level %cLogger%aliasMdc{compact}%eventId : %cMsg%fields{compact}%sEx{full,org.springframework,org.junit,org.gradle,worker.org.gradle,org.apache,jakarta.,io.grpc,io.netty,io.micrometer,org.zalando.logbook,jdk.internal,jdk.proxy,java.lang.reflect,java.util,sun.reflect}%n%nopex</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
@@ -39,6 +46,7 @@
 	<!-- Drill-down: the same events unfiltered and untrimmed (all levels, full stack traces) in <file>.full -->
 	<appender name="AI_FILE_FULL" class="no.entur.logging.cloud.logback.logstash.test.AiFileAppender">
 		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.full</file>
+		<lockFile>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.lock</lockFile>
 		<!-- override with -Dentur.logging.ai.full.level=INFO -->
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>${entur.logging.ai.full.level:-DEBUG}</level>
@@ -46,7 +54,7 @@
 		<append>true</append>
 		<immediateFlush>true</immediateFlush>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger%aliasMdc%eventId{always} : %aliasMsg%n%ex</pattern>
+			<pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger%aliasMdc%eventId{always} : %aliasMsg%fields%n%ex</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
@@ -74,8 +82,11 @@
 		<appender-ref ref="AI_ENCODER_ONLY" />
 	</appender>
 
-	<!-- on-demand logging requires a LoggingScopeAsyncAppender -->
-	<appender name="AI_FILE_ASYNC" class="no.entur.logging.cloud.appender.scope.LoggingScopeAsyncAppender">
+	<!--
+		on-demand logging requires a LoggingScopeAsyncAppender; this subclass also lets LogbackTestExtension receive the events
+		as they are written (after on-demand filtering and with the complete MDC), as with console output
+	-->
+	<appender name="AI_FILE_ASYNC" class="no.entur.logging.cloud.logback.logstash.test.CompositeConsoleAsyncAppenderLogging">
 		<discardingThreshold>0</discardingThreshold>
 		<maxFlushTime>0</maxFlushTime>
 		<appender-ref ref="AI_FANOUT" />
