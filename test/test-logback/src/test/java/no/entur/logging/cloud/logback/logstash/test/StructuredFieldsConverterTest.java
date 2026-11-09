@@ -86,7 +86,7 @@ public class StructuredFieldsConverterTest {
 
         EventIdConverter eventId = new EventIdConverter();
         eventId.start();
-        assertThat(eventId.convert(event)).matches(" #[0-9a-f]{8}");
+        assertThat(eventId.convert(event)).matches(" #[0-9a-f]{12}");
     }
 
     private static LoggingEvent event(String message) {

@@ -31,7 +31,10 @@ import java.util.List;
  * The structured data of an event for the AI files, read from its JSON output: the fields of Logstash markers, SLF4J key-value pairs
  * and structured arguments which are not part of the message (no <code>{}</code> placeholder). A request-response marker (an
  * <code>http</code> object with <code>headers</code>, written by the HTTP and gRPC request-response markers) gives the headers and
- * body; an {@link AiBodyMarker} replaces the body. The other fields are kept as a JSON object.
+ * body; an {@link AiBodyMarker} replaces the body. The other fields are kept as a JSON object; for the full file also the other members
+ * of the request-response <code>http</code> object, such as <code>origin</code>, <code>protocol</code>, <code>remote</code> and the gRPC
+ * <code>deadline-in</code>. If the JSON output is not valid JSON (for example a malformed JSON body from a local request, which the
+ * request-response marker writes as is), it is kept whole as the other fields, so that headers and body are not lost.
  * <p>
  * Kept for the last event per thread, as the compact and the full file render the same event one after the other.
  */
@@ -40,7 +43,7 @@ public final class AiEventDetails {
     public record Header(String name, String value) {
     }
 
-    static final AiEventDetails NONE = new AiEventDetails(false, Collections.emptyList(), null, false, null);
+    static final AiEventDetails NONE = new AiEventDetails(false, Collections.emptyList(), null, false, null, null);
 
     private static final LoggingEventCompositeJsonFormatter FORMATTER = createFormatter();
 
@@ -53,13 +56,15 @@ public final class AiEventDetails {
     private final String body;
     private final boolean jsonBody;
     private final String fields;
+    private final String fullFields;
 
-    private AiEventDetails(boolean requestResponse, List<Header> headers, String body, boolean jsonBody, String fields) {
+    private AiEventDetails(boolean requestResponse, List<Header> headers, String body, boolean jsonBody, String fields, String fullFields) {
         this.requestResponse = requestResponse;
         this.headers = headers;
         this.body = body;
         this.jsonBody = jsonBody;
         this.fields = fields;
+        this.fullFields = fullFields;
     }
 
     /** True if the event comes from request-response logging (HTTP or gRPC). */
@@ -84,6 +89,11 @@ public final class AiEventDetails {
     /** The other structured fields as a JSON object, or null if there are none. */
     public String getFields() {
         return fields;
+    }
+
+    /** Like {@link #getFields()}, plus the other members of the request-response <code>http</code> object, for the full file. */
+    public String getFullFields() {
+        return fullFields;
     }
 
     public static AiEventDetails of(ILoggingEvent event) {
@@ -114,6 +124,7 @@ public final class AiEventDetails {
             }
             AiEventDetails http = null;
             List<String> fields = new ArrayList<>();
+            List<String> fullFields = new ArrayList<>();
             JsonToken token = parser.nextToken();
             while (token == JsonToken.PROPERTY_NAME) {
                 int start = offset(parser);
@@ -128,27 +139,44 @@ public final class AiEventDetails {
                 token = parser.nextToken();
                 if (parsed != null) {
                     http = parsed;
+                    if (parsed.fields != null) {
+                        fullFields.add("\"http\":" + parsed.fields);
+                    }
                 } else {
-                    fields.add(withoutTrailingComma(json.substring(start, offset(parser))));
+                    String field = withoutTrailingComma(json.substring(start, offset(parser)));
+                    fields.add(field);
+                    fullFields.add(field);
                 }
             }
-            String otherFields = fields.isEmpty() ? null : AiText.singleLine("{" + String.join(",", fields) + "}");
+            String otherFields = toObject(fields);
+            String allFields = toObject(fullFields);
             if (http == null) {
-                return otherFields == null ? NONE : new AiEventDetails(false, Collections.emptyList(), null, false, otherFields);
+                return otherFields == null ? NONE : new AiEventDetails(false, Collections.emptyList(), null, false, otherFields, allFields);
             }
-            return new AiEventDetails(true, http.headers, http.body, http.jsonBody, otherFields);
+            return new AiEventDetails(true, http.headers, http.body, http.jsonBody, otherFields, allFields);
         } catch (JacksonException | IndexOutOfBoundsException e) {
-            return NONE;
+            // not valid JSON: keep it whole
+            String raw = AiText.singleLine(json.strip());
+            return raw.isEmpty() ? NONE : new AiEventDetails(false, Collections.emptyList(), null, false, raw, raw);
         }
     }
 
-    /** Parses an <code>http</code> object; null (after skipping it) if it has no headers, i.e. is not from request-response logging. */
+    private static String toObject(List<String> fields) {
+        return fields.isEmpty() ? null : AiText.singleLine("{" + String.join(",", fields) + "}");
+    }
+
+    /**
+     * Parses an <code>http</code> object; null (after skipping it) if it has no headers, i.e. is not from request-response logging.
+     * The members other than headers and body are returned as the fields.
+     */
     private static AiEventDetails parseHttp(JsonParser parser, String json, AiBodyMarker bodyMarker) {
         List<Header> headers = null;
         String body = null;
         boolean jsonBody = false;
+        List<String> rest = new ArrayList<>();
         JsonToken token = parser.nextToken();
         while (token == JsonToken.PROPERTY_NAME) {
+            int nameStart = offset(parser);
             String name = parser.currentName();
             JsonToken value = parser.nextToken();
             int start = offset(parser);
@@ -167,6 +195,7 @@ public final class AiEventDetails {
             } else {
                 parser.skipChildren();
                 token = parser.nextToken();
+                rest.add(withoutTrailingComma(json.substring(nameStart, offset(parser))));
             }
         }
         if (headers == null) {
@@ -176,7 +205,7 @@ public final class AiEventDetails {
             body = bodyMarker.getBody();
             jsonBody = bodyMarker.isJson();
         }
-        return new AiEventDetails(true, headers, body, jsonBody, null);
+        return new AiEventDetails(true, headers, body, jsonBody, rest.isEmpty() ? null : "{" + String.join(",", rest) + "}", null);
     }
 
     /** Header values are arrays of strings, or of JSON values (for example rich gRPC error details). */

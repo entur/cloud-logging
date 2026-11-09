@@ -16,6 +16,16 @@ public class AiTextTest {
     }
 
     @Test
+    public void onlyASingleValueIsJson() {
+        assertThat(AiText.isValidJson("{\"a\":[1,2]}")).isTrue();
+        assertThat(AiText.isValidJson("1\n2")).isFalse();
+        assertThat(AiText.isValidJson("{\"a\":1} {\"b\":2}")).isFalse();
+        assertThat(AiText.isValidJson("")).isFalse();
+        // several values are not JSON, so their whitespace is kept
+        assertThat(AiText.singleLineBody("1\n2", true)).isEqualTo("1 2");
+    }
+
+    @Test
     public void controlCharactersAreEscapedAndBinaryBodiesReplaced() {
         assertThat(AiText.singleLine("a\u001b[31mred\tb")).isEqualTo("a\\u001b[31mred\tb");
         assertThat(AiText.escapeControlCharacters("a\n\u0007", true)).isEqualTo("a\n\\u0007");

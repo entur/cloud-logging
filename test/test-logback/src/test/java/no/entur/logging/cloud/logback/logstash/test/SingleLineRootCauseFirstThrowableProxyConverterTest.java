@@ -39,6 +39,35 @@ public class SingleLineRootCauseFirstThrowableProxyConverterTest {
     }
 
     @Test
+    public void framesOfNamedClassLoadersAndVersionedModulesAreFrames() {
+        Exception e = new IllegalStateException("boom");
+        e.setStackTrace(new StackTraceElement[]{
+                new StackTraceElement("loader", "com.example.app", "1.2.3+4", "com.example.App", "run", "App.java", 42),
+                new StackTraceElement(null, "com.example.app", "1.2.3", "com.example.App", "main", "App.java", 7),
+                new StackTraceElement("a.App2", "m", "App2.java", 3)});
+
+        // 2 frames per exception by default: the third is left out, so the first two count as frames
+        assertThat(convert(e, "full")).isEqualTo(" | java.lang.IllegalStateException: boom"
+                + " | at loader/com.example.app@1.2.3+4/com.example.App.run(App.java:42)"
+                + " | at com.example.app@1.2.3/com.example.App.main(App.java:7) | [... 1 frames omitted]");
+    }
+
+    @Test
+    public void controlCharactersAreEscapedInBothFiles() {
+        Exception e = exception("bad\u0000value\u001b[31m", null, "a.App");
+
+        assertThat(convert(e, "full")).isEqualTo(" | java.lang.IllegalStateException: bad\\u0000value\\u001b[31m | at a.App.m(App.java:1)");
+
+        LoggerContext context = new LoggerContext();
+        EscapedThrowableProxyConverter full = new EscapedThrowableProxyConverter();
+        full.setContext(context);
+        full.start();
+        String trace = full.convert(new LoggingEvent("f", context.getLogger("x"), Level.ERROR, "m", e, null));
+        assertThat(trace).startsWith("java.lang.IllegalStateException: bad\\u0000value\\u001b[31m" + System.lineSeparator() + "\tat a.App.m(App.java:1)");
+        assertThat(full.convert(new LoggingEvent("f", context.getLogger("x"), Level.ERROR, "m", null, null))).isEmpty();
+    }
+
+    @Test
     public void framesAreLimitedAndLogbackMarkersDropped() {
         Exception e = exception("boom", null, "a.App", "org.fw.X", "org.fw.Y", "a.App2", "a.App3", "a.App4");
 

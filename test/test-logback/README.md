@@ -29,14 +29,15 @@ Set the JVM system property `entur.logging.ai.enabled=true` (exactly `true`, in 
 `--rerun` runs the tests even if Gradle considers them up to date (or cached), otherwise no logs are written.
 
 The files are `<file>.compact` and `<file>.full`, where `<file>` is given by `entur.logging.ai.file` (default: `entur-logging-ai` in the temp directory). Events are appended; delete both files first for a clean run.
+The files hold whole request and response bodies, so they are created readable by the owner only (where the file system has POSIX permissions), and a file which is a symbolic link is not written to.
 All test JVMs (one per module) append to the same files; each JVM starts with a line `---- JVM pid N started <time> in <module dir> (aliases u1, h1, ... restart) ----`.
 If test JVMs run at the same time (Gradle `--parallel` or `maxParallelForks`, Maven `forkCount`), their events are interleaved: only the JVM holding the lock file `<file>.lock` uses aliases, the others write
-`(another JVM is writing to this file, no aliases)` in their line and leave UUIDs as they are. So an alias always belongs to the last line before it which says `aliases ... restart`.
+`(another JVM is writing to this file, no aliases)` in their line and leave UUIDs as they are. A JVM which cannot lock the file does not use aliases either (`(could not lock ..., no aliases)`). So an alias always belongs to the last line before it which says `aliases ... restart`.
 
 ### Compact file (`<file>.compact`)
 One event per line, `LEVEL Logger [mdc] #id : message | fields: {...} | stack trace`, INFO and above (override with `entur.logging.ai.level`, for example `DEBUG`).
 
-- No timestamp, thread or colours. The logger is the simple class name (or the full name if the logger is not named after a class). Control characters are escaped (`\u001b`), so that `grep` treats the file as text.
+- No timestamp, thread or colours. The logger is the simple class name (or the full name if the logger is not named after a class). Control characters are escaped (`\u001b`), also in stack traces and in both files, so that `grep` treats the files as text.
 - MDC entries (present during requests) are appended to the logger as `[key=value, ...]`. The `logging.googleapis.com/` key prefix is removed, and such entries are left out when their value equals another entry's value (by default the trace is the correlation id).
 - Structured fields which are not part of the message, from Logstash markers (`Markers.append("key", value)`, ...), SLF4J key-value pairs and structured arguments without a `{}` placeholder (`kv("key", value)`), are appended as JSON: ` | fields: {"key":value}` (in both files; cut like request-response bodies in the compact file).
 - Stack traces are on the same line as the message (separated by ` | `), root cause first, with framework frames removed, so that `grep` returns a whole trace.
@@ -45,8 +46,8 @@ One event per line, `LEVEL Logger [mdc] #id : message | fields: {...} | stack tr
 - Repeated WARN/ERROR events (same level, logger, message and root cause) are collapsed: the first is printed, the rest are counted and a line `repeated N more times, N+1 in total (first #id, last #id): ...` is written (the total includes the first event) when the cache (500 keys, least recently used evicted) overflows or the test JVM stops. Disable with `entur.logging.ai.dedupe=false`.
 
 ### Full file (`<file>.full`)
-The same events with timestamps, thread names, full logger names, DEBUG and above (`entur.logging.ai.full.level`, default `DEBUG`), all request-response headers, whole bodies and full stack traces, for drill-down when the compact file is not enough.
-Every event has an id (`#1a2b3c4d`) here. In the compact file, only events which lost information (stack trace, truncated body or fields) show the id, so `grep -n -C 5 '#1a2b3c4d' <file>.full` gives the complete event.
+The same events with timestamps, thread names, full logger names, DEBUG and above (`entur.logging.ai.full.level`, default `DEBUG`), all request-response headers, whole bodies, the other request-response details (` | fields: {"http":{"origin":...,"protocol":...,"remote":...}}`) and full stack traces, for drill-down when the compact file is not enough.
+Every event has an id (`#1a2b3c4d5e6f`) here. In the compact file, only events which lost information (stack trace, truncated body or fields) show the id, so `grep -n -C 5 '#1a2b3c4d5e6f' <file>.full` gives the complete event.
 
 ### Request-response logging
 HTTP and gRPC request-response logging uses the machine-readable sinks, so message and JSON fields are the same as without AI mode and logging assertions behave the same.
