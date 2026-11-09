@@ -1,112 +1,149 @@
 package no.entur.logging.cloud.logback.logstash.test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static net.logstash.logback.marker.Markers.appendRaw;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.MDC;
+import org.slf4j.Marker;
+import org.slf4j.event.KeyValuePair;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.LoggingEvent;
+import net.logstash.logback.marker.LogstashMarker;
 
 public class CompactRequestResponseTest {
 
     @AfterEach
     public void cleanUp() {
-        MDC.clear();
         System.clearProperty(AiLoggingControl.AI_BODY_MAX_PROPERTY);
         System.clearProperty(AiLoggingControl.AI_EXCLUDED_HEADERS_PROPERTY);
     }
 
-    @Test
-    public void compactMessageLeavesOutExcludedHeadersAndHeadersInMdc() {
-        MDC.put("correlationId", "abc-123");
-        CompactRequestResponse message = new CompactRequestResponse("GET http://localhost/x\n", CompactRequestResponse.DEFAULT_EXCLUDED_HTTP_HEADERS)
-                .header("User-Agent", "Java")
-                .header("X-Correlation-Id", "abc-123")
-                .header("Content-Type", "application/json")
-                .body("{\"a\":1}");
+    private static LoggingEvent event(String message, Marker marker, Map<String, String> mdc) {
+        LoggingEvent event = new LoggingEvent("f", new LoggerContext().getLogger("x"), Level.INFO, message, null, null);
+        event.addMarker(marker);
+        event.setMDCPropertyMap(mdc == null ? Map.of() : mdc);
+        return event;
+    }
 
-        assertThat(message.getMessage()).isEqualTo("GET http://localhost/x | user-agent: Java; x-correlation-id: abc-123; content-type: application/json | body: {\"a\":1}");
-        assertThat(message.getCompactMessage()).isEqualTo("GET http://localhost/x | content-type: application/json | body: {\"a\":1}");
-        assertThat(message.getMarker().isTruncated()).isFalse();
+    private static String compact(LoggingEvent event) {
+        return new CompactMessageConverter().convert(event);
+    }
+
+    private static String full(LoggingEvent event) {
+        return new AliasMessageConverter().convert(event);
     }
 
     @Test
-    public void bodyIsTruncatedInCompactMessageOnly() {
+    public void messageIsUnchangedAndHeadersAndBodyComeFromTheMarker() {
+        Map<String, String> mdc = new HashMap<>();
+        mdc.put("correlationId", "abc-123");
+        mdc.put("attempt", "1");
+        LoggingEvent event = event("GET http://localhost/x\n", appendRaw("http", """
+                {"method":"GET","headers":{"user-agent":["Java"],"x-correlation-id":["abc-123"],"content-type":["application/json"],
+                "x-retry-count":["1"]},"body":{
+                  "a" : 1, "a" : 2.50
+                }}"""), mdc);
+
+        assertThat(event.getFormattedMessage()).isEqualTo("GET http://localhost/x\n");
+        assertThat(full(event)).isEqualTo("GET http://localhost/x | user-agent: Java; x-correlation-id: abc-123; content-type: application/json; x-retry-count: 1 | body: {\"a\":1,\"a\":2.50}");
+        // the correlation id header repeats the MDC; the retry count only has the same value as an unrelated MDC entry
+        assertThat(compact(event)).isEqualTo("GET http://localhost/x | content-type: application/json; x-retry-count: 1 | body: {\"a\":1,\"a\":2.50}");
+    }
+
+    @Test
+    public void bodyIsCutInCompactFileOnlyAndEventGetsAnId() {
         System.setProperty(AiLoggingControl.AI_BODY_MAX_PROPERTY, "3");
-        CompactRequestResponse message = new CompactRequestResponse("RESP", CompactRequestResponse.DEFAULT_EXCLUDED_GRPC_HEADERS)
-                .header("grpc-encoding", "identity")
-                .body("abcdef");
+        LoggingEvent event = event("RESP", appendRaw("http", "{\"headers\":{},\"body\":\"abcdef\"}"), null);
 
-        assertThat(message.getMessage()).isEqualTo("RESP | grpc-encoding: identity | body: abcdef");
-        assertThat(message.getCompactMessage()).isEqualTo("RESP | body: abc...[truncated, 6 chars]");
-        assertThat(message.getMarker().isTruncated()).isTrue();
+        assertThat(full(event)).isEqualTo("RESP | body: abcdef");
+        assertThat(compact(event)).isEqualTo("RESP | body: abc...[truncated, 6 chars]");
+
+        EventIdConverter eventId = new EventIdConverter();
+        eventId.start();
+        assertThat(eventId.convert(event)).matches(" #[0-9a-f]{8}");
+        assertThat(eventId.convert(event("RESP", appendRaw("http", "{\"headers\":{},\"body\":\"abc\"}"), null))).isEmpty();
     }
 
     @Test
-    public void truncatedBodyOfSameLengthIsStillTruncated() {
+    public void bodyCutToTheSameLengthIsStillCut() {
         // 4096 characters plus "...[truncated, 4122 chars]" (26 characters) is as long as the original body
-        String body = "x".repeat(4122);
-        CompactRequestResponse message = new CompactRequestResponse("RESP", CompactRequestResponse.DEFAULT_EXCLUDED_GRPC_HEADERS).body(body);
+        AiEventDetails details = AiEventDetails.of(event("RESP", appendRaw("http", "{\"headers\":{},\"body\":\"" + "x".repeat(4122) + "\"}"), null));
 
-        assertThat(message.getCompactMessage().length()).isEqualTo(message.getMessage().length());
-        assertThat(message.getMarker().isTruncated()).isTrue();
-    }
-
-    @Test
-    public void nullMdcValuesAreAllowed() {
-        MDC.put("empty", null);
-        CompactRequestResponse message = new CompactRequestResponse("REQ", CompactRequestResponse.DEFAULT_EXCLUDED_HTTP_HEADERS)
-                .header("x-a", null);
-
-        assertThat(message.getCompactMessage()).isEqualTo("REQ | x-a: null");
-    }
-
-    @Test
-    public void singleLineBodyKeepsJsonContentAndSeparatesOtherTokens() {
-        assertThat(CompactRequestResponse.singleLineBody("{\n  \"id\" : 1,\n  \"id\" : 1.10, \"s\": \"a \\\" b\\u00e9\"\n}\n", true))
-                .isEqualTo("{\"id\":1,\"id\":1.10,\"s\":\"a \\\" b\\u00e9\"}");
-        // not valid JSON: only line breaks are replaced, by a space
-        assertThat(CompactRequestResponse.singleLineBody("{\"a\": tru\n e}", true)).isEqualTo("{\"a\": tru e}");
-        assertThat(CompactRequestResponse.singleLineBody("<item\n   id=\"1\"/>\n", false)).isEqualTo("<item id=\"1\"/>");
+        assertThat(CompactRequestResponse.isBodyTruncatedInCompactFile(details)).isTrue();
     }
 
     @Test
     public void excludedHeadersCanBeOverridden() {
         System.setProperty(AiLoggingControl.AI_EXCLUDED_HEADERS_PROPERTY, "X-Secret, other");
-        CompactRequestResponse message = new CompactRequestResponse("REQ", CompactRequestResponse.DEFAULT_EXCLUDED_GRPC_HEADERS)
-                .header("grpc-encoding", "identity")
-                .header("x-secret", "s");
+        LoggingEvent event = event("REQ", appendRaw("http", "{\"headers\":{\"user-agent\":[\"Java\"],\"x-secret\":[\"s\"]}}"), null);
 
-        assertThat(message.getCompactMessage()).isEqualTo("REQ | grpc-encoding: identity");
+        assertThat(compact(event)).isEqualTo("REQ | user-agent: Java");
     }
 
     @Test
-    public void converterPrintsCompactMessageAndEventIdOnlyIfTruncated() {
-        System.setProperty(AiLoggingControl.AI_BODY_MAX_PROPERTY, "3");
-        CompactRequestResponse message = new CompactRequestResponse("REQ", CompactRequestResponse.DEFAULT_EXCLUDED_GRPC_HEADERS)
-                .header("te", "trailers")
-                .body("abcdef");
-        LoggingEvent event = new LoggingEvent("f", new LoggerContext().getLogger("x"), Level.INFO, message.getMessage(), null, null);
-        event.addMarker(message.getMarker());
+    public void grpcHeadersWithJsonValues() {
+        LoggingEvent event = event("RESP INVALID_ARGUMENT /Greeting/greet", appendRaw("http", """
+                {"headers":{"content-type":["application/grpc"],"grpc-status":["3"],"grpc-status-details-bin":[{"code":3,"details":[{"field":"name"}]}]}}"""), null);
 
-        assertThat(new CompactMessageConverter().convert(event)).isEqualTo("REQ | body: abc...[truncated, 6 chars]");
+        assertThat(compact(event)).isEqualTo("RESP INVALID_ARGUMENT /Greeting/greet | grpc-status: 3; grpc-status-details-bin: {\"code\":3,\"details\":[{\"field\":\"name\"}]}");
+    }
 
-        EventIdConverter compact = new EventIdConverter();
-        compact.start();
-        EventIdConverter always = new EventIdConverter();
-        always.setOptionList(List.of("always"));
-        always.start();
-        assertThat(compact.convert(event)).matches(" #[0-9a-f]{8}");
-        assertThat(always.convert(event)).isEqualTo(compact.convert(event));
+    @Test
+    public void uuidsAndHexIdsInHeadersAreAliasedAndAnnouncedInTheFullFile() {
+        String uuid = UUID.randomUUID().toString();
+        LoggingEvent event = event("GET /x", appendRaw("http",
+                "{\"headers\":{\"x-request-id\":[\"" + uuid + "\"],\"traceparent\":[\"00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01\"]}}"), null);
+        String alias = MdcAliasConverter.aliasOf(uuid);
 
-        LoggingEvent plain = new LoggingEvent("f", new LoggerContext().getLogger("x"), Level.INFO, "line 1\n  line 2", null, null);
-        assertThat(compact.convert(plain)).isEmpty();
-        assertThat(always.convert(plain)).matches(" #[0-9a-f]{8}");
-        assertThat(new CompactMessageConverter().convert(plain)).isEqualTo("line 1 line 2");
+        assertThat(compact(event)).matches("GET /x \\| x-request-id: " + alias + "; traceparent: 00-h\\d+-h\\d+-01");
+        assertThat(full(event)).startsWith("GET /x | x-request-id: " + alias + "(" + uuid + ")");
+        assertThat(full(event)).startsWith("GET /x | x-request-id: " + alias + ";");
+    }
+
+    @Test
+    public void bodyMarkerReplacesTheBodyOfTheRequestResponseMarker() {
+        LogstashMarker marker = appendRaw("http", "{\"headers\":{},\"body\":\"ab\"}");
+        marker.add(new AiBodyMarker("line 1\n  line 2", false));
+        assertThat(full(event("RESP", marker, null))).isEqualTo("RESP | body: line 1 line 2");
+
+        LogstashMarker binary = appendRaw("http", "{\"headers\":{}}");
+        binary.add(new AiBodyMarker("a\u0000b", false));
+        assertThat(full(event("RESP", binary, null))).isEqualTo("RESP | body: [binary, 3 chars]");
+    }
+
+    @Test
+    public void nullMdcValuesAreAllowed() {
+        Map<String, String> mdc = new HashMap<>();
+        mdc.put("empty", null);
+        LoggingEvent event = event("REQ", appendRaw("http", "{\"headers\":{\"empty\":[\"x\"]}}"), mdc);
+
+        assertThat(compact(event)).isEqualTo("REQ | empty: x");
+    }
+
+    @Test
+    public void httpFieldWithoutHeadersIsNotRequestResponse() {
+        LoggingEvent event = event("m", appendRaw("http", "{\"status\":200}"), null);
+        event.addKeyValuePair(new KeyValuePair("k", "v"));
+
+        assertThat(compact(event)).isEqualTo("m");
+        StructuredFieldsConverter fields = new StructuredFieldsConverter();
+        fields.setOptionList(List.of("compact"));
+        fields.start();
+        assertThat(fields.convert(event)).isEqualTo(" | fields: {\"http\":{\"status\":200},\"k\":\"v\"}");
+    }
+
+    @Test
+    public void normalizedNames() {
+        assertThat(CompactRequestResponse.normalizedName("X-Correlation-Id")).isEqualTo("correlationid");
+        assertThat(CompactRequestResponse.normalizedName("correlation_id")).isEqualTo("correlationid");
+        assertThat(CompactRequestResponse.normalizedName("logging.googleapis.com/trace")).isEqualTo("trace");
     }
 }

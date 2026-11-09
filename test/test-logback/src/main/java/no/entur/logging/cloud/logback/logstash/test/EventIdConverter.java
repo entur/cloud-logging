@@ -32,9 +32,9 @@ public class EventIdConverter extends ClassicConverter {
         if (event.getThrowableProxy() != null) {
             return true;
         }
-        CompactMessageMarker marker = CompactMessageMarker.find(event);
-        if (marker != null) {
-            return marker.isTruncated();
+        AiEventDetails details = AiEventDetails.of(event);
+        if (details.isRequestResponse() && CompactRequestResponse.isBodyTruncatedInCompactFile(details)) {
+            return true;
         }
         return StructuredFieldsConverter.isTruncatedInCompactFile(event);
     }

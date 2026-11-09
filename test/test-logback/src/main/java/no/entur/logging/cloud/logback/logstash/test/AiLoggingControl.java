@@ -15,8 +15,9 @@ public class AiLoggingControl {
     /** JVM system property; if 'true', test logging is written as compact output meant for AI tooling. */
     public static final String AI_ENABLED_PROPERTY = "entur.logging.ai.enabled";
 
+    /** Exactly <code>true</code>, as for the condition in <code>logback-test.xml</code> (which is case-sensitive). */
     public static boolean isAiEnabled() {
-        return Boolean.getBoolean(AI_ENABLED_PROPERTY);
+        return "true".equals(System.getProperty(AI_ENABLED_PROPERTY));
     }
 
     /** JVM system property; max number of characters of a request/response body in compact output. Default 4096; 0 means unlimited. */

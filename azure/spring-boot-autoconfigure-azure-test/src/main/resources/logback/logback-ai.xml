@@ -1,5 +1,8 @@
 <included>
 
+	<!-- Spring Boot default logger levels, as without AI mode -->
+	<include resource="logback/spring-defaults-test.xml" />
+
 	<conversionRule conversionWord="aliasMdc" class="no.entur.logging.cloud.logback.logstash.test.MdcAliasConverter" />
 	<conversionRule conversionWord="aliasMsg" class="no.entur.logging.cloud.logback.logstash.test.AliasMessageConverter" />
 	<conversionRule conversionWord="eventId" class="no.entur.logging.cloud.logback.logstash.test.EventIdConverter" />

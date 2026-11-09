@@ -33,14 +33,25 @@ public class MdcAliasConverterTest {
         Map<String, String> mdc = new LinkedHashMap<>();
         mdc.put("requestId", A);
         mdc.put("user", "john-doe");
-        String first = convert(mdc, null);
+        String first = convert(mdc, "compact");
         assertThat(first).matches(" \\[requestId=u\\d+, user=john-doe]");
         String alias = first.substring(first.indexOf('=') + 1, first.indexOf(','));
 
         mdc.put("requestId", B);
-        assertThat(convert(mdc, null)).doesNotContain(alias + ",");
+        assertThat(convert(mdc, "compact")).doesNotContain(alias + ",");
         mdc.put("requestId", A);
-        assertThat(convert(mdc, null)).isEqualTo(first);
+        assertThat(convert(mdc, "compact")).isEqualTo(first);
+    }
+
+    @Test
+    public void fullFileShowsTheValueTheFirstTime() {
+        String uuid = java.util.UUID.randomUUID().toString();
+        Map<String, String> mdc = new LinkedHashMap<>();
+        mdc.put("correlationId", uuid);
+        String alias = MdcAliasConverter.aliasOf(uuid);
+
+        assertThat(convert(mdc, null)).isEqualTo(" [correlationId=" + alias + "(" + uuid + ")]");
+        assertThat(convert(mdc, null)).isEqualTo(" [correlationId=" + alias + "]");
     }
 
     @Test
@@ -49,9 +60,9 @@ public class MdcAliasConverterTest {
         mdc.put("spanId", "8524c7fac997d420");
         mdc.put("count", "123456789012");
         mdc.put("word", "deadbeefcafe");
-        String converted = convert(mdc, null);
+        String converted = convert(mdc, "compact");
         assertThat(converted).matches(" \\[spanId=h\\d+, count=123456789012, word=deadbeefcafe]");
-        assertThat(convert(mdc, null)).isEqualTo(converted);
+        assertThat(convert(mdc, "compact")).isEqualTo(converted);
     }
 
     @Test

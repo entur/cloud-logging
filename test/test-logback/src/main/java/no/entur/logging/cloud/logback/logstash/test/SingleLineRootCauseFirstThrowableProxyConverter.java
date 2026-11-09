@@ -20,6 +20,9 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
 
     private static final Pattern SKIPPED_SUFFIX = Pattern.compile("\\s*\\[\\d+ skipped]$");
 
+    // a stack frame, 'at package.Class.method(Source.java:1)'; not a message line such as Jackson's 'at [Source: ...]'
+    private static final Pattern FRAME = Pattern.compile("^at [\\w$./<>-]+\\(");
+
     @Override
     public String convert(ILoggingEvent event) {
         String multiLine = super.convert(event);
@@ -39,7 +42,7 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
             if (trimmed.isEmpty() || isLogbackMarker(trimmed)) {
                 continue;
             }
-            if (trimmed.startsWith("at ")) {
+            if (FRAME.matcher(trimmed).lookingAt()) {
                 frames++;
                 if (maxFrames > 0 && frames > maxFrames) {
                     omittedFrames++;
@@ -50,7 +53,10 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
                 appendOmitted(builder, omittedFrames);
                 omittedFrames = 0;
                 frames = 0;
-                causes++;
+                // suppressed exceptions are not causes: they do not count, so that the wrapping exceptions are kept
+                if (!trimmed.startsWith(CoreConstants.SUPPRESSED)) {
+                    causes++;
+                }
                 if (maxCauses > 0 && causes > maxCauses) {
                     builder.append(SEPARATOR).append("[... more causes omitted]");
                     return builder.toString();

@@ -20,7 +20,7 @@ Can not yet assert against MDC fields set in gRPC MDC context.
 When using an async appender, there is a race condition for in-flight log events when switching from one encoder to another.
 
 # AI / tooling: compact log file
-Set the JVM system property `entur.logging.ai.enabled=true` to write all log events to files instead of the console:
+Set the JVM system property `entur.logging.ai.enabled=true` (exactly `true`, in lower case) to write all log events to files instead of the console:
 
 ```
 ./gradlew test --rerun -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test
@@ -36,32 +36,35 @@ If test JVMs run at the same time (Gradle `--parallel` or `maxParallelForks`, Ma
 ### Compact file (`<file>.compact`)
 One event per line, `LEVEL Logger [mdc] #id : message | fields: {...} | stack trace`, INFO and above (override with `entur.logging.ai.level`, for example `DEBUG`).
 
-- No timestamp, thread or colours. The logger is the simple class name (or the full name if the logger is not named after a class).
+- No timestamp, thread or colours. The logger is the simple class name (or the full name if the logger is not named after a class). Control characters are escaped (`\u001b`), so that `grep` treats the file as text.
 - MDC entries (present during requests) are appended to the logger as `[key=value, ...]`. The `logging.googleapis.com/` key prefix is removed, and such entries are left out when their value equals another entry's value (by default the trace is the correlation id).
-- Structured fields which are not part of the message, from Logstash markers (`Markers.append("key", value)`, ...) and SLF4J key-value pairs, are appended as JSON: ` | fields: {"key":value}` (in both files; cut like request-response bodies in the compact file).
+- Structured fields which are not part of the message, from Logstash markers (`Markers.append("key", value)`, ...), SLF4J key-value pairs and structured arguments without a `{}` placeholder (`kv("key", value)`), are appended as JSON: ` | fields: {"key":value}` (in both files; cut like request-response bodies in the compact file).
 - Stack traces are on the same line as the message (separated by ` | `), root cause first, with framework frames removed, so that `grep` returns a whole trace.
-  `entur.logging.ai.stacktrace.max-lines` keeps the first 2 frames of each exception by default (`0` = unlimited) and `entur.logging.ai.stacktrace.max-causes=3` keeps the root cause and the next two wrapping exceptions (`[... N frames omitted]` / `[... more causes omitted]` markers).
+  `entur.logging.ai.stacktrace.max-lines` keeps the first 2 frames of each exception by default (`0` = unlimited) and `entur.logging.ai.stacktrace.max-causes=3` keeps the root cause and the next two wrapping exceptions (`[... N frames omitted]` / `[... more causes omitted]` markers; suppressed exceptions are shown but not counted).
 - Events below WARN from framework loggers which only report start-up and shutdown (Tomcat, Spring test context, gRPC server, Hikari, ...) are left out, except the line with the port a server listens on (`Tomcat started on port N`). Override the logger name prefixes with `entur.logging.ai.quiet-loggers=a.b,c.d` (empty value: keep everything).
-- Repeated WARN/ERROR events (same level, logger and root cause or message) are collapsed: the first is printed, the rest are counted and a line `repeated N more times, N+1 in total (first #id, last #id): ...` is written (the total includes the first event) when the cache (500 keys, least recently used evicted) overflows or the test JVM stops. Disable with `entur.logging.ai.dedupe=false`.
+- Repeated WARN/ERROR events (same level, logger, message and root cause) are collapsed: the first is printed, the rest are counted and a line `repeated N more times, N+1 in total (first #id, last #id): ...` is written (the total includes the first event) when the cache (500 keys, least recently used evicted) overflows or the test JVM stops. Disable with `entur.logging.ai.dedupe=false`.
 
 ### Full file (`<file>.full`)
 The same events with timestamps, thread names, full logger names, DEBUG and above (`entur.logging.ai.full.level`, default `DEBUG`), all request-response headers, whole bodies and full stack traces, for drill-down when the compact file is not enough.
 Every event has an id (`#1a2b3c4d`) here. In the compact file, only events which lost information (stack trace, truncated body or fields) show the id, so `grep -n -C 5 '#1a2b3c4d' <file>.full` gives the complete event.
 
 ### Request-response logging
-HTTP and gRPC request-response logging is a single line without pretty-printing or colours, `message | header: value; ... | body: <body>` (`CompactLogbackLogstashSink` for HTTP, `CompactLogbackLogstashGrpcSink` for gRPC).
-Bodies of JSON, XML, `text/*` and form requests and responses are included; JSON only loses the whitespace between tokens, other bodies have line breaks replaced by spaces.
-The events keep the request-response marker, so logging assertions see the same JSON fields as without AI mode. In the compact file only:
+HTTP and gRPC request-response logging uses the machine-readable sinks, so message and JSON fields are the same as without AI mode and logging assertions behave the same.
+The files render each event on a single line without pretty-printing or colours, `message | header: value; ... | body: <body>`, with headers and body taken from the request-response marker
+(HTTP: `AiLogLevelLogstashLogbackSink` / `AiOndemandLogLevelLogstashLogbackSink` also attach the whole body of JSON, XML, `text/*` and form requests and responses, which JSON output does not show).
+JSON bodies and JSON header values (such as rich gRPC error details) only lose the whitespace between tokens; other bodies have line breaks replaced by spaces, and binary content is replaced by `[binary, N chars]`. In the compact file only:
 
-- Transport headers (`user-agent`, `accept-encoding`, `grpc-encoding`, `date`, ...) and headers whose value is already in the MDC (for example `x-correlation-id`) are left out. Override the header names with `entur.logging.ai.request-response.excluded-headers=a,b` (empty value: keep all headers).
+- Transport headers (`user-agent`, `accept-encoding`, `grpc-encoding`, `date`, ...) and headers repeated in the MDC (same name, ignoring an `x-` prefix, case and punctuation, and the same value, for example `x-correlation-id` and `correlationId`) are left out. Override the header names with `entur.logging.ai.request-response.excluded-headers=a,b` (empty value: keep all headers).
 - Bodies longer than 4096 characters are cut (a `...[truncated, N chars]` marker is appended); change the limit with `entur.logging.ai.request-response.max-body-size=N` (`0` = unlimited).
 
 ### Aliases
-UUIDs in MDC values and in messages (including request-response headers and bodies) are replaced by short aliases `u1`, `u2`, ..., and hex ids in MDC values (such as span ids) by `h1`, `h2`, ..., in both files (consistent within one JVM, up to 10000 values; later new values are not aliased). Disable with `entur.logging.ai.alias=false`.
+UUIDs in MDC values and in messages (including request-response headers and bodies) are replaced by short aliases `u1`, `u2`, ..., and hex ids in MDC values and request-response headers (such as span ids, or the ids in `traceparent`) by `h1`, `h2`, ..., in both files (consistent within one JVM, up to 10000 values; later new values are not aliased).
+The first time an alias appears in the full file it is followed by its value, `u7(123e4567-e89b-12d3-a456-426614174000)`, so a value from elsewhere (for example a failed assertion) can be found with `grep`. Disable with `entur.logging.ai.alias=false`.
 
 ### Configuration
-In the GCP and Azure test autoconfiguration this is implemented by `logback/logback-ai.xml`, loaded from `logback-test.xml`.
-The root `build.gradle` forwards these properties to the forked test JVMs. In Gradle projects forward them to the `test` task yourself (see below); Maven Surefire/Failsafe forward `-D` properties automatically.
+In the GCP and Azure test autoconfiguration this is implemented by `logback/logback-ai.xml`, loaded from `logback-test.xml` (with Spring Boot's default logger levels, as without AI mode).
+A shutdown hook stops logging at JVM exit when Spring Boot does not, so that queued events and `repeated` lines are written.
+The root `build.gradle` forwards all `entur.logging.ai.*` properties to the forked test JVMs. In Gradle projects forward them to the `test` task yourself (see below); Maven Surefire/Failsafe forward `-D` properties automatically.
 
 ## Paste into your project (AGENTS.md / CLAUDE.md)
 
@@ -69,17 +72,15 @@ Requires the `*-test` artifact of this library on the test classpath.
 
 **Maven:** nothing to configure; Surefire/Failsafe pass `-D` user properties on to the forked test JVM.
 
-**Gradle:** forward the system properties to the forked test JVMs:
+**Gradle:** forward all `entur.logging.ai.*` system properties to the forked test JVMs (Gradle 7.5 or later):
 
 ```groovy
 test {
-    ['entur.logging.ai.enabled', 'entur.logging.ai.file', 'entur.logging.ai.level', 'entur.logging.ai.full.level', 'entur.logging.ai.request-response.max-body-size', 'entur.logging.ai.stacktrace.max-lines', 'entur.logging.ai.stacktrace.max-causes', 'entur.logging.ai.dedupe', 'entur.logging.ai.alias', 'entur.logging.ai.request-response.excluded-headers', 'entur.logging.ai.quiet-loggers'].each { key ->
-        if (System.getProperty(key) != null) {
-            systemProperty key, System.getProperty(key)
-        }
-    }
+    systemProperties providers.systemPropertiesPrefixedBy('entur.logging.ai.').get()
 }
 ```
+
+Kotlin DSL: `tasks.test { systemProperties(providers.systemPropertiesPrefixedBy("entur.logging.ai.").get()) }`.
 
 Then add this to the instructions file read by your AI agent:
 
@@ -108,6 +109,6 @@ When running tests, enable compact log output to save context. Logs then go to a
   `repeated N more times, N+1 in total (first #id, last #id): message` whose total includes that first event. Counting restarts when logging
   is reconfigured (e.g. a new Spring context), so a message can have several such lines. For exact counts grep `/tmp/test.full` for the
   logger and the message, as the same message can come from several loggers: `grep -c 'DocumentEndpoint .* : Hello world' /tmp/test.full`.
-- UUIDs and hex ids are replaced by aliases (`u1`, `h1`, ...) in both files. Each test JVM starts with a `---- JVM pid ...` line; aliases restart there
+- UUIDs and hex ids are replaced by aliases (`u1`, `h1`, ...) in both files; the first time an alias appears in `/tmp/test.full` it is followed by its value, `u7(<uuid>)`, so grep `/tmp/test.full` for a raw id to find its alias. Each test JVM starts with a `---- JVM pid ...` line; aliases restart there
   (test JVMs running at the same time say `no aliases` there and keep UUIDs, so an alias belongs to the last line saying `aliases ... restart`).
 ````

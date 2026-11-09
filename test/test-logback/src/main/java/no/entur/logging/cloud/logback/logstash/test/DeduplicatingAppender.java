@@ -20,7 +20,7 @@ import java.util.Map;
  * <code>repeated N more times, N+1 in total (first #id, last #id): message</code> is forwarded when the entry is evicted or the appender stops.
  * The total includes the first occurrence (printed earlier), so that readers do not have to work out whether to add it.
  * <p>
- * Events are identical if level, logger and root cause (or, without an exception, the message) are equal.
+ * Events are identical if level, logger, message and root cause (if there is an exception) are equal.
  * Memory is bounded: at most {@link #setMaxEntries(int) maxEntries} small entries are kept (least recently used evicted,
  * summary written first, so no counts are lost). Lower levels are always forwarded.
  * Disable with <code>-Dentur.logging.ai.dedupe=false</code>.
@@ -117,12 +117,11 @@ public class DeduplicatingAppender extends AppenderBase<ILoggingEvent> implement
     }
 
     private static String key(ILoggingEvent event) {
-        StringBuilder key = new StringBuilder().append(event.getLevel()).append('|').append(event.getLoggerName()).append('|');
+        StringBuilder key = new StringBuilder().append(event.getLevel()).append('|').append(event.getLoggerName()).append('|')
+                .append(event.getFormattedMessage());
         IThrowableProxy root = rootCause(event.getThrowableProxy());
         if (root != null) {
-            key.append(root.getClassName()).append(':').append(root.getMessage());
-        } else {
-            key.append(event.getFormattedMessage());
+            key.append('|').append(root.getClassName()).append(':').append(root.getMessage());
         }
         return key.toString();
     }
@@ -144,7 +143,8 @@ public class DeduplicatingAppender extends AppenderBase<ILoggingEvent> implement
         if (message == null) {
             return "";
         }
-        String singleLine = message.replace('\n', ' ').replace('\r', ' ');
+        // alias before cutting, so that a UUID is not cut in half
+        String singleLine = MdcAliasConverter.aliasUuids(AiText.singleLine(message));
         return singleLine.length() > MAX_SUMMARY_MESSAGE ? singleLine.substring(0, MAX_SUMMARY_MESSAGE) + "..." : singleLine;
     }
 

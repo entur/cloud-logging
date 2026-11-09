@@ -4,7 +4,8 @@ import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupplierSource;
 import no.entur.logging.cloud.logbook.ondemand.state.ResponseHttpMessageStateSupplierSource;
 import no.entur.logging.cloud.logback.logstash.test.AiLoggingControl;
-import no.entur.logging.cloud.logbook.logbook.test.CompactLogbackLogstashSink;
+import no.entur.logging.cloud.logbook.logbook.test.AiLogLevelLogstashLogbackSink;
+import no.entur.logging.cloud.logbook.logbook.test.AiOndemandLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.logbook.test.CompositeSink;
 import no.entur.logging.cloud.logbook.logbook.test.PrettyPrintingLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.logbook.test.PrettyPrintingSink;
@@ -43,12 +44,15 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
         Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
 
         if (AiLoggingControl.isAiEnabled()) {
-            // AI mode: single-line output, no pretty-printing or colors
-            return new CompactLogbackLogstashSink.Builder()
+            // AI mode: the machine-readable sink (same message and JSON fields as without AI mode), plus the whole textual body
+            // for the AI files, which render headers and body from the marker
+            return AiOndemandLogLevelLogstashLogbackSink.newBuilder()
                     .withLogger(logger)
                     .withLogLevel(level)
                     .withMaxBodySize(getMaxBodySize())
                     .withMaxSize(getMaxSize())
+                    .withValidateRequestJsonBodyWellformed(requestHttpMessageStateSupplierSource)
+                    .withValidateResponseJsonBodyWellformed(responseHttpMessageStateSupplierSource)
                     .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
                     .withMessageComposers(format.getServer().getMessage().toComposer(), format.getClient().getMessage().toComposer())
                     .build();
@@ -100,8 +104,9 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
         Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
 
         if (AiLoggingControl.isAiEnabled()) {
-            // AI mode: single-line output, no pretty-printing or colors
-            return new CompactLogbackLogstashSink.Builder()
+            // AI mode: the machine-readable sink (same message and JSON fields as without AI mode), plus the whole textual body
+            // for the AI files, which render headers and body from the marker
+            return AiLogLevelLogstashLogbackSink.newBuilder()
                     .withLogger(logger)
                     .withLogLevel(level)
                     .withMaxBodySize(getMaxBodySize())

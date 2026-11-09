@@ -60,6 +60,31 @@ public class SingleLineRootCauseFirstThrowableProxyConverterTest {
     }
 
     @Test
+    public void messageLinesStartingWithAtAreNotFrames() {
+        System.setProperty(AiLoggingControl.AI_STACKTRACE_MAX_LINES_PROPERTY, "1");
+        Exception e = exception("Unexpected character\n at [Source: (String)\"{x\"; line: 1, column: 2]", null, "a.App", "a.App2");
+
+        assertThat(convert(e, "full"))
+                .isEqualTo(" | java.lang.IllegalStateException: Unexpected character at [Source: (String)\"{x\"; line: 1, column: 2]"
+                        + " | at a.App.m(App.java:1) | [... 1 frames omitted]");
+    }
+
+    @Test
+    public void suppressedExceptionsDoNotCountAsCauses() {
+        System.setProperty(AiLoggingControl.AI_STACKTRACE_MAX_LINES_PROPERTY, "1");
+        System.setProperty(AiLoggingControl.AI_STACKTRACE_MAX_CAUSES_PROPERTY, "2");
+        Exception root = exception("root", null, "a.Root");
+        root.addSuppressed(exception("close 1", null, "a.Close"));
+        root.addSuppressed(exception("close 2", null, "a.Close"));
+        Exception top = exception("top", root, "a.Top");
+
+        String converted = convert(top, "full");
+        assertThat(converted).contains("Suppressed: java.lang.IllegalStateException: close 2");
+        assertThat(converted).contains("Wrapped by: java.lang.IllegalStateException: top | at a.Top.m(Top.java:1)");
+        assertThat(converted).doesNotContain("more causes omitted");
+    }
+
+    @Test
     public void noExceptionGivesEmptyString() {
         assertThat(convert(null, "full")).isEmpty();
     }
