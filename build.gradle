@@ -66,6 +66,8 @@ ext {
 
     jsonAssertVersion = '0.8.0'
 
+    protobufToJsonVersion = '1.0.0-SNAPSHOT'
+
     // Security: override the Jackson versions from the Spring Boot BOM.
     // Remove once springBootVersion manages these (or newer) versions.
     jacksonBomVersion = '3.2.4'

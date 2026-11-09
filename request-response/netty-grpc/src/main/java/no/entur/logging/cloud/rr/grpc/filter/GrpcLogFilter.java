@@ -114,7 +114,14 @@ public class GrpcLogFilter {
     protected final GrpcBodyFilter requestBodyFilter;
     protected final GrpcBodyFilter responseBodyFilter;
 
+    protected final GrpcPayloadFilter requestPayloadFilter;
+    protected final GrpcPayloadFilter responsePayloadFilter;
+
     public GrpcLogFilter(boolean connect, boolean disconnect, boolean request, boolean response, GrpcMetadataFilter requestMetadataFilter, GrpcMetadataFilter responseMetadataFilter, GrpcBodyFilter requestBodyFilter, GrpcBodyFilter responseBodyFilter) {
+        this(connect, disconnect, request, response, requestMetadataFilter, responseMetadataFilter, requestBodyFilter, responseBodyFilter, GrpcPayloadFilter.NONE, GrpcPayloadFilter.NONE);
+    }
+
+    public GrpcLogFilter(boolean connect, boolean disconnect, boolean request, boolean response, GrpcMetadataFilter requestMetadataFilter, GrpcMetadataFilter responseMetadataFilter, GrpcBodyFilter requestBodyFilter, GrpcBodyFilter responseBodyFilter, GrpcPayloadFilter requestPayloadFilter, GrpcPayloadFilter responsePayloadFilter) {
         this.connect = connect;
         this.disconnect = disconnect;
         this.request = request;
@@ -123,6 +130,23 @@ public class GrpcLogFilter {
         this.responseMetadataFilter = responseMetadataFilter;
         this.requestBodyFilter = requestBodyFilter;
         this.responseBodyFilter = responseBodyFilter;
+        this.requestPayloadFilter = requestPayloadFilter;
+        this.responsePayloadFilter = responsePayloadFilter;
+    }
+
+    /**
+     * Copy this filter with other payload filters.
+     *
+     * @param requestPayloadFilter  request payload filter
+     * @param responsePayloadFilter response payload filter
+     * @return new filter, or this if the payload filters are the same
+     */
+
+    public GrpcLogFilter withPayloadFilters(GrpcPayloadFilter requestPayloadFilter, GrpcPayloadFilter responsePayloadFilter) {
+        if (this.requestPayloadFilter.equals(requestPayloadFilter) && this.responsePayloadFilter.equals(responsePayloadFilter)) {
+            return this;
+        }
+        return new GrpcLogFilter(connect, disconnect, request, response, requestMetadataFilter, responseMetadataFilter, requestBodyFilter, responseBodyFilter, requestPayloadFilter, responsePayloadFilter);
     }
 
     public boolean isDisconnect() {
@@ -159,5 +183,13 @@ public class GrpcLogFilter {
 
     public GrpcBodyFilter getResponseBodyFilter() {
         return responseBodyFilter;
+    }
+
+    public GrpcPayloadFilter getRequestPayloadFilter() {
+        return requestPayloadFilter;
+    }
+
+    public GrpcPayloadFilter getResponsePayloadFilter() {
+        return responsePayloadFilter;
     }
 }

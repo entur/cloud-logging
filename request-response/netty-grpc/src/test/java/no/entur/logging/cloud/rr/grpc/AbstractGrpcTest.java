@@ -1,18 +1,20 @@
 package no.entur.logging.cloud.rr.grpc;
 
-import com.google.protobuf.util.JsonFormat;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.util.TransmitStatusRuntimeExceptionInterceptor;
+import no.entur.logging.cloud.rr.grpc.filter.GrpcPayloadFilter;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcServerLoggingFilters;
-import no.entur.logging.cloud.rr.grpc.mapper.DefaultGrpcPayloadJsonMapper;
 import no.entur.logging.cloud.rr.grpc.mapper.DefaultMetadataJsonMapper;
 import no.entur.logging.cloud.rr.grpc.mapper.GrpcMetadataJsonMapper;
+import no.entur.logging.cloud.rr.grpc.mapper.GrpcPayloadJsonMapper;
 import no.entur.logging.cloud.rr.grpc.mapper.GrpcStatusMapper;
-import no.entur.logging.cloud.rr.grpc.mapper.JsonPrinterFactory;
-import no.entur.logging.cloud.rr.grpc.mapper.JsonPrinterStatusMapper;
+import no.entur.logging.cloud.rr.grpc.mapper.ProtobufJsonWriterFactory;
+import no.entur.logging.cloud.rr.grpc.mapper.ProtobufJsonWriterGrpcPayloadJsonMapper;
+import no.entur.logging.cloud.rr.grpc.mapper.ProtobufJsonWriterStatusMapper;
+import no.entur.logging.cloud.rr.grpc.mapper.TranscodingProtobufJsonWriterFactory;
 import no.entur.logging.cloud.rr.grpc.mapper.TypeRegistryFactory;
 import org.entur.oidc.grpc.test.GreetingRequest;
 import org.entur.oidc.grpc.test.GreetingServiceGrpc;
@@ -55,11 +57,11 @@ public class AbstractGrpcTest {
 
 	@BeforeAll
 	public static void start() throws Exception {
-		JsonFormat.Printer printer = JsonPrinterFactory.createPrinter(false, TypeRegistryFactory.createDefaultTypeRegistry());
+		ProtobufJsonWriterFactory writerFactory = new TranscodingProtobufJsonWriterFactory(TypeRegistryFactory.createDefaultTypeRegistry(), DEFAULT_JSON_MESSAGE_SIZE);
 
-		DefaultGrpcPayloadJsonMapper grpcPayloadJsonMapper = new DefaultGrpcPayloadJsonMapper(printer, DEFAULT_JSON_MESSAGE_SIZE, DEFAULT_BINARY_MESSAGE_SIZE);
+		GrpcPayloadJsonMapper grpcPayloadJsonMapper = new ProtobufJsonWriterGrpcPayloadJsonMapper(writerFactory);
 
-		GrpcStatusMapper grpcStatusMapper = new JsonPrinterStatusMapper(printer);
+		GrpcStatusMapper grpcStatusMapper = new ProtobufJsonWriterStatusMapper(writerFactory.create(GrpcPayloadFilter.NONE));
 
 		GrpcMetadataJsonMapper grpcMetadataJsonMapper = new DefaultMetadataJsonMapper(grpcStatusMapper, new HashMap<>());
 

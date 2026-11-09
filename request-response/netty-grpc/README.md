@@ -27,6 +27,20 @@ The (per-path) supported logging modes are
 The only built-in path matcher is a prefix matcher, supply a custom `GrpcLogFilterPathMatcher` for more advanced
 matching, i.e. using Spring's Antmatcher.
 
+### Payload filtering
+Payloads are written as JSON using [protobuf-to-json](https://github.com/entur/protobuf-to-json) (see
+`ProtobufJsonWriterGrpcPayloadJsonMapper`), which can anonymize, prune and truncate fields while writing. Configure a
+`GrpcPayloadFilter` per service and/or method using `GrpcServerLoggingFilters` / `GrpcClientLoggingFilters`:
+
+```java
+GrpcServerLoggingFilters.newBuilder()
+    .classicDefaultLogging()
+    .payloadFilterForService(GreetingServiceGrpc.SERVICE_NAME, GrpcPayloadFilter.newBuilder().withAnonymizeKeys("message").build(), GreetingServiceGrpc.getGreeting1Method())
+    .build();
+```
+
+Payload filters are resolved independently of the logging mode, the most specific first: method, service, then default.
+
 ## Example output
 
 Connect

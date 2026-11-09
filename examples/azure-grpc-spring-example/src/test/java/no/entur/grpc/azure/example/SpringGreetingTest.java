@@ -340,7 +340,9 @@ public class SpringGreetingTest extends SpringAbstractGrpcTest {
 
 			LogStatements http = statements.forLogger("no.entur.logging.cloud");
 			LogStatement response = http.get(http.size() - 2);
-			response.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+			// the message field does not fit within the max body size, so the body is truncated after the status field
+			response.assertThatHttpBody().field("status").matches("[0-9]+");
+			assertThat(response.getJsonAsNode().path("http").path("body").has("message")).isFalse();
 		} finally {
 			shutdown(stub);
 		}
@@ -363,7 +365,9 @@ public class SpringGreetingTest extends SpringAbstractGrpcTest {
 			LogStatement request = http.get(1);
 			request.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
 			LogStatement response = http.get(http.size() - 2);
-			response.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+			// the message field does not fit within the max body size, so the body is truncated after the status field
+			response.assertThatHttpBody().field("status").matches("[0-9]+");
+			assertThat(response.getJsonAsNode().path("http").path("body").has("message")).isFalse();
 		} finally {
 			shutdown(stub);
 		}
@@ -412,7 +416,9 @@ public class SpringGreetingTest extends SpringAbstractGrpcTest {
 
 			LogStatements http = statements.forLogger("no.entur.logging.cloud");
 			LogStatement response = http.get(http.size() - 1);
-			response.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+			// the message field does not fit within the max body size, so the body is truncated after the status field
+			response.assertThatHttpBody().field("status").matches("[0-9]+");
+			assertThat(response.getJsonAsNode().path("http").path("body").has("message")).isFalse();
 		} finally {
 			shutdown(stub);
 		}
@@ -435,14 +441,16 @@ public class SpringGreetingTest extends SpringAbstractGrpcTest {
 			LogStatement request = http.get(0);
 			request.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
 			LogStatement response = http.get(http.size() - 1);
-			response.assertThatHttpBody().matches("Omitted binary message size [0-9]+");
+			// the message field does not fit within the max body size, so the body is truncated after the status field
+			response.assertThatHttpBody().field("status").matches("[0-9]+");
+			assertThat(response.getJsonAsNode().path("http").path("body").has("message")).isFalse();
 		} finally {
 			shutdown(stub);
 		}
 	}
 
 	@Test
-	public void testBlowUpJsonFormatting(LogStatements statements) throws InterruptedException {
+	public void testOutOfRangeTimestamp(LogStatements statements) throws InterruptedException {
 		GreetingRequest greetingRequest = GreetingRequest.newBuilder().setTimestamp(Timestamp.newBuilder().setNanos(Integer.MAX_VALUE).build()).build();
 
 		GreetingServiceGrpc.GreetingServiceBlockingStub stub = stub();
@@ -450,9 +458,12 @@ public class SpringGreetingTest extends SpringAbstractGrpcTest {
 			GreetingResponse response = stub.greeting5(greetingRequest);
 			assertThat(response.getMessage()).isEqualTo("Hello");
 
-			List<LogStatement> logStatements = statements.forLogger(GrpcLoggingServerInterceptor.class);
-			logStatements.get(0).assertThatField("level").isEqualTo("INFO");
-			logStatements.get(1).assertThatField("level").isEqualTo("WARN");
+			// out of range timestamps are written as objects, rather than failing (like JsonFormat does)
+			LogStatements http = statements.forLogger("no.entur.logging.cloud");
+			http.get(0).assertThatHttpBody().field("timestamp").field("nanos").isEqualTo(Integer.MAX_VALUE);
+			http.get(http.size() - 1).assertThatHttpBody().field("timestamp").field("nanos").isEqualTo(Integer.MAX_VALUE);
+
+			assertThat(statements.forLogger(GrpcLoggingServerInterceptor.class)).isEmpty();
 		} finally {
 			shutdown(stub);
 		}

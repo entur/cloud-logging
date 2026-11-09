@@ -31,7 +31,9 @@ dependencies {
     api("jakarta.annotation:jakarta.annotation-api")
     api("com.google.api.grpc:proto-google-common-protos:$grpcCommonsVersion")
     api("com.google.protobuf:protobuf-java-util:${grpcProtobufVersion}")
+    api("no.entur.protobuf-to-json:protobuf-to-json-transcode:${protobufToJsonVersion}")
 
+    testImplementation("io.grpc:grpc-inprocess:$grpcVersion")
     testImplementation("com.google.truth:truth:${googleTruthVersion}")
     testImplementation("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
 }

@@ -203,9 +203,60 @@ Also create your own beans for
  * `GrpcStatusMapper`
 * `GrpcPayloadJsonMapper`
 * `GrpcMetadataJsonMapper`
+* `GrpcServerLoggingFilters`
 * `GrpcClientLoggingFilters`
+* `ProtobufJsonWriterFactory`
 
 to further customize logging.
+
+#### Payload filtering
+Request and response payloads are written as JSON using [protobuf-to-json](https://github.com/entur/protobuf-to-json), 
+which can filter the payloads while writing them:
+
+ * anonymize: keep the structure, but replace every scalar value with `"*"`
+ * prune: replace the whole value with `"[removed]"`
+ * max string length: truncate long string values
+
+Configure payload filters per service and/or method in the `GrpcServerLoggingFilters` and `GrpcClientLoggingFilters` beans
+(programmatically only), independently of which steps are logged:
+
+```java
+@Bean
+public GrpcServerLoggingFilters grpcServerLoggingFilters() {
+    GrpcPayloadFilter credentials = GrpcPayloadFilter.newBuilder()
+            .withAnonymizeKeys("password", "token") // field names, at any depth
+            .build();
+
+    GrpcPayloadFilter documents = GrpcPayloadFilter.newBuilder()
+            .withPrunePaths("$.document.content") // JSON paths
+            .withMaxStringLength(1024)
+            .build();
+
+    return GrpcServerLoggingFilters.newBuilder()
+            .classicDefaultLogging()
+            .defaultPayloadFilter(credentials) // all services
+            .payloadFilterForService(DocumentServiceGrpc.SERVICE_NAME, documents) // whole service
+            .payloadFilterForService(DocumentServiceGrpc.SERVICE_NAME, credentials, DocumentServiceGrpc.getLoginMethod()) // single method
+            .payloadFilterForService(DocumentServiceGrpc.SERVICE_NAME, null, documents, Set.of("GetDocument")) // response only
+            .build();
+}
+```
+
+The most specific payload filter applies: method, service, then default. Paths refer to the JSON field names, i.e.
+`$.customer.email`, `$.*.email` or `$..email` (any depth).
+
+Payloads larger than the max body size are truncated, as valid JSON. The default writer is protobuf-to-json's transcoding
+writer; on Java 24+, the faster accessor writer can be used via a `ProtobufJsonWriterFactory` bean:
+
+```java
+@Bean
+public ProtobufJsonWriterFactory protobufJsonWriterFactory(JsonFormat.TypeRegistry typeRegistry) {
+    return filter -> filter.configure(AccessorProtobufJsonWriter.newBuilder()
+            .withTypeRegistry(typeRegistry)
+            .withMaxSize(204800)
+    ).build();
+}
+```
 
 ### Optional: On-demand logging
 This feature adjusts the log level for individual gRPC service requests, taking into account actual behaviour.

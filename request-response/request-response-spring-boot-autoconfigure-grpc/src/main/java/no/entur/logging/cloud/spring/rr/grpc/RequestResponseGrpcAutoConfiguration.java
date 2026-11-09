@@ -4,13 +4,15 @@ import com.google.protobuf.util.JsonFormat;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcClientLoggingFilters;
 import no.entur.logging.cloud.rr.grpc.filter.GrpcServerLoggingFilters;
-import no.entur.logging.cloud.rr.grpc.mapper.DefaultGrpcPayloadJsonMapper;
+import no.entur.logging.cloud.rr.grpc.filter.GrpcPayloadFilter;
 import no.entur.logging.cloud.rr.grpc.mapper.DefaultMetadataJsonMapper;
 import no.entur.logging.cloud.rr.grpc.mapper.GrpcMetadataJsonMapper;
 import no.entur.logging.cloud.rr.grpc.mapper.GrpcPayloadJsonMapper;
 import no.entur.logging.cloud.rr.grpc.mapper.GrpcStatusMapper;
-import no.entur.logging.cloud.rr.grpc.mapper.JsonPrinterFactory;
-import no.entur.logging.cloud.rr.grpc.mapper.JsonPrinterStatusMapper;
+import no.entur.logging.cloud.rr.grpc.mapper.ProtobufJsonWriterFactory;
+import no.entur.logging.cloud.rr.grpc.mapper.ProtobufJsonWriterGrpcPayloadJsonMapper;
+import no.entur.logging.cloud.rr.grpc.mapper.ProtobufJsonWriterStatusMapper;
+import no.entur.logging.cloud.rr.grpc.mapper.TranscodingProtobufJsonWriterFactory;
 import no.entur.logging.cloud.rr.grpc.mapper.TypeRegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,18 +61,21 @@ public class RequestResponseGrpcAutoConfiguration extends AbstractRequestRespons
     }
 
     @Bean
+    @ConditionalOnMissingBean(ProtobufJsonWriterFactory.class)
+    public ProtobufJsonWriterFactory protobufJsonWriterFactory(JsonFormat.TypeRegistry typeRegistry) {
+        return new TranscodingProtobufJsonWriterFactory(typeRegistry, getMaxBodySize());
+    }
+
+    @Bean
     @ConditionalOnMissingBean(GrpcStatusMapper.class)
-    public GrpcStatusMapper grpcStatusMapper(JsonFormat.TypeRegistry typeRegistry) {
-        JsonFormat.Printer printer = JsonPrinterFactory.createPrinter(false, typeRegistry);
-        return new JsonPrinterStatusMapper(printer);
+    public GrpcStatusMapper grpcStatusMapper(ProtobufJsonWriterFactory protobufJsonWriterFactory) {
+        return new ProtobufJsonWriterStatusMapper(protobufJsonWriterFactory.create(GrpcPayloadFilter.NONE));
     }
 
     @Bean
     @ConditionalOnMissingBean(GrpcPayloadJsonMapper.class)
-    public GrpcPayloadJsonMapper grpcPayloadJsonMapper(JsonFormat.TypeRegistry typeRegistry) {
-        JsonFormat.Printer printer = JsonPrinterFactory.createPrinter(false, typeRegistry);
-        int max = getMaxBodySize();
-        return new DefaultGrpcPayloadJsonMapper(printer, max, max / 2);
+    public GrpcPayloadJsonMapper grpcPayloadJsonMapper(ProtobufJsonWriterFactory protobufJsonWriterFactory) {
+        return new ProtobufJsonWriterGrpcPayloadJsonMapper(protobufJsonWriterFactory);
     }
 
     @Bean
