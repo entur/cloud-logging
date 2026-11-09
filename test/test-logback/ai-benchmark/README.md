@@ -35,7 +35,7 @@ cd test/test-logback/ai-benchmark
 `run-agents.sh <logs dir> [setups] [agents]` takes the setups (default `"plain careful ai"`) and the agents as
 `tool:model:effort` (default `"copilot:default:low claude:opus:low claude:sonnet:low claude:haiku:low"`), for example
 `./run-agents.sh /tmp/ai-bench ai "claude:sonnet:high copilot:gpt-6.1-sol:low"`. `MAX_PARALLEL` limits the concurrent runs
-(default 8), `RUN_TIMEOUT` stops a run after that many seconds (default 1200), `DRY_RUN=1` only writes the prompts to `<logs dir>/runs/*.prompt`. A Copilot run uses about 5-40 AI credits
+(default 8), `RUN_TIMEOUT` stops a run after that many seconds (default 3600), `MEMORY_MAX` limits the memory of each run including the commands the agent runs (default 4G, needs `systemd-run`, `0` = no limit), `DRY_RUN=1` only writes the prompts to `<logs dir>/runs/*.prompt`. A Copilot run uses about 5-40 AI credits
 (1 credit = $0.01).
 
 Tokens are not comparable between tools: Copilot reports input including cached tokens, `claude -p` includes the full
