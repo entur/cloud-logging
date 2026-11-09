@@ -8,10 +8,16 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,14 +31,22 @@ import java.util.concurrent.ConcurrentHashMap;
  * Test JVMs may run at the same time (Gradle <code>--parallel</code>, <code>maxParallelForks</code>, Maven <code>forkCount</code>), and then
  * their events are interleaved. The JVM holding the lock file (see {@link #setLockFile(String)}) uses aliases; the others leave UUIDs and
  * hex ids as they are, and their line says <code>(another JVM is writing to this file, no aliases)</code>. So an alias always belongs to the
- * JVM of the last line before it that says <code>aliases ... restart</code>.
+ * JVM of the last line before it that says <code>aliases ... restart</code>. If the lock file cannot be locked, this JVM does not use
+ * aliases either.
+ * <p>
+ * The files hold whole request and response bodies and are often in a shared temporary directory, so they are created readable by the
+ * owner only (where the file system has POSIX permissions), and a file that is a symbolic link is refused.
  */
 public class AiFileAppender extends FileAppender<ILoggingEvent> {
+
+    enum LockState { HELD, OTHER_JVM, FAILED }
+
+    private static final Set<PosixFilePermission> OWNER_ONLY = EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
 
     private static final Set<String> STARTED = ConcurrentHashMap.newKeySet();
 
     // whether this JVM got the lock, per lock file
-    private static final Map<String, Boolean> LOCKED = new ConcurrentHashMap<>();
+    private static final Map<String, LockState> LOCKED = new ConcurrentHashMap<>();
     // referenced until the JVM exits: an unreachable channel is closed by the garbage collector, which releases the lock
     private static final Map<String, FileLock> LOCKS = new ConcurrentHashMap<>();
 
@@ -49,19 +63,26 @@ public class AiFileAppender extends FileAppender<ILoggingEvent> {
 
     @Override
     public void start() {
+        if (getFile() != null && !createOwnerOnly(Path.of(getFile()))) {
+            return;
+        }
         super.start();
         if (!isStarted()) {
             return;
         }
-        boolean alone = lockFile == null || LOCKED.computeIfAbsent(lockFile, this::lock);
-        if (!alone) {
+        LockState lock = lockFile == null ? LockState.HELD : LOCKED.computeIfAbsent(lockFile, this::lock);
+        if (lock != LockState.HELD) {
             AiLoggingControl.disableAliasesInThisJvm();
         }
         if (STARTED.add(getFile())) {
             String line = "---- JVM pid " + ProcessHandle.current().pid()
                     + " started " + LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
                     + " in " + System.getProperty("user.dir")
-                    + (alone ? " (aliases u1, h1, ... restart) ----" : " (another JVM is writing to this file, no aliases) ----")
+                    + switch (lock) {
+                        case HELD -> " (aliases u1, h1, ... restart) ----";
+                        case OTHER_JVM -> " (another JVM is writing to this file, no aliases) ----";
+                        case FAILED -> " (could not lock " + lockFile + ", no aliases) ----";
+                    }
                     + System.lineSeparator();
             streamWriteLock.lock();
             try {
@@ -74,24 +95,65 @@ public class AiFileAppender extends FileAppender<ILoggingEvent> {
         }
     }
 
-    /** Returns true if this JVM got the lock, false if another JVM holds it. */
-    private boolean lock(String file) {
+    /**
+     * Creates the file readable by the owner only, or makes an existing file of this user so (best effort; another user's file cannot be
+     * written anyway). Returns false, with an error, if the file is a symbolic link or cannot be created.
+     */
+    boolean createOwnerOnly(Path path) {
+        boolean posix = path.getFileSystem().supportedFileAttributeViews().contains("posix");
+        try {
+            Path parent = path.toAbsolutePath().getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+            if (posix) {
+                Files.createFile(path, PosixFilePermissions.asFileAttribute(OWNER_ONLY));
+            } else {
+                Files.createFile(path);
+            }
+            return true;
+        } catch (FileAlreadyExistsException e) {
+            // also if it is a symbolic link, even one to a missing file
+        } catch (IOException | RuntimeException e) {
+            addError("Unable to create " + path, e);
+            return false;
+        }
+        if (Files.isSymbolicLink(path)) {
+            addError("Not writing to " + path + ": it is a symbolic link");
+            return false;
+        }
+        if (posix && Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
+            try {
+                Files.setPosixFilePermissions(path, OWNER_ONLY);
+            } catch (IOException | RuntimeException e) {
+                // not the owner
+            }
+        }
+        return true;
+    }
+
+    /** Whether this JVM got the lock, another JVM holds it, or locking failed (then aliases are off, as for another JVM). */
+    LockState lock(String file) {
         FileChannel channel = null;
         try {
-            channel = FileChannel.open(Path.of(file), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+            Path path = Path.of(file);
+            if (!createOwnerOnly(path)) {
+                return LockState.FAILED;
+            }
+            channel = FileChannel.open(path, StandardOpenOption.WRITE, LinkOption.NOFOLLOW_LINKS);
             FileLock lock = channel.tryLock();
             if (lock != null) {
                 LOCKS.put(file, lock);
                 channel = null; // keep open
-                return true;
+                return LockState.HELD;
             }
-            return false;
+            return LockState.OTHER_JVM;
         } catch (OverlappingFileLockException e) {
             // already held by this JVM
-            return true;
+            return LockState.HELD;
         } catch (IOException | RuntimeException e) {
-            addWarn("Unable to lock " + file + ", assuming no other test JVM writes to " + getFile(), e);
-            return true;
+            addWarn("Unable to lock " + file + ", so not using aliases in " + getFile(), e);
+            return LockState.FAILED;
         } finally {
             if (channel != null) {
                 try {

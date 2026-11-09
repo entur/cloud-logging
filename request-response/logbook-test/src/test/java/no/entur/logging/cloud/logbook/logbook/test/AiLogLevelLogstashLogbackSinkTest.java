@@ -1,6 +1,11 @@
 package no.entur.logging.cloud.logbook.logbook.test;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.LoggingEvent;
 import no.entur.logging.cloud.logback.logstash.test.AiBodyMarker;
+import no.entur.logging.cloud.logback.logstash.test.AliasMessageConverter;
+import no.entur.logging.cloud.logback.logstash.test.StructuredFieldsConverter;
 import no.entur.logging.cloud.logbook.DefaultRemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.LogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.MessageComposer;
@@ -10,6 +15,7 @@ import no.entur.logging.cloud.logbook.ondemand.RequestOndemandSingleFieldAppendi
 import org.junit.jupiter.api.Test;
 import org.slf4j.Marker;
 import org.zalando.logbook.Correlation;
+import org.zalando.logbook.HttpHeaders;
 import org.zalando.logbook.HttpRequest;
 import org.zalando.logbook.Origin;
 import org.zalando.logbook.Sink;
@@ -22,6 +28,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doThrow;
@@ -100,6 +107,24 @@ public class AiLogLevelLogstashLogbackSinkTest {
 
         assertThat(markers.get(0)).isInstanceOf(RequestOndemandSingleFieldAppendingMarker.class);
         assertThat(findBodyMarker(markers.get(0)).getBody()).isEqualTo("{\"a\":1}");
+    }
+
+    @Test
+    public void malformedJsonBodyOfALocalRequestKeepsHeadersAndBodyInTheAiFiles() throws IOException {
+        // trusted as well-formed, so the request-response marker writes it as is and the event's JSON is not valid JSON
+        sink.write(null, MockHttpRequest.create().withOrigin(Origin.LOCAL).withMethod("POST").withPath("/api")
+                .withHeaders(HttpHeaders.of("x-test", "1")).withContentType("application/json").withBodyAsString("{\"a\":tru e}"));
+
+        LoggerContext context = new LoggerContext();
+        LoggingEvent event = new LoggingEvent("f", context.getLogger("x"), Level.INFO, messages.get(0), null, null);
+        event.addMarker(markers.get(0));
+        event.setMDCPropertyMap(Map.of());
+        StructuredFieldsConverter fields = new StructuredFieldsConverter();
+        fields.start();
+
+        assertThat(new AliasMessageConverter().convert(event)).isEqualTo("POST /api");
+        assertThat(fields.convert(event)).contains("\"headers\":{\"x-test\":[\"1\"]}");
+        assertThat(fields.convert(event)).contains("\"body\":{\"a\":tru e}");
     }
 
     private static Correlation correlation() {

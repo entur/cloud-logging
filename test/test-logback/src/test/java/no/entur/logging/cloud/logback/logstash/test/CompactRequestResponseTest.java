@@ -68,7 +68,7 @@ public class CompactRequestResponseTest {
 
         EventIdConverter eventId = new EventIdConverter();
         eventId.start();
-        assertThat(eventId.convert(event)).matches(" #[0-9a-f]{8}");
+        assertThat(eventId.convert(event)).matches(" #[0-9a-f]{12}");
         assertThat(eventId.convert(event("RESP", appendRaw("http", "{\"headers\":{},\"body\":\"abc\"}"), null))).isEmpty();
     }
 
@@ -138,6 +138,34 @@ public class CompactRequestResponseTest {
         fields.setOptionList(List.of("compact"));
         fields.start();
         assertThat(fields.convert(event)).isEqualTo(" | fields: {\"http\":{\"status\":200},\"k\":\"v\"}");
+    }
+
+    @Test
+    public void otherRequestResponseDetailsAreInTheFullFileOnly() {
+        LoggingEvent event = event("GET /x", appendRaw("http", "{\"origin\":\"local\",\"type\":\"request\",\"protocol\":\"HTTP/1.1\","
+                + "\"remote\":\"127.0.0.1\",\"headers\":{\"a\":[\"b\"]},\"body\":\"x\",\"deadline-in\":{\"ms\":500}}"), null);
+
+        assertThat(full(event)).isEqualTo("GET /x | a: b | body: x");
+        assertThat(fields(event, false)).isEqualTo(" | fields: {\"http\":{\"origin\":\"local\",\"type\":\"request\",\"protocol\":\"HTTP/1.1\","
+                + "\"remote\":\"127.0.0.1\",\"deadline-in\":{\"ms\":500}}}");
+        assertThat(fields(event, true)).isEmpty();
+    }
+
+    @Test
+    public void structuredDataWhichIsNotValidJsonIsKeptWhole() {
+        // a malformed JSON body from a local request is written as is by the request-response marker
+        LoggingEvent event = event("POST /x", appendRaw("http", "{\"headers\":{\"content-type\":[\"application/json\"]},\"body\":{\"a\":tru\n e}}"), null);
+
+        assertThat(compact(event)).isEqualTo("POST /x");
+        assertThat(fields(event, true)).isEqualTo(" | fields: {\"http\":{\"headers\":{\"content-type\":[\"application/json\"]},\"body\":{\"a\":tru e}}}");
+        assertThat(fields(event, false)).isEqualTo(fields(event, true));
+    }
+
+    private static String fields(LoggingEvent event, boolean compact) {
+        StructuredFieldsConverter converter = new StructuredFieldsConverter();
+        converter.setOptionList(compact ? List.of("compact") : List.of());
+        converter.start();
+        return converter.convert(event);
     }
 
     @Test

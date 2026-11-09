@@ -9,6 +9,7 @@
 	<conversionRule conversionWord="cMsg" class="no.entur.logging.cloud.logback.logstash.test.CompactMessageConverter" />
 	<conversionRule conversionWord="cLogger" class="no.entur.logging.cloud.logback.logstash.test.CompactLoggerConverter" />
 	<conversionRule conversionWord="sEx" class="no.entur.logging.cloud.logback.logstash.test.SingleLineRootCauseFirstThrowableProxyConverter" />
+	<conversionRule conversionWord="aiEx" class="no.entur.logging.cloud.logback.logstash.test.EscapedThrowableProxyConverter" />
 	<conversionRule conversionWord="fields" class="no.entur.logging.cloud.logback.logstash.test.StructuredFieldsConverter" />
 
 	<!-- stop logging at JVM exit also without Spring Boot, so that queued events and pending "repeated N more times" lines are written -->
@@ -57,7 +58,7 @@
 		<append>true</append>
 		<immediateFlush>true</immediateFlush>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger%aliasMdc%eventId{always} : %aliasMsg%fields%n%ex</pattern>
+			<pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger%aliasMdc%eventId{always} : %aliasMsg%fields%n%aiEx</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>

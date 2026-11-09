@@ -21,7 +21,8 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
     private static final Pattern SKIPPED_SUFFIX = Pattern.compile("\\s*\\[\\d+ skipped]$");
 
     // a stack frame, 'at package.Class.method(Source.java:1)'; not a message line such as Jackson's 'at [Source: ...]'
-    private static final Pattern FRAME = Pattern.compile("^at [\\w$./<>-]+\\(");
+    // class loader and module names may come first, as in at app//com.example.App.run(..) or at com.example.app@1.2.3+4/com.example.App.run(..)
+    private static final Pattern FRAME = Pattern.compile("^at [\\w$./<>@+-]+\\(");
 
     @Override
     public String convert(ILoggingEvent event) {
@@ -38,7 +39,7 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
         int frames = 0;
         int omittedFrames = 0;
         for (String line : multiLine.split("\\R")) {
-            String trimmed = line.strip();
+            String trimmed = AiText.escapeControlCharacters(line.strip(), false);
             if (trimmed.isEmpty() || isLogbackMarker(trimmed)) {
                 continue;
             }

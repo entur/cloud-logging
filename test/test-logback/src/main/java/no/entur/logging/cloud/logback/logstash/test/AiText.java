@@ -95,12 +95,14 @@ public final class AiText {
         return control > 0 && control * 10 > body.length();
     }
 
+    /** True if the text is exactly one JSON value (the parser would also accept several, such as <code>1 2</code>). */
     static boolean isValidJson(String body) {
         try (JsonParser parser = JSON_FACTORY.createParser(ObjectReadContext.empty(), body)) {
-            while (parser.nextToken() != null) {
-                // parse to the end
+            if (parser.nextToken() == null) {
+                return false;
             }
-            return true;
+            parser.skipChildren();
+            return parser.nextToken() == null;
         } catch (JacksonException e) {
             return false;
         }
