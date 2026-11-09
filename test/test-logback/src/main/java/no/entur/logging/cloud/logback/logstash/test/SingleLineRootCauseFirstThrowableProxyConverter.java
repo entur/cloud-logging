@@ -18,7 +18,7 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
 
     private static final String SEPARATOR = " | ";
 
-    private static final Pattern SKIPPED_SUFFIX = Pattern.compile("\\s*\\[\\d+ skipped]$");
+    private static final String SKIPPED_SUFFIX = " skipped]";
 
     // a stack frame, 'at package.Class.method(Source.java:1)'; not a message line such as Jackson's 'at [Source: ...]'
     // class loader and module names may come first, as in at app//com.example.App.run(..) or at com.example.app@1.2.3+4/com.example.App.run(..)
@@ -41,8 +41,8 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
         int omittedFrames = 0;
         int messageLength = 0;
         boolean messageCut = false;
-        for (String line : multiLine.split("\\R")) {
-            String trimmed = AiText.escapeControlCharacters(line.strip(), false);
+        for (String line : multiLine.lines().toList()) {
+            String trimmed = AiText.singleLine(line.strip());
             if (trimmed.isEmpty() || isLogbackMarker(trimmed)) {
                 continue;
             }
@@ -54,7 +54,7 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
                     omittedFrames++;
                     continue;
                 }
-                builder.append(SEPARATOR).append(SKIPPED_SUFFIX.matcher(trimmed).replaceFirst(""));
+                builder.append(SEPARATOR).append(withoutSkippedNote(trimmed));
             } else if (causes == 0 || isExceptionHeader(trimmed)) {
                 appendOmitted(builder, omittedFrames);
                 omittedFrames = 0;
@@ -83,6 +83,26 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
         }
         appendOmitted(builder, omittedFrames);
         return builder.toString();
+    }
+
+    /** The frame without logback's trailing <code>[N skipped]</code> note (and the whitespace before it). */
+    static String withoutSkippedNote(String frame) {
+        if (!frame.endsWith(SKIPPED_SUFFIX)) {
+            return frame;
+        }
+        int digitsEnd = frame.length() - SKIPPED_SUFFIX.length();
+        int open = digitsEnd;
+        while (open > 0 && frame.charAt(open - 1) >= '0' && frame.charAt(open - 1) <= '9') {
+            open--;
+        }
+        if (open == digitsEnd || open == 0 || frame.charAt(open - 1) != '[') {
+            return frame;
+        }
+        int end = open - 1;
+        while (end > 0 && Character.isWhitespace(frame.charAt(end - 1))) {
+            end--;
+        }
+        return frame.substring(0, end);
     }
 
     private static boolean isExceptionHeader(String line) {
