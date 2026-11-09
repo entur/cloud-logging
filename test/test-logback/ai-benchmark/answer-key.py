@@ -12,7 +12,7 @@ import collections
 import re
 import sys
 
-EVENT = re.compile(r'^\d\d:\d\d:\d\d\.\d{3} (\w+) +\[[^\]]*\] (\S+)(?: \[.*?\])? #[0-9a-f]{8} : (.*)$')
+EVENT = re.compile(r'^\d\d:\d\d:\d\d\.\d{3} (\w+) +\[[^\]]*\] (\S+)(?: \[.*?\])? #[0-9a-f]{8,12} : (.*)$')
 FRAME = re.compile(r'^\s+at (\S+)\(([^)]*)\)')
 EXCEPTION = re.compile(r'^(?:Caused by: |Wrapped by: )?((?:[a-z_][\w$]*\.)+[A-Z][\w$]*)(?::|$)')
 APP = re.compile(r'^(no\.entur\.grpc\.example|org\.entur\.example)\.')
