@@ -76,21 +76,30 @@ public class AiFileAppender extends FileAppender<ILoggingEvent> {
 
     /** Returns true if this JVM got the lock, false if another JVM holds it. */
     private boolean lock(String file) {
+        FileChannel channel = null;
         try {
-            FileChannel channel = FileChannel.open(Path.of(file), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+            channel = FileChannel.open(Path.of(file), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
             FileLock lock = channel.tryLock();
-            if (lock == null) {
-                channel.close();
-                return false;
+            if (lock != null) {
+                LOCKS.put(file, lock);
+                channel = null; // keep open
+                return true;
             }
-            LOCKS.put(file, lock);
-            return true;
+            return false;
         } catch (OverlappingFileLockException e) {
             // already held by this JVM
             return true;
         } catch (IOException | RuntimeException e) {
             addWarn("Unable to lock " + file + ", assuming no other test JVM writes to " + getFile(), e);
             return true;
+        } finally {
+            if (channel != null) {
+                try {
+                    channel.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
         }
     }
 }

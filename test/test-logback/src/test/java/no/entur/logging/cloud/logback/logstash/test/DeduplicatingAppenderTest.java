@@ -50,6 +50,25 @@ public class DeduplicatingAppenderTest {
     }
 
     @Test
+    public void differentMessagesWithTheSameRootCauseAreKept() {
+        LoggerContext context = new LoggerContext();
+        Collector collector = new Collector();
+        collector.setContext(context);
+        collector.start();
+        DeduplicatingAppender dedup = new DeduplicatingAppender();
+        dedup.setContext(context);
+        dedup.addAppender(collector);
+        dedup.start();
+        Logger logger = context.getLogger("test");
+
+        dedup.doAppend(new ch.qos.logback.classic.spi.LoggingEvent(Logger.class.getName(), logger, Level.ERROR, "Could not publish event", new IllegalStateException("refused"), null));
+        dedup.doAppend(new ch.qos.logback.classic.spi.LoggingEvent(Logger.class.getName(), logger, Level.ERROR, "Could not update cache", new IllegalStateException("refused"), null));
+        dedup.stop();
+
+        assertThat(collector.lines).containsExactly("ERROR Could not publish event", "ERROR Could not update cache");
+    }
+
+    @Test
     public void evictedEntriesWriteTheirSummary() {
         LoggerContext context = new LoggerContext();
         Collector collector = new Collector();

@@ -1,7 +1,9 @@
 package no.entur.logging.cloud.logback.logstash.test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static net.logstash.logback.argument.StructuredArguments.kv;
 import static net.logstash.logback.marker.Markers.append;
+import static net.logstash.logback.marker.Markers.appendRaw;
 
 import java.util.List;
 import java.util.Map;
@@ -48,10 +50,29 @@ public class StructuredFieldsConverterTest {
         devOps.addMarker(DevOpsMarker.errorTellMeTomorrow());
         assertThat(converter(null).convert(devOps)).isEmpty();
 
-        LoggingEvent requestResponse = event("GET /x | body: {}");
-        requestResponse.addMarker(new CompactMessageMarker("GET /x", false));
-        requestResponse.addKeyValuePair(new KeyValuePair("a", "b"));
+        LoggingEvent requestResponse = event("GET /x");
+        requestResponse.addMarker(appendRaw("http", "{\"headers\":{},\"body\":{}}"));
         assertThat(converter(null).convert(requestResponse)).isEmpty();
+
+        // other fields of a request-response event are printed
+        LoggingEvent withKeyValue = event("GET /x");
+        withKeyValue.addMarker(appendRaw("http", "{\"headers\":{},\"body\":{}}"));
+        withKeyValue.addKeyValuePair(new KeyValuePair("a", "b"));
+        assertThat(converter(null).convert(withKeyValue)).isEqualTo(" | fields: {\"a\":\"b\"}");
+    }
+
+    @Test
+    public void printsStructuredArgumentsWithoutPlaceholder() {
+        LoggingEvent withoutPlaceholder = new LoggingEvent("f", new LoggerContext().getLogger("x"), Level.INFO, "Order placed", null,
+                new Object[]{kv("orderId", 42)});
+        assertThat(converter(null).convert(withoutPlaceholder)).isEqualTo(" | fields: {\"orderId\":42}");
+
+        LoggingEvent withPlaceholder = new LoggingEvent("f", new LoggerContext().getLogger("x"), Level.INFO, "Order {} placed", null,
+                new Object[]{kv("orderId", 42)});
+        assertThat(withPlaceholder.getFormattedMessage()).isEqualTo("Order orderId=42 placed");
+        assertThat(converter(null).convert(withPlaceholder)).isEmpty();
+
+        assertThat(AiEventDetails.placeholders("a {} b \\{} c \\\\{}")).isEqualTo(2);
     }
 
     @Test
