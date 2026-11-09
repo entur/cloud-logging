@@ -5,12 +5,8 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.LoggingEvent;
-import ch.qos.logback.core.Appender;
-import ch.qos.logback.core.AppenderBase;
-import ch.qos.logback.core.spi.AppenderAttachable;
-import ch.qos.logback.core.spi.AppenderAttachableImpl;
+import no.entur.logging.cloud.api.DevOpsMarker;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -20,17 +16,19 @@ import java.util.Map;
  * <code>repeated N more times, N+1 in total (first #id, last #id): message</code> is forwarded when the entry is evicted or the appender stops.
  * The total includes the first occurrence (printed earlier), so that readers do not have to work out whether to add it.
  * <p>
- * Events are identical if level, logger, message and root cause (if there is an exception) are equal.
+ * Events are identical if level (including the DevOpsLogger error severity, see {@link AiLevelConverter}), logger, message and root
+ * cause (if there is an exception) are equal.
  * Memory is bounded: at most {@link #setMaxEntries(int) maxEntries} small entries are kept (least recently used evicted,
  * summary written first, so no counts are lost). Lower levels are always forwarded.
  * Disable with <code>-Dentur.logging.ai.dedupe=false</code>.
  */
-public class DeduplicatingAppender extends AppenderBase<ILoggingEvent> implements AppenderAttachable<ILoggingEvent> {
+public class DeduplicatingAppender extends ForwardingAppender {
 
     private static final int MAX_SUMMARY_MESSAGE = 200;
 
     private static class Entry {
         final Level level;
+        final DevOpsMarker devOpsMarker;
         final String loggerName;
         final String message;
         final String firstId;
@@ -39,14 +37,13 @@ public class DeduplicatingAppender extends AppenderBase<ILoggingEvent> implement
 
         Entry(ILoggingEvent event, String id) {
             this.level = event.getLevel();
+            this.devOpsMarker = AiLevelConverter.devOpsMarker(event);
             this.loggerName = event.getLoggerName();
             this.message = abbreviate(describe(event));
             this.firstId = id;
             this.lastId = id;
         }
     }
-
-    private final AppenderAttachableImpl<ILoggingEvent> appenders = new AppenderAttachableImpl<>();
 
     private int maxEntries = 500;
 
@@ -102,7 +99,6 @@ public class DeduplicatingAppender extends AppenderBase<ILoggingEvent> implement
                 entries.clear();
             }
         }
-        appenders.detachAndStopAllAppenders();
         super.stop();
     }
 
@@ -112,12 +108,16 @@ public class DeduplicatingAppender extends AppenderBase<ILoggingEvent> implement
         }
         String message = "repeated " + entry.suppressed + " more times, " + (entry.suppressed + 1) + " in total (first #" + entry.firstId + ", last #" + entry.lastId + "): " + entry.message;
         Logger logger = ((ch.qos.logback.classic.LoggerContext) getContext()).getLogger(entry.loggerName);
-        appenders.appendLoopOnAppenders(new LoggingEvent(DeduplicatingAppender.class.getName(), logger, entry.level, message, null, null));
+        LoggingEvent summary = new LoggingEvent(DeduplicatingAppender.class.getName(), logger, entry.level, message, null, null);
+        if (entry.devOpsMarker != null) {
+            summary.addMarker(entry.devOpsMarker);
+        }
+        appenders.appendLoopOnAppenders(summary);
         entry.suppressed = 0;
     }
 
     private static String key(ILoggingEvent event) {
-        StringBuilder key = new StringBuilder().append(event.getLevel()).append('|').append(event.getLoggerName()).append('|')
+        StringBuilder key = new StringBuilder().append(AiLevelConverter.levelOf(event)).append('|').append(event.getLoggerName()).append('|')
                 .append(event.getFormattedMessage());
         IThrowableProxy root = rootCause(event.getThrowableProxy());
         if (root != null) {
@@ -143,43 +143,8 @@ public class DeduplicatingAppender extends AppenderBase<ILoggingEvent> implement
         if (message == null) {
             return "";
         }
-        // alias before cutting, so that a UUID is not cut in half
+        // alias before cutting, so that a UUID is not cut in half (and cut so that an alias is not cut either)
         String singleLine = MdcAliasConverter.aliasUuids(AiText.singleLine(message));
-        return singleLine.length() > MAX_SUMMARY_MESSAGE ? singleLine.substring(0, MAX_SUMMARY_MESSAGE) + "..." : singleLine;
-    }
-
-    @Override
-    public void addAppender(Appender<ILoggingEvent> appender) {
-        appenders.addAppender(appender);
-    }
-
-    @Override
-    public Iterator<Appender<ILoggingEvent>> iteratorForAppenders() {
-        return appenders.iteratorForAppenders();
-    }
-
-    @Override
-    public Appender<ILoggingEvent> getAppender(String name) {
-        return appenders.getAppender(name);
-    }
-
-    @Override
-    public boolean isAttached(Appender<ILoggingEvent> appender) {
-        return appenders.isAttached(appender);
-    }
-
-    @Override
-    public void detachAndStopAllAppenders() {
-        appenders.detachAndStopAllAppenders();
-    }
-
-    @Override
-    public boolean detachAppender(Appender<ILoggingEvent> appender) {
-        return appenders.detachAppender(appender);
-    }
-
-    @Override
-    public boolean detachAppender(String name) {
-        return appenders.detachAppender(name);
+        return singleLine.length() > MAX_SUMMARY_MESSAGE ? AiText.cut(singleLine, MAX_SUMMARY_MESSAGE) + "..." : singleLine;
     }
 }

@@ -13,7 +13,9 @@ import java.util.regex.Pattern;
  */
 public final class AiText {
 
-    private static final Pattern LINE_BREAKS = Pattern.compile("\\s*\\R\\s*");
+    // line breaks with the whitespace around them; linear time: a match only starts at the first space or tab of a run, and the possessive
+    // [ \t]*+ does not backtrack (\s*\R\s* takes quadratic time on a long run of spaces without a line break)
+    private static final Pattern LINE_BREAKS = Pattern.compile("(?<![ \\t])[ \\t]*+\\R\\s*");
 
     private static final JsonFactory JSON_FACTORY = new JsonFactory();
 
@@ -29,6 +31,31 @@ public final class AiText {
             text = LINE_BREAKS.matcher(text).replaceAll(" ");
         }
         return escapeControlCharacters(text, false);
+    }
+
+    /**
+     * The text cut to at most <code>max</code> characters, but not inside an alias (<code>u12</code> from <code>u1234</code> would be
+     * another alias) or a surrogate pair. The text itself if it is not longer.
+     */
+    public static String cut(String text, int max) {
+        if (text.length() <= max) {
+            return text;
+        }
+        int end = max;
+        if (Character.isDigit(text.charAt(end))) {
+            int start = end;
+            while (start > 0 && Character.isDigit(text.charAt(start - 1))) {
+                start--;
+            }
+            if (start > 0 && (text.charAt(start - 1) == 'u' || text.charAt(start - 1) == 'h')
+                    && (start == 1 || !Character.isLetterOrDigit(text.charAt(start - 2)))) {
+                end = start - 1;
+            }
+        }
+        if (end > 0 && Character.isLowSurrogate(text.charAt(end)) && Character.isHighSurrogate(text.charAt(end - 1))) {
+            end--;
+        }
+        return text.substring(0, end);
     }
 
     /** Control characters other than tab (and, if <code>keepLineBreaks</code>, line breaks) as <code>\\uXXXX</code>. */

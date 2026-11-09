@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Renders request-response events (HTTP and gRPC) for the AI files: the event's message (unchanged, as without AI mode) followed by
@@ -25,12 +26,20 @@ public final class CompactRequestResponse {
             "user-agent", "vary", "x-content-type-options", "x-frame-options", "x-xss-protection",
             "grpc-accept-encoding", "grpc-encoding", "te");
 
+    // added by the sink's message composer if the body in the JSON output was cut
+    private static final Pattern TRUNCATED_NOTE = Pattern.compile("\\s*\\[truncated ~\\d+(?: bytes|KB)]$");
+
     private CompactRequestResponse() {
     }
 
     /** The message with headers and body, for the full (<code>compact</code> false) or the compact file. */
     public static String render(String message, AiEventDetails details, Map<String, String> mdc, boolean compact) {
-        StringBuilder builder = new StringBuilder(256).append(MdcAliasConverter.aliasUuids(AiText.singleLine(message.strip()), !compact));
+        String text = message.strip();
+        if (details.isCompleteBody()) {
+            // the AI files have the whole body, so the note about the JSON output's body would contradict it
+            text = TRUNCATED_NOTE.matcher(text).replaceFirst("");
+        }
+        StringBuilder builder = new StringBuilder(256).append(MdcAliasConverter.aliasUuids(AiText.singleLine(text), !compact));
         Set<String> excluded = compact ? AiLoggingControl.excludedHeaders(DEFAULT_EXCLUDED_HEADERS) : Set.of();
         Map<String, String> mdcByName = compact ? byNormalizedName(mdc) : Map.of();
         int count = 0;
@@ -51,25 +60,18 @@ public final class CompactRequestResponse {
 
     /** True if the compact file cuts the body of this event. */
     public static boolean isBodyTruncatedInCompactFile(AiEventDetails details) {
-        String body = aliasedBody(details, false);
+        String body = details.getCompactBody();
         return body != null && !AiLoggingControl.truncateBody(body).equals(body);
     }
 
     private static String fullBody(AiEventDetails details) {
-        return aliasedBody(details, true);
+        String body = details.getSingleLineBody();
+        return body == null ? null : MdcAliasConverter.aliasUuids(body, true);
     }
 
     private static String compactBody(AiEventDetails details) {
-        String body = aliasedBody(details, false);
+        String body = details.getCompactBody();
         return body == null ? null : AiLoggingControl.truncateBody(body);
-    }
-
-    private static String aliasedBody(AiEventDetails details, boolean full) {
-        String body = details.getBody();
-        if (body == null || body.isBlank()) {
-            return null;
-        }
-        return MdcAliasConverter.aliasUuids(AiText.singleLineBody(body, details.isJsonBody()), full);
     }
 
     private static boolean isGrpcContentType(String name, String value) {

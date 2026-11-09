@@ -35,14 +35,19 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
         int maxCauses = AiLoggingControl.stackTraceMaxCauses();
 
         StringBuilder builder = new StringBuilder(multiLine.length() + 16);
+        int maxMessage = AiLoggingControl.messageMax();
         int causes = 0;
         int frames = 0;
         int omittedFrames = 0;
+        int messageLength = 0;
+        boolean messageCut = false;
         for (String line : multiLine.split("\\R")) {
             String trimmed = AiText.escapeControlCharacters(line.strip(), false);
             if (trimmed.isEmpty() || isLogbackMarker(trimmed)) {
                 continue;
             }
+            // logback indents suppressed exceptions and their causes; only the causes of the logged exception are at the start of a line
+            boolean nested = Character.isWhitespace(line.charAt(0));
             if (FRAME.matcher(trimmed).lookingAt()) {
                 frames++;
                 if (maxFrames > 0 && frames > maxFrames) {
@@ -54,18 +59,26 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
                 appendOmitted(builder, omittedFrames);
                 omittedFrames = 0;
                 frames = 0;
-                // suppressed exceptions are not causes: they do not count, so that the wrapping exceptions are kept
-                if (!trimmed.startsWith(CoreConstants.SUPPRESSED)) {
+                // suppressed exceptions (and their causes) are not causes: they do not count, so that the wrapping exceptions are kept
+                if (!nested && !trimmed.startsWith(CoreConstants.SUPPRESSED)) {
                     causes++;
                 }
                 if (maxCauses > 0 && causes > maxCauses) {
                     builder.append(SEPARATOR).append("[... more causes omitted]");
                     return builder.toString();
                 }
-                builder.append(SEPARATOR).append(trimmed);
-            } else {
+                builder.append(SEPARATOR).append(AiLoggingControl.truncate(trimmed, maxMessage));
+                messageLength = trimmed.length();
+                messageCut = maxMessage > 0 && messageLength > maxMessage;
+            } else if (!messageCut) {
                 // continuation of a multi-line exception message
-                builder.append(' ').append(trimmed);
+                if (maxMessage > 0 && messageLength + 1 + trimmed.length() > maxMessage) {
+                    builder.append(' ').append(AiText.cut(trimmed, Math.max(0, maxMessage - messageLength - 1))).append("...[truncated]");
+                    messageCut = true;
+                } else {
+                    builder.append(' ').append(trimmed);
+                    messageLength += 1 + trimmed.length();
+                }
             }
         }
         appendOmitted(builder, omittedFrames);

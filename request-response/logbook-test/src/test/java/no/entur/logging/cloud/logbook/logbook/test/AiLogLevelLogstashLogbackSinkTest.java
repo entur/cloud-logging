@@ -86,7 +86,7 @@ public class AiLogLevelLogstashLogbackSinkTest {
     public void logsWithoutBodyIfBodyCannotBeRead() throws IOException {
         HttpRequest request = spy(MockHttpRequest.create().withOrigin(Origin.LOCAL).withMethod("PUT").withPath("/api")
                 .withContentType("text/plain").withBodyAsString("x"));
-        doThrow(new IOException("closed")).when(request).getBodyAsString();
+        doThrow(new IOException("closed")).when(request).getBody();
 
         sink.write(null, request);
 

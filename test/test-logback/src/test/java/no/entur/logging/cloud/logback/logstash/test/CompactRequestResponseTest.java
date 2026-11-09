@@ -22,6 +22,7 @@ public class CompactRequestResponseTest {
 
     @AfterEach
     public void cleanUp() {
+        System.clearProperty(AiLoggingControl.AI_MESSAGE_MAX_PROPERTY);
         System.clearProperty(AiLoggingControl.AI_BODY_MAX_PROPERTY);
         System.clearProperty(AiLoggingControl.AI_EXCLUDED_HEADERS_PROPERTY);
     }
@@ -166,6 +167,34 @@ public class CompactRequestResponseTest {
         converter.setOptionList(compact ? List.of("compact") : List.of());
         converter.start();
         return converter.convert(event);
+    }
+
+    @Test
+    public void truncationNoteIsLeftOutIfTheAiBodyIsComplete() {
+        // the sink's note is about the body in the JSON output; the AI body marker has the whole body
+        LogstashMarker complete = appendRaw("http", "{\"headers\":{},\"body\":\"ab\"}");
+        complete.add(new AiBodyMarker("abcdef", false));
+        assertThat(full(event("200 http://localhost/x (in 5 ms) [truncated ~4KB]", complete, null))).isEqualTo("200 http://localhost/x (in 5 ms) | body: abcdef");
+
+        LoggingEvent jsonBody = event("POST /x [truncated ~12 bytes]", appendRaw("http", "{\"headers\":{},\"body\":\"ab\"}"), null);
+        assertThat(full(jsonBody)).isEqualTo("POST /x [truncated ~12 bytes] | body: ab");
+    }
+
+    @Test
+    public void longMessagesAreCutInTheCompactFileWithAnId() {
+        System.setProperty(AiLoggingControl.AI_MESSAGE_MAX_PROPERTY, "6");
+        LoggingEvent event = new LoggingEvent("f", new LoggerContext().getLogger("x"), Level.INFO, "payload: 1234567890", null, null);
+        event.setMDCPropertyMap(Map.of());
+        EventIdConverter eventId = new EventIdConverter();
+        eventId.start();
+
+        assertThat(compact(event)).isEqualTo("payloa...[truncated, 19 chars]");
+        assertThat(full(event)).isEqualTo("payload: 1234567890");
+        assertThat(eventId.convert(event)).matches(" #[0-9a-f]{12}");
+
+        LoggingEvent shortMessage = new LoggingEvent("f", new LoggerContext().getLogger("x"), Level.INFO, "short", null, null);
+        shortMessage.setMDCPropertyMap(Map.of());
+        assertThat(eventId.convert(shortMessage)).isEmpty();
     }
 
     @Test

@@ -10,6 +10,7 @@
 	<conversionRule conversionWord="cLogger" class="no.entur.logging.cloud.logback.logstash.test.CompactLoggerConverter" />
 	<conversionRule conversionWord="sEx" class="no.entur.logging.cloud.logback.logstash.test.SingleLineRootCauseFirstThrowableProxyConverter" />
 	<conversionRule conversionWord="aiEx" class="no.entur.logging.cloud.logback.logstash.test.EscapedThrowableProxyConverter" />
+	<conversionRule conversionWord="aiLevel" class="no.entur.logging.cloud.logback.logstash.test.AiLevelConverter" />
 	<conversionRule conversionWord="fields" class="no.entur.logging.cloud.logback.logstash.test.StructuredFieldsConverter" />
 
 	<!-- stop logging at JVM exit also without Spring Boot, so that queued events and pending "repeated N more times" lines are written -->
@@ -37,7 +38,7 @@
 				structured fields (Logstash markers, key-value pairs) as JSON, truncated like request-response bodies;
 				stack traces on a single line (grep friendly), root-cause-first, framework frames removed, frames limited by entur.logging.ai.stacktrace.max-lines
 			-->
-			<pattern>%level %cLogger%aliasMdc{compact}%eventId : %cMsg%fields{compact}%sEx{full,org.springframework,org.junit,org.gradle,worker.org.gradle,org.apache,jakarta.,io.grpc,io.netty,io.micrometer,org.zalando.logbook,jdk.internal,jdk.proxy,java.lang.reflect,java.util,sun.reflect}%n%nopex</pattern>
+			<pattern>%aiLevel %cLogger%aliasMdc{compact}%eventId : %cMsg%fields{compact}%sEx{full,org.springframework,org.junit,org.gradle,worker.org.gradle,org.apache,jakarta.,io.grpc,io.netty,io.micrometer,org.zalando.logbook,jdk.internal,jdk.proxy,java.lang.reflect,java.util,sun.reflect}%n%nopex</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
@@ -58,7 +59,7 @@
 		<append>true</append>
 		<immediateFlush>true</immediateFlush>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger%aliasMdc%eventId{always} : %aliasMsg%fields%n%aiEx</pattern>
+			<pattern>%d{HH:mm:ss.SSS} %-5aiLevel [%thread] %logger%aliasMdc%eventId{always} : %aliasMsg%fields%n%aiEx</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
@@ -80,7 +81,7 @@
 	</appender>
 
 	<!-- logback async appenders accept a single child, so fan out to both files and the encoder-only appender -->
-	<appender name="AI_FANOUT" class="no.entur.logging.cloud.logback.logstash.test.ListAppender">
+	<appender name="AI_FANOUT" class="no.entur.logging.cloud.logback.logstash.test.FanOutAppender">
 		<appender-ref ref="AI_DEDUP" />
 		<appender-ref ref="AI_FILE_FULL" />
 		<appender-ref ref="AI_ENCODER_ONLY" />

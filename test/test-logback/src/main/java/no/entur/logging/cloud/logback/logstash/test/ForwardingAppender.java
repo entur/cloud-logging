@@ -9,16 +9,12 @@ import ch.qos.logback.core.spi.AppenderAttachableImpl;
 import java.util.Iterator;
 
 /**
- * Forwards each event to all attached appenders. Needed because logback's async appenders accept only a single child.
+ * An appender which passes events on to the attached appenders (see {@link FanOutAppender} and {@link DeduplicatingAppender}).
+ * Stopping it stops the attached appenders.
  */
-public class ListAppender extends AppenderBase<ILoggingEvent> implements AppenderAttachable<ILoggingEvent> {
+public abstract class ForwardingAppender extends AppenderBase<ILoggingEvent> implements AppenderAttachable<ILoggingEvent> {
 
-    private final AppenderAttachableImpl<ILoggingEvent> appenders = new AppenderAttachableImpl<>();
-
-    @Override
-    protected void append(ILoggingEvent event) {
-        appenders.appendLoopOnAppenders(event);
-    }
+    protected final AppenderAttachableImpl<ILoggingEvent> appenders = new AppenderAttachableImpl<>();
 
     @Override
     public void stop() {

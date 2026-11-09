@@ -12,6 +12,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
+import no.entur.logging.cloud.api.DevOpsMarker;
 
 public class DeduplicatingAppenderTest {
 
@@ -20,7 +21,7 @@ public class DeduplicatingAppenderTest {
 
         @Override
         protected void append(ILoggingEvent event) {
-            lines.add(event.getLevel() + " " + event.getFormattedMessage());
+            lines.add(AiLevelConverter.levelOf(event) + " " + event.getFormattedMessage());
         }
     }
 
@@ -47,6 +48,34 @@ public class DeduplicatingAppenderTest {
         assertThat(collector.lines.stream().filter(l -> l.equals("ERROR failed")).count()).isEqualTo(1);
         assertThat(collector.lines.stream().filter(l -> l.equals("WARN other")).count()).isEqualTo(1);
         assertThat(collector.lines.stream().anyMatch(l -> l.startsWith("ERROR repeated 4 more times, 5 in total (first #") && l.endsWith("failed | java.lang.NumberFormatException: C"))).isTrue();
+    }
+
+    @Test
+    public void devOpsSeveritiesAreKeptApartAndShown() {
+        LoggerContext context = new LoggerContext();
+        Collector collector = new Collector();
+        collector.setContext(context);
+        collector.start();
+        DeduplicatingAppender dedup = new DeduplicatingAppender();
+        dedup.setContext(context);
+        dedup.addAppender(collector);
+        dedup.start();
+        Logger logger = context.getLogger("test");
+
+        for (int i = 0; i < 2; i++) {
+            ch.qos.logback.classic.spi.LoggingEvent tomorrow = new ch.qos.logback.classic.spi.LoggingEvent(Logger.class.getName(), logger, Level.ERROR, "payment failed", null, null);
+            tomorrow.addMarker(DevOpsMarker.errorTellMeTomorrow());
+            dedup.doAppend(tomorrow);
+            ch.qos.logback.classic.spi.LoggingEvent now = new ch.qos.logback.classic.spi.LoggingEvent(Logger.class.getName(), logger, Level.ERROR, "payment failed", null, null);
+            now.addMarker(DevOpsMarker.errorWakeMeUpRightNow());
+            dedup.doAppend(now);
+        }
+        dedup.stop();
+
+        assertThat(collector.lines).contains("ERROR(TELL_ME_TOMORROW) payment failed");
+        assertThat(collector.lines).contains("ERROR(WAKE_ME_UP_RIGHT_NOW) payment failed");
+        assertThat(collector.lines.stream().filter(l -> l.startsWith("ERROR(WAKE_ME_UP_RIGHT_NOW) repeated 1 more times, 2 in total")).count()).isEqualTo(1);
+        assertThat(collector.lines.stream().filter(l -> l.startsWith("ERROR(TELL_ME_TOMORROW) repeated 1 more times, 2 in total")).count()).isEqualTo(1);
     }
 
     @Test

@@ -15,12 +15,15 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.attribute.UserPrincipal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * File appender for AI mode. All test JVMs (one per module) append to the same file, so the first time a JVM opens the file a line
@@ -35,7 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * aliases either.
  * <p>
  * The files hold whole request and response bodies and are often in a shared temporary directory, so they are created readable by the
- * owner only (where the file system has POSIX permissions), and a file that is a symbolic link is refused.
+ * owner only (where the file system has POSIX permissions), and a file that is a symbolic link or belongs to another user is refused.
  */
 public class AiFileAppender extends FileAppender<ILoggingEvent> {
 
@@ -49,6 +52,8 @@ public class AiFileAppender extends FileAppender<ILoggingEvent> {
     private static final Map<String, LockState> LOCKED = new ConcurrentHashMap<>();
     // referenced until the JVM exits: an unreachable channel is closed by the garbage collector, which releases the lock
     private static final Map<String, FileLock> LOCKS = new ConcurrentHashMap<>();
+    // channels opened on a lock file this JVM had already locked through another path: closing them could release that lock
+    private static final List<FileChannel> KEPT_OPEN = new CopyOnWriteArrayList<>();
 
     private String lockFile;
 
@@ -70,7 +75,8 @@ public class AiFileAppender extends FileAppender<ILoggingEvent> {
         if (!isStarted()) {
             return;
         }
-        LockState lock = lockFile == null ? LockState.HELD : LOCKED.computeIfAbsent(lockFile, this::lock);
+        AiLoggingControl.aiFileStarted();
+        LockState lock = lockFile == null ? LockState.HELD : LOCKED.computeIfAbsent(normalize(lockFile), this::lock);
         if (lock != LockState.HELD) {
             AiLoggingControl.disableAliasesInThisJvm();
         }
@@ -95,9 +101,17 @@ public class AiFileAppender extends FileAppender<ILoggingEvent> {
         }
     }
 
+    private static String normalize(String file) {
+        try {
+            return Path.of(file).toAbsolutePath().normalize().toString();
+        } catch (RuntimeException e) {
+            return file;
+        }
+    }
+
     /**
-     * Creates the file readable by the owner only, or makes an existing file of this user so (best effort; another user's file cannot be
-     * written anyway). Returns false, with an error, if the file is a symbolic link or cannot be created.
+     * Creates the file readable by the owner only, or makes an existing file of this user so. Returns false, with an error, if the file is
+     * a symbolic link, belongs to another user (it could be readable by others) or cannot be created.
      */
     boolean createOwnerOnly(Path path) {
         boolean posix = path.getFileSystem().supportedFileAttributeViews().contains("posix");
@@ -122,6 +136,10 @@ public class AiFileAppender extends FileAppender<ILoggingEvent> {
             addError("Not writing to " + path + ": it is a symbolic link");
             return false;
         }
+        if (posix && !isOwnedByThisUser(path)) {
+            addError("Not writing to " + path + ": it belongs to another user");
+            return false;
+        }
         if (posix && Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
             try {
                 Files.setPosixFilePermissions(path, OWNER_ONLY);
@@ -130,6 +148,17 @@ public class AiFileAppender extends FileAppender<ILoggingEvent> {
             }
         }
         return true;
+    }
+
+    /** True if the file belongs to the user running this JVM, or if that cannot be told. */
+    boolean isOwnedByThisUser(Path path) {
+        try {
+            UserPrincipal owner = Files.getOwner(path, LinkOption.NOFOLLOW_LINKS);
+            UserPrincipal user = path.getFileSystem().getUserPrincipalLookupService().lookupPrincipalByName(System.getProperty("user.name"));
+            return owner.equals(user);
+        } catch (IOException | RuntimeException e) {
+            return true;
+        }
     }
 
     /** Whether this JVM got the lock, another JVM holds it, or locking failed (then aliases are off, as for another JVM). */
@@ -149,7 +178,11 @@ public class AiFileAppender extends FileAppender<ILoggingEvent> {
             }
             return LockState.OTHER_JVM;
         } catch (OverlappingFileLockException e) {
-            // already held by this JVM
+            // already held by this JVM (through another path); closing this channel could release that lock
+            if (channel != null) {
+                KEPT_OPEN.add(channel);
+                channel = null;
+            }
             return LockState.HELD;
         } catch (IOException | RuntimeException e) {
             addWarn("Unable to lock " + file + ", so not using aliases in " + getFile(), e);

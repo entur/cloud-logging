@@ -27,9 +27,16 @@ public class AiLogLevelLogstashLogbackSink extends LogLevelLogstashLogbackSink {
 
         @Override
         public AiLogLevelLogstashLogbackSink build() {
-            super.build(); // validates and sets defaults
-            return new AiLogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), jsonMapper,
-                    Math.min(maxBodySize, maxSize), remoteHttpMessageContextSupplier, server, client);
+            return (AiLogLevelLogstashLogbackSink) super.build();
+        }
+
+        @Override
+        protected AiLogLevelLogstashLogbackSink newSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled,
+                                                        JsonMapper jsonMapper, int maxSize,
+                                                        RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier,
+                                                        MessageComposer server, MessageComposer client) {
+            return new AiLogLevelLogstashLogbackSink(logConsumer, logLevelEnabled, jsonMapper, maxSize, remoteHttpMessageContextSupplier,
+                    server, client);
         }
     }
 

@@ -7,11 +7,13 @@ import org.zalando.logbook.ContentType;
 import org.zalando.logbook.HttpMessage;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Locale;
 
 /**
  * AI mode: attaches the whole body of textual requests and responses to the request-response marker as an {@link AiBodyMarker},
- * which the AI files print and JSON output ignores.
+ * which the AI files print and JSON output ignores. The body bytes are captured with the marker (the request or response may be
+ * recycled before the event is written), and decoded when the event is written.
  */
 public final class AiBodies {
 
@@ -26,20 +28,19 @@ public final class AiBodies {
         if (!isTextMediaType(contentType)) {
             return marker;
         }
-        String body = readBody(message);
-        if (body != null && !body.isBlank()) {
-            marker.add(new AiBodyMarker(body, ContentType.isJsonMediaType(contentType)));
-        }
-        return marker;
-    }
-
-    private static String readBody(HttpMessage message) {
+        byte[] body;
+        Charset charset;
         try {
-            return message.getBodyAsString();
+            body = message.getBody();
+            charset = message.getCharset();
         } catch (IOException | RuntimeException e) {
             // logged without the body
-            return null;
+            return marker;
         }
+        if (body != null && body.length > 0) {
+            marker.add(new AiBodyMarker(() -> new String(body, charset), ContentType.isJsonMediaType(contentType)));
+        }
+        return marker;
     }
 
     /**

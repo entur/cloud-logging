@@ -43,7 +43,7 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
 
-        if (AiLoggingControl.isAiEnabled()) {
+        if (AiLoggingControl.isAiActive()) {
             // AI mode: the machine-readable sink (same message and JSON fields as without AI mode), plus the whole textual body
             // for the AI files, which render headers and body from the marker
             return AiOndemandLogLevelLogstashLogbackSink.newBuilder()
@@ -103,7 +103,7 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
 
-        if (AiLoggingControl.isAiEnabled()) {
+        if (AiLoggingControl.isAiActive()) {
             // AI mode: the machine-readable sink (same message and JSON fields as without AI mode), plus the whole textual body
             // for the AI files, which render headers and body from the marker
             return AiLogLevelLogstashLogbackSink.newBuilder()
