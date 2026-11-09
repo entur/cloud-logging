@@ -1,0 +1,189 @@
+package no.entur.logging.cloud.rr.grpc.message;
+
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
+import com.google.protobuf.MessageOrBuilder;
+import no.entur.logging.cloud.rr.grpc.filter.GrpcBodyFilter;
+import no.entur.logging.cloud.rr.grpc.mapper.GrpcPayloadJsonMapper;
+import tools.jackson.core.io.JsonStringEncoder;
+
+/**
+ * Message body, mapped to JSON at most once. Mapping can be deferred until the body is actually logged,
+ * for example so that on-demand logging does not map messages for log statements which are discarded.
+ * <br><br>
+ * Deferred mapping holds on to the protobuf message, and might map it on another thread: by default the thread which
+ * flushes an on-demand logging scope (before the log statement is handed over to the async appender), or, if so configured,
+ * the async appender's worker thread. This is safe because:
+ * <ul>
+ *     <li>generated protobuf messages are immutable, "just like a Java String", see
+ *     <a href="https://protobuf.dev/reference/java/java-generated/#message">Java Generated Code Guide: Messages</a> and
+ *     <a href="https://protobuf.dev/getting-started/javatutorial/">Protocol Buffer Basics: Java</a> (Builders vs. Messages)</li>
+ *     <li>gRPC's protobuf marshaller relies on this ("Returning provided object is safe since protobufs are immutable"), and
+ *     received messages do not refer to the marshaller's reused read buffer (no aliasing), see
+ *     <a href="https://github.com/grpc/grpc-java/blob/master/protobuf-lite/src/main/java/io/grpc/protobuf/lite/ProtoLiteUtils.java">ProtoLiteUtils</a></li>
+ *     <li>the mapped body is published via volatile fields</li>
+ * </ul>
+ * Builders are not thread-safe (see the guide's <a href="https://protobuf.dev/reference/java/java-generated/#builders">Builders</a> section),
+ * so a builder is snapshot (as an immutable message) when the payload is created; later changes to the builder are not reflected.
+ * <br><br>
+ * The reference to the protobuf message is released once the message has been mapped (also if mapping failed), so that
+ * the (possibly large) message does not stay in memory for as long as the payload.
+ */
+
+public class GrpcPayload {
+
+    /**
+     * Create an already mapped payload.
+     *
+     * @param body body as raw JSON, or null
+     * @return payload
+     */
+
+    public static GrpcPayload of(String body) {
+        return new GrpcPayload(body);
+    }
+
+    protected volatile MessageOrBuilder message;
+    protected final GrpcBodyFilter filter;
+    protected final GrpcPayloadJsonMapper mapper;
+    protected final boolean mapOnAsyncAppenderThread;
+
+    protected volatile boolean mapped;
+    protected volatile String body;
+
+    /**
+     * Constructor; the message is mapped before the log statement is handed over to the async appender.
+     *
+     * @param message message
+     * @param filter body filter
+     * @param mapper message to JSON mapper
+     */
+
+    public GrpcPayload(MessageOrBuilder message, GrpcBodyFilter filter, GrpcPayloadJsonMapper mapper) {
+        this(message, filter, mapper, false);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param message message
+     * @param filter body filter
+     * @param mapper message to JSON mapper
+     * @param mapOnAsyncAppenderThread true if mapping can be left to the async appender's thread (i.e. when the log statement is written),
+     *                                 false if the message should be mapped before the log statement is handed over to the async appender
+     *                                 (see {@linkplain #prepareForAsyncAppender()}).
+     */
+
+    public GrpcPayload(MessageOrBuilder message, GrpcBodyFilter filter, GrpcPayloadJsonMapper mapper, boolean mapOnAsyncAppenderThread) {
+        // builders are mutable and not thread-safe, so take an immutable snapshot
+        this.message = message instanceof Message.Builder builder ? builder.buildPartial() : message;
+        this.filter = filter;
+        this.mapper = mapper;
+        this.mapOnAsyncAppenderThread = mapOnAsyncAppenderThread;
+    }
+
+    protected GrpcPayload(String body) {
+        this.message = null;
+        this.filter = null;
+        this.mapper = null;
+        this.mapOnAsyncAppenderThread = false;
+        this.body = body;
+        this.mapped = true;
+    }
+
+    /**
+     * Map the message to JSON, if not already mapped.
+     *
+     * @throws InvalidProtocolBufferException if the message could not be mapped; the body is then null.
+     */
+
+    public void map() throws InvalidProtocolBufferException {
+        map(false);
+    }
+
+    /**
+     * Get the body, mapping the message to JSON if not already mapped.
+     * <br>
+     * Mapping failures are not logged, as this method might be invoked by the logging framework itself.
+     * Instead, the body describes the failure.
+     *
+     * @return body as raw JSON, or null
+     */
+
+    public String getBody() {
+        try {
+            map(true);
+        } catch (InvalidProtocolBufferException e) {
+            // unreachable: failures are described by the body
+            throw new IllegalStateException(e);
+        }
+        return body;
+    }
+
+    private void map(boolean describeFailure) throws InvalidProtocolBufferException {
+        if (!mapped) {
+            synchronized (this) {
+                if (!mapped) {
+                    try {
+                        body = mapper.map(message, filter);
+                    } catch (Throwable e) {
+                        if (!describeFailure) {
+                            throw e;
+                        }
+                        // set the body before publishing it as mapped
+                        body = getUnableToMapMessage(e);
+                    } finally {
+                        mapped = true;
+                        message = null;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Prepare for the log statement being handed over to the async appender: unless mapping on the async appender's
+     * thread is allowed, map the message now (on the calling thread), so that the async appender's thread does not
+     * have to. Does nothing if the message has already been mapped.
+     * <br>
+     * Mapping failures are not logged, see {@linkplain #getBody()}.
+     */
+
+    public void prepareForAsyncAppender() {
+        if (!mapOnAsyncAppenderThread) {
+            getBody();
+        }
+    }
+
+    /**
+     * Whether mapping can be left to the async appender's thread.
+     *
+     * @return true if the message is mapped when the log statement is written, false if mapped before the log statement is handed over to the async appender.
+     */
+
+    public boolean isMapOnAsyncAppenderThread() {
+        return mapOnAsyncAppenderThread;
+    }
+
+    public boolean isMapped() {
+        return mapped;
+    }
+
+    /**
+     * Get the message
+     *
+     * @return the protobuf message, or null if it has been mapped (the reference is then released) or if created from an already mapped body.
+     */
+
+    public MessageOrBuilder getMessage() {
+        return message;
+    }
+
+    protected String getUnableToMapMessage(Throwable e) {
+        StringBuilder builder = new StringBuilder(128);
+        builder.append('"');
+        JsonStringEncoder.getInstance().quoteAsString("Unable to format message: " + e.getMessage(), builder);
+        builder.append('"');
+        return builder.toString();
+    }
+}
