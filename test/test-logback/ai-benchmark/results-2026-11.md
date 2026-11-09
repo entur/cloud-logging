@@ -131,6 +131,30 @@ token difference is two cheap models: Gemini 3.8 Flash used 5.0M tokens for both
 differences per run are of the size seen between repeated runs. MAI-Code-1.1-Flash at high effort at 39f55f85 is the
 memory-limited re-run described above.
 
+## Formatting cost per event
+
+`formatting-benchmark.sh`: time and allocation per event for the AI files (compact and full line) against the JSON encoder of
+the machine-readable output; writing to the files is not included. JDK 25.0.4.1 on an AMD Ryzen 9 9950X, median of three runs
+(the run before bb7e3868 is a single run of the same benchmark).
+
+| Event | JSON encoder | AI files before bb7e3868 | AI files at bb7e3868 |
+|---|---|---|---|
+| Plain message with MDC | 0.7 µs, 0.7 KB | 1.9 µs, 5.8 KB | 1.3 µs, 4.5 KB |
+| HTTP response, 1 KB JSON body | 1.7 µs, 5.8 KB | 24.0 µs, 47.8 KB | 9.9 µs, 37.1 KB |
+| HTTP response, 100 KB JSON body | 47 µs, 323 KB | 1,603 µs, 2,017 KB | 465 µs, 1,511 KB |
+| ERROR with a 3-exception trace | 17.6 µs, 145 KB | 23.7 µs, 170 KB | 22.1 µs, 169 KB |
+
+- Before bb7e3868 a profile of the benchmark (Java Flight Recorder) put half of the AI time of request-response events in a
+  UUID regular expression: every hex digit of a JSON body starts a match attempt. bb7e3868 finds UUIDs and hex ids by hand,
+  from each `-`, and no longer parses a JSON body a second time when it equals the one in the event's JSON output.
+- The AI files still cost more than the JSON encoder, mostly for request-response events: aliasing, the single-line
+  conversion of the body and a JSON round trip (the event's structured data is written as JSON and read back for the headers
+  and the body). For large bodies most of what is left is that round trip.
+- In test runs this does not show. The formatting runs on the async appender's thread, not on the test threads. Recordings of
+  the two example suites (test JVMs only) put all logging code at 2.4 % of CPU samples and 2.1 % of allocations without AI
+  mode, and at 3.2 % and 1.8 % with AI mode, and the suites took 23.8 and 23.7 s with AI mode against 24.0 and 23.9 s
+  without (JUnit test time 21.4/21.3 s against 21.5/21.4 s); the console output drops from 95 KB to 0.3 KB.
+
 ## Earlier run: four agents at low effort
 
 Logs from commit 566bff8e (AI mode) and the same code without AI mode (JUnit XML reports). One run per agent and setup.

@@ -42,6 +42,15 @@ Tokens are not comparable between tools: Copilot reports input including cached 
 Claude Code system prompt in every turn (about 4× the tokens of a Claude Code subagent on the same task). Compare
 setups within one tool and model.
 
+## Formatting cost
+
+`./formatting-benchmark.sh [output file]` measures what AI mode costs per log event, without agents: time and allocation for the
+compact and the full line (the patterns and converters of the GCP `logback-ai.xml`) against the JSON encoder of the
+machine-readable output, for a plain message with MDC, HTTP responses with a 1 KB and a 100 KB JSON body, and an error with a
+stack trace. It runs [AiFormattingBenchmark](../src/test/java/no/entur/logging/cloud/logback/logstash/test/AiFormattingBenchmark.java),
+a test in `test-logback` which only runs when the environment variable `AI_FORMATTING_BENCHMARK` names its output file, takes
+a few seconds and prints a Markdown table. Writing to the files is not included.
+
 ## Grading
 
 [grade.py](grade.py) compares each `<logs dir>/runs/<run>.answer` with `<logs dir>/answer-key.txt` ([answer-key.py](answer-key.py)
@@ -58,4 +67,5 @@ strict about numbers; check what `-v` reports by hand, since a paraphrased messa
 
 ## Results
 
-[results-2026-11.md](results-2026-11.md): AI mode against both baselines, and the old against the new compact format.
+[results-2026-11.md](results-2026-11.md): AI mode against both baselines, the old against the new compact format, and the
+formatting cost per event.
