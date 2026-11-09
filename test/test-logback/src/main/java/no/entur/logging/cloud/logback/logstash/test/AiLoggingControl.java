@@ -79,8 +79,15 @@ public class AiLoggingControl {
      */
     public static final String AI_ALIAS_PROPERTY = "entur.logging.ai.alias";
 
+    private static volatile boolean aliasesDisabledInThisJvm;
+
     public static boolean isAliasEnabled() {
-        return !"false".equalsIgnoreCase(System.getProperty(AI_ALIAS_PROPERTY));
+        return !aliasesDisabledInThisJvm && !"false".equalsIgnoreCase(System.getProperty(AI_ALIAS_PROPERTY));
+    }
+
+    /** Called if another test JVM writes to the same files at the same time, as its aliases would be ambiguous (see {@link AiFileAppender}). */
+    public static void disableAliasesInThisJvm() {
+        aliasesDisabledInThisJvm = true;
     }
 
     /**

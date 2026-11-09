@@ -31,12 +31,8 @@ public class MdcAliasConverter extends ClassicConverter {
 
     private static final AtomicInteger UUID_COUNTER = new AtomicInteger();
     private static final AtomicInteger HEX_COUNTER = new AtomicInteger();
-    private static final Map<String, String> ALIASES = new LinkedHashMap<>(256, 0.75f, true) {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
-            return size() > MAX_ENTRIES;
-        }
-    };
+    // never evicted, so that a value keeps its alias for the whole JVM; once full, new values are not aliased
+    private static final Map<String, String> ALIASES = new HashMap<>(256);
 
     private boolean compact;
 
@@ -60,7 +56,15 @@ public class MdcAliasConverter extends ClassicConverter {
 
     private static String alias(String value, String prefix, AtomicInteger counter) {
         synchronized (ALIASES) {
-            return ALIASES.computeIfAbsent(value, k -> prefix + counter.incrementAndGet());
+            String alias = ALIASES.get(value);
+            if (alias == null) {
+                if (ALIASES.size() >= MAX_ENTRIES) {
+                    return value;
+                }
+                alias = prefix + counter.incrementAndGet();
+                ALIASES.put(value, alias);
+            }
+            return alias;
         }
     }
 
