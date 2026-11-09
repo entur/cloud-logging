@@ -134,10 +134,11 @@ configure(jvmProjects()) {
         useJUnitPlatform {
             includeEngines 'junit-jupiter'
         }
+        // AI mode: forward all entur.logging.ai.* properties to the test JVMs,
         // e.g. ./gradlew test --rerun -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test
         // (not to test-logback's own unit tests, which test the AI-mode classes with their defaults)
-        if (project.path != ':test:test-logback') ['entur.logging.ai.enabled', 'entur.logging.ai.file', 'entur.logging.ai.level', 'entur.logging.ai.full.level', 'entur.logging.ai.request-response.max-body-size', 'entur.logging.ai.stacktrace.max-lines', 'entur.logging.ai.stacktrace.max-causes', 'entur.logging.ai.dedupe', 'entur.logging.ai.alias', 'entur.logging.ai.request-response.excluded-headers', 'entur.logging.ai.quiet-loggers'].each { name ->
-            System.getProperty(name)?.with { systemProperty name, it }
+        if (project.path != ':test:test-logback') {
+            systemProperties providers.systemPropertiesPrefixedBy('entur.logging.ai.').get()
         }
     }
 

@@ -64,7 +64,7 @@ The first time an alias appears in the full file it is followed by its value, `u
 ### Configuration
 In the GCP and Azure test autoconfiguration this is implemented by `logback/logback-ai.xml`, loaded from `logback-test.xml` (with Spring Boot's default logger levels, as without AI mode).
 A shutdown hook stops logging at JVM exit when Spring Boot does not, so that queued events and `repeated` lines are written.
-The root `build.gradle` forwards these properties to the forked test JVMs. In Gradle projects forward them to the `test` task yourself (see below); Maven Surefire/Failsafe forward `-D` properties automatically.
+The root `build.gradle` forwards all `entur.logging.ai.*` properties to the forked test JVMs. In Gradle projects forward them to the `test` task yourself (see below); Maven Surefire/Failsafe forward `-D` properties automatically.
 
 ## Paste into your project (AGENTS.md / CLAUDE.md)
 
@@ -72,17 +72,15 @@ Requires the `*-test` artifact of this library on the test classpath.
 
 **Maven:** nothing to configure; Surefire/Failsafe pass `-D` user properties on to the forked test JVM.
 
-**Gradle:** forward the system properties to the forked test JVMs:
+**Gradle:** forward all `entur.logging.ai.*` system properties to the forked test JVMs (Gradle 7.5 or later):
 
 ```groovy
 test {
-    ['entur.logging.ai.enabled', 'entur.logging.ai.file', 'entur.logging.ai.level', 'entur.logging.ai.full.level', 'entur.logging.ai.request-response.max-body-size', 'entur.logging.ai.stacktrace.max-lines', 'entur.logging.ai.stacktrace.max-causes', 'entur.logging.ai.dedupe', 'entur.logging.ai.alias', 'entur.logging.ai.request-response.excluded-headers', 'entur.logging.ai.quiet-loggers'].each { key ->
-        if (System.getProperty(key) != null) {
-            systemProperty key, System.getProperty(key)
-        }
-    }
+    systemProperties providers.systemPropertiesPrefixedBy('entur.logging.ai.').get()
 }
 ```
+
+Kotlin DSL: `tasks.test { systemProperties(providers.systemPropertiesPrefixedBy("entur.logging.ai.").get()) }`.
 
 Then add this to the instructions file read by your AI agent:
 
