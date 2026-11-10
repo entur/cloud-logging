@@ -3,7 +3,7 @@ package no.entur.logging.cloud.gcp.spring.gcp.grpc.spring.test;
 import no.entur.logging.cloud.gcp.spring.gcp.grpc.spring.RequestResponseGcpGrpcSpringAutoConfiguration;
 import no.entur.logging.cloud.spring.rr.grpc.AbstractRequestResponseGrpcSinkAutoConfiguration;
 import no.entur.logging.cloud.rr.grpc.GrpcSink;
-import no.entur.logging.cloud.logback.logstash.test.AiLoggingControl;
+import no.entur.logging.cloud.logback.logstash.test.ai.AiLoggingControl;
 import no.entur.logging.cloud.rr.grpc.test.CompositeSink;
 import no.entur.logging.cloud.rr.grpc.test.PrettyPrintingLogLevelLogstashLogbackGrpcSink;
 import no.entur.logging.cloud.rr.grpc.test.PrettyPrintingGrpcSink;

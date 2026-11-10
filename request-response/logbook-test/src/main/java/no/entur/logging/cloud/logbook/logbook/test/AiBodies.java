@@ -1,6 +1,6 @@
 package no.entur.logging.cloud.logbook.logbook.test;
 
-import no.entur.logging.cloud.logback.logstash.test.AiBodyMarker;
+import no.entur.logging.cloud.logback.logstash.test.ai.AiBodyMarker;
 import no.entur.logging.cloud.logbook.AbstractLogLevelSink;
 import no.entur.logging.cloud.logbook.RequestResponseSingleFieldAppendingMarker;
 import org.zalando.logbook.ContentType;

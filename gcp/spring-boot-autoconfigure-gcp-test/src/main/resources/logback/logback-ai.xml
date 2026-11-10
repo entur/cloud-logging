@@ -4,36 +4,36 @@
 	<include resource="logback/spring-defaults-test.xml" />
 
 	<!-- both files -->
-	<conversionRule conversionWord="aiLevel" class="no.entur.logging.cloud.logback.logstash.test.AiLevelConverter" />
+	<conversionRule conversionWord="aiLevel" class="no.entur.logging.cloud.logback.logstash.test.ai.common.AiLevelConverter" />
 
 	<!-- compact file -->
-	<conversionRule conversionWord="cLogger" class="no.entur.logging.cloud.logback.logstash.test.CompactLoggerConverter" />
-	<conversionRule conversionWord="cMdc" class="no.entur.logging.cloud.logback.logstash.test.CompactMdcConverter" />
-	<conversionRule conversionWord="cEventId" class="no.entur.logging.cloud.logback.logstash.test.CompactEventIdConverter" />
-	<conversionRule conversionWord="cMsg" class="no.entur.logging.cloud.logback.logstash.test.CompactMessageConverter" />
-	<conversionRule conversionWord="cFields" class="no.entur.logging.cloud.logback.logstash.test.CompactFieldsConverter" />
-	<conversionRule conversionWord="cEx" class="no.entur.logging.cloud.logback.logstash.test.SingleLineRootCauseFirstThrowableProxyConverter" />
+	<conversionRule conversionWord="cLogger" class="no.entur.logging.cloud.logback.logstash.test.ai.compact.CompactLoggerConverter" />
+	<conversionRule conversionWord="cMdc" class="no.entur.logging.cloud.logback.logstash.test.ai.compact.CompactMdcConverter" />
+	<conversionRule conversionWord="cEventId" class="no.entur.logging.cloud.logback.logstash.test.ai.compact.CompactEventIdConverter" />
+	<conversionRule conversionWord="cMsg" class="no.entur.logging.cloud.logback.logstash.test.ai.compact.CompactMessageConverter" />
+	<conversionRule conversionWord="cFields" class="no.entur.logging.cloud.logback.logstash.test.ai.compact.CompactFieldsConverter" />
+	<conversionRule conversionWord="cEx" class="no.entur.logging.cloud.logback.logstash.test.ai.compact.SingleLineRootCauseFirstThrowableProxyConverter" />
 
 	<!-- full file -->
-	<conversionRule conversionWord="fMdc" class="no.entur.logging.cloud.logback.logstash.test.FullMdcConverter" />
-	<conversionRule conversionWord="fEventId" class="no.entur.logging.cloud.logback.logstash.test.FullEventIdConverter" />
-	<conversionRule conversionWord="fMsg" class="no.entur.logging.cloud.logback.logstash.test.FullMessageConverter" />
-	<conversionRule conversionWord="fFields" class="no.entur.logging.cloud.logback.logstash.test.FullFieldsConverter" />
-	<conversionRule conversionWord="fEx" class="no.entur.logging.cloud.logback.logstash.test.FullThrowableProxyConverter" />
+	<conversionRule conversionWord="fMdc" class="no.entur.logging.cloud.logback.logstash.test.ai.full.FullMdcConverter" />
+	<conversionRule conversionWord="fEventId" class="no.entur.logging.cloud.logback.logstash.test.ai.full.FullEventIdConverter" />
+	<conversionRule conversionWord="fMsg" class="no.entur.logging.cloud.logback.logstash.test.ai.full.FullMessageConverter" />
+	<conversionRule conversionWord="fFields" class="no.entur.logging.cloud.logback.logstash.test.ai.full.FullFieldsConverter" />
+	<conversionRule conversionWord="fEx" class="no.entur.logging.cloud.logback.logstash.test.ai.full.FullThrowableProxyConverter" />
 
 	<!-- stop logging at JVM exit also without Spring Boot, so that queued events and pending "repeated N more times" lines are written -->
-	<shutdownHook class="no.entur.logging.cloud.logback.logstash.test.AiShutdownHook" />
+	<shutdownHook class="no.entur.logging.cloud.logback.logstash.test.ai.AiShutdownHook" />
 
 	<!--
 		Compact plain text (one event per line) written to <file>.compact, where <file> is given by -Dentur.logging.ai.file (default: entur-logging-ai in the temp directory),
 		nothing on the console. Included from logback-test.xml only if -Dentur.logging.ai.enabled=true.
 	-->
-	<appender name="AI_FILE" class="no.entur.logging.cloud.logback.logstash.test.AiFileAppender">
+	<appender name="AI_FILE" class="no.entur.logging.cloud.logback.logstash.test.ai.AiFileAppender">
 		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.compact</file>
 		<!-- held by the test JVM which uses aliases, see AiFileAppender -->
 		<lockFile>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.lock</lockFile>
 		<!-- framework start-up/shutdown chatter below WARN, override with -Dentur.logging.ai.quiet-loggers=a.b,c.d -->
-		<filter class="no.entur.logging.cloud.logback.logstash.test.QuietLoggersFilter" />
+		<filter class="no.entur.logging.cloud.logback.logstash.test.ai.compact.QuietLoggersFilter" />
 		<!-- compact file level, override with -Dentur.logging.ai.level=DEBUG -->
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>${entur.logging.ai.level:-INFO}</level>
@@ -52,12 +52,12 @@
 	</appender>
 
 	<!-- collapses repeated WARN/ERROR events in the compact file ("repeated N more times"); disable with -Dentur.logging.ai.dedupe=false -->
-	<appender name="AI_DEDUP" class="no.entur.logging.cloud.logback.logstash.test.DeduplicatingAppender">
+	<appender name="AI_DEDUP" class="no.entur.logging.cloud.logback.logstash.test.ai.compact.DeduplicatingAppender">
 		<appender-ref ref="AI_FILE" />
 	</appender>
 
 	<!-- Drill-down: the same events unfiltered and untrimmed (all levels, full stack traces) in <file>.full -->
-	<appender name="AI_FILE_FULL" class="no.entur.logging.cloud.logback.logstash.test.AiFileAppender">
+	<appender name="AI_FILE_FULL" class="no.entur.logging.cloud.logback.logstash.test.ai.AiFileAppender">
 		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.full</file>
 		<lockFile>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.lock</lockFile>
 		<!-- override with -Dentur.logging.ai.full.level=INFO -->
@@ -89,7 +89,7 @@
 	</appender>
 
 	<!-- logback async appenders accept a single child, so fan out to both files and the encoder-only appender -->
-	<appender name="AI_FANOUT" class="no.entur.logging.cloud.logback.logstash.test.FanOutAppender">
+	<appender name="AI_FANOUT" class="no.entur.logging.cloud.logback.logstash.test.ai.FanOutAppender">
 		<appender-ref ref="AI_DEDUP" />
 		<appender-ref ref="AI_FILE_FULL" />
 		<appender-ref ref="AI_ENCODER_ONLY" />
