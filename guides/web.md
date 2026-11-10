@@ -407,23 +407,15 @@ and
 For 'classic' one-line log output when running a server locally, additionally add the logging test artifacts to the main scope during local execution only.
 
 * Maven: Use profiles
-* Gradle:
-    * Use configurations, and/or
-    * add dependencies directly to task
+* Gradle: add them to the `developmentOnly` configuration of the Spring Boot Gradle plugin. These dependencies are on the `bootRun` classpath, but are not packaged by `bootJar` (and are not on the test classpath).
 
 <details>
   <summary>Gradle bootRun example</summary>
 
 ```groovy
-tasks.register("logPlainly") {
-   dependencies {
-      implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test")
-      implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test")
-   }
-}
-
-tasks.withType(JavaExec).configureEach {
-   dependsOn("logPlainly")
+dependencies {
+   developmentOnly("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test")
+   developmentOnly("no.entur.logging.cloud:spring-boot-starter-gcp-web-test")
 }
 ```
 

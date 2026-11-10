@@ -29,12 +29,8 @@ dependencies {
 
     testImplementation ("com.google.truth:truth:${googleTruthVersion}")
     testImplementation ("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
-}
 
-bootRun {
-    // example for running locally with one-line logging
-    dependencies {
-        implementation project(":azure:spring-boot-starter-azure-web-test");
-        implementation project(":azure:request-response-spring-boot-starter-azure-web-test");
-    }
+    // for running locally with one-line logging: on the bootRun classpath, but not packaged by bootJar
+    developmentOnly project(":azure:spring-boot-starter-azure-web-test")
+    developmentOnly project(":azure:request-response-spring-boot-starter-azure-web-test")
 }
