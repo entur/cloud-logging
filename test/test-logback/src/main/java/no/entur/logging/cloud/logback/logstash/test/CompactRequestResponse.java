@@ -6,15 +6,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Renders request-response events (HTTP and gRPC) for the AI files: the event's message (unchanged, as without AI mode) followed by
- * the headers and body from the request-response marker, <code>message | header: value; ... | body: &lt;body&gt;</code>, on a single line.
- * <ul>
- *     <li>The full file gets all headers and the whole body; aliases are followed by their value the first time.</li>
- *     <li>The compact file leaves out transport headers (see {@link CompactSettings#AI_EXCLUDED_HEADERS_PROPERTY}) and headers
- *     repeated in the MDC (same name, ignoring an <code>x-</code> prefix, case and punctuation, and the same value), and cuts the body
- *     (see {@link CompactSettings#AI_BODY_MAX_PROPERTY}).</li>
- * </ul>
- * UUIDs are aliased in headers and bodies, hex ids in headers (for example in <code>traceparent</code>); aliasing comes before cutting.
+ * Renders request-response events (HTTP and gRPC) for the compact file (see {@link AiRequestResponse}): leaves out transport headers
+ * (see {@link CompactSettings#AI_EXCLUDED_HEADERS_PROPERTY}) and headers repeated in the MDC (same name, ignoring an <code>x-</code>
+ * prefix, case and punctuation, and the same value), and cuts the body (see {@link CompactSettings#AI_BODY_MAX_PROPERTY}). Aliasing
+ * comes before cutting.
  */
 public final class CompactRequestResponse {
 
@@ -28,36 +23,31 @@ public final class CompactRequestResponse {
     private CompactRequestResponse() {
     }
 
-    /** The message with headers and body, for the full (<code>compact</code> false) or the compact file. */
-    public static String render(String message, AiEventDetails details, Map<String, String> mdc, boolean compact) {
-        // sized for the body (not aliased yet: aliases are announced in the order they appear, message and headers first)
+    /** The message with fewer headers and the body cut. */
+    public static String render(String message, AiEventDetails details, Map<String, String> mdc) {
+        // sized for the cut body
         String singleLineBody = details.getSingleLineBody();
         int bodyLength = singleLineBody == null ? 0 : singleLineBody.length();
         int bodyMax = CompactSettings.bodyMax();
-        StringBuilder builder = AiRequestResponse.message(message, details, !compact, compact && bodyMax > 0 ? Math.min(bodyLength, bodyMax + 64) : bodyLength);
-        Set<String> excluded = compact ? CompactSettings.excludedHeaders(DEFAULT_EXCLUDED_HEADERS) : Set.of();
-        Map<String, String> mdcByName = compact ? byNormalizedName(mdc) : Map.of();
+        StringBuilder builder = AiRequestResponse.message(message, details, false, bodyMax > 0 ? Math.min(bodyLength, bodyMax + 64) : bodyLength);
+        Set<String> excluded = CompactSettings.excludedHeaders(DEFAULT_EXCLUDED_HEADERS);
+        Map<String, String> mdcByName = byNormalizedName(mdc);
         int count = 0;
         for (AiEventDetails.Header header : details.getHeaders()) {
             String name = header.name().toLowerCase(Locale.ROOT);
             String value = header.value();
-            if (compact && (excluded.contains(name) || isGrpcContentType(name, value) || repeatsMdc(name, value, mdcByName))) {
+            if (excluded.contains(name) || isGrpcContentType(name, value) || repeatsMdc(name, value, mdcByName)) {
                 continue;
             }
-            AiRequestResponse.appendHeader(builder, count++, name, value, !compact);
+            AiRequestResponse.appendHeader(builder, count++, name, value, false);
         }
-        return AiRequestResponse.withBody(builder, compact ? compactBody(details) : fullBody(details));
+        return AiRequestResponse.withBody(builder, compactBody(details));
     }
 
     /** True if the compact file cuts the body of this event. */
     public static boolean isBodyTruncatedInCompactFile(AiEventDetails details) {
         String body = details.getCompactBody();
         return body != null && !CompactSettings.truncateBody(body).equals(body);
-    }
-
-    private static String fullBody(AiEventDetails details) {
-        String body = details.getSingleLineBody();
-        return body == null ? null : AiAliases.aliasUuids(body, true);
     }
 
     private static String compactBody(AiEventDetails details) {

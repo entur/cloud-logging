@@ -3,15 +3,23 @@
 	<!-- Spring Boot default logger levels, as without AI mode -->
 	<include resource="logback/spring-defaults-test.xml" />
 
-	<conversionRule conversionWord="aliasMdc" class="no.entur.logging.cloud.logback.logstash.test.MdcAliasConverter" />
-	<conversionRule conversionWord="aliasMsg" class="no.entur.logging.cloud.logback.logstash.test.AliasMessageConverter" />
-	<conversionRule conversionWord="eventId" class="no.entur.logging.cloud.logback.logstash.test.EventIdConverter" />
-	<conversionRule conversionWord="cMsg" class="no.entur.logging.cloud.logback.logstash.test.CompactMessageConverter" />
-	<conversionRule conversionWord="cLogger" class="no.entur.logging.cloud.logback.logstash.test.CompactLoggerConverter" />
-	<conversionRule conversionWord="sEx" class="no.entur.logging.cloud.logback.logstash.test.SingleLineRootCauseFirstThrowableProxyConverter" />
-	<conversionRule conversionWord="aiEx" class="no.entur.logging.cloud.logback.logstash.test.EscapedThrowableProxyConverter" />
+	<!-- both files -->
 	<conversionRule conversionWord="aiLevel" class="no.entur.logging.cloud.logback.logstash.test.AiLevelConverter" />
-	<conversionRule conversionWord="fields" class="no.entur.logging.cloud.logback.logstash.test.StructuredFieldsConverter" />
+
+	<!-- compact file -->
+	<conversionRule conversionWord="cLogger" class="no.entur.logging.cloud.logback.logstash.test.CompactLoggerConverter" />
+	<conversionRule conversionWord="cMdc" class="no.entur.logging.cloud.logback.logstash.test.CompactMdcConverter" />
+	<conversionRule conversionWord="cEventId" class="no.entur.logging.cloud.logback.logstash.test.CompactEventIdConverter" />
+	<conversionRule conversionWord="cMsg" class="no.entur.logging.cloud.logback.logstash.test.CompactMessageConverter" />
+	<conversionRule conversionWord="cFields" class="no.entur.logging.cloud.logback.logstash.test.CompactFieldsConverter" />
+	<conversionRule conversionWord="cEx" class="no.entur.logging.cloud.logback.logstash.test.SingleLineRootCauseFirstThrowableProxyConverter" />
+
+	<!-- full file -->
+	<conversionRule conversionWord="fMdc" class="no.entur.logging.cloud.logback.logstash.test.FullMdcConverter" />
+	<conversionRule conversionWord="fEventId" class="no.entur.logging.cloud.logback.logstash.test.FullEventIdConverter" />
+	<conversionRule conversionWord="fMsg" class="no.entur.logging.cloud.logback.logstash.test.FullMessageConverter" />
+	<conversionRule conversionWord="fFields" class="no.entur.logging.cloud.logback.logstash.test.FullFieldsConverter" />
+	<conversionRule conversionWord="fEx" class="no.entur.logging.cloud.logback.logstash.test.FullThrowableProxyConverter" />
 
 	<!-- stop logging at JVM exit also without Spring Boot, so that queued events and pending "repeated N more times" lines are written -->
 	<shutdownHook class="no.entur.logging.cloud.logback.logstash.test.AiShutdownHook" />
@@ -38,7 +46,7 @@
 				structured fields (Logstash markers, key-value pairs) as JSON, truncated like request-response bodies;
 				stack traces on a single line (grep friendly), root-cause-first, framework frames removed, frames limited by entur.logging.ai.stacktrace.max-lines
 			-->
-			<pattern>%aiLevel %cLogger%aliasMdc{compact}%eventId : %cMsg%fields{compact}%sEx{full,org.springframework,org.junit,org.gradle,worker.org.gradle,org.apache,jakarta.,io.grpc,io.netty,io.micrometer,org.zalando.logbook,jdk.internal,jdk.proxy,java.lang.reflect,java.util,sun.reflect}%n%nopex</pattern>
+			<pattern>%aiLevel %cLogger%cMdc%cEventId : %cMsg%cFields%cEx{full,org.springframework,org.junit,org.gradle,worker.org.gradle,org.apache,jakarta.,io.grpc,io.netty,io.micrometer,org.zalando.logbook,jdk.internal,jdk.proxy,java.lang.reflect,java.util,sun.reflect}%n%nopex</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
@@ -59,7 +67,7 @@
 		<append>true</append>
 		<immediateFlush>true</immediateFlush>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%d{HH:mm:ss.SSS} %-5aiLevel [%thread] %logger%aliasMdc%eventId{always} : %aliasMsg%fields%n%aiEx</pattern>
+			<pattern>%d{HH:mm:ss.SSS} %-5aiLevel [%thread] %logger%fMdc%fEventId : %fMsg%fFields%n%fEx</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>

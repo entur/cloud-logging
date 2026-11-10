@@ -60,7 +60,7 @@ public class SingleLineRootCauseFirstThrowableProxyConverterTest {
         assertThat(convert(e, "full")).isEqualTo(" | java.lang.IllegalStateException: bad\\u0000value\\u001b[31m | at a.App.m(App.java:1)");
 
         LoggerContext context = new LoggerContext();
-        EscapedThrowableProxyConverter full = new EscapedThrowableProxyConverter();
+        FullThrowableProxyConverter full = new FullThrowableProxyConverter();
         full.setContext(context);
         full.start();
         String trace = full.convert(new LoggingEvent("f", context.getLogger("x"), Level.ERROR, "m", e, null));

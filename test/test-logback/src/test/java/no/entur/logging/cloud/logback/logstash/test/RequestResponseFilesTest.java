@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static net.logstash.logback.marker.Markers.appendRaw;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -14,11 +13,13 @@ import org.slf4j.Marker;
 import org.slf4j.event.KeyValuePair;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.pattern.ClassicConverter;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import net.logstash.logback.marker.LogstashMarker;
 
-public class CompactRequestResponseTest {
+/** The same request-response event in the compact and the full file. */
+public class RequestResponseFilesTest {
 
     @AfterEach
     public void cleanUp() {
@@ -39,7 +40,7 @@ public class CompactRequestResponseTest {
     }
 
     private static String full(LoggingEvent event) {
-        return new AliasMessageConverter().convert(event);
+        return new FullMessageConverter().convert(event);
     }
 
     @Test
@@ -67,7 +68,7 @@ public class CompactRequestResponseTest {
         assertThat(full(event)).isEqualTo("RESP | body: abcdef");
         assertThat(compact(event)).isEqualTo("RESP | body: abc...[truncated, 6 chars]");
 
-        EventIdConverter eventId = new EventIdConverter();
+        CompactEventIdConverter eventId = new CompactEventIdConverter();
         eventId.start();
         assertThat(eventId.convert(event)).matches(" #[0-9a-f]{12}");
         assertThat(eventId.convert(event("RESP", appendRaw("http", "{\"headers\":{},\"body\":\"abc\"}"), null))).isEmpty();
@@ -135,8 +136,7 @@ public class CompactRequestResponseTest {
         event.addKeyValuePair(new KeyValuePair("k", "v"));
 
         assertThat(compact(event)).isEqualTo("m");
-        StructuredFieldsConverter fields = new StructuredFieldsConverter();
-        fields.setOptionList(List.of("compact"));
+        CompactFieldsConverter fields = new CompactFieldsConverter();
         fields.start();
         assertThat(fields.convert(event)).isEqualTo(" | fields: {\"http\":{\"status\":200},\"k\":\"v\"}");
     }
@@ -163,8 +163,7 @@ public class CompactRequestResponseTest {
     }
 
     private static String fields(LoggingEvent event, boolean compact) {
-        StructuredFieldsConverter converter = new StructuredFieldsConverter();
-        converter.setOptionList(compact ? List.of("compact") : List.of());
+        ClassicConverter converter = compact ? new CompactFieldsConverter() : new FullFieldsConverter();
         converter.start();
         return converter.convert(event);
     }
@@ -185,7 +184,7 @@ public class CompactRequestResponseTest {
         System.setProperty(CompactSettings.AI_MESSAGE_MAX_PROPERTY, "6");
         LoggingEvent event = new LoggingEvent("f", new LoggerContext().getLogger("x"), Level.INFO, "payload: 1234567890", null, null);
         event.setMDCPropertyMap(Map.of());
-        EventIdConverter eventId = new EventIdConverter();
+        CompactEventIdConverter eventId = new CompactEventIdConverter();
         eventId.start();
 
         assertThat(compact(event)).isEqualTo("payloa...[truncated, 19 chars]");

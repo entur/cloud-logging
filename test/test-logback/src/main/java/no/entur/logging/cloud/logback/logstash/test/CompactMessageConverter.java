@@ -6,7 +6,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 /**
  * Message for the compact file, on a single line with UUIDs aliased and cut (see {@link CompactSettings#AI_MESSAGE_MAX_PROPERTY}).
  * Request-response events get the headers and body from the request-response marker, with fewer headers and the body cut
- * (see {@link CompactRequestResponse}). Other files keep the full message.
+ * (see {@link CompactRequestResponse}).
  */
 public class CompactMessageConverter extends ClassicConverter {
 
@@ -18,7 +18,7 @@ public class CompactMessageConverter extends ClassicConverter {
         }
         AiEventDetails details = AiEventDetails.of(event);
         if (details.isRequestResponse()) {
-            return CompactRequestResponse.render(message, details, event.getMDCPropertyMap(), true);
+            return CompactRequestResponse.render(message, details, event.getMDCPropertyMap());
         }
         return CompactSettings.truncateMessage(compactMessage(message));
     }

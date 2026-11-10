@@ -43,6 +43,14 @@ public final class AiEventDetails {
     public record Header(String name, String value) {
     }
 
+    /**
+     * Comes before the structured fields of an event which are not part of its message, <code> | fields: {"key":value, ...}</code>, as
+     * in the JSON output: the fields of Logstash markers (for example <code>Markers.append("system", map)</code>), SLF4J key-value pairs
+     * and structured arguments without a <code>{}</code> placeholder. Request-response headers and body are left out (the message has
+     * them).
+     */
+    public static final String FIELDS_PREFIX = " | fields: ";
+
     static final AiEventDetails NONE = new AiEventDetails(false, Collections.emptyList(), null, false, null, null);
 
     private static final LoggingEventCompositeJsonFormatter FORMATTER = createFormatter();

@@ -4,8 +4,8 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import no.entur.logging.cloud.logback.logstash.test.AiBodyMarker;
-import no.entur.logging.cloud.logback.logstash.test.AliasMessageConverter;
-import no.entur.logging.cloud.logback.logstash.test.StructuredFieldsConverter;
+import no.entur.logging.cloud.logback.logstash.test.FullMessageConverter;
+import no.entur.logging.cloud.logback.logstash.test.FullFieldsConverter;
 import no.entur.logging.cloud.logbook.DefaultRemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.LogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.MessageComposer;
@@ -119,10 +119,10 @@ public class AiLogLevelLogstashLogbackSinkTest {
         LoggingEvent event = new LoggingEvent("f", context.getLogger("x"), Level.INFO, messages.get(0), null, null);
         event.addMarker(markers.get(0));
         event.setMDCPropertyMap(Map.of());
-        StructuredFieldsConverter fields = new StructuredFieldsConverter();
+        FullFieldsConverter fields = new FullFieldsConverter();
         fields.start();
 
-        assertThat(new AliasMessageConverter().convert(event)).isEqualTo("POST /api");
+        assertThat(new FullMessageConverter().convert(event)).isEqualTo("POST /api");
         assertThat(fields.convert(event)).contains("\"headers\":{\"x-test\":[\"1\"]}");
         assertThat(fields.convert(event)).contains("\"body\":{\"a\":tru e}");
     }
