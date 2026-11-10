@@ -433,6 +433,8 @@ Then configure desired output by specifying `entur.logging.style`
 entur.logging.style=humanReadablePlain|humanReadableJson|machineReadableJson
 ```
 
+In tests, `-Dentur.logging.style=machineReadableJson` on the command line gives the servers' JSON output on the console, see [Console output as on the servers](../test/test-logback/README.md#console-output-as-on-the-servers).
+
 </details>
 
 

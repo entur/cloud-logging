@@ -85,6 +85,7 @@ See also [troubleshooting](guides/troubleShooting.md).
 ## AI agents: compact test logging
 When an AI agent runs the tests, `-Dentur.logging.ai.enabled=true` writes the test logging to a compact, grep-friendly file (plus a full file for drill-down) instead of the console, which saves the agent's context and tokens.
 See [AI / tooling: compact log file](test/test-logback/README.md#ai--tooling-compact-log-file) for the details and the [instructions to add to your AGENTS.md / CLAUDE.md](test/test-logback/README.md#paste-into-your-project-agentsmd--claudemd) (including the Gradle setup).
+To see the exact JSON the servers log instead, run the tests with `-Dentur.logging.style=machineReadableJson`, see [Console output as on the servers](test/test-logback/README.md#console-output-as-on-the-servers).
 
 # Roadmap
 

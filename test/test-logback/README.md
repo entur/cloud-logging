@@ -19,6 +19,28 @@ Can not yet assert against MDC fields set in gRPC MDC context.
 
 When using an async appender, there is a race condition for in-flight log events when switching from one encoder to another.
 
+# Console output as on the servers
+`-Dentur.logging.style=machineReadableJson` switches the console to the output of the servers: one JSON object per line, with the
+encoder settings and request-response sinks used in production (no pretty-printing or colours). This shows what Cloud Logging or
+Azure Monitor receive, for example to check the fields of a log statement:
+
+```
+./gradlew test --rerun -Dentur.logging.style=machineReadableJson
+```
+
+The other values are `humanReadablePlain` (the default) and `humanReadableJson`. It is the Spring property read by `LoggingStyleAutoConfiguration`,
+so it can also be set in `application.properties` or with `@TestPropertySource`. On the command line, Gradle projects must forward it to the
+`test` task (see [Paste into your project](#paste-into-your-project-agentsmd--claudemd)); Maven Surefire/Failsafe forward `-D` properties.
+
+- It applies when the first Spring context of the test JVM starts, and from then on for the whole JVM. Lines logged before that (Spring Boot start-up,
+  tests without a Spring context which run first) are human-readable.
+- Code which switches the output (`CompositeConsoleOutputControl.useHumanReadableJsonEncoder()` and so on) still does so within its block.
+- The test starters set a few framework loggers (Tomcat, Jetty, Hibernate Validator, ...) to WARN or ERROR, which the servers do not.
+  `serviceContext` is filled from the `HOSTNAME` environment variable, so it is the local host name.
+- On the console, Gradle only shows the lines logged after the last test (at JVM exit); with `testLogging.showStandardStreams` (and
+  without `-q`) it shows all of them, but indented. The lines as written are in the test reports; this prints the JSON lines: `sed -n 's/^  <system-out><!\[CDATA\[{/{/; /^{"/p' build/test-results/test/*.xml`
+- AI mode (`entur.logging.ai.enabled=true`) writes nothing to the console, so do not combine the two.
+
 # AI / tooling: compact log file
 Set the JVM system property `entur.logging.ai.enabled=true` (exactly `true`, in lower case) to write all log events to files instead of the console:
 
@@ -68,7 +90,7 @@ The first time an alias appears in the full file it is followed by its value, `u
 In the GCP and Azure test autoconfiguration this is implemented by `logback/logback-ai.xml`, loaded from `logback-test.xml` (with Spring Boot's default logger levels, as without AI mode).
 A shutdown hook stops logging at JVM exit, so that queued events and `repeated` lines are written. When Spring Boot has configured logging, it first waits for Spring Boot's shutdown hook, which stops logging after closing the application contexts, and only stops logging itself if Spring Boot did not (for example with `logging.register-shutdown-hook=false`).
 Request-response logging only switches to the AI-mode sinks when the AI files are actually written, so a project whose own `logback-test.xml` shadows the starter's keeps its usual console output.
-The root `build.gradle` forwards all `entur.logging.ai.*` properties to the forked test JVMs. In Gradle projects forward them to the `test` task yourself (see below); Maven Surefire/Failsafe forward `-D` properties automatically.
+The root `build.gradle` forwards all `entur.logging.*` properties to the forked test JVMs. In Gradle projects forward them to the `test` task yourself (see below); Maven Surefire/Failsafe forward `-D` properties automatically.
 
 ## Paste into your project (AGENTS.md / CLAUDE.md)
 
@@ -76,15 +98,15 @@ Requires the `*-test` artifact of this library on the test classpath.
 
 **Maven:** nothing to configure; Surefire/Failsafe pass `-D` user properties on to the forked test JVM.
 
-**Gradle:** forward all `entur.logging.ai.*` system properties to the forked test JVMs (Gradle 7.5 or later):
+**Gradle:** forward all `entur.logging.*` system properties (the AI-mode properties and `entur.logging.style`) to the forked test JVMs (Gradle 7.5 or later):
 
 ```groovy
 test {
-    systemProperties providers.systemPropertiesPrefixedBy('entur.logging.ai.').get()
+    systemProperties providers.systemPropertiesPrefixedBy('entur.logging.').get()
 }
 ```
 
-Kotlin DSL: `tasks.test { systemProperties(providers.systemPropertiesPrefixedBy("entur.logging.ai.").get()) }`.
+Kotlin DSL: `tasks.test { systemProperties(providers.systemPropertiesPrefixedBy("entur.logging.").get()) }`.
 
 Then add this to the instructions file read by your AI agent:
 
@@ -115,4 +137,8 @@ When running tests, enable compact log output to save context. Logs then go to a
   logger and the message, as the same message can come from several loggers: `grep -c 'DocumentEndpoint .* : Hello world' /tmp/test.full`.
 - UUIDs and hex ids are replaced by aliases (`u1`, `h1`, ...) in both files; the first time an alias appears in `/tmp/test.full` it is followed by its value, `u7(<uuid>)`, so grep `/tmp/test.full` for a raw id to find its alias. Each test JVM starts with a `---- JVM pid ...` line; aliases restart there
   (test JVMs running at the same time say `no aliases` there and keep UUIDs, so an alias belongs to the last line saying `aliases ... restart`).
+- To see the exact JSON the servers log (for example the fields of a log statement), run the tests without AI mode and with
+  `-Dentur.logging.style=machineReadableJson`. With Gradle, print the JSON lines from the test reports:
+  `sed -n 's/^  <system-out><!\[CDATA\[{/{/; /^{"/p' build/test-results/test/*.xml | grep 'some message'` (Maven: in the test output).
+  Lines logged before the first Spring context has started are not JSON.
 ````
