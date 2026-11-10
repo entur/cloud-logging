@@ -13,7 +13,6 @@ dependencies {
     api("org.springframework.boot:spring-boot-autoconfigure")
     api("org.springframework.boot:spring-boot-starter-logging")
 
-    api(platform("io.grpc:grpc-bom:${grpcVersion}"))
     api("io.grpc:grpc-api")
 
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"

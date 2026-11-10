@@ -8,7 +8,6 @@ dependencies {
 
     api("tools.jackson.core:jackson-core")
 
-    api(platform("io.grpc:grpc-bom:${grpcVersion}"))
     api("io.grpc:grpc-services")
 
     api("io.grpc:grpc-api")
@@ -27,6 +26,8 @@ dependencies {
 
     // transport for the gRPC servers started by the tests
     testRuntimeOnly("io.grpc:grpc-netty")
+    // test logback-test.xml uses LogstashEncoder
+    testRuntimeOnly("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
 }
 
 sourceSets {
