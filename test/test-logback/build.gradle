@@ -7,8 +7,6 @@ dependencies {
     api ("ch.qos.logback:logback-classic")
     api ("ch.qos.logback:logback-core")
 
-    // pins a newer version than the one the decorators bring in transitively
-    api ("org.entur.jackson:jackson-tools-syntax-highlight:${jacksonSyntaxHighlightVersion}")
     api ("org.entur.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
 }
 
