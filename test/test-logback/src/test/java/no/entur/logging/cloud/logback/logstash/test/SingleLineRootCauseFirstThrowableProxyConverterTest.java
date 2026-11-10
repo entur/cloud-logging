@@ -15,9 +15,9 @@ public class SingleLineRootCauseFirstThrowableProxyConverterTest {
 
     @AfterEach
     public void cleanUp() {
-        System.clearProperty(AiLoggingControl.AI_MESSAGE_MAX_PROPERTY);
-        System.clearProperty(AiLoggingControl.AI_STACKTRACE_MAX_LINES_PROPERTY);
-        System.clearProperty(AiLoggingControl.AI_STACKTRACE_MAX_CAUSES_PROPERTY);
+        System.clearProperty(CompactSettings.AI_MESSAGE_MAX_PROPERTY);
+        System.clearProperty(CompactSettings.AI_STACKTRACE_MAX_LINES_PROPERTY);
+        System.clearProperty(CompactSettings.AI_STACKTRACE_MAX_CAUSES_PROPERTY);
     }
 
     private static Exception exception(String message, Exception cause, String... classes) {
@@ -70,8 +70,8 @@ public class SingleLineRootCauseFirstThrowableProxyConverterTest {
 
     @Test
     public void suppressedExceptionsAndTheirCausesDoNotCountAsCauses() {
-        System.setProperty(AiLoggingControl.AI_STACKTRACE_MAX_LINES_PROPERTY, "1");
-        System.setProperty(AiLoggingControl.AI_STACKTRACE_MAX_CAUSES_PROPERTY, "3");
+        System.setProperty(CompactSettings.AI_STACKTRACE_MAX_LINES_PROPERTY, "1");
+        System.setProperty(CompactSettings.AI_STACKTRACE_MAX_CAUSES_PROPERTY, "3");
         Exception root = exception("R", null, "a.R");
         Exception middle = exception("T", root, "a.T");
         middle.addSuppressed(exception("S", exception("S0", null, "a.S0"), "a.S"));
@@ -83,7 +83,7 @@ public class SingleLineRootCauseFirstThrowableProxyConverterTest {
 
     @Test
     public void longExceptionMessagesAreCut() {
-        System.setProperty(AiLoggingControl.AI_MESSAGE_MAX_PROPERTY, "60");
+        System.setProperty(CompactSettings.AI_MESSAGE_MAX_PROPERTY, "60");
         // the first line has 54 characters, so 5 of the second line fit
         Exception e = exception("first line " + "x".repeat(10) + "\nsecond line " + "y".repeat(30), null, "a.App");
 
@@ -103,8 +103,8 @@ public class SingleLineRootCauseFirstThrowableProxyConverterTest {
 
     @Test
     public void rootCauseFirstWithMaxCauses() {
-        System.setProperty(AiLoggingControl.AI_STACKTRACE_MAX_LINES_PROPERTY, "1");
-        System.setProperty(AiLoggingControl.AI_STACKTRACE_MAX_CAUSES_PROPERTY, "2");
+        System.setProperty(CompactSettings.AI_STACKTRACE_MAX_LINES_PROPERTY, "1");
+        System.setProperty(CompactSettings.AI_STACKTRACE_MAX_CAUSES_PROPERTY, "2");
         Exception root = exception("root\nsecond line", null, "a.Root", "a.Root2");
         Exception middle = exception("middle", root, "a.Middle");
         Exception top = exception("top", middle, "a.Top");
@@ -116,7 +116,7 @@ public class SingleLineRootCauseFirstThrowableProxyConverterTest {
 
     @Test
     public void messageLinesStartingWithAtAreNotFrames() {
-        System.setProperty(AiLoggingControl.AI_STACKTRACE_MAX_LINES_PROPERTY, "1");
+        System.setProperty(CompactSettings.AI_STACKTRACE_MAX_LINES_PROPERTY, "1");
         Exception e = exception("Unexpected character\n at [Source: (String)\"{x\"; line: 1, column: 2]", null, "a.App", "a.App2");
 
         assertThat(convert(e, "full"))
@@ -126,8 +126,8 @@ public class SingleLineRootCauseFirstThrowableProxyConverterTest {
 
     @Test
     public void suppressedExceptionsDoNotCountAsCauses() {
-        System.setProperty(AiLoggingControl.AI_STACKTRACE_MAX_LINES_PROPERTY, "1");
-        System.setProperty(AiLoggingControl.AI_STACKTRACE_MAX_CAUSES_PROPERTY, "2");
+        System.setProperty(CompactSettings.AI_STACKTRACE_MAX_LINES_PROPERTY, "1");
+        System.setProperty(CompactSettings.AI_STACKTRACE_MAX_CAUSES_PROPERTY, "2");
         Exception root = exception("root", null, "a.Root");
         root.addSuppressed(exception("close 1", null, "a.Close"));
         root.addSuppressed(exception("close 2", null, "a.Close"));

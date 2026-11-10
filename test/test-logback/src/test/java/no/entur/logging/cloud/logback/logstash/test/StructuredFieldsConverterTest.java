@@ -21,7 +21,7 @@ public class StructuredFieldsConverterTest {
 
     @AfterEach
     public void cleanUp() {
-        System.clearProperty(AiLoggingControl.AI_BODY_MAX_PROPERTY);
+        System.clearProperty(CompactSettings.AI_BODY_MAX_PROPERTY);
     }
 
     @Test
@@ -77,7 +77,7 @@ public class StructuredFieldsConverterTest {
 
     @Test
     public void compactFileTruncatesFieldsAndShowsEventId() {
-        System.setProperty(AiLoggingControl.AI_BODY_MAX_PROPERTY, "10");
+        System.setProperty(CompactSettings.AI_BODY_MAX_PROPERTY, "10");
         LoggingEvent event = event("Order rejected");
         event.addMarker(append("system", "abcdefghijklmnop"));
 

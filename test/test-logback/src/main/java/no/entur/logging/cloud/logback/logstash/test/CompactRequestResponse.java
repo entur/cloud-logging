@@ -10,9 +10,9 @@ import java.util.Set;
  * the headers and body from the request-response marker, <code>message | header: value; ... | body: &lt;body&gt;</code>, on a single line.
  * <ul>
  *     <li>The full file gets all headers and the whole body; aliases are followed by their value the first time.</li>
- *     <li>The compact file leaves out transport headers (see {@link AiLoggingControl#AI_EXCLUDED_HEADERS_PROPERTY}) and headers
+ *     <li>The compact file leaves out transport headers (see {@link CompactSettings#AI_EXCLUDED_HEADERS_PROPERTY}) and headers
  *     repeated in the MDC (same name, ignoring an <code>x-</code> prefix, case and punctuation, and the same value), and cuts the body
- *     (see {@link AiLoggingControl#AI_BODY_MAX_PROPERTY}).</li>
+ *     (see {@link CompactSettings#AI_BODY_MAX_PROPERTY}).</li>
  * </ul>
  * UUIDs are aliased in headers and bodies, hex ids in headers (for example in <code>traceparent</code>); aliasing comes before cutting.
  */
@@ -25,26 +25,17 @@ public final class CompactRequestResponse {
             "user-agent", "vary", "x-content-type-options", "x-frame-options", "x-xss-protection",
             "grpc-accept-encoding", "grpc-encoding", "te");
 
-    // added by the sink's message composer if the body in the JSON output was cut: ' [truncated ~123 bytes]' or ' [truncated ~4KB]'
-    private static final String TRUNCATED_NOTE = "[truncated ~";
-
     private CompactRequestResponse() {
     }
 
     /** The message with headers and body, for the full (<code>compact</code> false) or the compact file. */
     public static String render(String message, AiEventDetails details, Map<String, String> mdc, boolean compact) {
-        String text = message.strip();
-        if (details.isCompleteBody()) {
-            // the AI files have the whole body, so the note about the JSON output's body would contradict it
-            text = withoutTruncatedNote(text);
-        }
         // sized for the body (not aliased yet: aliases are announced in the order they appear, message and headers first)
         String singleLineBody = details.getSingleLineBody();
         int bodyLength = singleLineBody == null ? 0 : singleLineBody.length();
-        int bodyMax = AiLoggingControl.bodyMax();
-        StringBuilder builder = new StringBuilder(256 + (compact && bodyMax > 0 ? Math.min(bodyLength, bodyMax + 64) : bodyLength))
-                .append(MdcAliasConverter.aliasUuids(AiText.singleLine(text), !compact));
-        Set<String> excluded = compact ? AiLoggingControl.excludedHeaders(DEFAULT_EXCLUDED_HEADERS) : Set.of();
+        int bodyMax = CompactSettings.bodyMax();
+        StringBuilder builder = AiRequestResponse.message(message, details, !compact, compact && bodyMax > 0 ? Math.min(bodyLength, bodyMax + 64) : bodyLength);
+        Set<String> excluded = compact ? CompactSettings.excludedHeaders(DEFAULT_EXCLUDED_HEADERS) : Set.of();
         Map<String, String> mdcByName = compact ? byNormalizedName(mdc) : Map.of();
         int count = 0;
         for (AiEventDetails.Header header : details.getHeaders()) {
@@ -53,53 +44,25 @@ public final class CompactRequestResponse {
             if (compact && (excluded.contains(name) || isGrpcContentType(name, value) || repeatsMdc(name, value, mdcByName))) {
                 continue;
             }
-            builder.append(count++ == 0 ? " | " : "; ").append(name).append(": ").append(MdcAliasConverter.aliasIds(AiText.singleLine(value), !compact));
+            AiRequestResponse.appendHeader(builder, count++, name, value, !compact);
         }
-        String body = compact ? compactBody(details) : fullBody(details);
-        if (body != null) {
-            builder.append(AiLoggingControl.BODY_MARKER).append(body);
-        }
-        return builder.toString();
+        return AiRequestResponse.withBody(builder, compact ? compactBody(details) : fullBody(details));
     }
 
     /** True if the compact file cuts the body of this event. */
     public static boolean isBodyTruncatedInCompactFile(AiEventDetails details) {
         String body = details.getCompactBody();
-        return body != null && !AiLoggingControl.truncateBody(body).equals(body);
+        return body != null && !CompactSettings.truncateBody(body).equals(body);
     }
 
     private static String fullBody(AiEventDetails details) {
         String body = details.getSingleLineBody();
-        return body == null ? null : MdcAliasConverter.aliasUuids(body, true);
+        return body == null ? null : AiAliases.aliasUuids(body, true);
     }
 
     private static String compactBody(AiEventDetails details) {
         String body = details.getCompactBody();
-        return body == null ? null : AiLoggingControl.truncateBody(body);
-    }
-
-    /** The text without a trailing truncation note of the sink's message composer (and the whitespace before it). */
-    static String withoutTruncatedNote(String text) {
-        if (!text.endsWith("]")) {
-            return text;
-        }
-        int start = text.lastIndexOf(TRUNCATED_NOTE);
-        if (start == -1) {
-            return text;
-        }
-        int digits = start + TRUNCATED_NOTE.length();
-        int end = digits;
-        while (end < text.length() && text.charAt(end) >= '0' && text.charAt(end) <= '9') {
-            end++;
-        }
-        if (end == digits || !(text.startsWith(" bytes]", end) && end + 7 == text.length() || text.startsWith("KB]", end) && end + 3 == text.length())) {
-            return text;
-        }
-        int before = start;
-        while (before > 0 && Character.isWhitespace(text.charAt(before - 1))) {
-            before--;
-        }
-        return text.substring(0, before);
+        return body == null ? null : CompactSettings.truncateBody(body);
     }
 
     private static boolean isGrpcContentType(String name, String value) {

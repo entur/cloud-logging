@@ -33,18 +33,18 @@ public class IdScanningTest {
                 text.append(parts[random.nextInt(parts.length)]);
             }
             String s = text.toString();
-            assertThat(MdcAliasConverter.replaceUuids(s, uuid -> "<u:" + uuid + ">")).isEqualTo(byRegex(UUID_PATTERN, s));
-            assertThat(MdcAliasConverter.replaceIds(s, uuid -> "<u:" + uuid + ">", hexId -> "<h:" + hexId + ">")).isEqualTo(byRegex(UUID_OR_HEX_ID_TOKEN, s));
+            assertThat(AiAliases.replaceUuids(s, uuid -> "<u:" + uuid + ">")).isEqualTo(byRegex(UUID_PATTERN, s));
+            assertThat(AiAliases.replaceIds(s, uuid -> "<u:" + uuid + ">", hexId -> "<h:" + hexId + ">")).isEqualTo(byRegex(UUID_OR_HEX_ID_TOKEN, s));
         }
     }
 
     @Test
     public void examples() {
         String uuid = "123e4567-e89b-12d3-a456-426614174000";
-        assertThat(MdcAliasConverter.replaceUuids("id=" + uuid + "-x", v -> "U")).isEqualTo("id=U-x");
-        assertThat(MdcAliasConverter.replaceUuids("no ids-here", v -> "U")).isEqualTo("no ids-here");
-        assertThat(MdcAliasConverter.replaceIds("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01", v -> "U", v -> "H")).isEqualTo("00-H-H-01");
+        assertThat(AiAliases.replaceUuids("id=" + uuid + "-x", v -> "U")).isEqualTo("id=U-x");
+        assertThat(AiAliases.replaceUuids("no ids-here", v -> "U")).isEqualTo("no ids-here");
+        assertThat(AiAliases.replaceIds("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01", v -> "U", v -> "H")).isEqualTo("00-H-H-01");
         // the hex digits of a UUID are not hex ids
-        assertThat(MdcAliasConverter.replaceIds(uuid, v -> "U", v -> "H")).isEqualTo("U");
+        assertThat(AiAliases.replaceIds(uuid, v -> "U", v -> "H")).isEqualTo("U");
     }
 }

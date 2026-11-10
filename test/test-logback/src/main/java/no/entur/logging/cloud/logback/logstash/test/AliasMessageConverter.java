@@ -20,6 +20,6 @@ public class AliasMessageConverter extends ClassicConverter {
         if (details.isRequestResponse()) {
             return CompactRequestResponse.render(message, details, event.getMDCPropertyMap(), false);
         }
-        return MdcAliasConverter.aliasUuids(AiText.escapeControlCharacters(message, true), true);
+        return AiAliases.aliasUuids(AiText.escapeControlCharacters(message, true), true);
     }
 }

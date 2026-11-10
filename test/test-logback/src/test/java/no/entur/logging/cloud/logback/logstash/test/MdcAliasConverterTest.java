@@ -48,7 +48,7 @@ public class MdcAliasConverterTest {
         String uuid = java.util.UUID.randomUUID().toString();
         Map<String, String> mdc = new LinkedHashMap<>();
         mdc.put("correlationId", uuid);
-        String alias = MdcAliasConverter.aliasOf(uuid);
+        String alias = AiAliases.aliasOf(uuid);
 
         assertThat(convert(mdc, null)).isEqualTo(" [correlationId=" + alias + "(" + uuid + ")]");
         assertThat(convert(mdc, null)).isEqualTo(" [correlationId=" + alias + "]");
@@ -71,7 +71,7 @@ public class MdcAliasConverterTest {
         mdc.put("correlationId", A);
         mdc.put("logging.googleapis.com/trace", A);
         mdc.put("logging.googleapis.com/spanId", "8524c7fac997d420");
-        String alias = MdcAliasConverter.aliasOf(A);
+        String alias = AiAliases.aliasOf(A);
 
         assertThat(convert(mdc, "compact")).matches(" \\[correlationId=" + alias + ", spanId=h\\d+]");
         assertThat(convert(mdc, null)).contains("logging.googleapis.com/trace=" + alias);

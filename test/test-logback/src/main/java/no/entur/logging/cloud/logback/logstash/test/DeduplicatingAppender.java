@@ -57,7 +57,7 @@ public class DeduplicatingAppender extends ForwardingAppender {
 
     @Override
     public void start() {
-        enabled = AiLoggingControl.isDedupeEnabled();
+        enabled = CompactSettings.isDedupeEnabled();
         entries = new LinkedHashMap<>(16, 0.75f, true) {
             @Override
             protected boolean removeEldestEntry(Map.Entry<String, Entry> eldest) {
@@ -78,7 +78,7 @@ public class DeduplicatingAppender extends ForwardingAppender {
             return;
         }
         String key = key(event);
-        String id = EventIdConverter.idOf(event);
+        String id = AiEventId.idOf(event);
         synchronized (this) {
             Entry entry = entries.get(key);
             if (entry != null) {
@@ -144,7 +144,7 @@ public class DeduplicatingAppender extends ForwardingAppender {
             return "";
         }
         // alias before cutting, so that a UUID is not cut in half (and cut so that an alias is not cut either)
-        String singleLine = MdcAliasConverter.aliasUuids(AiText.singleLine(message));
+        String singleLine = AiAliases.aliasUuids(AiText.singleLine(message));
         return singleLine.length() > MAX_SUMMARY_MESSAGE ? AiText.cut(singleLine, MAX_SUMMARY_MESSAGE) + "..." : singleLine;
     }
 }

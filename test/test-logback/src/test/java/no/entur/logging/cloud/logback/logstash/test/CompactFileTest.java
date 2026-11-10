@@ -23,7 +23,7 @@ public class CompactFileTest {
 
     @AfterEach
     public void cleanUp() {
-        System.clearProperty(AiLoggingControl.AI_QUIET_LOGGERS_PROPERTY);
+        System.clearProperty(CompactSettings.AI_QUIET_LOGGERS_PROPERTY);
     }
 
     @Test
@@ -54,7 +54,7 @@ public class CompactFileTest {
         assertThat(filter.decide(event(context, "org.springframework.grpc.server.lifecycle.GrpcServerLifecycle", Level.INFO,
                 "gRPC Server started, listening on address: [/[0:0:0:0:0:0:0:0]:9090], port: 9090"))).isEqualTo(FilterReply.NEUTRAL);
 
-        System.setProperty(AiLoggingControl.AI_QUIET_LOGGERS_PROPERTY, "");
+        System.setProperty(CompactSettings.AI_QUIET_LOGGERS_PROPERTY, "");
         QuietLoggersFilter none = new QuietLoggersFilter();
         none.start();
         assertThat(none.decide(event(context, "org.apache.catalina.core.StandardService", Level.INFO))).isEqualTo(FilterReply.NEUTRAL);

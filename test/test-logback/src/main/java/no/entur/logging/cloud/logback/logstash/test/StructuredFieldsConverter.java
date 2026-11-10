@@ -10,7 +10,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
  * out (the message has them); the full file gets the other request-response details (see {@link AiEventDetails#getFullFields()}).
  * Empty if there are none. UUIDs are aliased.
  * With option <code>compact</code> (for the compact file), the JSON is cut like request-response bodies
- * (see {@link AiLoggingControl#AI_BODY_MAX_PROPERTY}).
+ * (see {@link CompactSettings#AI_BODY_MAX_PROPERTY}).
  */
 public class StructuredFieldsConverter extends ClassicConverter {
 
@@ -29,15 +29,15 @@ public class StructuredFieldsConverter extends ClassicConverter {
         AiEventDetails details = AiEventDetails.of(event);
         if (compact) {
             String fields = details.getCompactFields();
-            return fields == null ? "" : PREFIX + AiLoggingControl.truncateBody(fields);
+            return fields == null ? "" : PREFIX + CompactSettings.truncateBody(fields);
         }
         String fields = details.getFullFields();
-        return fields == null ? "" : PREFIX + MdcAliasConverter.aliasUuids(fields, true);
+        return fields == null ? "" : PREFIX + AiAliases.aliasUuids(fields, true);
     }
 
     /** True if the compact file cuts the structured fields of the event. */
     public static boolean isTruncatedInCompactFile(ILoggingEvent event) {
         String fields = AiEventDetails.of(event).getCompactFields();
-        return fields != null && !AiLoggingControl.truncateBody(fields).equals(fields);
+        return fields != null && !CompactSettings.truncateBody(fields).equals(fields);
     }
 }

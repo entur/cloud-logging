@@ -36,7 +36,7 @@ public class AiTextTest {
         assertThat(AiText.cut("abu1234", 5)).isEqualTo("abu12");
         assertThat(AiText.cut("x 12345", 4)).isEqualTo("x 12");
         assertThat(AiText.cut("ab\uD83D\uDE00c", 3)).isEqualTo("ab");
-        assertThat(AiLoggingControl.truncate("body u1234 end", 7)).isEqualTo("body ...[truncated, 14 chars]");
+        assertThat(CompactSettings.truncate("body u1234 end", 7)).isEqualTo("body ...[truncated, 14 chars]");
     }
 
     @Test

@@ -119,7 +119,7 @@ public final class AiEventDetails {
     public String getCompactBody() {
         if (!compactBodyDone) {
             String singleLine = getSingleLineBody();
-            compactBody = singleLine == null ? null : MdcAliasConverter.aliasUuids(singleLine, false);
+            compactBody = singleLine == null ? null : AiAliases.aliasUuids(singleLine, false);
             compactBodyDone = true;
         }
         return compactBody;
@@ -128,7 +128,7 @@ public final class AiEventDetails {
     /** {@link #getFields()} with UUIDs aliased for the compact file (not cut). */
     public String getCompactFields() {
         if (!compactFieldsDone) {
-            compactFields = fields == null ? null : MdcAliasConverter.aliasUuids(fields, false);
+            compactFields = fields == null ? null : AiAliases.aliasUuids(fields, false);
             compactFieldsDone = true;
         }
         return compactFields;

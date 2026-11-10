@@ -9,8 +9,8 @@ import java.util.regex.Pattern;
 /**
  * Root-cause-first stack trace rendered on a single line, so that a trace can be found and read with grep.
  * Supports the same options as {@code %rEx}: depth followed by exclude patterns (frames containing any of them are left out).
- * Frames per exception and the number of exceptions are limited by {@link AiLoggingControl#stackTraceMaxLines()} and
- * {@link AiLoggingControl#stackTraceMaxCauses()}; logback's own markers ({@code [N skipped]}, {@code ... N common frames omitted}) are dropped.
+ * Frames per exception and the number of exceptions are limited by {@link CompactSettings#stackTraceMaxLines()} and
+ * {@link CompactSettings#stackTraceMaxCauses()}; logback's own markers ({@code [N skipped]}, {@code ... N common frames omitted}) are dropped.
  * Output is empty if there is no exception, otherwise it starts with a separator, e.g.
  * {@code  | java.lang.RuntimeException: root | at a.B.c(B.java:1) | [... 3 frames omitted] | Wrapped by: java.lang.IllegalStateException: boom | ...}.
  */
@@ -31,11 +31,11 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
             return "";
         }
 
-        int maxFrames = AiLoggingControl.stackTraceMaxLines();
-        int maxCauses = AiLoggingControl.stackTraceMaxCauses();
+        int maxFrames = CompactSettings.stackTraceMaxLines();
+        int maxCauses = CompactSettings.stackTraceMaxCauses();
 
         StringBuilder builder = new StringBuilder(multiLine.length() + 16);
-        int maxMessage = AiLoggingControl.messageMax();
+        int maxMessage = CompactSettings.messageMax();
         int causes = 0;
         int frames = 0;
         int omittedFrames = 0;
@@ -67,7 +67,7 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
                     builder.append(SEPARATOR).append("[... more causes omitted]");
                     return builder.toString();
                 }
-                builder.append(SEPARATOR).append(AiLoggingControl.truncate(trimmed, maxMessage));
+                builder.append(SEPARATOR).append(CompactSettings.truncate(trimmed, maxMessage));
                 messageLength = trimmed.length();
                 messageCut = maxMessage > 0 && messageLength > maxMessage;
             } else if (!messageCut) {

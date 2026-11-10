@@ -22,9 +22,9 @@ public class CompactRequestResponseTest {
 
     @AfterEach
     public void cleanUp() {
-        System.clearProperty(AiLoggingControl.AI_MESSAGE_MAX_PROPERTY);
-        System.clearProperty(AiLoggingControl.AI_BODY_MAX_PROPERTY);
-        System.clearProperty(AiLoggingControl.AI_EXCLUDED_HEADERS_PROPERTY);
+        System.clearProperty(CompactSettings.AI_MESSAGE_MAX_PROPERTY);
+        System.clearProperty(CompactSettings.AI_BODY_MAX_PROPERTY);
+        System.clearProperty(CompactSettings.AI_EXCLUDED_HEADERS_PROPERTY);
     }
 
     private static LoggingEvent event(String message, Marker marker, Map<String, String> mdc) {
@@ -61,7 +61,7 @@ public class CompactRequestResponseTest {
 
     @Test
     public void bodyIsCutInCompactFileOnlyAndEventGetsAnId() {
-        System.setProperty(AiLoggingControl.AI_BODY_MAX_PROPERTY, "3");
+        System.setProperty(CompactSettings.AI_BODY_MAX_PROPERTY, "3");
         LoggingEvent event = event("RESP", appendRaw("http", "{\"headers\":{},\"body\":\"abcdef\"}"), null);
 
         assertThat(full(event)).isEqualTo("RESP | body: abcdef");
@@ -83,7 +83,7 @@ public class CompactRequestResponseTest {
 
     @Test
     public void excludedHeadersCanBeOverridden() {
-        System.setProperty(AiLoggingControl.AI_EXCLUDED_HEADERS_PROPERTY, "X-Secret, other");
+        System.setProperty(CompactSettings.AI_EXCLUDED_HEADERS_PROPERTY, "X-Secret, other");
         LoggingEvent event = event("REQ", appendRaw("http", "{\"headers\":{\"user-agent\":[\"Java\"],\"x-secret\":[\"s\"]}}"), null);
 
         assertThat(compact(event)).isEqualTo("REQ | user-agent: Java");
@@ -102,7 +102,7 @@ public class CompactRequestResponseTest {
         String uuid = UUID.randomUUID().toString();
         LoggingEvent event = event("GET /x", appendRaw("http",
                 "{\"headers\":{\"x-request-id\":[\"" + uuid + "\"],\"traceparent\":[\"00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01\"]}}"), null);
-        String alias = MdcAliasConverter.aliasOf(uuid);
+        String alias = AiAliases.aliasOf(uuid);
 
         assertThat(compact(event)).matches("GET /x \\| x-request-id: " + alias + "; traceparent: 00-h\\d+-h\\d+-01");
         assertThat(full(event)).startsWith("GET /x | x-request-id: " + alias + "(" + uuid + ")");
@@ -182,7 +182,7 @@ public class CompactRequestResponseTest {
 
     @Test
     public void longMessagesAreCutInTheCompactFileWithAnId() {
-        System.setProperty(AiLoggingControl.AI_MESSAGE_MAX_PROPERTY, "6");
+        System.setProperty(CompactSettings.AI_MESSAGE_MAX_PROPERTY, "6");
         LoggingEvent event = new LoggingEvent("f", new LoggerContext().getLogger("x"), Level.INFO, "payload: 1234567890", null, null);
         event.setMDCPropertyMap(Map.of());
         EventIdConverter eventId = new EventIdConverter();

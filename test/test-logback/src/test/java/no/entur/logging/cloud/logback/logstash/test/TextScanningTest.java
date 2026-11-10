@@ -32,13 +32,13 @@ public class TextScanningTest {
 
     @Test
     public void truncationNote() {
-        assertThat(CompactRequestResponse.withoutTruncatedNote("POST /x [truncated ~12 bytes]")).isEqualTo("POST /x");
-        assertThat(CompactRequestResponse.withoutTruncatedNote("200 /x (in 5 ms)  [truncated ~4KB]")).isEqualTo("200 /x (in 5 ms)");
-        assertThat(CompactRequestResponse.withoutTruncatedNote("GET /x [truncated ~KB]")).isEqualTo("GET /x [truncated ~KB]");
-        assertThat(CompactRequestResponse.withoutTruncatedNote("GET /x [truncated ~4KB] more")).isEqualTo("GET /x [truncated ~4KB] more");
-        assertThat(CompactRequestResponse.withoutTruncatedNote("GET /x [truncated ~4 KB]")).isEqualTo("GET /x [truncated ~4 KB]");
+        assertThat(AiRequestResponse.withoutTruncatedNote("POST /x [truncated ~12 bytes]")).isEqualTo("POST /x");
+        assertThat(AiRequestResponse.withoutTruncatedNote("200 /x (in 5 ms)  [truncated ~4KB]")).isEqualTo("200 /x (in 5 ms)");
+        assertThat(AiRequestResponse.withoutTruncatedNote("GET /x [truncated ~KB]")).isEqualTo("GET /x [truncated ~KB]");
+        assertThat(AiRequestResponse.withoutTruncatedNote("GET /x [truncated ~4KB] more")).isEqualTo("GET /x [truncated ~4KB] more");
+        assertThat(AiRequestResponse.withoutTruncatedNote("GET /x [truncated ~4 KB]")).isEqualTo("GET /x [truncated ~4 KB]");
         String spaces = "GET /x" + " ".repeat(LONG) + "y]";
-        assertThat(fast(() -> CompactRequestResponse.withoutTruncatedNote(spaces))).isSameInstanceAs(spaces);
+        assertThat(fast(() -> AiRequestResponse.withoutTruncatedNote(spaces))).isSameInstanceAs(spaces);
     }
 
     @Test
@@ -62,19 +62,19 @@ public class TextScanningTest {
 
     @Test
     public void hexIds() {
-        assertThat(MdcAliasConverter.isHexId("00f067aa0ba902b7")).isTrue();
-        assertThat(MdcAliasConverter.isHexId("4bf92f3577b34da6a3ce929d0e0e4736")).isTrue();
-        assertThat(MdcAliasConverter.isHexId("123456789012")).isFalse();
-        assertThat(MdcAliasConverter.isHexId("abcdefabcdef")).isFalse();
-        assertThat(MdcAliasConverter.isHexId("00F067AA0BA902B7")).isFalse();
-        assertThat(MdcAliasConverter.isHexId("0a0a0a0a0a0")).isFalse();
-        assertThat(MdcAliasConverter.isHexId("0a".repeat(17))).isFalse();
+        assertThat(AiAliases.isHexId("00f067aa0ba902b7")).isTrue();
+        assertThat(AiAliases.isHexId("4bf92f3577b34da6a3ce929d0e0e4736")).isTrue();
+        assertThat(AiAliases.isHexId("123456789012")).isFalse();
+        assertThat(AiAliases.isHexId("abcdefabcdef")).isFalse();
+        assertThat(AiAliases.isHexId("00F067AA0BA902B7")).isFalse();
+        assertThat(AiAliases.isHexId("0a0a0a0a0a0")).isFalse();
+        assertThat(AiAliases.isHexId("0a".repeat(17))).isFalse();
     }
 
     @Test
     public void eventIdDigits() {
-        assertThat(EventIdConverter.hex12(0xabL)).isEqualTo("0000000000ab");
-        assertThat(EventIdConverter.hex12(0xFFFF_FFFF_FFFFL)).isEqualTo("ffffffffffff");
-        assertThat(EventIdConverter.hex12(0L)).isEqualTo("000000000000");
+        assertThat(AiEventId.hex12(0xabL)).isEqualTo("0000000000ab");
+        assertThat(AiEventId.hex12(0xFFFF_FFFF_FFFFL)).isEqualTo("ffffffffffff");
+        assertThat(AiEventId.hex12(0L)).isEqualTo("000000000000");
     }
 }

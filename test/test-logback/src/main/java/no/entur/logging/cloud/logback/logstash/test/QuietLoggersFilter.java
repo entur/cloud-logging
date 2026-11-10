@@ -33,7 +33,7 @@ public class QuietLoggersFilter extends Filter<ILoggingEvent> {
 
     @Override
     public void start() {
-        prefixes = AiLoggingControl.quietLoggers(DEFAULT_QUIET_LOGGERS);
+        prefixes = CompactSettings.quietLoggers(DEFAULT_QUIET_LOGGERS);
         super.start();
     }
 
