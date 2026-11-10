@@ -1,13 +1,13 @@
 package org.entur.example.web.rest;
 
-import org.codehaus.commons.nullanalysis.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class MyEntity {
 
-	@NotNull
+	@NonNull
 	private String secret;
 
-	@NotNull
+	@NonNull
 	private String name;
 	
 	public String getSecret() {

@@ -7,8 +7,6 @@ dependencies {
     api project(':on-demand:on-demand-spring-boot-autoconfigure')
 
     api("org.slf4j:slf4j-api")
-    api ("org.codehaus.janino:commons-compiler-jdk")
-    api ("org.codehaus.janino:janino")
     api("org.springframework.boot:spring-boot-autoconfigure")
     api("org.springframework.boot:spring-boot-starter-logging")
     api("org.springframework.boot:spring-boot-starter-web")

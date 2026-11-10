@@ -9,8 +9,6 @@ dependencies {
     api project(':trace:server:correlation-id-trace-spring-boot-web')
 
     api("org.slf4j:slf4j-api")
-    api ("org.codehaus.janino:commons-compiler-jdk")
-    api ("org.codehaus.janino:janino")
     api("org.springframework.boot:spring-boot-autoconfigure")
     api("org.springframework.boot:spring-boot-starter-logging")
     api("org.springframework.boot:spring-boot-starter-web")

@@ -5,8 +5,6 @@ dependencies {
 
     api project(":test:test-logback")
 
-    api ("org.codehaus.janino:janino")
-
     api("jakarta.annotation:jakarta.annotation-api")
 
     api("org.springframework.boot:spring-boot-starter-logging")
