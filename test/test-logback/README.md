@@ -108,34 +108,44 @@ test {
 
 Kotlin DSL: `tasks.test { systemProperties(providers.systemPropertiesPrefixedBy("entur.logging.").get()) }`.
 
-Then add this to the instructions file read by your AI agent:
+Then add this to the instructions file read by your AI agent. If the file already has a test command (for example with a profile such as
+`-Pquick`), add the `-D` options and the log directory to that command instead of using the generic one below, and remove rules which
+contradict it (such as a rule against `-q`).
+
+Each test run gets its own log directory in `/tmp`, so test runs of other projects, or of other checkouts of the same project, never write to the
+same files, also when they run at the same time (the test JVMs of one run share the files). The directories stay until `/tmp` is cleaned,
+usually at reboot.
 
 ````markdown
 ## Running tests and reading logs
 
-When running tests, enable compact log output to save context. Logs then go to a file instead of the console:
+When running tests, enable compact log output to save context. Logs then go to files in a new directory instead of the console.
+Run each command as one line (it creates the directory and uses it):
 
-    rm -f /tmp/test.compact /tmp/test.full
     # Gradle (--rerun: also if the tests are up to date)
-    ./gradlew test --rerun -q --console=plain -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test > /tmp/test.out 2>&1; echo "exit code $?"; head -40 /tmp/test.out
+    L=$(mktemp -d "/tmp/$(basename "$PWD")-tests.XXXXXX"); echo "logs: $L"; ./gradlew test --rerun -q --console=plain -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=$L/test > $L/test.out 2>&1; echo "exit code $?"; head -40 $L/test.out
     # Maven (keep only the Maven/test error lines, not the plugin and JVM warnings or client stack traces)
-    mvn -q test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test > /tmp/test.out 2>&1; echo "exit code $?"; grep '^\[ERROR\]' /tmp/test.out | cut -c1-300 | head -30
+    L=$(mktemp -d "/tmp/$(basename "$PWD")-tests.XXXXXX"); echo "logs: $L"; mvn -q test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=$L/test > $L/test.out 2>&1; echo "exit code $?"; grep '^\[ERROR\]' $L/test.out | cut -c1-300 | head -30
 
-- Console output (`/tmp/test.out`) only contains the test summary and failures (filtered as above, about 1.5 KB); a non-zero exit code means failed tests or a broken build. Do not use `-i`/`--info` (Gradle) or `-X` (Maven); they are not needed.
-- `/tmp/test.compact`: compact, one event per line (`LEVEL SimpleClassName [mdc] #id : message`), INFO and above. Stack traces are on the same line as the
-  message, root cause first, framework frames removed, 2 frames per exception. Use `grep` (for example `grep -n 'ERROR\|WARN' /tmp/test.compact`), do not read the whole file.
-- `/tmp/test.full`: the same events plus what the compact file leaves out: DEBUG, timestamps, thread names, full logger names,
+- `<logs>` below is the directory the command printed (`logs: /tmp/myproject-tests.Ab12Cd`); use it in later commands, as variables do not
+  survive from one command to the next. Every run gets a new one, so nothing has to be deleted first.
+- Console output (`<logs>/test.out`) only contains the test summary and failures (filtered as above, usually a few KB); a non-zero exit code means
+  failed tests or a broken build. With `-q`, Maven prints no test summary: the counts per test class are in `target/surefire-reports/*.txt`
+  (files of test classes which did not run this time are left from earlier runs). Do not use `-i`/`--info` (Gradle) or `-X` (Maven); they are not needed.
+- `<logs>/test.compact`: compact, one event per line (`LEVEL SimpleClassName [mdc] #id : message`), INFO and above. Stack traces are on the same line as the
+  message, root cause first, framework frames removed, 2 frames per exception. Use `grep` (for example `grep -n 'ERROR\|WARN' <logs>/test.compact`), do not read the whole file.
+- `<logs>/test.full`: the same events plus what the compact file leaves out: DEBUG, timestamps, thread names, full logger names,
   framework start-up/shutdown lines (server ports are kept in the compact file), transport headers (`user-agent`, `accept*`, `grpc-*encoding`, `date`, ...),
   whole bodies and full stack traces. Some things are only logged at DEBUG and so only appear here, for example requests rejected by
-  a security filter before request-response logging (`grep -n 'Response 4[0-9][0-9]\|Rejecting access' /tmp/test.full`). Look for those directly in this file with `grep -n`; an `#id` in the compact file (truncated stack trace, message, body or fields)
-  finds the complete event with `grep -n -C 5 '#id' /tmp/test.full`.
+  a security filter before request-response logging (`grep -n 'Response 4[0-9][0-9]\|Rejecting access' <logs>/test.full`). Look for those directly in this file with `grep -n`; an `#id` in the compact file (truncated stack trace, message, body or fields)
+  finds the complete event with `grep -n -C 5 '#id' <logs>/test.full`.
 - Include `-Dentur.logging.ai.level=DEBUG` to also get DEBUG in the compact file (`-Dentur.logging.ai.full.level=INFO` limits the `.full` file).
 - Request/response logging (HTTP, gRPC) is a single line: `message | header: value; ... | body: <body>`. Other structured fields of an event follow the message as ` | fields: {json}`.
-- Repeated WARN/ERROR events are collapsed in `/tmp/test.compact`: the first is printed, the rest are summarized later in a line
+- Repeated WARN/ERROR events are collapsed in `<logs>/test.compact`: the first is printed, the rest are summarized later in a line
   `repeated N more times, N+1 in total (first #id, last #id): message` whose total includes that first event. Counting restarts when logging
-  is reconfigured (e.g. a new Spring context), so a message can have several such lines. For exact counts grep `/tmp/test.full` for the
-  logger and the message, as the same message can come from several loggers: `grep -c 'DocumentEndpoint .* : Hello world' /tmp/test.full`.
-- UUIDs and hex ids are replaced by aliases (`u1`, `h1`, ...) in both files; the first time an alias appears in `/tmp/test.full` it is followed by its value, `u7(<uuid>)`, so grep `/tmp/test.full` for a raw id to find its alias. Each test JVM starts with a `---- JVM pid ...` line; aliases restart there
+  is reconfigured (e.g. a new Spring context), so a message can have several such lines. For exact counts grep `<logs>/test.full` for the
+  logger and the message, as the same message can come from several loggers: `grep -c 'DocumentEndpoint .* : Hello world' <logs>/test.full`.
+- UUIDs and hex ids are replaced by aliases (`u1`, `h1`, ...) in both files; the first time an alias appears in `<logs>/test.full` it is followed by its value, `u7(<uuid>)`, so grep `<logs>/test.full` for a raw id to find its alias. Each test JVM starts with a `---- JVM pid ...` line; aliases restart there
   (test JVMs running at the same time say `no aliases` there and keep UUIDs, so an alias belongs to the last line saying `aliases ... restart`).
 - To see the exact JSON the servers log (for example the fields of a log statement), run the tests without AI mode and with
   `-Dentur.logging.style=machineReadableJson`. With Gradle, print the JSON lines from the test reports:
