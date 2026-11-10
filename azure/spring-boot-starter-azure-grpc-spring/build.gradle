@@ -19,8 +19,6 @@ dependencies {
 
     api("org.springframework.boot:spring-boot-starter-grpc-server")
 
-    api "io.grpc:grpc-netty:${grpcNettyVersion}"
-
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation project(":azure:spring-boot-autoconfigure-azure-test")
 

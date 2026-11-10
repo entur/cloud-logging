@@ -57,7 +57,6 @@ ext {
     logbackLogstashSyntaxHighlightingDecoratorsVersion = '2.0.3'
     commonsIoVersion = '2.22.0'
 
-    grpcNettyVersion = '1.85.1'
     grpcVersion = '1.85.1'
     grpcCommonsVersion = '2.78.0'
     grpcProtobufVersion = '4.36.2'

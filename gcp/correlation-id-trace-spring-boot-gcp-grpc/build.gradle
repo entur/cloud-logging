@@ -6,7 +6,6 @@ dependencies {
     api project(':gcp:spring-boot-autoconfigure-gcp')
 
     api("org.springframework.boot:spring-boot-autoconfigure")
-    api "io.grpc:grpc-netty:${grpcNettyVersion}"
 
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"
 }

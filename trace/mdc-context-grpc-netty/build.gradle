@@ -8,13 +8,13 @@ dependencies {
 
     api("tools.jackson.core:jackson-core")
 
-    api("io.grpc:grpc-netty:${grpcNettyVersion}")
-    api("io.grpc:grpc-services:${grpcNettyVersion}")
+    api(platform("io.grpc:grpc-bom:${grpcVersion}"))
+    api("io.grpc:grpc-services")
 
-    api("io.grpc:grpc-api:$grpcVersion")
-    api("io.grpc:grpc-core:$grpcVersion")
-    api("io.grpc:grpc-protobuf:$grpcVersion")
-    api("io.grpc:grpc-util:$grpcVersion")
+    api("io.grpc:grpc-api")
+    api("io.grpc:grpc-core")
+    api("io.grpc:grpc-protobuf")
+    api("io.grpc:grpc-util")
 
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     // Versions managed by Spring Boot BOM
@@ -26,6 +26,9 @@ dependencies {
     api("com.google.api.grpc:proto-google-common-protos:$grpcCommonsVersion")
 
     testImplementation project(":test:test-logback-junit")
+
+    // transport for the gRPC servers started by the tests
+    testRuntimeOnly("io.grpc:grpc-netty")
 }
 
 sourceSets {
