@@ -11,8 +11,6 @@ dependencies {
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation project(":gcp:spring-boot-autoconfigure-gcp-test")
-
 }
 
 

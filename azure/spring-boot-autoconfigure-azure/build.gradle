@@ -1,6 +1,7 @@
 
 dependencies {
     api project(':azure:micrometer-azure')
+    api project(':azure:logback-logstash-encoder-azure') // logback-spring.xml includes logback/logback-default-server.xml
     api project(':micrometer')
     api project(':appender')
     api project(':on-demand:on-demand-spring-boot-autoconfigure')
@@ -8,7 +9,6 @@ dependencies {
     api project(':trace:server:correlation-id-trace-spring-boot-web')
 
     api("org.slf4j:slf4j-api")
-    api ("org.codehaus.janino:commons-compiler")
     api ("org.codehaus.janino:commons-compiler-jdk")
     api ("org.codehaus.janino:janino")
     api("org.springframework.boot:spring-boot-autoconfigure")
@@ -17,10 +17,7 @@ dependencies {
     api ("org.springframework.boot:spring-boot-starter-security")
     api("org.springframework.boot:spring-boot-micrometer-metrics")
 
-    api ("org.codehaus.janino:janino")
-
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-
 }
 
 

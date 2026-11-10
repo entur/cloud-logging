@@ -56,8 +56,6 @@ ext {
     jacksonSyntaxHighlightVersion = '2.0.4'
     logbackLogstashSyntaxHighlightingDecoratorsVersion = '2.0.3'
     commonsIoVersion = '2.22.0'
-    commonsTextVersion = '1.15.0'
-    nettyTcnativeBoringsslStaticVersion = '2.0.84.Final'
 
     grpcNettyVersion = '1.85.1'
     grpcVersion = '1.85.1'

@@ -5,19 +5,11 @@ plugins {
 
 dependencies {
     api project(":appender")
-    api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
 
     api("tools.jackson.core:jackson-core")
 
     api("io.grpc:grpc-netty:${grpcNettyVersion}")
     api("io.grpc:grpc-services:${grpcNettyVersion}")
-    api("io.grpc:grpc-services:${grpcNettyVersion}")
-
-    // grpc dependencies
-    api("io.netty:netty-codec-http2")
-    api("io.netty:netty-handler-proxy")
-
-    api("io.netty:netty-tcnative-boringssl-static:${nettyTcnativeBoringsslStaticVersion}")
 
     api("io.grpc:grpc-api:$grpcVersion")
     api("io.grpc:grpc-core:$grpcVersion")
@@ -28,19 +20,12 @@ dependencies {
     // Versions managed by Spring Boot BOM
     api("org.slf4j:slf4j-api")
     api("ch.qos.logback:logback-classic")
-    api("ch.qos.logback:logback-core")
 
     api("jakarta.annotation:jakarta.annotation-api")
+    // pins a newer version than the one grpc brings in transitively
     api("com.google.api.grpc:proto-google-common-protos:$grpcCommonsVersion")
-    api("com.google.protobuf:protobuf-java-util:${grpcProtobufVersion}")
 
-    testImplementation("com.google.truth:truth:${googleTruthVersion}")
-    testImplementation("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
-
-    testImplementation project(":api")
-    testImplementation project(":test:test-logback")
     testImplementation project(":test:test-logback-junit")
-
 }
 
 sourceSets {

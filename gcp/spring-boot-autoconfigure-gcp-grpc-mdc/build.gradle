@@ -5,7 +5,6 @@ dependencies {
 
     api("org.slf4j:slf4j-api")
 
-    api ("org.codehaus.janino:commons-compiler")
     api ("org.codehaus.janino:commons-compiler-jdk")
     api ("org.codehaus.janino:janino")
 
@@ -15,8 +14,6 @@ dependencies {
     api "io.grpc:grpc-netty:${grpcNettyVersion}"
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation project(":gcp:spring-boot-autoconfigure-gcp-test")
-
 }
 
 
