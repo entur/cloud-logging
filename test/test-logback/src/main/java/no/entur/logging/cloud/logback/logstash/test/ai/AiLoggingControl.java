@@ -44,4 +44,11 @@ public class AiLoggingControl {
     public static void disableAliasesInThisJvm() {
         aliasesDisabledInThisJvm = true;
     }
+
+    /** JVM system property; set to <code>false</code> to not write the failures file (see {@link FailuresFileAppender}). Default true. */
+    public static final String AI_FAILURES_PROPERTY = "entur.logging.ai.failures";
+
+    public static boolean isFailuresEnabled() {
+        return !"false".equalsIgnoreCase(System.getProperty(AI_FAILURES_PROPERTY));
+    }
 }

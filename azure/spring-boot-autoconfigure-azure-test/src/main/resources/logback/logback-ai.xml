@@ -112,10 +112,27 @@
 		</encoder>
 	</appender>
 
+	<!--
+		Per failed test, the WARN/ERROR events logged while it ran, in <file>.failures; written when the tests of a JVM have finished
+		(see AiTestExecutionListener). Turn off with -Dentur.logging.ai.failures=false.
+	-->
+	<appender name="FAILURES_FILE" class="no.entur.logging.cloud.logback.logstash.test.ai.FailuresFileAppender">
+		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.failures</file>
+		<lockFile>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.lock</lockFile>
+		<append>true</append>
+		<immediateFlush>true</immediateFlush>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<!-- as in the compact file, but always with the #id -->
+			<pattern>%aiLevel %cLogger%cMdc%fEventId : %cMsg%cFields%cEx{full,org.springframework,org.junit,org.gradle,worker.org.gradle,org.apache,jakarta.,io.grpc,io.netty,io.micrometer,org.zalando.logbook,jdk.internal,jdk.proxy,java.lang.reflect,java.util,sun.reflect}%nopex</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+
 	<!-- logback async appenders accept a single child, so fan out to both files and the no-op appender which holds the JSON encoder -->
 	<appender name="AI_FANOUT" class="no.entur.logging.cloud.logback.logstash.test.ai.FanOutAppender">
 		<appender-ref ref="COMPACT_DEDUP" />
 		<appender-ref ref="FULL_FILE" />
+		<appender-ref ref="FAILURES_FILE" />
 		<appender-ref ref="DEFAULT_NOOP" />
 	</appender>
 

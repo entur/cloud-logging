@@ -50,7 +50,7 @@ Set the JVM system property `entur.logging.ai.enabled=true` (exactly `true`, in 
 
 `--rerun` runs the tests even if Gradle considers them up to date (or cached), otherwise no logs are written.
 
-The files are `<file>.compact` and `<file>.full`, where `<file>` is given by `entur.logging.ai.file` (default: `entur-logging-ai` in the temp directory). Events are appended; delete both files first for a clean run.
+The files are `<file>.compact`, `<file>.full` and `<file>.failures`, where `<file>` is given by `entur.logging.ai.file` (default: `entur-logging-ai` in the temp directory). Events are appended; delete both files first for a clean run.
 The files hold whole request and response bodies, so they are created readable by the owner only (where the file system has POSIX permissions), and a file which is a symbolic link or belongs to another user is not written to.
 All test JVMs (one per module) append to the same files; each JVM starts with a line `---- JVM pid N started <time> in <module dir> (aliases u1, h1, ... restart) ----`.
 If test JVMs run at the same time (Gradle `--parallel` or `maxParallelForks`, Maven `forkCount`), their events are interleaved: only the JVM holding the lock file `<file>.lock` uses aliases, the others write
@@ -71,6 +71,15 @@ One event per line, `LEVEL Logger [mdc] #id : message | fields: {...} | stack tr
 ### Full file (`<file>.full`)
 The same events with timestamps, thread names, full logger names, DEBUG and above (`entur.logging.ai.full.level`, default `DEBUG`), all request-response headers, whole bodies, the other request-response details (` | fields: {"http":{"origin":...,"protocol":...,"remote":...}}`) and full stack traces, for drill-down when the compact file is not enough.
 Every event has an id (`#1a2b3c4d5e6f`) here. In the compact file, only events which lost information (stack trace, truncated message, body or fields) show the id, so `grep -n -C 5 '#1a2b3c4d5e6f' <file>.full` gives the complete event.
+
+### Failures file (`<file>.failures`)
+Per failed test, its failure (the first line of the assertion) and the WARN/ERROR events logged while it ran, as in the compact file but always
+with the `#id`; identical events are shown once with their number. If no test failed, the number of WARN/ERROR events per logger.
+A JUnit Platform listener (`AiTestExecutionListener`, registered through `META-INF/services`, so Gradle and Maven pick it up) records which test
+ran on which thread and when, and the file is written when the tests of a JVM have finished. An event belongs to a test if it was logged on the
+test's thread while it ran, and not if it was logged on another test's thread while that ran. Events of other threads (thread pools, servers)
+are matched by time, from the start of the test's class (so that `@BeforeAll` and a Spring context starting count); when other tests ran at
+the same time, they may belong to those, and the file says so. At most 10 lines per test. Turn it off with `entur.logging.ai.failures=false`.
 
 ### Request-response logging
 HTTP and gRPC request-response logging uses the machine-readable sinks, so message and JSON fields are the same as without AI mode and logging assertions behave the same.
@@ -126,12 +135,16 @@ Run each command as one line (it creates the directory and uses it):
     L=$(mktemp -d "/tmp/$(basename "$PWD")-tests.XXXXXX"); echo "logs: $L"; ./gradlew test --rerun -q --console=plain -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=$L/test > $L/test.out 2>&1; echo "exit code $?"; head -40 $L/test.out
     # Maven (keep only the Maven/test error lines, not the plugin and JVM warnings or client stack traces)
     L=$(mktemp -d "/tmp/$(basename "$PWD")-tests.XXXXXX"); echo "logs: $L"; mvn -q test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=$L/test > $L/test.out 2>&1; echo "exit code $?"; grep '^\[ERROR\]' $L/test.out | cut -c1-300 | head -30
+    # if tests failed: each failed test and the WARN/ERROR events logged while it ran
+    cat <logs>/test.failures
 
 - `<logs>` below is the directory the command printed (`logs: /tmp/myproject-tests.Ab12Cd`); use it in later commands, as variables do not
   survive from one command to the next. Every run gets a new one, so nothing has to be deleted first.
 - Console output (`<logs>/test.out`) only contains the test summary and failures (filtered as above, usually a few KB); a non-zero exit code means
   failed tests or a broken build. With `-q`, Maven prints no test summary: the counts per test class are in `target/surefire-reports/*.txt`
   (files of test classes which did not run this time are left from earlier runs). Do not use `-i`/`--info` (Gradle) or `-X` (Maven); they are not needed.
+- If tests failed, read `<logs>/test.failures` first, whole (it is short, do not cut it with `head`): per failed test, its failure and the
+  WARN/ERROR events logged while it ran, often the cause. `grep -n -C 5 '#id' <logs>/test.full` gives the whole event of an `#id`.
 - `<logs>/test.compact`: compact, one event per line (`LEVEL SimpleClassName [mdc] #id : message`), INFO and above. Stack traces are on the same line as the
   message, root cause first, framework frames removed, 2 frames per exception. Use `grep` (for example `grep -n 'ERROR\|WARN' <logs>/test.compact`), do not read the whole file.
 - `<logs>/test.full`: the same events plus what the compact file leaves out: DEBUG, timestamps, thread names, full logger names,
