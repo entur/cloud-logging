@@ -4,15 +4,9 @@ dependencies {
     api project(':appender')
     api project(':request-response:logbook-filter')
     api("org.zalando:logbook-api:${logbookVersion}")
-    api("org.zalando:logbook-api:${logbookVersion}")
-
-    api "commons-io:commons-io:${commonsIoVersion}"
 
     api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
     api("tools.jackson.core:jackson-core")
-
-    api("org.apache.commons:commons-text:${commonsTextVersion}")
-
 }
 
 
