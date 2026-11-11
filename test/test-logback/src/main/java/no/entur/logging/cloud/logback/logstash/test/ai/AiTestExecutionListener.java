@@ -15,7 +15,6 @@ import org.junit.platform.launcher.TestPlan;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 
 /**
@@ -99,9 +98,9 @@ public class AiTestExecutionListener implements TestExecutionListener {
         return text.length() > AiTestRun.MAX_LINE_LENGTH ? text.substring(0, AiTestRun.MAX_LINE_LENGTH) + "..." : text;
     }
 
-    /** Milliseconds, as the time of a logging event. */
+    /** At the precision of logging events (logback keeps their time at full precision), so that an event is not taken for the next test's. */
     private static Instant now() {
-        return Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        return Instant.now();
     }
 
     private static void waitForLogging() {
