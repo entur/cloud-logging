@@ -1,7 +1,5 @@
 
 dependencies {
-
-    api project(':api')
     api project(':request-response:logbook')
     api project(':request-response:logbook-spring-boot-autoconfigure')
 
