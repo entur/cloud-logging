@@ -123,14 +123,15 @@ When running tests, enable compact log output to save context. Logs then go to f
 Run each command as one line (it creates the directory and uses it):
 
     # Gradle (--rerun: also if the tests are up to date)
-    L=$(mktemp -d "/tmp/$(basename "$PWD")-tests.XXXXXX"); echo "logs: $L"; ./gradlew test --rerun -q --console=plain -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=$L/test > $L/test.out 2>&1; echo "exit code $?"; head -40 $L/test.out
+    L=$(mktemp -d "/tmp/$(basename "$PWD")-tests.XXXXXX"); echo "logs: $L"; ./gradlew test --rerun -q --console=plain -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=$L/test > $L/test.out 2>&1; echo "exit code $?"; head -40 $L/test.out; echo "WARN/ERROR lines per logger:"; grep -oE '^(WARN|ERROR)[^ ]* [^ ]+' $L/test.compact 2>/dev/null | sort | uniq -c | sort -rn | head -30
     # Maven (keep only the Maven/test error lines, not the plugin and JVM warnings or client stack traces)
-    L=$(mktemp -d "/tmp/$(basename "$PWD")-tests.XXXXXX"); echo "logs: $L"; mvn -q test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=$L/test > $L/test.out 2>&1; echo "exit code $?"; grep '^\[ERROR\]' $L/test.out | cut -c1-300 | head -30
+    L=$(mktemp -d "/tmp/$(basename "$PWD")-tests.XXXXXX"); echo "logs: $L"; mvn -q test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=$L/test > $L/test.out 2>&1; echo "exit code $?"; grep '^\[ERROR\]' $L/test.out | cut -c1-300 | head -30; echo "WARN/ERROR lines per logger:"; grep -oE '^(WARN|ERROR)[^ ]* [^ ]+' $L/test.compact 2>/dev/null | sort | uniq -c | sort -rn | head -30
 
 - `<logs>` below is the directory the command printed (`logs: /tmp/myproject-tests.Ab12Cd`); use it in later commands, as variables do not
   survive from one command to the next. Every run gets a new one, so nothing has to be deleted first.
 - Console output (`<logs>/test.out`) only contains the test summary and failures (filtered as above, usually a few KB); a non-zero exit code means
-  failed tests or a broken build. With `-q`, Maven prints no test summary: the counts per test class are in `target/surefire-reports/*.txt`
+  failed tests or a broken build. The command ends with the number of WARN/ERROR lines of each logger in the compact file, so an
+  unexpected logger stands out even if its lines are not among the first ones. With `-q`, Maven prints no test summary: the counts per test class are in `target/surefire-reports/*.txt`
   (files of test classes which did not run this time are left from earlier runs). Do not use `-i`/`--info` (Gradle) or `-X` (Maven); they are not needed.
 - `<logs>/test.compact`: compact, one event per line (`LEVEL SimpleClassName [mdc] #id : message`), INFO and above. Stack traces are on the same line as the
   message, root cause first, framework frames removed, 2 frames per exception. Use `grep` (for example `grep -n 'ERROR\|WARN' <logs>/test.compact`), do not read the whole file.
