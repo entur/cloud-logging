@@ -28,6 +28,7 @@ import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
 import ch.qos.logback.core.encoder.Encoder;
 import net.logstash.logback.marker.LogstashMarker;
+import no.entur.logging.cloud.logback.logstash.test.ai.AiBodyMarker;
 
 /**
  * Microbenchmark (see <code>test/test-logback/ai-benchmark/formatting-benchmark.sh</code>): time and allocation per event for the AI

@@ -5,8 +5,9 @@
 #
 #   <logs dir>/xml/<module>/*.xml     JUnit XML reports without AI mode (plain and careful baseline)
 #   <logs dir>/xml-console.out        console output of that run
-#   <logs dir>/ai/test.compact        compact file (AI mode)
-#   <logs dir>/ai/test.full           full file (AI mode)
+#   <logs dir>/ai/test.<pid>.compact  compact file of each test JVM (AI mode)
+#   <logs dir>/ai/test.<pid>.full     full file of each test JVM (AI mode)
+#   <logs dir>/ai/test.summary        failed tests and number of tests per test JVM (AI mode)
 #   <logs dir>/ai-console.out         console output of that run
 #   <logs dir>/answer-key.txt         expected answers, from answer-key.py
 set -euo pipefail
@@ -40,9 +41,9 @@ status=0
 ./gradlew "${TASKS[@]}" -q --console=plain -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file="$LOGS/ai/test" > "$LOGS/ai-console.out" 2>&1 || status=$?
 [ $status -eq 0 ] || echo "  tests failed (exit $status), see $LOGS/ai-console.out"
 
-python3 -I "$HERE/answer-key.py" "$LOGS/ai/test.full" > "$LOGS/answer-key.txt"
+python3 -I "$HERE/answer-key.py" "$LOGS"/ai/*.full > "$LOGS/answer-key.txt"
 
 echo
 echo "Console output:  without AI mode $(wc -c < "$LOGS/xml-console.out") bytes, with AI mode $(wc -c < "$LOGS/ai-console.out") bytes"
-echo "Logs to search:  XML reports $(cat "$LOGS"/xml/*/*.xml | wc -c) bytes, compact file $(wc -c < "$LOGS/ai/test.compact") bytes (.full $(wc -c < "$LOGS/ai/test.full") bytes)"
+echo "Logs to search:  XML reports $(cat "$LOGS"/xml/*/*.xml | wc -c) bytes, compact files $(cat "$LOGS"/ai/*.compact | wc -c) bytes (.full $(cat "$LOGS"/ai/*.full | wc -c) bytes, summary $(wc -c < "$LOGS/ai/test.summary") bytes)"
 echo "Answer key:      $LOGS/answer-key.txt"

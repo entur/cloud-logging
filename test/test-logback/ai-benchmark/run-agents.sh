@@ -6,7 +6,7 @@
 #   setups  any of: plain careful ai                       (default: all three)
 #           plain    JUnit XML reports, only told where they are
 #           careful  JUnit XML reports plus a tested grep cookbook (prompts/careful.txt)
-#           ai       compact file and .full plus the AGENTS.md snippet from ../README.md
+#           ai       the AI-mode files (summary, compact and .full per test JVM) plus the AGENTS.md snippet from ../README.md
 #   agents  tool:model:effort, tool is copilot or claude, model 'default' is the tool's default model
 #           (default: "copilot:default:low claude:opus:low claude:sonnet:low claude:haiku:low")
 #
@@ -36,10 +36,10 @@ if [ "${MEMORY_MAX:-4G}" != 0 ]; then
   fi
 fi
 
-# The AI-mode instructions from the README, from the compact file bullet to the end of the snippet.
+# The AI-mode instructions from the README, from the summary file bullet to the end of the snippet.
 snippet() {
-  awk '/^````markdown/ {b=1; next} b && /^````/ {exit} b && /^- `\/tmp\/test\.compact`/ {p=1} b && p' "$HERE/../README.md" \
-    | sed "s|/tmp/test|$LOGS/ai/test|g"
+  awk '/^````markdown/ {b=1; next} b && /^````/ {exit} b && /^- `<logs>\/test\.summary`/ {p=1} b && p' "$HERE/../README.md" \
+    | sed "s|<logs>|$LOGS/ai|g"
 }
 
 prompt() { # setup

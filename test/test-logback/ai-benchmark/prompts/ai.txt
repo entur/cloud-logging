@@ -1,11 +1,13 @@
-You are helping debug a Java test run. Its logs were written to two files:
-  @LOGS@/ai/test.compact
-  @LOGS@/ai/test.full
+You are helping debug a Java test run. Its logs were written to the files in @LOGS@/ai:
+  test.summary               the number of tests per test JVM, and the failed tests
+  test.<pid>.compact         compact log of one test JVM
+  test.<pid>.full            full log of the same test JVM
+The run had several test JVMs, so there are several compact and full files; the questions are about all of them.
 
 How the log files work (from the project's instructions for AI agents):
 @SNIPPET@
 
-Rules: use only these two files. Do not read any other files (no source code) and do not modify anything. Prefer grep/head/wc style commands; do not read whole files.
+Rules: use only the files in that directory. Do not read any other files (no source code) and do not modify anything. Prefer grep/head/wc style commands; do not read whole files.
 
 Answer these questions:
 1. List every distinct WARN and ERROR message of the run. Treat events that differ only in ids, aliases or ports as the same message. For each, give level, logger class, the message, the total number of times it was logged (include events collapsed into "repeated N more times" lines) and, if it has a stack trace, the exception class.

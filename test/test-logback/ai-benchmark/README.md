@@ -8,7 +8,7 @@ answers the same four questions in three setups:
 |---|---|
 | `plain` | the JUnit XML reports (log output in `<system-out>`), only told where they are |
 | `careful` | the same reports plus a tested grep cookbook for them ([prompts/careful.txt](prompts/careful.txt)): the three console formats, a `sed`+`awk` normaliser to one event per line and recipes for each question |
-| `ai` | the compact file and `.full` from an AI-mode run, plus the AGENTS.md snippet from [../README.md](../README.md), read at run time |
+| `ai` | the files of an AI-mode run (the summary file, and a compact and a `.full` file per test JVM), plus the AGENTS.md snippet from [../README.md](../README.md), read at run time |
 
 Questions (full wording in [prompts/](prompts)):
 
@@ -54,7 +54,7 @@ a few seconds and prints a Markdown table. Writing to the files is not included.
 ## Grading
 
 [grade.py](grade.py) compares each `<logs dir>/runs/<run>.answer` with `<logs dir>/answer-key.txt` ([answer-key.py](answer-key.py)
-computes it from `.full`, which has every event; the baselines run the same tests). It is lenient about the format but
+computes it from the `.full` files, which have every event; the baselines run the same tests). It is lenient about the format but
 strict about numbers; check what `-v` reports by hand, since a paraphrased message counts as missing. Each question scores
 0 to 1, 4 in total:
 

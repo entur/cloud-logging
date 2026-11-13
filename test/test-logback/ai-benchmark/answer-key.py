@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Prints the answer key for the benchmark questions, computed from the .full file of an AI-mode run.
+"""Prints the answer key for the benchmark questions, computed from the .full files of an AI-mode run.
 
-Usage: answer-key.py <logs>/ai/test.full
+Usage: answer-key.py <logs>/ai/*.full
 
-The .full file has every event (DEBUG and above, no dedupe), each starting with a line
-'HH:mm:ss.SSS LEVEL [thread] logger [mdc] #id : message', followed by message continuation lines and the stack trace.
+Every test JVM writes its own .full file. It has every event (DEBUG and above, no dedupe), one per line:
+'HH:mm:ss.SSS LEVEL [thread] logger #t17 [mdc] #id : message | fields: {...} | Exception: message | at frame | Caused by: ...'
+(the test token after the logger, '#t17' or '~ #t17 #t21', only for events logged during a test; the stack trace follows the
+message, separated by ' | '). Lines starting with '---- ' mark JVMs and tests.
 The plain and careful baselines run the same tests, so the key applies to them too (check the totals once with the
 careful baseline's grep recipes if the example tests change).
 """
@@ -12,40 +14,33 @@ import collections
 import re
 import sys
 
-EVENT = re.compile(r'^\d\d:\d\d:\d\d\.\d{3} (\w+) +\[[^\]]*\] (\S+)(?: \[.*?\])? #[0-9a-f]{8,12} : (.*)$')
-FRAME = re.compile(r'^\s+at (\S+)\(([^)]*)\)')
-EXCEPTION = re.compile(r'^(?:Caused by: |Wrapped by: )?((?:[a-z_][\w$]*\.)+[A-Z][\w$]*)(?::|$)')
+EVENT = re.compile(r'^\d\d:\d\d:\d\d\.\d{3} (\w+)(?:\(\w+\))? +\[[^\]]*\] (\S+)(?: #t\d+| ~(?: #t\d+)+)?(?: \[.*?\])? #[0-9a-f]{8,12} : (.*)$')
+FRAME = re.compile(r'^at (\S+)\(([^)]*)\)')
+EXCEPTION = re.compile(r'^(?:Caused by: |Wrapped by: |Suppressed: )?((?:[a-z_][\w$]*\.)+[A-Z][\w$]*)(?::|$)')
 APP = re.compile(r'^(no\.entur\.grpc\.example|org\.entur\.example)\.')
 RESPONSE = re.compile(r'^([45]\d\d) [A-Za-z ]+ https?://[^/\s]+(/\S*)')
 REQUEST = re.compile(r'^(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) https?://[^/\s]+(/\S*)')
 
 
-def events(path):
-    """Yields (level, logger, lines) per event; lines[0] is the message part of the first line."""
-    current = None
-    with open(path, encoding='utf-8', errors='replace') as f:
-        for raw in f:
-            line = raw.rstrip('\n')
-            m = EVENT.match(line)
-            if m or line.startswith('---- JVM pid '):
-                if current:
-                    yield current
-                current = (m.group(1), m.group(2), [m.group(3)]) if m else None
-            elif current:
-                current[2].append(line)
-    if current:
-        yield current
+def events(paths):
+    """Yields (level, logger, message, trace) per event; trace is the list of stack trace parts (exception lines and frames)."""
+    for path in paths:
+        with open(path, encoding='utf-8', errors='replace') as f:
+            for raw in f:
+                m = EVENT.match(raw.rstrip('\n'))
+                if m:
+                    message, trace = split(m.group(3))
+                    yield m.group(1), m.group(2), message, trace
 
 
-def split(lines):
-    """Splits an event into message lines and stack trace lines (from the exception line before the first frame)."""
-    first_frame = next((i for i, l in enumerate(lines) if FRAME.match(l)), None)
-    if first_frame is None:
-        return lines, []
-    start = first_frame - 1
-    while start > 0 and not EXCEPTION.match(lines[start]):
-        start -= 1
-    return lines[:start], lines[start:]
+def split(text):
+    """Splits the text after ' : ' into the message (with fields) and the parts of the stack trace, which starts at the first
+    exception line that is followed by a frame."""
+    parts = text.split(' | ')
+    for i in range(1, len(parts) - 1):
+        if EXCEPTION.match(parts[i]) and FRAME.match(parts[i + 1]):
+            return ' | '.join(parts[:i]), parts[i:]
+    return text, []
 
 
 def normalize(message):
@@ -53,7 +48,7 @@ def normalize(message):
     return re.sub(r'localhost:\d+', 'localhost:<port>', message)
 
 
-def main(path):
+def main(paths):
     groups = collections.Counter()
     exceptions = {}
     throws = collections.Counter()
@@ -63,9 +58,7 @@ def main(path):
     tomcat = grpc = 0
     grpc_ports = set()
 
-    for level, logger, lines in events(path):
-        message_lines, trace = split(lines)
-        message = next((l.strip() for l in message_lines if l.strip()), '')
+    for level, logger, message, trace in events(paths):
         if level in ('WARN', 'ERROR'):
             key = (level, logger.rsplit('.', 1)[-1], normalize(message))
             groups[key] += 1
@@ -108,4 +101,4 @@ def main(path):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(sys.argv[1:])
