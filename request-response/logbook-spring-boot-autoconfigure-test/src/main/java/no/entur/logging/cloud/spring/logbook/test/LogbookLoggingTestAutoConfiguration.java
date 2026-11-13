@@ -3,6 +3,9 @@ package no.entur.logging.cloud.spring.logbook.test;
 import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupplierSource;
 import no.entur.logging.cloud.logbook.ondemand.state.ResponseHttpMessageStateSupplierSource;
+import no.entur.logging.cloud.logback.logstash.test.ai.AiLoggingControl;
+import no.entur.logging.cloud.logbook.logbook.test.AiLogLevelLogstashLogbackSink;
+import no.entur.logging.cloud.logbook.logbook.test.AiOndemandLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.logbook.test.CompositeSink;
 import no.entur.logging.cloud.logbook.logbook.test.PrettyPrintingLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.logbook.test.PrettyPrintingSink;
@@ -39,6 +42,21 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
             RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
+
+        if (AiLoggingControl.isAiActive()) {
+            // AI mode: the machine-readable sink (same message and JSON fields as without AI mode), plus the whole textual body
+            // for the AI files, which render headers and body from the marker
+            return AiOndemandLogLevelLogstashLogbackSink.newBuilder()
+                    .withLogger(logger)
+                    .withLogLevel(level)
+                    .withMaxBodySize(getMaxBodySize())
+                    .withMaxSize(getMaxSize())
+                    .withValidateRequestJsonBodyWellformed(requestHttpMessageStateSupplierSource)
+                    .withValidateResponseJsonBodyWellformed(responseHttpMessageStateSupplierSource)
+                    .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
+                    .withMessageComposers(format.getServer().getMessage().toComposer(), format.getClient().getMessage().toComposer())
+                    .build();
+        }
 
         Sink machineReadableSink = createAsyncMachineReadableSink(logger, level, requestHttpMessageStateSupplierSource,
                 responseHttpMessageStateSupplierSource, remoteHttpMessageContextSupplier);
@@ -84,6 +102,19 @@ public class LogbookLoggingTestAutoConfiguration extends AbstractLogbookLoggingA
     public Sink sink(RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier) {
         Logger logger = LoggerFactory.getLogger(loggerName);
         Level level = LogbookLoggingAutoConfiguration.parseLevel(loggerLevel);
+
+        if (AiLoggingControl.isAiActive()) {
+            // AI mode: the machine-readable sink (same message and JSON fields as without AI mode), plus the whole textual body
+            // for the AI files, which render headers and body from the marker
+            return AiLogLevelLogstashLogbackSink.newBuilder()
+                    .withLogger(logger)
+                    .withLogLevel(level)
+                    .withMaxBodySize(getMaxBodySize())
+                    .withMaxSize(getMaxSize())
+                    .withRemoteHttpMessageContextSupplier(remoteHttpMessageContextSupplier)
+                    .withMessageComposers(format.getServer().getMessage().toComposer(), format.getClient().getMessage().toComposer())
+                    .build();
+        }
 
         Sink machineReadableSink = createMachineReadbleSink(logger, level, remoteHttpMessageContextSupplier);
 

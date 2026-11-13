@@ -45,9 +45,21 @@ public class OndemandLogLevelLogstashLogbackSink extends AbstractOndemandLogLeve
             if (remoteHttpMessageContextSupplier == null) {
                 remoteHttpMessageContextSupplier = new DefaultRemoteHttpMessageContextSupplier();
             }
-            return new OndemandLogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(),
+            return newSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(),
                     jsonMapper, requestBodyWellformedDecisionSupplier, responseBodyWellformedDecisionSupplier,
                     maxBodySize, maxSize, remoteHttpMessageContextSupplier, server, client);
+        }
+
+        /** Creates the sink from the validated settings; override to create a subclass. */
+        protected OndemandLogLevelLogstashLogbackSink newSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled,
+                                                              JsonMapper jsonMapper,
+                                                              RequestHttpMessageStateSupplierSource requestHttpMessageStateSupplierSource,
+                                                              ResponseHttpMessageStateSupplierSource responseHttpMessageStateSupplierSource,
+                                                              int maxBodySize, int maxSize,
+                                                              RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier,
+                                                              MessageComposer server, MessageComposer client) {
+            return new OndemandLogLevelLogstashLogbackSink(logConsumer, logLevelEnabled, jsonMapper, requestHttpMessageStateSupplierSource,
+                    responseHttpMessageStateSupplierSource, maxBodySize, maxSize, remoteHttpMessageContextSupplier, server, client);
         }
     }
 

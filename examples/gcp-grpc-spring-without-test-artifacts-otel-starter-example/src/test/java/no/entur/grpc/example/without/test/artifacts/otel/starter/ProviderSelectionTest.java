@@ -3,7 +3,7 @@ package no.entur.grpc.example.without.test.artifacts.otel.starter;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.Appender;
-import ch.qos.logback.core.ConsoleAppender;
+import ch.qos.logback.core.OutputStreamAppender;
 import ch.qos.logback.core.encoder.Encoder;
 import ch.qos.logback.core.spi.AppenderAttachable;
 import no.entur.logging.cloud.gcp.logback.logstash.StackdriverLogstashEncoder;
@@ -55,8 +55,8 @@ public class ProviderSelectionTest {
                 if (enc instanceof StackdriverLogstashEncoder stackdriverEncoder) {
                     return stackdriverEncoder;
                 }
-            } else if (appender instanceof ConsoleAppender<?> consoleAppender) {
-                if (consoleAppender.getEncoder() instanceof StackdriverLogstashEncoder enc) {
+            } else if (appender instanceof OutputStreamAppender<?> outputStreamAppender) {
+                if (outputStreamAppender.getEncoder() instanceof StackdriverLogstashEncoder enc) {
                     return enc;
                 }
             }

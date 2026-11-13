@@ -55,8 +55,17 @@ public class LogLevelLogstashLogbackSink extends AbstractLogLevelLogstashLogback
             if (remoteHttpMessageContextSupplier == null) {
                 remoteHttpMessageContextSupplier = new DefaultRemoteHttpMessageContextSupplier();
             }
-            return new LogLevelLogstashLogbackSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), jsonMapper,
+            return newSink(loggerToBiConsumer(), logEnabledToBooleanSupplier(), jsonMapper,
                     Math.min(maxBodySize, maxSize), remoteHttpMessageContextSupplier, server, client);
+        }
+
+        /** Creates the sink from the validated settings; override to create a subclass. */
+        protected LogLevelLogstashLogbackSink newSink(BiConsumer<Marker, String> logConsumer, BooleanSupplier logLevelEnabled,
+                                                      JsonMapper jsonMapper, int maxSize,
+                                                      RemoteHttpMessageContextSupplier remoteHttpMessageContextSupplier,
+                                                      MessageComposer server, MessageComposer client) {
+            return new LogLevelLogstashLogbackSink(logConsumer, logLevelEnabled, jsonMapper, maxSize, remoteHttpMessageContextSupplier,
+                    server, client);
         }
     }
 
