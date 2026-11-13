@@ -3,7 +3,12 @@
 	<!-- Spring Boot default logger levels, as without AI mode -->
 	<include resource="logback/spring-defaults-test.xml" />
 
+	<!-- every test JVM writes its own files, <file>.<pid>.compact and <file>.<pid>.full -->
+	<define name="entur.logging.ai.pid" class="no.entur.logging.cloud.logback.logstash.test.ai.AiPidPropertyDefiner" />
+
 	<!-- both files -->
+	<!-- the test running on the thread of the event, " #t17" (see AiTestThread) -->
+	<conversionRule conversionWord="aiTest" class="no.entur.logging.cloud.logback.logstash.test.ai.common.AiTestConverter" />
 	<conversionRule conversionWord="aiLevel" class="no.entur.logging.cloud.logback.logstash.test.ai.common.AiLevelConverter" />
 
 	<!-- compact file -->
@@ -25,19 +30,19 @@
 	<shutdownHook class="no.entur.logging.cloud.logback.logstash.test.ai.AiShutdownHook" />
 
 	<!--
-		Compact plain text (one event per line) written to <file>.compact, where <file> is given by -Dentur.logging.ai.file (default: entur-logging-ai in the temp directory),
+		Compact plain text (one event per line) written to <file>.<pid>.compact, where <file> is given by -Dentur.logging.ai.file (default: entur-logging-ai in the temp directory),
 		nothing on the console. Included from logback-test.xml only if -Dentur.logging.ai.enabled=true.
 	-->
 	<appender name="COMPACT_FILE" class="no.entur.logging.cloud.logback.logstash.test.ai.AiFileAppender">
-		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.compact</file>
-		<!-- held by the test JVM which uses aliases, see AiFileAppender -->
-		<lockFile>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.lock</lockFile>
+		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.${entur.logging.ai.pid}.compact</file>
 		<!-- framework start-up/shutdown chatter below WARN, override with -Dentur.logging.ai.quiet-loggers=a.b,c.d -->
 		<filter class="no.entur.logging.cloud.logback.logstash.test.ai.compact.QuietLoggersFilter" />
 		<!-- compact file level, override with -Dentur.logging.ai.level=DEBUG -->
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>${entur.logging.ai.level:-INFO}</level>
 		</filter>
+		<!-- no marker lines for tests which passed without logging anything, see AiTestExecutionListener -->
+		<skipEmptyTests>true</skipEmptyTests>
 		<append>true</append>
 		<immediateFlush>true</immediateFlush>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
@@ -46,7 +51,7 @@
 				structured fields (Logstash markers, key-value pairs) as JSON, truncated like request-response bodies;
 				stack traces on a single line (grep friendly), root-cause-first, framework frames removed, frames limited by entur.logging.ai.stacktrace.max-lines
 			-->
-			<pattern>%aiLevel %cLogger%cMdc%cEventId : %cMsg%cFields%cEx{full,org.springframework,org.junit,org.gradle,worker.org.gradle,org.apache,jakarta.,io.grpc,io.netty,io.micrometer,org.zalando.logbook,jdk.internal,jdk.proxy,java.lang.reflect,java.util,sun.reflect}%n%nopex</pattern>
+			<pattern>%aiLevel %cLogger%aiTest%cMdc%cEventId : %cMsg%cFields%cEx{full,org.springframework,org.junit,org.gradle,worker.org.gradle,org.apache,jakarta.,io.grpc,io.netty,io.micrometer,org.zalando.logbook,jdk.internal,jdk.proxy,java.lang.reflect,java.util,sun.reflect}%n%nopex</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
@@ -56,10 +61,9 @@
 		<appender-ref ref="COMPACT_FILE" />
 	</appender>
 
-	<!-- Drill-down: the same events unfiltered and untrimmed (all levels, full stack traces) in <file>.full -->
+	<!-- Drill-down: the same events unfiltered and untrimmed (all levels, whole stack traces; one event per line) in <file>.<pid>.full -->
 	<appender name="FULL_FILE" class="no.entur.logging.cloud.logback.logstash.test.ai.AiFileAppender">
-		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.full</file>
-		<lockFile>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.lock</lockFile>
+		<file>${entur.logging.ai.file:-${java.io.tmpdir}/entur-logging-ai}.${entur.logging.ai.pid}.full</file>
 		<!-- override with -Dentur.logging.ai.full.level=INFO -->
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>${entur.logging.ai.full.level:-DEBUG}</level>
@@ -67,7 +71,7 @@
 		<append>true</append>
 		<immediateFlush>true</immediateFlush>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%d{HH:mm:ss.SSS} %-5aiLevel [%thread] %logger%fMdc%fEventId : %fMsg%fFields%n%fEx</pattern>
+			<pattern>%d{HH:mm:ss.SSS} %-5aiLevel [%thread] %logger%aiTest%fMdc%fEventId : %fMsg%fFields%fEx%n</pattern>
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>

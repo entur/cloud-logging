@@ -13,6 +13,23 @@ public class AiLoggingControl {
         return "true".equals(System.getProperty(AI_ENABLED_PROPERTY));
     }
 
+    /** JVM system property; the AI files are this value followed by <code>.compact</code>, <code>.full</code> and <code>.summary</code>. */
+    public static final String AI_FILE_PROPERTY = "entur.logging.ai.file";
+
+    /** As the default in <code>logback-ai.xml</code>: <code>entur-logging-ai</code> in the temp directory. */
+    public static String aiFile() {
+        String file = System.getProperty(AI_FILE_PROPERTY);
+        return file != null && !file.isEmpty() ? file : System.getProperty("java.io.tmpdir") + "/entur-logging-ai";
+    }
+
+    /**
+     * The files of this JVM without extension, <code>&lt;file&gt;.&lt;pid&gt;</code>: every test JVM writes its own compact and full file
+     * (see {@link AiPidPropertyDefiner}). The summary file, <code>&lt;file&gt;.summary</code>, is shared.
+     */
+    public static String aiJvmFile() {
+        return aiFile() + "." + ProcessHandle.current().pid();
+    }
+
     private static volatile boolean aiFilesStarted;
 
     /**
@@ -34,14 +51,7 @@ public class AiLoggingControl {
      */
     public static final String AI_ALIAS_PROPERTY = "entur.logging.ai.alias";
 
-    private static volatile boolean aliasesDisabledInThisJvm;
-
     public static boolean isAliasEnabled() {
-        return !aliasesDisabledInThisJvm && !"false".equalsIgnoreCase(System.getProperty(AI_ALIAS_PROPERTY));
-    }
-
-    /** Called if another test JVM writes to the same files at the same time, as its aliases would be ambiguous (see {@link AiFileAppender}). */
-    public static void disableAliasesInThisJvm() {
-        aliasesDisabledInThisJvm = true;
+        return !"false".equalsIgnoreCase(System.getProperty(AI_ALIAS_PROPERTY));
     }
 }

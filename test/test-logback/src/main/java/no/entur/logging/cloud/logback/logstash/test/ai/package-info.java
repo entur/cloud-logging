@@ -4,7 +4,8 @@
  * and {@link no.entur.logging.cloud.logback.logstash.test.ai.AiBodyMarker}.
  * <p>
  * Subpackages: <code>common</code> has what both files use, <code>compact</code> and <code>full</code> what only one of them uses.
- * Dependencies go upwards only: <code>compact</code> and <code>full</code> use <code>common</code> and this package,
+ * <code>junit</code> has the JUnit Platform listener which writes the summary file (the failed tests) and the test markers.
+ * Dependencies go upwards only: <code>compact</code>, <code>full</code> and <code>junit</code> use <code>common</code> and this package,
  * <code>common</code> uses this package, and <code>compact</code> and <code>full</code> do not use each other.
  */
 package no.entur.logging.cloud.logback.logstash.test.ai;

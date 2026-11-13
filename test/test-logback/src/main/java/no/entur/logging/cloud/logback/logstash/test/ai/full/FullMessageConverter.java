@@ -8,7 +8,7 @@ import no.entur.logging.cloud.logback.logstash.test.ai.common.AiText;
 
 /**
  * Message for the full file: like <code>%msg</code>, but UUIDs are replaced by the same aliases as in the compact file (followed by the
- * value the first time) and control characters other than line breaks are escaped. Request-response events get all headers and the
+ * value the first time), and the message is on a single line with control characters escaped, so that every event is one line. Request-response events get all headers and the
  * whole body from the request-response marker (see {@link FullRequestResponse}).
  */
 public class FullMessageConverter extends ClassicConverter {
@@ -23,6 +23,6 @@ public class FullMessageConverter extends ClassicConverter {
         if (details.isRequestResponse()) {
             return FullRequestResponse.render(message, details);
         }
-        return AiAliases.aliasUuids(AiText.escapeControlCharacters(message, true), true);
+        return AiAliases.aliasUuids(AiText.singleLine(message), true);
     }
 }

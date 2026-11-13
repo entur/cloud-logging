@@ -13,5 +13,9 @@ dependencies {
     // AI mode: DevOpsLogger severities (DevOpsMarker) in both files
     api project(":api")
 
+    // AI mode: AiTestExecutionListener; the launcher is on the classpath whenever it loads the listener
+    compileOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.junit.platform:junit-platform-launcher")
+
     api ("org.entur.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
 }

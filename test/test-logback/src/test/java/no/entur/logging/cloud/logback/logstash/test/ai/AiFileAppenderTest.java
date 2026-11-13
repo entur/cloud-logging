@@ -107,33 +107,6 @@ public class AiFileAppenderTest {
     }
 
     @Test
-    public void lockReachedThroughAnotherPathIsKept(@TempDir Path directory) {
-        AiFileAppender appender = new AiFileAppender();
-        appender.setContext(new LoggerContext());
-        Path lock = directory.resolve("kept.lock");
-
-        assertThat(appender.lock(lock.toString())).isEqualTo(AiFileAppender.LockState.HELD);
-        // the same file again (another path in the same JVM): still held, and the second channel is not closed (that could release the lock)
-        assertThat(appender.lock(directory.resolve(".").resolve("kept.lock").toString())).isEqualTo(AiFileAppender.LockState.HELD);
-    }
-
-    @Test
-    public void noAliasesIfLockingFails(@TempDir Path directory) throws IOException {
-        AiFileAppender appender = new AiFileAppender();
-        appender.setContext(new LoggerContext());
-
-        Path notAFile = Files.createDirectory(directory.resolve("ai.lock"));
-        assertThat(appender.lock(notAFile.toString())).isEqualTo(AiFileAppender.LockState.FAILED);
-
-        Path target = directory.resolve("elsewhere");
-        Path link = directory.resolve("link.lock");
-        if (symbolicLink(link, target)) {
-            assertThat(appender.lock(link.toString())).isEqualTo(AiFileAppender.LockState.FAILED);
-            assertThat(Files.exists(target)).isFalse();
-        }
-    }
-
-    @Test
     public void jvmStartLineIsWrittenOncePerFile(@TempDir Path directory) throws Exception {
         File file = directory.resolve("ai.log").toFile();
         LoggerContext context = new LoggerContext();
@@ -148,7 +121,65 @@ public class AiFileAppenderTest {
 
         List<String> lines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
         assertThat(lines).hasSize(3);
-        assertThat(lines.get(0)).matches("---- JVM pid \\d+ started .* in .* \\(aliases u1, h1, \\.\\.\\. restart\\) ----");
+        assertThat(lines.get(0)).matches("---- JVM pid \\d+ started .* in .* ----");
         assertThat(lines.subList(1, 3)).containsExactly("message", "message");
+    }
+
+    private static LoggingEvent event(LoggerContext context, String message, AiTestMarker marker) {
+        LoggingEvent event = new LoggingEvent("f", context.getLogger("x"), Level.INFO, message, null, null);
+        event.setMDCPropertyMap(Map.of());
+        if (marker != null) {
+            event.addMarker(marker);
+        }
+        return event;
+    }
+
+    @Test
+    public void testMarkersAreWrittenAsTheyAre(@TempDir Path directory) throws Exception {
+        Path file = directory.resolve("ai.full");
+        LoggerContext context = new LoggerContext();
+        AiFileAppender appender = appender(context, file);
+        appender.start();
+        AiTestMarker start = AiTestMarker.start("t1-1", "MyTest.passes()");
+        appender.doAppend(event(context, start.getLine(), start));
+        AiTestMarker end = AiTestMarker.end("t1-1", "MyTest.passes()", "passed", false);
+        appender.doAppend(event(context, end.getLine(), end));
+        appender.stop();
+
+        List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
+        assertThat(lines.subList(1, lines.size())).containsExactly("---- #t1-1 start: MyTest.passes() ----", "---- #t1-1 end (passed): MyTest.passes() ----").inOrder();
+    }
+
+    @Test
+    public void testsWithoutEventsCanBeSkipped(@TempDir Path directory) throws Exception {
+        Path file = directory.resolve("ai.compact");
+        LoggerContext context = new LoggerContext();
+        AiFileAppender appender = appender(context, file);
+        appender.setSkipEmptyTests(true);
+        appender.start();
+
+        // passed without events: no lines
+        appender.doAppend(event(context, "", AiTestMarker.start("t1-1", "MyTest.silent()")));
+        appender.doAppend(event(context, "", AiTestMarker.end("t1-1", "MyTest.silent()", "passed", false)));
+        // failed without events: both lines
+        appender.doAppend(event(context, "", AiTestMarker.start("t1-2", "MyTest.fails()")));
+        appender.doAppend(event(context, "", AiTestMarker.end("t1-2", "MyTest.fails()", "FAILED", true)));
+        // the start line is written with the first event, also by the appender of a later logging configuration
+        appender.doAppend(event(context, "", AiTestMarker.start("t1-3", "MyTest.logs()")));
+        appender.stop();
+        appender = appender(context, file);
+        appender.setSkipEmptyTests(true);
+        appender.start();
+        appender.doAppend(event(context, "message", null));
+        appender.doAppend(event(context, "", AiTestMarker.end("t1-3", "MyTest.logs()", "passed", false)));
+        appender.stop();
+
+        List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
+        assertThat(lines.subList(1, lines.size())).containsExactly(
+                "---- #t1-2 start: MyTest.fails() ----",
+                "---- #t1-2 end (FAILED): MyTest.fails() ----",
+                "---- #t1-3 start: MyTest.logs() ----",
+                "message",
+                "---- #t1-3 end (passed): MyTest.logs() ----").inOrder();
     }
 }
