@@ -15,9 +15,20 @@ public class DefaultCompositeConsoleOutputLoggingEvent implements CompositeConso
 
     private final ILoggingEvent event;
     private final CompositeConsoleOutputType compositeConsoleOutputType;
+    private final String aiTest;
     public DefaultCompositeConsoleOutputLoggingEvent(ILoggingEvent event, CompositeConsoleOutputType compositeConsoleOutputType) {
+        this(event, compositeConsoleOutputType, null);
+    }
+
+    /** @param aiTest AI mode: the test or tests the event may belong to, as written to the AI files (see AiTestThread#tag()), or null */
+    public DefaultCompositeConsoleOutputLoggingEvent(ILoggingEvent event, CompositeConsoleOutputType compositeConsoleOutputType, String aiTest) {
         this.event = event;
         this.compositeConsoleOutputType = compositeConsoleOutputType;
+        this.aiTest = aiTest;
+    }
+
+    public String getAiTest() {
+        return aiTest;
     }
     @Override
     public String getThreadName() {

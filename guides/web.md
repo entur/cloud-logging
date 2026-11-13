@@ -402,6 +402,8 @@ and
 * use the `CopyCorrelationIdFromGrpcMdcContextToRequestClientInterceptor` client interceptor,
 * wrap the call(s) in a `GrpcMdcContext` (or `CorrelationIdGrpcMdcContext`).
 
+These artifacts do not include a gRPC transport. If your application does not already have one, add it yourself, for example `io.grpc:grpc-netty` or `io.grpc:grpc-netty-shaded`.
+
 
 ### Running applications locally
 For 'classic' one-line log output when running a server locally, additionally add the logging test artifacts to the main scope during local execution only.
@@ -432,6 +434,8 @@ Then configure desired output by specifying `entur.logging.style`
 ```
 entur.logging.style=humanReadablePlain|humanReadableJson|machineReadableJson
 ```
+
+In tests, `-Dentur.logging.style=machineReadableJson` on the command line gives the servers' JSON output on the console, see [Console output as on the servers](../test/test-logback/README.md#console-output-as-on-the-servers).
 
 </details>
 

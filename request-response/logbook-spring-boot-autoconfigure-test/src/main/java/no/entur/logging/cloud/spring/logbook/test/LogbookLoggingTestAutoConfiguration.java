@@ -3,7 +3,7 @@ package no.entur.logging.cloud.spring.logbook.test;
 import no.entur.logging.cloud.logbook.RemoteHttpMessageContextSupplier;
 import no.entur.logging.cloud.logbook.ondemand.state.RequestHttpMessageStateSupplierSource;
 import no.entur.logging.cloud.logbook.ondemand.state.ResponseHttpMessageStateSupplierSource;
-import no.entur.logging.cloud.logback.logstash.test.AiLoggingControl;
+import no.entur.logging.cloud.logback.logstash.test.ai.AiLoggingControl;
 import no.entur.logging.cloud.logbook.logbook.test.AiLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.logbook.test.AiOndemandLogLevelLogstashLogbackSink;
 import no.entur.logging.cloud.logbook.logbook.test.CompositeSink;

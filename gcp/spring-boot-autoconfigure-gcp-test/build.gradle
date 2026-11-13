@@ -1,14 +1,9 @@
 
 dependencies {
-
     api project(":api")
     api project(":gcp:logback-logstash-encoder-gcp")
 
     api project(":test:test-logback")
-
-    api ("org.slf4j:slf4j-api")
-    api ("org.codehaus.janino:commons-compiler")
-    api ("org.codehaus.janino:janino")
 
     api("jakarta.annotation:jakarta.annotation-api")
 

@@ -56,12 +56,9 @@ ext {
     jacksonSyntaxHighlightVersion = '2.0.4'
     logbackLogstashSyntaxHighlightingDecoratorsVersion = '2.0.3'
     commonsIoVersion = '2.22.0'
-    commonsTextVersion = '1.15.0'
-    nettyTcnativeBoringsslStaticVersion = '2.0.84.Final'
 
-    grpcNettyVersion = '1.85.1'
     grpcVersion = '1.85.1'
-    grpcCommonsVersion = '2.78.0'
+    grpcCommonsVersion = '2.79.0'
     grpcProtobufVersion = '4.36.2'
 
     jsonAssertVersion = '0.8.0'
@@ -107,6 +104,7 @@ configure(exampleProjects()) {
         // Use Spring Boot BOM for dependency management
         implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
         implementation platform("tools.jackson:jackson-bom:${jacksonBomVersion}")
+        implementation platform("com.google.protobuf:protobuf-bom:${grpcProtobufVersion}")
     }
 }
 
@@ -124,6 +122,16 @@ configure(libraryProjects()) {
         // This ensures both api and implementation dependencies get pinned versions
         api(platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}"))
         api(platform("tools.jackson:jackson-bom:${jacksonBomVersion}"))
+        api(platform("io.grpc:grpc-bom:${grpcVersion}"))
+        // protobuf 4.x, also used by protoc in the gRPC modules
+        api(platform("com.google.protobuf:protobuf-bom:${grpcProtobufVersion}"))
+
+        // Keep versions consistent across all modules in this build. Constraints only set
+        // versions, they do not add dependencies (and are not published, see withXml below).
+        constraints {
+            api("com.google.api.grpc:proto-google-common-protos:${grpcCommonsVersion}")
+            api("org.entur.jackson:jackson-tools-syntax-highlight:${jacksonSyntaxHighlightVersion}")
+        }
     }
 }
 
@@ -134,11 +142,12 @@ configure(jvmProjects()) {
         useJUnitPlatform {
             includeEngines 'junit-jupiter'
         }
-        // AI mode: forward all entur.logging.ai.* properties to the test JVMs,
-        // e.g. ./gradlew test --rerun -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test
-        // (not to test-logback's own unit tests, which test the AI-mode classes with their defaults)
+        // forward all entur.logging.* properties to the test JVMs, for example for AI mode
+        // (./gradlew test --rerun -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test)
+        // or for the servers' JSON output on the console (-Dentur.logging.style=machineReadableJson);
+        // not to test-logback's own unit tests, which test the AI-mode classes with their defaults
         if (project.path != ':test:test-logback') {
-            systemProperties providers.systemPropertiesPrefixedBy('entur.logging.ai.').get()
+            systemProperties providers.systemPropertiesPrefixedBy('entur.logging.').get()
         }
     }
 

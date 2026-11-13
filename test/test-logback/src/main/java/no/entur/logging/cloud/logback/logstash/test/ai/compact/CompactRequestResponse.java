@@ -1,0 +1,101 @@
+package no.entur.logging.cloud.logback.logstash.test.ai.compact;
+
+import no.entur.logging.cloud.logback.logstash.test.ai.common.AiEventDetails;
+import no.entur.logging.cloud.logback.logstash.test.ai.common.AiRequestResponse;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Renders request-response events (HTTP and gRPC) for the compact file (see {@link AiRequestResponse}): leaves out transport headers
+ * (see {@link CompactSettings#AI_EXCLUDED_HEADERS_PROPERTY}) and headers repeated in the MDC (same name, ignoring an <code>x-</code>
+ * prefix, case and punctuation, and the same value), and cuts the body (see {@link CompactSettings#AI_BODY_MAX_PROPERTY}). Aliasing
+ * comes before cutting.
+ */
+public final class CompactRequestResponse {
+
+    /** Transport and boilerplate HTTP and gRPC headers. Content-type is kept (except for gRPC) as it often explains a failing request. */
+    public static final Set<String> DEFAULT_EXCLUDED_HEADERS = Set.of(
+            "accept", "accept-encoding", "accept-language", "cache-control", "connection", "content-length", "date", "expires",
+            "host", "http2-settings", "keep-alive", "pragma", "strict-transport-security", "transfer-encoding", "upgrade",
+            "user-agent", "vary", "x-content-type-options", "x-frame-options", "x-xss-protection",
+            "grpc-accept-encoding", "grpc-encoding", "te");
+
+    private CompactRequestResponse() {
+    }
+
+    /** The message with fewer headers and the body cut. */
+    public static String render(String message, AiEventDetails details, Map<String, String> mdc) {
+        // sized for the cut body
+        String singleLineBody = details.getSingleLineBody();
+        int bodyLength = singleLineBody == null ? 0 : singleLineBody.length();
+        int bodyMax = CompactSettings.bodyMax();
+        StringBuilder builder = AiRequestResponse.message(message, details, false, bodyMax > 0 ? Math.min(bodyLength, bodyMax + 64) : bodyLength);
+        Set<String> excluded = CompactSettings.excludedHeaders(DEFAULT_EXCLUDED_HEADERS);
+        Map<String, String> mdcByName = byNormalizedName(mdc);
+        int count = 0;
+        for (AiEventDetails.Header header : details.getHeaders()) {
+            String name = header.name().toLowerCase(Locale.ROOT);
+            String value = header.value();
+            if (excluded.contains(name) || isGrpcContentType(name, value) || repeatsMdc(name, value, mdcByName)) {
+                continue;
+            }
+            AiRequestResponse.appendHeader(builder, count++, name, value, false);
+        }
+        return AiRequestResponse.withBody(builder, compactBody(details));
+    }
+
+    /** True if the compact file cuts the body of this event. */
+    public static boolean isBodyTruncatedInCompactFile(AiEventDetails details) {
+        String body = details.getCompactBody();
+        return body != null && !CompactSettings.truncateBody(body).equals(body);
+    }
+
+    private static String compactBody(AiEventDetails details) {
+        String body = details.getCompactBody();
+        return body == null ? null : CompactSettings.truncateBody(body);
+    }
+
+    private static boolean isGrpcContentType(String name, String value) {
+        return name.equals("content-type") && value != null && value.startsWith("application/grpc");
+    }
+
+    private static boolean repeatsMdc(String name, String value, Map<String, String> mdcByName) {
+        return value != null && !value.isEmpty() && value.equals(mdcByName.get(normalizedName(name)));
+    }
+
+    private static Map<String, String> byNormalizedName(Map<String, String> mdc) {
+        if (mdc == null || mdc.isEmpty()) {
+            return Map.of();
+        }
+        Map<String, String> result = new HashMap<>();
+        for (Map.Entry<String, String> entry : mdc.entrySet()) {
+            if (entry.getKey() != null && entry.getValue() != null) {
+                result.put(normalizedName(entry.getKey()), entry.getValue());
+            }
+        }
+        return result;
+    }
+
+    /** <code>X-Correlation-Id</code>, <code>correlationId</code> and <code>correlation_id</code> are all <code>correlationid</code>. */
+    static String normalizedName(String name) {
+        String lowerCase = name.toLowerCase(Locale.ROOT);
+        int slash = lowerCase.lastIndexOf('/');
+        if (slash != -1) {
+            lowerCase = lowerCase.substring(slash + 1);
+        }
+        if (lowerCase.startsWith("x-")) {
+            lowerCase = lowerCase.substring(2);
+        }
+        StringBuilder builder = new StringBuilder(lowerCase.length());
+        for (int i = 0; i < lowerCase.length(); i++) {
+            char c = lowerCase.charAt(i);
+            if (Character.isLetterOrDigit(c)) {
+                builder.append(c);
+            }
+        }
+        return builder.toString();
+    }
+}
