@@ -1,0 +1,18 @@
+You are helping debug a Java test run. Its logs were written to the files in @LOGS@/ai:
+  test.summary               the number of tests per test JVM, and the failed tests
+  test.<pid>.compact         compact log of one test JVM
+  test.<pid>.full            full log of the same test JVM
+The run had several test JVMs, so there are several compact and full files; the questions are about all of them.
+
+How the log files work (from the project's instructions for AI agents):
+@SNIPPET@
+
+Rules: use only the files in that directory. Do not read any other files (no source code) and do not modify anything. Prefer grep/head/wc style commands; do not read whole files.
+
+Answer these questions:
+1. List every distinct WARN and ERROR message of the run. Treat events that differ only in ids, aliases or ports as the same message. For each, give level, logger class, the message, the total number of times it was logged (include events collapsed into "repeated N more times" lines) and, if it has a stack trace, the exception class.
+2. Which HTTP requests (method and path) got a 4xx or 5xx response? Give the status and how many times.
+3. How many times was an embedded Tomcat server started, how many times a gRPC server, and on which port did the gRPC server listen?
+4. For the ERROR events that have a stack trace, give the exception class and the source file and line where it was thrown in the application's own code (packages no.entur.grpc.example and org.entur.example).
+
+Reply with a numbered list, one section per question, and nothing else. For question 1 use one line per message: LEVEL | logger class | message | count | exception class or -.
