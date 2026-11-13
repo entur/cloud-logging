@@ -90,7 +90,8 @@ FAILED DocumentEndpointTest.returnsNotFound() #t17
 ```
 
 - An entry has the exception (and its root cause, if there is one), each with the stack frame which tells most: the first one in the project's own code (a class loaded from a
-  directory of class files, not from a jar), else the first one which is not in a test framework, an assertion library or the JDK. The same goes for the frames of the listed events.
+  directory of class files, not from a jar), else the first one which is not in a test framework, an assertion library or the JDK. A listed event has that frame of its root cause (`| at ...`) and, if the class which logged the event is further down in the stack trace,
+  the frame of that class (`| called from ...`): an exception which is caught and logged is often thrown in code which only got a wrong value, and the fault is in its caller.
   The name is `Class.method()`, followed by the display name in brackets if it tells more (the invocation of a parameterized test, `@DisplayName`).
 - `WARN/ERROR logged during the test` lists what the test logged at WARN and above (up to 8 different events, repeats counted; message, root cause and its first frame
   outside frameworks, with the `#id` of the event in the full file), so that a cause which is only in the log is visible without running a command. It has the events

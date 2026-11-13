@@ -143,6 +143,24 @@ public final class AiTestEvents {
         return outsideFrameworks != null ? outsideFrameworks : frames[0];
     }
 
+    /**
+     * The frame of the class which logged the event (its logger is named after it), or of a class nested in it: where that class
+     * called what failed. An exception which is caught and logged is often thrown further down, in code which only got a wrong
+     * value, and this is the frame nearest to the log statement. Null if the class is not in the stack trace.
+     */
+    public static StackTraceElement callerFrameOf(StackTraceElement[] frames, String loggerName) {
+        if (frames == null || loggerName == null) {
+            return null;
+        }
+        for (StackTraceElement frame : frames) {
+            String className = frame.getClassName();
+            if (className.equals(loggerName) || className.startsWith(loggerName) && className.charAt(loggerName.length()) == '$') {
+                return frame;
+            }
+        }
+        return null;
+    }
+
     /** Called on the thread which logs the event. */
     public static void logged(ILoggingEvent event) {
         if (!enabled || event.getLevel() == null || !event.getLevel().isGreaterOrEqual(Level.WARN)) {
@@ -197,7 +215,7 @@ public final class AiTestEvents {
         if (root == null) {
             return event.getLevel() + "|" + event.getLoggerName() + '|' + withoutDigits(String.valueOf(event.getFormattedMessage()));
         }
-        return event.getLevel() + "|" + event.getLoggerName() + '|' + root.getClassName() + '|' + frame(root);
+        return event.getLevel() + "|" + event.getLoggerName() + '|' + root.getClassName() + '|' + frames(root, event.getLoggerName());
     }
 
     private static String withoutDigits(String text) {
@@ -221,17 +239,24 @@ public final class AiTestEvents {
         return root;
     }
 
-    /** See {@link #frameOf(StackTraceElement[])}; null if the exception has no frames. */
-    private static String frame(IThrowableProxy throwable) {
+    /**
+     * <code> | at frame</code> (see {@link #frameOf(StackTraceElement[])}), followed by <code> | called from frame</code> if the class which
+     * logged the event is further down in the stack trace (see {@link #callerFrameOf(StackTraceElement[], String)}); empty if the
+     * exception has no frames.
+     */
+    private static String frames(IThrowableProxy throwable, String loggerName) {
         StackTraceElementProxy[] proxies = throwable.getStackTraceElementProxyArray();
         if (proxies == null || proxies.length == 0) {
-            return null;
+            return "";
         }
         StackTraceElement[] frames = new StackTraceElement[proxies.length];
         for (int i = 0; i < proxies.length; i++) {
             frames[i] = proxies[i].getStackTraceElement();
         }
-        return frameOf(frames).toString();
+        StackTraceElement thrown = frameOf(frames);
+        StackTraceElement caller = callerFrameOf(frames, loggerName);
+        String result = " | at " + thrown;
+        return caller == null || caller.equals(thrown) ? result : result + " | called from " + caller;
     }
 
     /** <code>WARN Logger #id : message | root cause: message | at frame</code>, on one line. */
@@ -245,10 +270,7 @@ public final class AiTestEvents {
             if (root.getMessage() != null && !root.getMessage().isEmpty()) {
                 line.append(": ").append(cut(root.getMessage(), MAX_EXCEPTION_MESSAGE));
             }
-            String frame = frame(root);
-            if (frame != null) {
-                line.append(" | at ").append(frame);
-            }
+            line.append(frames(root, event.getLoggerName()));
         }
         return line.toString();
     }
