@@ -76,10 +76,10 @@ Every event has an id (`#1a2b3c4d5e6f`) here. In the compact file, only events w
 A JUnit Platform `TestExecutionListener` (`AiTestExecutionListener`, registered through `META-INF/services`, so there is nothing to configure with
 Gradle, Maven or an IDE) tells which tests failed and where their log lines are. It does nothing unless `entur.logging.ai.enabled=true`.
 
-`<file>.summary` has an entry per failed test and a line per test JVM (the only line if nothing failed):
+`<file>.summary` has a block per test JVM, written when the JVM exits: a line with the number of tests (the only line if nothing failed) and an entry per failed test:
 
 ```
----- JVM pid 4711 in /work/app, logs /tmp/test.4711.compact ----
+---- JVM pid 4711 in /work/app, logs /tmp/test.4711.compact: 118 tests, 1 failed, 0 aborted, 2 skipped ----
 FAILED DocumentEndpointTest.returnsNotFound() #t17
   org.opentest4j.AssertionFailedError: expected: <404> but was: <500>
   at no.entur.DocumentEndpointTest.returnsNotFound(DocumentEndpointTest.java:42)
@@ -87,18 +87,40 @@ FAILED DocumentEndpointTest.returnsNotFound() #t17
     ERROR DocumentService #1a2b3c4d5e6f : Unable to load document 7 | java.io.IOException: timeout | at no.entur.DocumentStore.load(DocumentStore.java:88)
   logs: sed -n '/#t17 start/,/#t17 end/p' /tmp/test.4711.compact
   class logs (set-up, Spring context start): sed -n '/#t12 start/,/#t12 end/p' /tmp/test.4711.compact
----- JVM pid 4711: 118 tests, 1 failed, 0 aborted, 2 skipped ----
 ```
 
-- An entry has the exception (and its root cause, if there is one), each with the first stack frame which is not in a test framework, an assertion library or the JDK.
+- An entry has the exception (and its root cause, if there is one), each with the stack frame which tells most: the first one in the project's own code (a class loaded from a
+  directory of class files, not from a jar), else the first one which is not in a test framework, an assertion library or the JDK. The same goes for the frames of the listed events.
   The name is `Class.method()`, followed by the display name in brackets if it tells more (the invocation of a parameterized test, `@DisplayName`).
 - `WARN/ERROR logged during the test` lists what the test logged at WARN and above (up to 8 different events, repeats counted; message, root cause and its first frame
   outside frameworks, with the `#id` of the event in the full file), so that a cause which is only in the log is visible without running a command. It has the events
   logged on the thread of the test, and those of other threads while it ran; if several tests ran then, the latter are marked `~` and may belong to another test.
   Also events which the compact file collapses as repeated. If the test logged none, the events of the set-up of its class are listed (a Spring context which failed to start).
-- A failure with the same exception at the same place as an earlier one is a single line, `FAILED ... : same failure as ...`.
 - If the set-up or tear-down of a test class fails (`@BeforeAll`, ...), the class has the entry, with the number of its tests which did not run.
 - Messages are on one line and cut at 500 characters. UUIDs are not replaced by aliases here; see [Aliases](#aliases) for finding them in the log files.
+
+With many failed tests the block stays short, and what they have in common comes first:
+
+```
+---- JVM pid 4711 in /work/app, logs /tmp/test.4711.compact: 94 tests, 24 failed, 0 aborted, 0 skipped ----
+WARN/ERROR events logged during several failed tests, likely causes first (one event of each kind):
+  24 of 24 failed, 0 of 70 passed tests: WARN DocumentCache #1a2b3c4d5e6f : Unable to store document 7 | java.lang.IllegalArgumentException: no id | at no.entur.DocumentCache.put(DocumentCache.java:88)
+  9 of 24 failed, 3 of 70 passed tests: WARN DocumentClient #2b3c4d5e6f1a : Retrying request 2
+Failed tests (24), the 5 marked * in detail below:
+* #t17 DocumentEndpointTest.returnsNotFound(): AssertionFailedError: expected: <404> but was: <500>
+  #t18 DocumentEndpointTest.returnsDocument(): AssertionFailedError: expected: not <null>
+  ...
+FAILED DocumentEndpointTest.returnsNotFound() #t17
+  ...
+```
+
+- `WARN/ERROR events logged during several failed tests`: the kinds of events which more than one failed test logged, with the number of failed and of passed tests which
+  logged them, and one event of each kind. Events are of the same kind if they have the same logger and were thrown at the same place (root cause and its first frame outside
+  frameworks) or, without an exception, have the same message apart from digits. Those logged by a larger share of the failed than of the passed tests are listed
+  (at most 5), the most specific to the failures first: an event of all failed tests and no passed test is likely the cause, one which most tests log is not listed.
+- `Failed tests`: all failed tests (at most 30), one line each with the token and the root cause. Only 5 are written in detail, failures with different exceptions or places
+  first, as the same failure in another test tells little. The log lines of any other test are printed by the same commands with its token.
+- As the block is written at JVM exit, a test JVM which is killed leaves none; the build tool reports that.
 
 The commands work because both log files have a marker line at the start and at the end of every test and test class,
 `---- #t17 start: DocumentEndpointTest.returnsNotFound() ----` and `---- #t17 end (FAILED): ... ----` (`passed`, `FAILED` or `aborted`);
@@ -175,14 +197,16 @@ Run each command as one line (it creates the directory and uses it):
 
 - `<logs>` below is the directory the command printed (`logs: /tmp/myproject-tests.Ab12Cd`); use it in later commands, as variables do not
   survive from one command to the next. Every run gets a new one, so nothing has to be deleted first.
-- `<logs>/test.summary`: the failed tests and a line per test JVM (module) with the number of tests and its log files (each test JVM writes its own
-  `<logs>/test.<pid>.compact` and `.full`). An entry is `FAILED Class.method() #token`, the exception
+- `<logs>/test.summary`: a block per test JVM (module): a line with the number of tests and its log files (each test JVM writes its own
+  `<logs>/test.<pid>.compact` and `.full`), then the failed tests. An entry is `FAILED Class.method() #token`, the exception
   and where it was thrown, the WARN and ERROR events logged during that test (often the cause; `~`: logged by another thread while several tests ran, may belong
   to another test), a `logs` command which prints everything logged during that test and a `class logs` command for its test class, which
   includes the set-up (Spring context start). Read the listed events first, then run those commands; replace `.compact` by `.full` in them for all details (DEBUG, whole stack traces).
   If tests ran at the same time, the command is a `grep` for the token: it prints the lines logged on the thread of the test, and lines of other
   threads (a server, an executor) logged while it ran, which have the tokens of all tests running then after a `~` and may belong to any of them.
-  `same failure as` refers to an earlier entry with the same exception.
+- With many failed tests the block starts with `WARN/ERROR events logged during several failed tests`: what the failed tests have in common, with the number of
+  failed and passed tests which logged each event, likely causes first. Start there: one cause often fails many tests. Then all failed tests are listed, one line each
+  (`#token Class.method(): exception`), and only 5 (marked `*`, with different failures) have a full entry; the commands work for any token.
 - Console output (`<logs>/test.out`) only contains the build tool's own summary and failures. A non-zero exit code without failed tests in the summary
   (or without a summary) means a broken build, for example a compilation error: then read `<logs>/test.out` (`head -40`, or `grep '^\[ERROR\]'` for Maven).
   Do not use `-i`/`--info` (Gradle) or `-X` (Maven); they are not needed.

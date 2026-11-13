@@ -156,6 +156,40 @@ public class Fixtures {
         }
     }
 
+    /** Seven tests which fail for the same reason, which is only in the log, and two which pass; all log the same unrelated warning. */
+    @Fixture
+    public static class SharedCauseFixture {
+
+        private static void store(int document) {
+            try {
+                throw new IllegalStateException("no connection");
+            } catch (IllegalStateException e) {
+                logger.warn("Unable to store document " + document, e);
+            }
+        }
+
+        private static void lookup(int document, boolean stored) {
+            logger.warn("Slow response");
+            if (stored) {
+                return;
+            }
+            store(document);
+            assertEquals("document " + document, null);
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints = { 1, 2, 3, 4, 5, 6, 7 })
+        public void missing(int document) {
+            lookup(document, false);
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints = { 8, 9 })
+        public void present(int document) {
+            lookup(document, true);
+        }
+    }
+
     @Fixture
     public static class PassingFixture {
 

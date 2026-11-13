@@ -144,9 +144,8 @@ public class AiTestExecutionListenerTest {
         List<String> full = lines(Path.of(file + ".full"));
         String text = String.join("\n", summary);
 
-        assertThat(summary.get(0)).matches("---- JVM pid \\d+ in .*, logs .*test\\.compact ----");
-        assertThat(summary.get(summary.size() - 1)).matches(
-                "---- JVM pid \\d+: 9 tests, 5 failed, 1 aborted, 1 skipped, 2 not run, 1 failed test classes \\(set-up or tear-down\\) ----");
+        assertThat(summary.get(0)).matches("---- JVM pid \\d+ in .*, logs .*test\\.compact: 9 tests, 5 failed, 1 aborted, 1 skipped, 2 not run, "
+                + "1 failed test classes \\(set-up or tear-down\\) ----");
 
         // the exception, where it was thrown in the test and the command printing the log lines of the test
         String failed = token(summary, "Fixtures$MixedFixture.b_logsAndFails()");
@@ -175,10 +174,14 @@ public class AiTestExecutionListenerTest {
         // invocation of a parameterized test and display name
         assertThat(text).contains("FAILED Fixtures$MixedFixture.g_parameterized() [[2] ");
         assertThat(text).doesNotContain("g_parameterized() [[1] ");
-        String displayName = token(summary, "Fixtures$MixedFixture.h_displayName() [returns not found]");
-        assertThat(text).contains("FAILED Fixtures$MixedFixture.i_sameFailure() #" + token(summary, "Fixtures$MixedFixture.i_sameFailure()")
-                + ": same failure as Fixtures$MixedFixture.h_displayName() [returns not found] #" + displayName + "\n");
-
+        token(summary, "Fixtures$MixedFixture.h_displayName() [returns not found]");
+        // more failed tests than are written in detail: all are listed, and the same failure in another test is not repeated in detail
+        assertThat(summary.get(1)).isEqualTo("Failed tests (6), the 5 marked * in detail below:");
+        assertThat(summary.subList(2, 8).stream().filter(line -> line.startsWith("* ")).count()).isEqualTo(5);
+        assertThat(summary.subList(2, 8).stream().filter(line -> line.startsWith("  ")).toList()).hasSize(1);
+        assertThat(text).containsMatch("\n  #t\\d+ Fixtures\\$MixedFixture\\.i_sameFailure\\(\\): UnsupportedOperationException: not yet\n");
+        assertThat(text).containsMatch("\n\\* #t\\d+ Fixtures\\$MixedFixture\\.b_logsAndFails\\(\\): AssertionFailedError: expected: <404> but was: <500>\n");
+        assertThat(text).doesNotContain("FAILED Fixtures$MixedFixture.i_sameFailure()");
         // a failed set-up: the class has the entry, with its own log lines
         String setUp = token(summary, "Fixtures$BrokenSetUpFixture (test class set-up or tear-down)");
         assertThat(text).contains("FAILED Fixtures$BrokenSetUpFixture (test class set-up or tear-down) #" + setUp + ", 2 tests not run\n"
@@ -238,6 +241,32 @@ public class AiTestExecutionListenerTest {
         // one class: its lines are those between its markers
         assertThat(String.join("\n", summary)).containsMatch("  class logs \\(set-up, Spring context start\\): sed -n '/#t\\d+ start/,/#t\\d+ end/p' ");
         assertThat(compact.stream().filter(line -> line.endsWith("from another thread")).findFirst().orElseThrow()).matches("WARN ~ #t\\d+ #t\\d+ from another thread");
+    }
+
+    @Test
+    public void eventsSharedByTheFailedTestsComeFirst(@TempDir Path directory) throws Exception {
+        Path file = directory.resolve("test");
+        LoggerContext context = logging(file, new ArrayList<>());
+        Fixtures.logger = context.getLogger("fixture");
+        try {
+            run(new AiTestExecutionListener(true, file.toString(), file.toString(), () -> true, () -> context), Fixtures.SharedCauseFixture.class);
+        } finally {
+            context.stop();
+            Fixtures.logger = null;
+        }
+        writeTotals(file);
+
+        List<String> summary = lines(Path.of(file + ".summary"));
+        assertThat(summary.get(0)).matches("---- JVM pid \\d+ in .*: 9 tests, 7 failed, 0 aborted, 0 skipped ----");
+        // logged during every failed test and no test which passed; the warning which every test logs is not listed
+        assertThat(summary.get(1)).isEqualTo("WARN/ERROR events logged during several failed tests, likely causes first (one event of each kind):");
+        assertThat(summary.get(2)).matches("  7 of 7 failed, 0 of 2 passed tests: WARN fixture #[0-9a-f]{12} : Unable to store document \\d \\| "
+                + "java.lang.IllegalStateException: no connection \\| at .*Fixtures\\$SharedCauseFixture\\.store\\(Fixtures\\.java:\\d+\\)");
+        assertThat(summary.get(3)).isEqualTo("Failed tests (7), the 5 marked * in detail below:");
+        assertThat(summary.subList(4, 11).stream().filter(line -> line.startsWith("* #t")).count()).isEqualTo(5);
+        assertThat(summary.subList(4, 11).stream().filter(line -> line.startsWith("  #t")).count()).isEqualTo(2);
+        assertThat(summary.stream().filter(line -> line.startsWith("FAILED ")).count()).isEqualTo(5);
+        assertThat(summary.stream().filter(line -> line.contains("passed tests: ")).count()).isEqualTo(1);
     }
 
     @Test
