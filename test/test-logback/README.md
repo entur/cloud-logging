@@ -139,16 +139,11 @@ Run each command as one line (it creates the directory and uses it):
   whole bodies and full stack traces. Some things are only logged at DEBUG and so only appear here, for example requests rejected by
   a security filter before request-response logging (`grep -n 'Response 4[0-9][0-9]\|Rejecting access' <logs>/test.full`). Look for those directly in this file with `grep -n`; an `#id` in the compact file (truncated stack trace, message, body or fields)
   finds the complete event with `grep -n -C 5 '#id' <logs>/test.full`.
-- Include `-Dentur.logging.ai.level=DEBUG` to also get DEBUG in the compact file (`-Dentur.logging.ai.full.level=INFO` limits the `.full` file).
-- Request/response logging (HTTP, gRPC) is a single line: `message | header: value; ... | body: <body>`. Other structured fields of an event follow the message as ` | fields: {json}`.
 - Repeated WARN/ERROR events are collapsed in `<logs>/test.compact`: the first is printed, the rest are summarized later in a line
   `repeated N more times, N+1 in total (first #id, last #id): message` whose total includes that first event. Counting restarts when logging
   is reconfigured (e.g. a new Spring context), so a message can have several such lines. For exact counts grep `<logs>/test.full` for the
   logger and the message, as the same message can come from several loggers: `grep -c 'DocumentEndpoint .* : Hello world' <logs>/test.full`.
-- UUIDs and hex ids are replaced by aliases (`u1`, `h1`, ...) in both files; the first time an alias appears in `<logs>/test.full` it is followed by its value, `u7(<uuid>)`, so grep `<logs>/test.full` for a raw id to find its alias. Each test JVM starts with a `---- JVM pid ...` line; aliases restart there
-  (test JVMs running at the same time say `no aliases` there and keep UUIDs, so an alias belongs to the last line saying `aliases ... restart`).
-- To see the exact JSON the servers log (for example the fields of a log statement), run the tests without AI mode and with
-  `-Dentur.logging.style=machineReadableJson`. With Gradle, print the JSON lines from the test reports:
-  `sed -n 's/^  <system-out><!\[CDATA\[{/{/; /^{"/p' build/test-results/test/*.xml | grep 'some message'` (Maven: in the test output).
-  Lines logged before the first Spring context has started are not JSON.
+- UUIDs and hex ids are replaced by aliases (`u1`, `h1`, ...) in both files; grep `<logs>/test.full` for a raw id to find its alias, `u7(<uuid>)`.
+- For the exact JSON the servers log, run without AI mode and with `-Dentur.logging.style=machineReadableJson`; with Gradle,
+  `sed -n 's/^  <system-out><!\[CDATA\[{/{/; /^{"/p' build/test-results/test/*.xml` prints it.
 ````
