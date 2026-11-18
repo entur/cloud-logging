@@ -1,15 +1,10 @@
 
 dependencies {
-    api project(':api')
-
-    api("org.slf4j:slf4j-api")
     api ("ch.qos.logback:logback-classic")
     api ("ch.qos.logback:logback-core")
 
     api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
     api("tools.jackson.core:jackson-core")
-
-
 }
 
 

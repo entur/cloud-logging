@@ -6,14 +6,10 @@ dependencies {
 
     api("org.slf4j:slf4j-api")
 
-    api ("org.codehaus.janino:commons-compiler")
-    api ("org.codehaus.janino:commons-compiler-jdk")
-    api ("org.codehaus.janino:janino")
-
     api("org.springframework.boot:spring-boot-autoconfigure")
     api("org.springframework.boot:spring-boot-starter-logging")
 
-    api "io.grpc:grpc-netty:${grpcNettyVersion}"
+    api("io.grpc:grpc-api")
 
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"
 

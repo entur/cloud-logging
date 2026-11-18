@@ -9,31 +9,23 @@ dependencies {
     api("tools.jackson.core:jackson-core")
     api("tools.jackson.core:jackson-databind")
 
-    api("io.grpc:grpc-netty:${grpcNettyVersion}")
-    api("io.grpc:grpc-services:${grpcNettyVersion}")
+    api("io.grpc:grpc-services")
 
-    // grpc dependencies
-    api("io.netty:netty-codec-http2")
-    api("io.netty:netty-handler-proxy")
-
-    api("io.netty:netty-tcnative-boringssl-static:${nettyTcnativeBoringsslStaticVersion}")
-
-    api("io.grpc:grpc-api:$grpcVersion")
-    api("io.grpc:grpc-core:$grpcVersion")
-    api("io.grpc:grpc-protobuf:$grpcVersion")
-    api("io.grpc:grpc-util:$grpcVersion")
+    api("io.grpc:grpc-api")
+    api("io.grpc:grpc-core")
+    api("io.grpc:grpc-protobuf")
+    api("io.grpc:grpc-util")
 
     // Versions managed by Spring Boot BOM
     api("org.slf4j:slf4j-api")
     api("ch.qos.logback:logback-classic")
-    api("ch.qos.logback:logback-core")
 
     api("jakarta.annotation:jakarta.annotation-api")
     api("com.google.api.grpc:proto-google-common-protos:$grpcCommonsVersion")
     api("com.google.protobuf:protobuf-java-util:${grpcProtobufVersion}")
 
-    testImplementation("com.google.truth:truth:${googleTruthVersion}")
-    testImplementation("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
+    // transport for the gRPC servers started by the tests
+    testRuntimeOnly("io.grpc:grpc-netty")
 }
 
 sourceSets {

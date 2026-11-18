@@ -12,10 +12,6 @@ dependencies {
     api("com.toomuchcoding.jsonassert:jsonassert:${jsonAssertVersion}") {
         exclude group: 'net.minidev', module: 'json-smart'
     }
-    api("com.jayway.jsonpath:json-path") {
-        exclude group: 'net.minidev', module: 'json-smart'
-    }
-
 }
 
 

@@ -1,26 +1,21 @@
 
 dependencies {
     api project(':gcp:micrometer-gcp')
+    api project(':gcp:logback-logstash-encoder-gcp') // logback-spring.xml includes logback/logback-default-server.xml
     api project(':micrometer')
     api project(':appender')
     api project(':on-demand:on-demand-spring-boot-autoconfigure')
 
     api("org.slf4j:slf4j-api")
-    api ("org.codehaus.janino:commons-compiler")
-    api ("org.codehaus.janino:commons-compiler-jdk")
-    api ("org.codehaus.janino:janino")
     api("org.springframework.boot:spring-boot-autoconfigure")
     api("org.springframework.boot:spring-boot-starter-logging")
     api("org.springframework.boot:spring-boot-starter-web")
     api ("org.springframework.boot:spring-boot-starter-security")
     api("org.springframework.boot:spring-boot-micrometer-metrics")
 
-    api ("org.codehaus.janino:janino")
-
     compileOnly("io.micrometer:micrometer-tracing")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-
 }
 
 

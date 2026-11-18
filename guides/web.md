@@ -402,6 +402,8 @@ and
 * use the `CopyCorrelationIdFromGrpcMdcContextToRequestClientInterceptor` client interceptor,
 * wrap the call(s) in a `GrpcMdcContext` (or `CorrelationIdGrpcMdcContext`).
 
+These artifacts do not include a gRPC transport. If your application does not already have one, add it yourself, for example `io.grpc:grpc-netty` or `io.grpc:grpc-netty-shaded`.
+
 
 ### Running applications locally
 For 'classic' one-line log output when running a server locally, additionally add the logging test artifacts to the main scope during local execution only.
