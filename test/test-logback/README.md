@@ -276,8 +276,8 @@ console). Arguments go to Maven/Gradle, for example `scripts/test-ai -Dtest=FooT
 - `<logs>/test.<pid>.compact` has one event per line (INFO and above, short stack traces), `<logs>/test.<pid>.full` everything (DEBUG,
   whole stack traces and bodies). Search them with `grep -n` instead of reading them; `grep -n '#id' <logs>/*.full` prints the whole
   event of an `#id` from the summary or the compact file. A compact line is `LEVEL Logger #t17 [mdc] #id : message | ...`.
-- For exact counts use `grep -c` on `.full` (logger and message): the compact file writes a repeated WARN/ERROR once and then as
-  `repeated N more times, N+1 in total`, a total which includes that first line.
+- For exact counts use `grep -c` on `.full` with level, logger and message (`grep -c ' WARN .*MyService .* : Hello' <logs>/*.full`): the
+  compact file writes a repeated WARN/ERROR once and then as `repeated N more times, N+1 in total`, a total which includes that first line.
 - An HTTP call is logged as two lines with the same `requestId`: the request (`POST http://localhost:8080/api/x | header: value | body: ...`)
   and the response (`404 Not Found http://localhost:8080/api/x (in 2 ms) | ...`). The method is only on the request line.
 - Some events are only logged at DEBUG, so they are only in `.full`: for example requests a security filter rejects before
