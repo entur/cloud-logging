@@ -207,6 +207,47 @@ Totals: mean score, runs with 4.00, tokens, tool calls, time, cost.
   the careful baseline it saves less than in November, and Sonnet misses the HTTP methods. Running the same logs with the
   earlier instructions would show how much of that comes from the shorter snippet.
 
+### Restoring parts of the AI-mode instructions (3660270c, bac1ad1c)
+
+Two changes to the snippet in #535 after the runs above, each measured with the same six AI-mode runs (same logs, same
+day, Claude Code 2.1.328):
+
+- 3660270c: the compact line format (`LEVEL Logger #t17 [mdc] #id : message | ...`); that an HTTP call is logged as a
+  request and a response line with the same `requestId`, the method only on the request line; and that some events, such
+  as requests a security filter rejects, are only logged at DEBUG and so only in `.full`.
+- bac1ad1c: for exact counts, `grep -c` on `.full` (logger and message), as the compact file writes a repeated WARN/ERROR
+  once and then as `repeated N more times, N+1 in total`, a total which includes that first line. The snippet is then
+  1.9 KB, against 1.1 KB at 72c1a578 and 2.4 KB at bb7e3868.
+
+Score / tokens / tool calls / time / cost:
+
+| Model | Effort | 72c1a578 | 3660270c | bac1ad1c |
+|---|---|---|---|---|
+| Claude Opus 5.5 | low | 4.00 / 203k / 12 / 55 s / $0.29 | 4.00 / 152k / 8 / 43 s / $0.25 | 4.00 / 229k / 15 / 60 s / $0.30 |
+| Claude Opus 5.5 | medium | 4.00 / 368k / 14 / 62 s / $0.44 | 4.00 / 317k / 16 / 79 s / $0.38 | 4.00 / 259k / 15 / 56 s / $0.40 |
+| Claude Opus 5.5 | high | 4.00 / 431k / 18 / 76 s / $0.52 | 4.00 / 499k / 17 / 81 s / $0.50 | 4.00 / 209k / 11 / 51 s / $0.39 |
+| Claude Sonnet 5.5 | low | 3.50 / 151k / 8 / 33 s / $0.15 | 3.42 / 155k / 16 / 51 s / $0.14 | 3.74 / 208k / 11 / 36 s / $0.13 |
+| Claude Sonnet 5.5 | medium | 4.00 / 233k / 14 / 48 s / $0.19 | 3.42 / 193k / 10 / 45 s / $0.15 | 3.17 / 299k / 20 / 68 s / $0.20 |
+| Claude Sonnet 5.5 | high | 3.58 / 235k / 13 / 47 s / $0.20 | 4.00 / 284k / 18 / 52 s / $0.21 | 4.00 / 238k / 13 / 46 s / $0.21 |
+| **Total** | | 96 % (4/6 perfect), 1.62M tokens, 79 calls, 5.4 min, $1.79 | 95 % (4/6 perfect), 1.60M tokens, 85 calls, 5.9 min, $1.63 | 95 % (4/6 perfect), 1.44M tokens, 85 calls, 5.3 min, $1.63 |
+
+- Each change fixed the mistake it was aimed at. At 3660270c every run gave the HTTP methods (4 of 6 at 72c1a578), and
+  three runs, all Opus, reported the 403 only logged at DEBUG (one at 72c1a578, one at bac1ad1c). At bac1ad1c no run
+  counted the first event of a collapsed message twice, as Sonnet did at 3660270c at low and medium effort (1016 instead
+  of 1012, 7 instead of 5: its `awk` started each message at 1 and added the `N+1 in total` of each `repeated` line).
+- Opus was perfect in all nine runs. At bac1ad1c it used 0.70M tokens for its three runs, against 1.00M and 0.97M; at
+  high effort 209k, in the range of the earlier AI-mode runs (152-282k), at low effort 229k, still above it (112-184k).
+- Sonnet at high effort was perfect with both changes. At low and medium effort it lost points in every version, each time
+  elsewhere. At bac1ad1c at medium effort it again gave no methods ("The `.full` log has the method only on the request
+  lines, which I didn't extract") and did not count the gRPC server starts; at low effort it left out four messages logged
+  once and counted the protobuf WARN twice, as `grep -c` for its logger and message also matches an INFO request-response
+  line with the same text (the snippet could say "level, logger and message").
+- So the totals barely move (96 %, 95 %, 95 %); the differences are of the size seen between repeated runs. AI mode at
+  bac1ad1c stays ahead of both baselines above: 95 % with 1.44M tokens, 5.3 minutes and $1.63, against 91 % with 2.28M
+  tokens, 9.8 minutes and $2.26 (careful) and 81 % with 6.98M tokens, 14.2 minutes and $4.33 (plain).
+- Graded by hand: at 3660270c Sonnet at medium effort wrote the second `MergedAnnotation` warning as "Same message for
+  `jwtAuthenticationProcessInterceptor(...)`" (right count): 3.34 → 3.42.
+
 AI mode across the commits, the same cells (score / tokens / tool calls / time / cost; the earlier columns are from the
 table above):
 

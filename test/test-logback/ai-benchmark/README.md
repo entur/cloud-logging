@@ -68,4 +68,5 @@ strict about numbers; check what `-v` reports by hand, since a paraphrased messa
 ## Results
 
 [results-2026-11.md](results-2026-11.md): AI mode against both baselines, AI mode at 72c1a578 against both baselines with
-Claude Code (Opus and Sonnet, three efforts), the old against the new compact format, and the formatting cost per event.
+Claude Code (Opus and Sonnet, three efforts) and after two fixes to the instructions, the old against the new compact
+format, and the formatting cost per event.
