@@ -275,7 +275,11 @@ console). Arguments go to Maven/Gradle, for example `scripts/test-ai -Dtest=FooT
   which they have in common come first, numbered, and tests which failed the same way have one entry.
 - `<logs>/test.<pid>.compact` has one event per line (INFO and above, short stack traces), `<logs>/test.<pid>.full` everything (DEBUG,
   whole stack traces and bodies). Search them with `grep -n` instead of reading them; `grep -n '#id' <logs>/*.full` prints the whole
-  event of an `#id` from the summary or the compact file.
+  event of an `#id` from the summary or the compact file. A compact line is `LEVEL Logger #t17 [mdc] #id : message | ...`.
+- An HTTP call is logged as two lines with the same `requestId`: the request (`POST http://localhost:8080/api/x | header: value | body: ...`)
+  and the response (`404 Not Found http://localhost:8080/api/x (in 2 ms) | ...`). The method is only on the request line.
+- Some events are only logged at DEBUG, so they are only in `.full`: for example requests a security filter rejects before
+  request-response logging (`grep -n 'Response 4[0-9][0-9]\|Rejecting access' <logs>/*.full`).
 ````
 
 **3. The permission rule** (Claude Code), in `.claude/settings.json`:
