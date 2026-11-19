@@ -241,7 +241,7 @@ Score / tokens / tool calls / time / cost:
   elsewhere. At bac1ad1c at medium effort it again gave no methods ("The `.full` log has the method only on the request
   lines, which I didn't extract") and did not count the gRPC server starts; at low effort it left out four messages logged
   once and counted the protobuf WARN twice, as `grep -c` for its logger and message also matches an INFO request-response
-  line with the same text (the snippet could say "level, logger and message").
+  line with the same text. Since 369d71b9 (not measured) the snippet says level, logger and message, with an example.
 - So the totals barely move (96 %, 95 %, 95 %); the differences are of the size seen between repeated runs. AI mode at
   bac1ad1c stays ahead of both baselines above: 95 % with 1.44M tokens, 5.3 minutes and $1.63, against 91 % with 2.28M
   tokens, 9.8 minutes and $2.26 (careful) and 81 % with 6.98M tokens, 14.2 minutes and $4.33 (plain).
