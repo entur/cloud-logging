@@ -135,6 +135,43 @@ Since 39f55f85 the compact file of these suites changed only in three lines (the
 response is left out) and in the event ids (12 instead of 8 hex digits), and the AGENTS.md snippet in one word (an `#id`
 also marks a cut message). MAI-Code-1.1-Flash at high effort at 39f55f85 is the memory-limited re-run described above.
 
+### AI mode with the shorter instructions and `scripts/test-ai` (72c1a578), Claude Code only
+
+Logs and README snippet from commit 72c1a578 (#535 with the shorter test summary and `scripts/test-ai`), 2026-11-19, Claude
+Code 2.1.328, Opus and Sonnet only, the four runs at the same time. The AI-mode logs now come from `scripts/test-ai`
+(`generate-logs.sh` runs the script from the README), and the prompt has the whole AGENTS.md snippet and what the script
+printed (the log directory, the exit code and the two count lines of the summary), as an agent sees them after running the
+tests. The earlier runs got the snippet from the compact file bullet on (2.4 KB). The new snippet is 1.1 KB in all and no
+longer describes the compact line format, the request-response lines, how `repeated N more times` lines count (or to count in
+`.full`), aliases, or that some events are only logged at DEBUG. The test suites and the answer key are unchanged. Score /
+tokens / tool calls / time / cost; the earlier columns are the same cells of the table above.
+
+| Model | Effort | acdcc660 | 9b0a3424 | 39f55f85 | bb7e3868 | 72c1a578 |
+|---|---|---|---|---|---|---|
+| Claude Opus 5.5 | low | 4.00 / 130k / 6 / 45 s / $0.23 | 4.00 / 112k / 5 / 28 s / $0.20 | 4.00 / 184k / 8 / 42 s / $0.28 | 4.00 / 125k / 6 / 51 s / $0.24 | 4.00 / 203k / 12 / 55 s / $0.29 |
+| Claude Sonnet 5.5 | low | 4.00 / 167k / 11 / 37 s / $0.14 | 4.00 / 225k / 11 / 45 s / $0.18 | 4.00 / 172k / 11 / 41 s / $0.13 | 4.00 / 115k / 5 / 26 s / $0.12 | 3.50 / 151k / 8 / 33 s / $0.15 |
+| Claude Opus 5.5 | high | 4.00 / 152k / 9 / 54 s / $0.25 | 4.00 / 282k / 17 / 71 s / $0.40 | 4.00 / 280k / 12 / 60 s / $0.33 | 4.00 / 216k / 9 / 55 s / $0.33 | 4.00 / 431k / 18 / 77 s / $0.52 |
+| Claude Sonnet 5.5 | high | 4.00 / 234k / 15 / 49 s / $0.15 | 4.00 / 207k / 11 / 48 s / $0.13 | 4.00 / 318k / 17 / 51 s / $0.18 | 4.00 / 215k / 9 / 56 s / $0.20 | 3.58 / 235k / 13 / 47 s / $0.20 |
+| **Total** | | 100 % (4/4 perfect), 683k tokens, 41 calls, 185 s, $0.77 | 100 % (4/4), 826k, 44 calls, 192 s, $0.91 | 100 % (4/4), 954k, 48 calls, 194 s, $0.92 | 100 % (4/4), 671k, 29 calls, 188 s, $0.89 | 94 % (2/4), 1.02M, 51 calls, 212 s, $1.16 |
+
+- Opus was perfect at both efforts, as in the eight earlier runs, but used more tokens than in any of them: 203k at low
+  effort (earlier 112-184k) and 431k at high effort (152-282k), with 12 and 18 tool calls (5-8 and 9-17).
+- Sonnet lost half of Q2 at both efforts. It listed the six responses with the right status and count, but without the
+  method: at low effort none ("method not shown in these log lines"), at high effort only the POST of the 500. The method
+  is on the request line logged just before each response (`POST http://localhost:38001/api/document/...`, same
+  `requestId` alias), which Sonnet did not look for. All eight earlier Sonnet runs gave the methods; the earlier snippet
+  described the request-response lines.
+- Q1 was right in all four runs, so the `repeated N more times, N+1 in total` lines are counted right without the
+  snippet's explanation.
+- The 403 on `POST /api/secured/endpoint`, only logged at DEBUG, was reported by one run (Opus at high effort), against
+  17 of the 20 AI-mode runs at bb7e3868. It is not in the key, so it is not scored.
+- 10 of the 51 tool calls were denied by the read-only allowlist of `run-agents.sh`: nine commands that start with `cd` or
+  a variable assignment or contain a `for` loop, and one `grep` piped into a multi-line `awk` program. The earlier results
+  did not count denials.
+- One run per cell, so this is a signal, not a measurement: with the shorter instructions both Sonnet runs missed the
+  methods and both Opus runs used more tokens than before. Running the same logs with the earlier instructions would show
+  how much of it comes from the snippet.
+
 ## Formatting cost per event
 
 `formatting-benchmark.sh`: time and allocation per event for the AI files (compact and full line) against the JSON encoder of

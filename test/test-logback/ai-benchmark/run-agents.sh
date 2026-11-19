@@ -6,7 +6,8 @@
 #   setups  any of: plain careful ai                       (default: all three)
 #           plain    JUnit XML reports, only told where they are
 #           careful  JUnit XML reports plus a tested grep cookbook (prompts/careful.txt)
-#           ai       the AI-mode files (summary, compact and .full per test JVM) plus the AGENTS.md snippet from ../README.md
+#           ai       the AI-mode files (summary, compact and .full per test JVM), the AGENTS.md snippet from ../README.md
+#                    and what scripts/test-ai printed (test-ai.out, written by generate-logs.sh)
 #   agents  tool:model:effort, tool is copilot or claude, model 'default' is the tool's default model
 #           (default: "copilot:default:low claude:opus:low claude:sonnet:low claude:haiku:low")
 #
@@ -36,15 +37,23 @@ if [ "${MEMORY_MAX:-4G}" != 0 ]; then
   fi
 fi
 
-# The AI-mode instructions from the README, from the summary file bullet to the end of the snippet.
+# The AI-mode instructions: the whole AGENTS.md snippet of the README, as a project pastes it.
 snippet() {
-  awk '/^````markdown/ {b=1; next} b && /^````/ {exit} b && /^- `<logs>\/test\.summary`/ {p=1} b && p' "$HERE/../README.md" \
-    | sed "s|<logs>|$LOGS/ai|g"
+  awk '/^````markdown/ {b=1; next} b && /^````/ {exit} b' "$HERE/../README.md"
 }
+
+case " $SETUPS " in
+  *" ai "*)
+    [ -n "$(snippet)" ] || { echo "no AGENTS.md snippet in $HERE/../README.md" >&2; exit 1; }
+    [ -s "$LOGS/test-ai.out" ] || { echo "no $LOGS/test-ai.out, run generate-logs.sh first" >&2; exit 1; }
+    ;;
+esac
 
 prompt() { # setup
   if [ "$1" = ai ]; then
-    SNIPPET=$(snippet) awk '$0 == "@SNIPPET@" {print ENVIRON["SNIPPET"]; next} {print}' "$HERE/prompts/ai.txt"
+    SNIPPET=$(snippet) TEST_AI=$(cat "$LOGS/test-ai.out") \
+      awk '$0 == "@SNIPPET@" {print ENVIRON["SNIPPET"]; next} $0 == "@TEST_AI@" {print ENVIRON["TEST_AI"]; next} {print}' \
+      "$HERE/prompts/ai.txt"
   else
     cat "$HERE/prompts/$1.txt"
   fi | sed "s|@LOGS@|$LOGS|g"

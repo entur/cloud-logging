@@ -8,7 +8,7 @@ answers the same four questions in three setups:
 |---|---|
 | `plain` | the JUnit XML reports (log output in `<system-out>`), only told where they are |
 | `careful` | the same reports plus a tested grep cookbook for them ([prompts/careful.txt](prompts/careful.txt)): the three console formats, a `sed`+`awk` normaliser to one event per line and recipes for each question |
-| `ai` | the files of an AI-mode run (the summary file, and a compact and a `.full` file per test JVM), plus the AGENTS.md snippet from [../README.md](../README.md), read at run time |
+| `ai` | the files of an AI-mode run (the summary file, and a compact and a `.full` file per test JVM), the AGENTS.md snippet from [../README.md](../README.md) and what its `scripts/test-ai` printed for the run, both read from the README at run time |
 
 Questions (full wording in [prompts/](prompts)):
 
@@ -26,7 +26,7 @@ Needs Java 25, Python 3 and the agent CLIs: [GitHub Copilot CLI](https://github.
 
 ```
 cd test/test-logback/ai-benchmark
-./generate-logs.sh /tmp/ai-bench           # runs the two suites without and with AI mode, writes answer-key.txt
+./generate-logs.sh /tmp/ai-bench           # runs the two suites without and with AI mode (scripts/test-ai), writes answer-key.txt
 ./run-agents.sh /tmp/ai-bench              # 3 setups x 4 agents in parallel, a few minutes
 ./summarize.py /tmp/ai-bench               # time, tokens and tool calls per run, writes <run>.answer
 ./grade.py /tmp/ai-bench -v                # score per run against the answer key, with what was wrong
@@ -67,5 +67,5 @@ strict about numbers; check what `-v` reports by hand, since a paraphrased messa
 
 ## Results
 
-[results-2026-11.md](results-2026-11.md): AI mode against both baselines, the old against the new compact format, and the
-formatting cost per event.
+[results-2026-11.md](results-2026-11.md): AI mode against both baselines, AI mode with the shorter instructions and
+`scripts/test-ai` (Claude Code, Opus and Sonnet), the old against the new compact format, and the formatting cost per event.
