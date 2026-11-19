@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
@@ -51,22 +52,31 @@ import no.entur.logging.cloud.logback.logstash.test.ai.common.AiText;
  * <code>META-INF/services</code>, so it is active in every test run (Gradle, Maven, IDE) with this library on the test classpath, and
  * does nothing unless <code>-Dentur.logging.ai.enabled=true</code>.
  * <p>
- * <b>Summary file</b> (<code>&lt;file&gt;.summary</code>, shared by all test JVMs): an entry per failed test (or test class, if its
- * set-up or tear-down failed) with the exception, the first frame which is not framework code and commands printing the log lines of
- * the test, and a line with the number of tests per test JVM:
+ * <b>Summary file</b> (<code>&lt;file&gt;.summary</code>, shared by all test JVMs): a line with the number of tests per test JVM, the
+ * command which prints the log lines of a test (with its token), and an entry per failed test (or test class, if its set-up or
+ * tear-down failed) with the exception, the first frame which is not framework code and the WARN/ERROR events logged during the test:
  * <pre>
  * ---- JVM pid 4711 in /work/app, logs /tmp/logs/test.4711.compact: 118 tests, 1 failed, 0 aborted, 2 skipped ----
- * FAILED DocumentEndpointTest.returnsNotFound() #t17
+ * log lines: sed -n '/#tN start/,/#tN end/p' /tmp/logs/test.4711.compact with the #tN of a test, or of its class (class #tN: set-up, Spring context start)
+ * FAILED DocumentEndpointTest.returnsNotFound() #t17, class #t12
  *   org.opentest4j.AssertionFailedError: expected: &lt;404&gt; but was: &lt;500&gt;
  *   at no.entur.DocumentEndpointTest.returnsNotFound(DocumentEndpointTest.java:42)
  *   WARN/ERROR logged during the test:
  *     ERROR DocumentService #1a2b3c4d5e6f : Unable to load document 7 | java.io.IOException: timeout | at no.entur.DocumentStore.load(DocumentStore.java:88)
- *   logs: sed -n '/#t17 start/,/#t17 end/p' /tmp/logs/test.4711.compact
- *   class logs (set-up, Spring context start): sed -n '/#t12 start/,/#t12 end/p' /tmp/logs/test.4711.compact
  * </pre>
- * The block of a JVM is written when the JVM exits. With many failed tests it stays short: first the kinds of WARN/ERROR events which
- * several failed tests have in common (and how many passed tests logged them too, so that the likely cause comes first), then the failed
- * tests, one line each, then the details of {@value #MAX_DETAILED} of them, those with different failures first.
+ * The block of a JVM is written when the JVM exits. With many failed tests it stays short:
+ * <ul>
+ * <li>First the kinds of WARN/ERROR events which several failed tests have in common (and how many passed tests logged them too, so
+ * that the likely cause comes first), numbered; an entry refers to them by number (and the id of its own event) instead of repeating
+ * them.</li>
+ * <li>Tests which failed the same way have one entry, which names the others: the same exception and message, thrown at the same
+ * place outside the test's own class (an assertion fails at another line in each test), and the same kinds of WARN/ERROR events.</li>
+ * <li>{@value #MAX_DETAILED} entries, then the other failures, one line each.</li>
+ * <li>If a test logged nothing, its entry has the events of the set-up of its class (a Spring context start), except those which a
+ * test class that passed also logged during its set-up (framework warnings at every context start); the entry says how many it left
+ * out.</li>
+ * </ul>
+ * Everything which is left out or cut is counted or marked (<code>... and 3 more</code>, <code>...[truncated, 812 chars]</code>).
  * <p>
  * <b>Test markers</b> (see {@link AiTestMarker}): a line at the start and at the end of every test and test class, in the compact and
  * the full file of this JVM. They are queued like log events, so they are in order with the events of the test thread. The test
@@ -83,23 +93,43 @@ public class AiTestExecutionListener implements TestExecutionListener {
 
     private static final int MAX_MESSAGE = 500;
     private static final int MAX_NAME = 200;
-    /** Failed tests written in detail per test JVM (those with different failures first); the others are one line each. */
+    /** Failures written in detail per test JVM (tests which failed the same way are one failure); the others are one line each. */
     static final int MAX_DETAILED = 5;
-    /** Failed tests listed per test JVM. */
+    /** Failures listed in one line each per test JVM, after the detailed ones. */
     static final int MAX_LISTED = 30;
+    /** Other tests named in the entry of a failure. */
+    static final int MAX_NAMED = 10;
     /** Kinds of WARN/ERROR events listed as shared by the failed tests. */
     static final int MAX_SHARED = 5;
     private static final int MAX_LISTED_MESSAGE = 160;
 
     /** A failed test (or test class), as written to the summary file. */
     private static final class Failure {
-        // FAILED Class.method() #t17
+        // FAILED Class.method() #t17, class #t12
         String title;
+        // Class.method(), the simple name of its class and its token: to name it in the entry of another test which failed the same way
+        String name;
+        String className;
+        String token;
         // #t17 Class.method(): AssertionFailedError: expected ...
         String listed;
-        // the exception, its frame, the events and the commands, one line each
-        final List<String> details = new ArrayList<>();
-        // exception and frames: failures with the same key are the same failure
+        // the exception and its root cause, each with its frame, one line each
+        final List<String> exception = new ArrayList<>();
+        // the frame of the test method in the stack trace of the exception, and the file of the frame shown for the exception: for the
+        // line of a test which failed the same way as another, which the entry of the other names
+        StackTraceElement testFrame;
+        String shownFile;
+        // the WARN/ERROR events logged during the test (see AiTestEvents), and how many were not kept
+        String eventsHeading;
+        List<AiTestEvents.Line> events = List.of();
+        int notListed;
+        // the events are those of the set-up of the test's class, as the test logged none
+        boolean classEvents;
+        // the compact file, if the command of the block prints the lines of the test or of its class
+        String compactFile;
+        // commands for the lines of a test or class which ran at the same time as others, which that command does not print
+        final List<String> commands = new ArrayList<>();
+        // the exception, where it was thrown outside the test's class and the kinds of events: failures with the same key are one entry
         String key;
         // kinds of WARN/ERROR events logged during the test, see AiTestEvents
         Map<String, String> eventKinds = Map.of();
@@ -121,6 +151,8 @@ public class AiTestExecutionListener implements TestExecutionListener {
         // tests which passed, and how many of them logged each kind of WARN/ERROR event
         int passed;
         final Map<String, int[]> passedWithKind = new HashMap<>();
+        // the kinds of WARN/ERROR events logged during the set-up of test classes which passed (the class and all its tests)
+        final Set<String> passedClassKinds = new HashSet<>();
     }
 
     private static final Map<Path, Totals> TOTALS = new ConcurrentHashMap<>();
@@ -150,6 +182,8 @@ public class AiTestExecutionListener implements TestExecutionListener {
         String previous;
         // another test (for a class: another class) ran at the same time, so the lines between the markers are not only its own
         volatile boolean overlapped;
+        // for a class: one of its tests (or nested classes) failed
+        volatile boolean failedWithin;
 
         Mark(String uniqueId, String token, String name, boolean test) {
             this.uniqueId = uniqueId;
@@ -328,13 +362,17 @@ public class AiTestExecutionListener implements TestExecutionListener {
                 writeFailure(identifier, mark, result.getThrowable().orElse(null), missing);
             }
             if (mark != null) {
-                // of a test which passed (those of a failed one were taken above)
+                // of a test which passed (those of a failed one were taken above), or of the set-up of a class
                 AiTestEvents.Events events = AiTestEvents.of(mark.token(), true);
-                if (mark.test && status == TestExecutionResult.Status.SUCCESSFUL) {
+                if (status == TestExecutionResult.Status.SUCCESSFUL) {
                     synchronized (totals) {
-                        totals.passed++;
-                        for (String kind : events.kinds().keySet()) {
-                            totals.passedWithKind.computeIfAbsent(kind, k -> new int[1])[0]++;
+                        if (mark.test) {
+                            totals.passed++;
+                            for (String kind : events.kinds().keySet()) {
+                                totals.passedWithKind.computeIfAbsent(kind, k -> new int[1])[0]++;
+                            }
+                        } else if (!mark.failedWithin) {
+                            totals.passedClassKinds.addAll(events.kinds().keySet());
                         }
                     }
                 }
@@ -385,7 +423,7 @@ public class AiTestExecutionListener implements TestExecutionListener {
                     return; // nothing ran, for example a launcher within a test
                 }
                 StringBuilder block = new StringBuilder("---- JVM pid ").append(ProcessHandle.current().pid()).append(totals.header)
-                        .append(": ").append(totals.tests).append(" tests, ").append(totals.failed).append(" failed, ")
+                        .append(": ").append(totals.tests + totals.skipped).append(" tests, ").append(totals.failed).append(" failed, ")
                         .append(totals.aborted).append(" aborted, ").append(totals.skipped).append(" skipped");
                 if (totals.notRun > 0) {
                     block.append(", ").append(totals.notRun).append(" not run");
@@ -394,7 +432,16 @@ public class AiTestExecutionListener implements TestExecutionListener {
                     block.append(", ").append(totals.failedContainers).append(" failed test classes (set-up or tear-down)");
                 }
                 block.append(" ----\n");
-                describeFailures(block, totals);
+                try {
+                    StringBuilder failures = new StringBuilder();
+                    describeFailures(failures, totals);
+                    block.append(failures);
+                } catch (RuntimeException | LinkageError e) {
+                    // the failed tests at least
+                    for (Failure failure : totals.failures) {
+                        block.append(failure.title).append('\n');
+                    }
+                }
                 AiFiles.createOwnerOnly(summaryFile);
                 // one write per JVM, as several test JVMs append to the file
                 try (FileChannel channel = FileChannel.open(summaryFile, StandardOpenOption.WRITE, StandardOpenOption.APPEND, LinkOption.NOFOLLOW_LINKS)) {
@@ -414,48 +461,158 @@ public class AiTestExecutionListener implements TestExecutionListener {
         if (failures.isEmpty()) {
             return;
         }
-        describeSharedEvents(block, totals);
+        // one command for the log lines of all tests and test classes, with the token of one
+        for (Failure failure : failures) {
+            if (failure.compactFile != null) {
+                block.append("log lines: ").append(command("tN", failure.compactFile))
+                        .append(" with the #tN of a test, or of its class (class #tN: set-up, Spring context start)\n");
+                break;
+            }
+        }
+        Map<String, Integer> shared = describeSharedEvents(block, totals);
 
-        // in detail: failures which differ from each other first, as the same failure in another test tells little
-        List<Failure> detailed = new ArrayList<>();
-        Set<String> keys = new HashSet<>();
+        // tests which failed the same way are one failure, with one entry
+        Map<Object, List<Failure>> byKey = new LinkedHashMap<>();
         for (Failure failure : failures) {
-            if (detailed.size() < MAX_DETAILED && (failure.key == null || keys.add(failure.key))) {
-                detailed.add(failure);
-            }
+            byKey.computeIfAbsent(failure.key != null ? failure.key : failure, key -> new ArrayList<>()).add(failure);
         }
-        for (Failure failure : failures) {
-            if (detailed.size() < MAX_DETAILED && !detailed.contains(failure)) {
-                detailed.add(failure);
-            }
+        List<List<Failure>> sameFailures = new ArrayList<>(byKey.values());
+        int detailed = Math.min(MAX_DETAILED, sameFailures.size());
+        for (List<Failure> same : sameFailures.subList(0, detailed)) {
+            describe(block, same, shared, totals);
         }
-        if (detailed.size() < failures.size()) {
-            block.append("Failed tests (").append(failures.size()).append("), the ").append(detailed.size()).append(" marked * in detail below:\n");
-            for (int i = 0; i < failures.size() && i < MAX_LISTED; i++) {
-                block.append(detailed.contains(failures.get(i)) ? "* " : "  ").append(failures.get(i).listed).append('\n');
-            }
-            if (failures.size() > MAX_LISTED) {
-                block.append("  ... and ").append(failures.size() - MAX_LISTED).append(" more\n");
-            }
+        if (detailed == sameFailures.size()) {
+            return;
         }
-        for (Failure failure : failures) {
-            if (detailed.contains(failure)) {
-                block.append(failure.title).append('\n');
-                for (String line : failure.details) {
-                    block.append("  ").append(line).append('\n');
-                }
+        List<List<Failure>> others = sameFailures.subList(detailed, sameFailures.size());
+        block.append("Other failed tests (").append(others.stream().mapToInt(List::size).sum()).append("), one line per failure:\n");
+        for (int i = 0; i < others.size(); i++) {
+            if (i == MAX_LISTED) {
+                List<List<Failure>> left = others.subList(i, others.size());
+                block.append("  ... and ").append(left.size()).append(" more failures, of ").append(left.stream().mapToInt(List::size).sum())
+                        .append(" tests\n");
+                break;
             }
+            List<Failure> same = others.get(i);
+            block.append("  ").append(same.get(0).listed);
+            if (same.size() > 1) {
+                block.append(", and the same in ").append(others(same, false));
+            }
+            block.append('\n');
+        }
+    }
+
+    /** The entry of a failure: its first test, with the others which failed the same way named. */
+    private static void describe(StringBuilder block, List<Failure> same, Map<String, Integer> shared, Totals totals) {
+        Failure failure = same.get(0);
+        block.append(failure.title).append('\n');
+        for (String line : failure.exception) {
+            block.append("  ").append(line).append('\n');
+        }
+        describeEvents(block, failure, shared, totals);
+        if (same.size() > 1) {
+            block.append("  the same failure in ").append(others(same, true)).append('\n');
+        }
+        for (String command : failure.commands) {
+            block.append("  ").append(command).append('\n');
         }
     }
 
     /**
-     * The kinds of WARN/ERROR events logged during more than one failed test, most specific to the failures first: an event logged
-     * during all failed tests and no test which passed is likely to be the cause, one logged during most tests is not.
+     * The events of the entry: those of a shared kind by number and id, the others in full. Events of the set-up of the test's class
+     * which a test class that passed also logged during its set-up are left out, and counted.
      */
-    private static void describeSharedEvents(StringBuilder block, Totals totals) {
+    private static void describeEvents(StringBuilder block, Failure failure, Map<String, Integer> shared, Totals totals) {
+        List<String> references = new ArrayList<>();
+        List<String> lines = new ArrayList<>();
+        int alsoPassed = 0;
+        boolean otherThreads = false;
+        for (AiTestEvents.Line line : failure.events) {
+            if (failure.classEvents && totals.passedClassKinds.contains(line.kind())) {
+                alsoPassed += line.count();
+                continue;
+            }
+            otherThreads |= line.text().startsWith("~ ");
+            Integer number = shared.get(line.kind());
+            if (number != null) {
+                references.add("[" + number + "] #" + line.id() + (line.count() > 1 ? " (" + line.count() + " times)" : ""));
+            } else {
+                lines.add(line.toString());
+            }
+        }
+        String passedNote = alsoPassed + (alsoPassed == 1 ? " event" : " events") + " which test classes that passed also logged during their set-up";
+        if (references.isEmpty() && lines.isEmpty() && failure.notListed == 0) {
+            if (alsoPassed > 0) {
+                block.append("  ").append(failure.eventsHeading).append(": only ").append(passedNote).append('\n');
+            }
+            return;
+        }
+        block.append("  ").append(failure.eventsHeading);
+        if (otherThreads) {
+            block.append(" (~: by another thread while several tests ran, may belong to another test)");
+        }
+        block.append(':');
+        if (!references.isEmpty()) {
+            block.append(' ').append(String.join(", ", references)).append(" (above)");
+            if (!lines.isEmpty() || failure.notListed > 0 || alsoPassed > 0) {
+                block.append(", and");
+            }
+        }
+        block.append('\n');
+        for (String line : lines) {
+            block.append("    ").append(line).append('\n');
+        }
+        if (failure.notListed > 0) {
+            block.append("    ... and ").append(failure.notListed).append(" more WARN/ERROR events\n");
+        }
+        if (alsoPassed > 0) {
+            block.append("    ... and ").append(passedNote).append('\n');
+        }
+    }
+
+    /**
+     * The other tests of a failure: <code>2 more tests: b() at line 52 #t18, Other.c() at Other.java:40 #t19</code>, without the class
+     * if it is that of the first. With lines (in the entry of the first, not in the list of other failures): where each test method is
+     * in the stack trace of its exception, unless that is where the first one is, as for the invocations of a parameterized test. The
+     * line is in the file of the frame shown for the first test's exception, else the file is named.
+     */
+    private static String others(List<Failure> same, boolean withLines) {
+        Failure first = same.get(0);
+        int count = same.size() - 1;
+        StringBuilder names = new StringBuilder().append(count).append(count == 1 ? " more test: " : " more tests: ");
+        for (int i = 1; i < same.size(); i++) {
+            if (i > MAX_NAMED) {
+                names.append(", and ").append(same.size() - i).append(" more");
+                break;
+            }
+            Failure other = same.get(i);
+            String name = other.name;
+            if (other.className != null && other.className.equals(first.className) && name.startsWith(other.className + ".")) {
+                name = name.substring(other.className.length() + 1);
+            }
+            names.append(i > 1 ? ", " : "").append(name);
+            StackTraceElement frame = other.testFrame;
+            if (withLines && frame != null && !(first.testFrame != null && frame.getFileName().equals(first.testFrame.getFileName())
+                    && frame.getLineNumber() == first.testFrame.getLineNumber())) {
+                names.append(" at ").append(frame.getFileName().equals(first.shownFile) ? "line " : frame.getFileName() + ":")
+                        .append(frame.getLineNumber());
+            }
+            if (other.token != null) {
+                names.append(" #").append(other.token);
+            }
+        }
+        return names.toString();
+    }
+
+    /**
+     * The kinds of WARN/ERROR events logged during more than one failed test, most specific to the failures first: an event logged
+     * during all failed tests and no test which passed is likely to be the cause, one logged during most tests is not. Returns the
+     * number of each kind listed.
+     */
+    private static Map<String, Integer> describeSharedEvents(StringBuilder block, Totals totals) {
         List<Failure> failures = totals.failures;
         if (failures.size() < 2) {
-            return;
+            return Map.of();
         }
         Map<String, Integer> failedWith = new LinkedHashMap<>();
         Map<String, String> lines = new HashMap<>();
@@ -465,7 +622,7 @@ public class AiTestExecutionListener implements TestExecutionListener {
                 lines.putIfAbsent(kind.getKey(), kind.getValue());
             }
         }
-        record Shared(String line, int failed, int passed, double score) {
+        record Shared(String kind, String line, int failed, int passed, double score) {
         }
         List<Shared> shared = new ArrayList<>();
         for (Map.Entry<String, Integer> kind : failedWith.entrySet()) {
@@ -473,19 +630,25 @@ public class AiTestExecutionListener implements TestExecutionListener {
             int passed = passedWith == null ? 0 : passedWith[0];
             double score = (double) kind.getValue() / failures.size() - (totals.passed == 0 ? 0 : (double) passed / totals.passed);
             if (kind.getValue() > 1 && score > 0) {
-                shared.add(new Shared(lines.get(kind.getKey()), kind.getValue(), passed, score));
+                shared.add(new Shared(kind.getKey(), lines.get(kind.getKey()), kind.getValue(), passed, score));
             }
         }
         if (shared.isEmpty()) {
-            return;
+            return Map.of();
         }
         shared.sort(Comparator.comparingDouble(Shared::score).reversed().thenComparing(Comparator.comparingInt(Shared::failed).reversed()));
         block.append("WARN/ERROR events logged during several failed tests, likely causes first (one event of each kind):\n");
+        Map<String, Integer> numbers = new HashMap<>();
         for (int i = 0; i < shared.size() && i < MAX_SHARED; i++) {
             Shared event = shared.get(i);
-            block.append("  ").append(event.failed()).append(" of ").append(failures.size()).append(" failed, ").append(event.passed()).append(" of ")
-                    .append(totals.passed).append(" passed tests: ").append(event.line()).append('\n');
+            numbers.put(event.kind(), i + 1);
+            block.append("  [").append(i + 1).append("] ").append(event.failed()).append(" of ").append(failures.size()).append(" failed, ")
+                    .append(event.passed()).append(" of ").append(totals.passed).append(" passed tests: ").append(event.line()).append('\n');
         }
+        if (shared.size() > MAX_SHARED) {
+            block.append("  ... and ").append(shared.size() - MAX_SHARED).append(" more kinds\n");
+        }
+        return numbers;
     }
 
     // ---- test markers
@@ -516,6 +679,15 @@ public class AiTestExecutionListener implements TestExecutionListener {
     private void writeFailure(TestIdentifier identifier, Mark mark, Throwable throwable, int missing) {
         Failure failure = new Failure();
         String name = mark != null ? mark.name() : nameOf(identifier);
+        String testClass = classOf(identifier);
+        failure.name = name;
+        failure.className = testClass == null ? null : simpleName(testClass);
+        failure.token = mark == null ? null : mark.token();
+        Mark parent = parentMark(identifier);
+        if (parent != null) {
+            parent.failedWithin = true;
+        }
+
         String kind = identifier.isTest() ? "" : isClass(identifier) ? " (test class set-up or tear-down)" : " (container)";
         StringBuilder title = new StringBuilder("FAILED ").append(name).append(kind);
         if (mark != null) {
@@ -524,62 +696,117 @@ public class AiTestExecutionListener implements TestExecutionListener {
         if (missing > 0) {
             title.append(", ").append(missing).append(" tests not run");
         }
+        // the lines of the test and of its class are printed by the command of the block, unless other tests ran at the same time
+        boolean byToken = mark != null && mark.written() && !mark.overlapped;
+        if (parent != null && parent.written() && !parent.overlapped) {
+            title.append(", class #").append(parent.token());
+            byToken = true;
+        }
         failure.title = title.toString();
+        failure.compactFile = byToken ? compactFile : null;
 
         Throwable root = rootCause(throwable);
         StringBuilder listed = new StringBuilder(mark != null ? "#" + mark.token() + " " : "").append(name).append(kind);
+        String key = null;
         if (throwable != null) {
-            failure.key = throwable.getClass().getName() + ':' + throwable.getMessage() + '|' + root.getClass().getName() + ':' + root.getMessage()
-                    + '|' + frame(throwable) + '|' + frame(root);
-            String message = AiText.singleLine(root.getMessage());
+            // not the frame in the test's own class: the same assertion fails at another line in each test
+            key = throwable.getClass().getName() + ':' + throwable.getMessage() + '|' + root.getClass().getName() + ':' + root.getMessage()
+                    + '|' + keyFrame(throwable, testClass) + '|' + keyFrame(root, testClass);
+            String singleLine = AiText.singleLine(root.getMessage());
+            String message = AiText.squeezeIfLonger(singleLine, MAX_LISTED_MESSAGE);
             listed.append(": ").append(simpleName(root.getClass().getName()));
             if (!message.isEmpty()) {
-                listed.append(": ").append(message.length() > MAX_LISTED_MESSAGE ? AiText.cut(message, MAX_LISTED_MESSAGE) + "..." : message);
+                listed.append(": ").append(message.length() > MAX_LISTED_MESSAGE
+                        ? AiText.cut(message, MAX_LISTED_MESSAGE) + "...[truncated, " + singleLine.length() + " chars]" : message);
             }
             StringBuilder description = new StringBuilder();
             describe(description, "", throwable);
             if (root != throwable) {
                 describe(description, "root cause: ", root);
             }
-            description.toString().lines().forEach(line -> failure.details.add(line.strip()));
+            description.toString().lines().forEach(line -> failure.exception.add(line.strip()));
+            failure.testFrame = testFrame(identifier, throwable, root);
+            StackTraceElement shown = AiTestEvents.frameOf(throwable.getStackTrace());
+            failure.shownFile = shown == null ? null : shown.getFileName();
         }
         failure.listed = listed.toString();
 
         // what the test logged at WARN and ERROR, so that the cause can be seen without running a command
         AiTestEvents.Events events = mark == null ? AiTestEvents.of("", false) : AiTestEvents.of(mark.token(), true);
         failure.eventKinds = events.kinds();
-        Mark parent = parentMark(identifier);
-        String heading = identifier.isTest() ? "WARN/ERROR logged during the test" : "WARN/ERROR logged during the set-up or tear-down";
+        failure.eventsHeading = identifier.isTest() ? "WARN/ERROR logged during the test" : "WARN/ERROR logged during the set-up or tear-down";
         if (events.isEmpty() && parent != null) {
             // for example a Spring context which failed to start: logged before the test started
             events = AiTestEvents.of(parent.token(), false);
-            heading = "WARN/ERROR logged during the set-up of the test class";
+            failure.eventsHeading = "WARN/ERROR logged during the set-up of the test class";
+            failure.classEvents = true;
         }
-        List<String> lines = events.lines();
-        if (!lines.isEmpty()) {
-            failure.details.add(heading + (lines.stream().anyMatch(line -> line.startsWith("~ "))
-                    ? " (~: by another thread while several tests ran, may belong to another test):" : ":"));
-            for (String line : lines) {
-                failure.details.add("  " + line);
-            }
+        failure.events = events.lines();
+        failure.notListed = events.notListed();
+        // tests which failed the same way: also the same kinds of events (of the test, or of its class if it logged none), so that
+        // tests which fail alike for different reasons are not one
+        failure.key = key == null ? null : key + '|' + failure.classEvents + '|' + String.join("|", new TreeSet<>(events.kinds().keySet()));
+
+        if (mark != null && mark.written() && mark.overlapped) {
+            failure.commands.add("logs (other tests ran at the same time: the lines of the test's thread, and of other threads (~) which may be its own): "
+                    + command(mark));
         }
-        if (mark != null && mark.written()) {
-            failure.details.add((mark.overlapped ? "logs (other tests ran at the same time: the lines of the test's thread, and of other threads (~) which may be its own): "
-                    : "logs: ") + command(mark));
-        }
-        if (parent != null && parent.written()) {
-            failure.details.add((parent.overlapped ? "class logs (set-up; other classes ran at the same time: the lines of the class's thread): "
-                    : "class logs (set-up, Spring context start): ") + command(parent));
+        if (parent != null && parent.written() && parent.overlapped) {
+            failure.commands.add("class logs (set-up; other classes ran at the same time: the lines of the class's thread): " + command(parent));
         }
         synchronized (totals) {
             totals.failures.add(failure);
         }
     }
 
+    /** The frame of an exception for the key of a failure: none if it is in the test's own class (or a class nested in it). */
+    private static String keyFrame(Throwable throwable, String testClass) {
+        StackTraceElement frame = AiTestEvents.frameOf(throwable.getStackTrace());
+        if (frame == null || testClass != null && outerClass(frame.getClassName()).equals(outerClass(testClass))) {
+            return "";
+        }
+        return frame.toString();
+    }
+
+    /**
+     * The frame of the test method in the stack trace of the exception, else of its root cause: the line of the test where it failed, or
+     * where it called what failed. Null for a test class, or if neither has a frame of the method with a line.
+     */
+    private static StackTraceElement testFrame(TestIdentifier identifier, Throwable throwable, Throwable root) {
+        if (!(identifier.getSource().orElse(null) instanceof MethodSource source)) {
+            return null;
+        }
+        for (Throwable exception : List.of(throwable, root)) {
+            StackTraceElement[] frames = exception.getStackTrace();
+            for (StackTraceElement frame : frames == null ? new StackTraceElement[0] : frames) {
+                if (frame.getClassName().equals(source.getClassName()) && frame.getMethodName().equals(source.getMethodName())
+                        && frame.getFileName() != null && frame.getLineNumber() > 0) {
+                    return frame;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static String outerClass(String className) {
+        int nested = className.indexOf('$');
+        return nested == -1 ? className : className.substring(0, nested);
+    }
+
+    /** The class of a test or test class, null if it has none (a dynamic container, for example). */
+    private static String classOf(TestIdentifier identifier) {
+        TestSource source = identifier.getSource().orElse(null);
+        if (source instanceof MethodSource methodSource) {
+            return methodSource.getClassName();
+        }
+        return source instanceof ClassSource classSource ? classSource.getClassName() : null;
+    }
+
     private static void describe(StringBuilder entry, String prefix, Throwable throwable) {
-        String message = AiText.singleLine(throwable.getMessage());
+        String singleLine = AiText.singleLine(throwable.getMessage());
+        String message = AiText.squeezeIfLonger(singleLine, MAX_MESSAGE);
         if (message.length() > MAX_MESSAGE) {
-            message = AiText.cut(message, MAX_MESSAGE) + "...[truncated, " + message.length() + " chars]";
+            message = AiText.cut(message, MAX_MESSAGE) + "...[truncated, " + singleLine.length() + " chars]";
         }
         entry.append("  ").append(prefix).append(throwable.getClass().getName());
         if (!message.isEmpty()) {
@@ -621,7 +848,11 @@ public class AiTestExecutionListener implements TestExecutionListener {
         if (mark.overlapped) {
             return "grep '#" + mark.token() + " ' " + compactFile;
         }
-        return "sed -n '/#" + mark.token() + " start/,/#" + mark.token() + " end/p' " + compactFile;
+        return command(mark.token(), compactFile);
+    }
+
+    private static String command(String token, String file) {
+        return "sed -n '/#" + token + " start/,/#" + token + " end/p' " + file;
     }
 
     /** The mark of the nearest enclosing test class. */

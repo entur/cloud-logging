@@ -41,7 +41,7 @@ public final class CompactSettings {
     }
 
     public static String truncateMessage(String message) {
-        return truncate(message, messageMax());
+        return truncateSqueezed(message, messageMax());
     }
 
     /** Cut to <code>max</code> characters (not inside an alias), followed by <code>...[truncated, N chars]</code>. */
@@ -50,6 +50,18 @@ public final class CompactSettings {
             return AiText.cut(text, max) + "...[truncated, " + text.length() + " chars]";
         }
         return text;
+    }
+
+    /**
+     * A message (not a body, which is data): if longer than <code>max</code> characters, {@link AiText#squeeze(String) squeezed} first
+     * (table borders and padding), then cut like {@link #truncate(String, int)} if still longer.
+     */
+    static String truncateSqueezed(String text, int max) {
+        String squeezed = AiText.squeezeIfLonger(text, max);
+        if (max > 0 && squeezed.length() > max) {
+            return AiText.cut(squeezed, max) + "...[truncated, " + text.length() + " chars]";
+        }
+        return squeezed;
     }
 
     /**

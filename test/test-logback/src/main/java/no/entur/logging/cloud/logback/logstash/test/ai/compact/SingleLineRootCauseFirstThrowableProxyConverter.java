@@ -68,17 +68,19 @@ public class SingleLineRootCauseFirstThrowableProxyConverter extends RootCauseFi
                     builder.append(SEPARATOR).append("[... more causes omitted]");
                     return builder.toString();
                 }
-                builder.append(SEPARATOR).append(CompactSettings.truncate(trimmed, maxMessage));
-                messageLength = trimmed.length();
+                // squeezed if too long (table borders and padding), then cut
+                builder.append(SEPARATOR).append(CompactSettings.truncateSqueezed(trimmed, maxMessage));
+                messageLength = AiText.squeezeIfLonger(trimmed, maxMessage).length();
                 messageCut = maxMessage > 0 && messageLength > maxMessage;
             } else if (!messageCut) {
-                // continuation of a multi-line exception message
-                if (maxMessage > 0 && messageLength + 1 + trimmed.length() > maxMessage) {
-                    builder.append(' ').append(AiText.cut(trimmed, Math.max(0, maxMessage - messageLength - 1))).append("...[truncated]");
+                // continuation of a multi-line exception message, squeezed like the first line once the message gets too long
+                String part = maxMessage > 0 && messageLength + 1 + trimmed.length() > maxMessage ? AiText.squeeze(trimmed) : trimmed;
+                if (maxMessage > 0 && messageLength + 1 + part.length() > maxMessage) {
+                    builder.append(' ').append(AiText.cut(part, Math.max(0, maxMessage - messageLength - 1))).append("...[truncated]");
                     messageCut = true;
                 } else {
-                    builder.append(' ').append(trimmed);
-                    messageLength += 1 + trimmed.length();
+                    builder.append(' ').append(part);
+                    messageLength += 1 + part.length();
                 }
             }
         }

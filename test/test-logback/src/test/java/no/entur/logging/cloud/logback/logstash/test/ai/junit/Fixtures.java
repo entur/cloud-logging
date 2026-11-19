@@ -9,6 +9,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 
@@ -187,6 +189,125 @@ public class Fixtures {
         @ValueSource(ints = { 8, 9 })
         public void present(int document) {
             lookup(document, true);
+        }
+    }
+
+    /** A test whose wrong value is only reported by the class which checks it, without an exception. */
+    @Fixture
+    public static class CallerFixture {
+
+        @Test
+        public void passesAWrongValue() {
+            long now = -5;
+            assertEquals(true, FixtureChecks.isInRange(now));
+        }
+    }
+
+    /** Four tests with the same assertion message: two fail after one error, two after another. */
+    @Fixture
+    @TestMethodOrder(MethodOrderer.MethodName.class)
+    public static class SameMessageFixture {
+
+        @Test
+        public void a_databaseDown() {
+            logger.error("Database is down");
+            logger.error("Database is down");
+            assertEquals(200, 500);
+        }
+
+        @Test
+        public void b_databaseDownToo() {
+            logger.error("Database is down");
+            assertEquals(200, 500);
+        }
+
+        @Test
+        public void c_cacheFull() {
+            logger.error("Cache is full");
+            assertEquals(200, 500);
+        }
+
+        @Test
+        public void d_cacheFullToo() {
+            logger.error("Cache is full");
+            assertEquals(200, 500);
+        }
+    }
+
+    /** Logs a warning during its set-up, as a framework does at every Spring context start, and passes. */
+    @Fixture
+    public static class NoisySetUpFixture {
+
+        @BeforeAll
+        public static void setUp() {
+            logger.warn("Using a deprecated filter");
+        }
+
+        @Test
+        public void passes() {
+        }
+    }
+
+    /** Logs the warning of {@link NoisySetUpFixture} and one of its own during its set-up; its test fails without logging. */
+    @Fixture
+    public static class NoisySetUpFailingFixture {
+
+        @BeforeAll
+        public static void setUp() {
+            logger.warn("Using a deprecated filter");
+            logger.warn("Cache directory is missing");
+        }
+
+        @Test
+        public void fails() {
+            assertEquals(1, 2);
+        }
+    }
+
+    /** Logs only the warning of {@link NoisySetUpFixture} during its set-up; its test fails without logging. */
+    @Fixture
+    public static class OnlyNoisySetUpFailingFixture {
+
+        @BeforeAll
+        public static void setUp() {
+            logger.warn("Using a deprecated filter");
+        }
+
+        @Test
+        public void fails() {
+            assertEquals(1, 2);
+        }
+    }
+
+    /** Fifteen tests which fail the same way, and forty which fail each in its own way. */
+    @Fixture
+    @TestMethodOrder(MethodOrderer.MethodName.class)
+    public static class ManyFailuresFixture {
+
+        @ParameterizedTest
+        @ValueSource(ints = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 })
+        public void a_same(int value) {
+            assertEquals(-1, 1);
+        }
+
+        @ParameterizedTest
+        @MethodSource("values")
+        public void b_distinct(int value) {
+            assertEquals(0, value);
+        }
+
+        static IntStream values() {
+            return IntStream.rangeClosed(1, 40);
+        }
+    }
+
+    /** Fails in the class it calls, as {@link OtherFileFixture} does in another file. */
+    @Fixture
+    public static class SameCauseFixture {
+
+        @Test
+        public void callsBroken() {
+            FixtureChecks.broken();
         }
     }
 
