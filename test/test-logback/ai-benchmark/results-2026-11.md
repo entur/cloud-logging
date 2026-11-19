@@ -135,42 +135,88 @@ Since 39f55f85 the compact file of these suites changed only in three lines (the
 response is left out) and in the event ids (12 instead of 8 hex digits), and the AGENTS.md snippet in one word (an `#id`
 also marks a cut message). MAI-Code-1.1-Flash at high effort at 39f55f85 is the memory-limited re-run described above.
 
-### AI mode with the shorter instructions and `scripts/test-ai` (72c1a578), Claude Code only
+### AI mode at 72c1a578 against the baselines: Claude Code, Opus and Sonnet, three efforts
 
-Logs and README snippet from commit 72c1a578 (#535 with the shorter test summary and `scripts/test-ai`), 2026-11-19, Claude
-Code 2.1.328, Opus and Sonnet only, the four runs at the same time. The AI-mode logs now come from `scripts/test-ai`
-(`generate-logs.sh` runs the script from the README), and the prompt has the whole AGENTS.md snippet and what the script
-printed (the log directory, the exit code and the two count lines of the summary), as an agent sees them after running the
-tests. The earlier runs got the snippet from the compact file bullet on (2.4 KB). The new snippet is 1.1 KB in all and no
-longer describes the compact line format, the request-response lines, how `repeated N more times` lines count (or to count in
-`.full`), aliases, or that some events are only logged at DEBUG. The test suites and the answer key are unchanged. Score /
-tokens / tool calls / time / cost; the earlier columns are the same cells of the table above.
+AI-mode logs and README snippet from commit 72c1a578 (#535 with the shorter test summary and `scripts/test-ai`); the
+baselines were re-run the same day with the same JUnit XML reports and prompts as above. 2026-11-19, Claude Code 2.1.328
+(`claude -p`), Claude Opus 5.5 and Claude Sonnet 5.5 at low, medium and high effort, one run per cell, at most 4 at a
+time. The AI-mode logs now come from `scripts/test-ai` (`generate-logs.sh` runs the script from the README), and the
+AI-mode prompt has the whole AGENTS.md snippet and what the script printed (the log directory, the exit code and the two
+count lines of the summary), as an agent sees them after running the tests. The earlier AI-mode runs got the snippet from
+the compact file bullet on (2.4 KB). The new snippet is 1.1 KB in all and no longer describes the compact line format, the
+request-response lines, how `repeated N more times` lines count (or to count in `.full`), aliases, or that some events are
+only logged at DEBUG. The test suites and the answer key are unchanged. Graded with `grade.py`, every flagged item checked
+by hand; three answers are graded by hand (below). Score (max 4) / tokens / tool calls / time / cost.
+
+| Model | Effort | Plain baseline | Careful baseline | AI mode |
+|---|---|---|---|---|
+| Claude Opus 5.5 | low | 2.92 / 348k / 19 / 84 s / $0.36 | 4.00 / 343k / 20 / 100 s / $0.41 | 4.00 / 203k / 12 / 55 s / $0.29 |
+| Claude Opus 5.5 | medium | 4.00 / 1.83M / 42 / 194 s / $1.18 | 4.00 / 505k / 20 / 137 s / $0.64 | 4.00 / 368k / 14 / 62 s / $0.44 |
+| Claude Opus 5.5 | high | 4.00 / 2.17M / 36 / 225 s / $1.56 | 4.00 / 311k / 22 / 114 s / $0.51 | 4.00 / 431k / 18 / 76 s / $0.52 |
+| Claude Sonnet 5.5 | low | 2.59 / 337k / 13 / 74 s / $0.23 | 2.92 / 253k / 18 / 64 s / $0.18 | 3.50 / 151k / 8 / 33 s / $0.15 |
+| Claude Sonnet 5.5 | medium | 3.13 / 944k / 43 / 127 s / $0.41 | 3.45 / 295k / 16 / 61 s / $0.17 | 4.00 / 233k / 14 / 48 s / $0.19 |
+| Claude Sonnet 5.5 | high | 2.92 / 1.35M / 33 / 145 s / $0.58 | 3.42 / 572k / 34 / 111 s / $0.34 | 3.58 / 235k / 13 / 47 s / $0.20 |
+
+Totals: mean score, runs with 4.00, tokens, tool calls, time, cost.
+
+| Runs | Plain baseline | Careful baseline | AI mode |
+|---|---|---|---|
+| All 6 runs per setup | 81 % (2/6 perfect), 6.98M tokens, 186 calls, 14.2 min, $4.33 | 91 % (3/6 perfect), 2.28M tokens, 130 calls, 9.8 min, $2.26 | 96 % (4/6 perfect), 1.62M tokens, 79 calls, 5.4 min, $1.79 |
+| Opus | 91 % (2/3 perfect), 4.35M tokens, 97 calls, 8.4 min, $3.11 | 100 % (3/3 perfect), 1.16M tokens, 62 calls, 5.8 min, $1.57 | 100 % (3/3 perfect), 1.00M tokens, 44 calls, 3.2 min, $1.25 |
+| Sonnet | 72 % (0/3 perfect), 2.63M tokens, 89 calls, 5.8 min, $1.22 | 82 % (0/3 perfect), 1.12M tokens, 68 calls, 3.9 min, $0.69 | 92 % (1/3 perfect), 0.62M tokens, 35 calls, 2.1 min, $0.54 |
+| Low effort | 69 % (0/2 perfect), 0.68M tokens, 32 calls, 2.6 min, $0.59 | 86 % (1/2 perfect), 0.60M tokens, 38 calls, 2.7 min, $0.59 | 94 % (1/2 perfect), 0.35M tokens, 20 calls, 1.5 min, $0.43 |
+| Medium effort | 89 % (1/2 perfect), 2.78M tokens, 85 calls, 5.3 min, $1.60 | 93 % (1/2 perfect), 0.80M tokens, 36 calls, 3.3 min, $0.81 | 100 % (2/2 perfect), 0.60M tokens, 28 calls, 1.8 min, $0.63 |
+| High effort | 86 % (1/2 perfect), 3.52M tokens, 69 calls, 6.2 min, $2.14 | 93 % (1/2 perfect), 0.88M tokens, 56 calls, 3.7 min, $0.85 | 95 % (1/2 perfect), 0.67M tokens, 31 calls, 2.1 min, $0.72 |
+
+- AI mode was again the most accurate setup, 96 % against 91 % for the careful and 81 % for the plain baseline, and the
+  cheapest: 1.62M tokens against 2.28M and 6.98M, $1.79 against $2.26 and $4.33, 5.4 against 9.8 and 14.2 minutes.
+- The gap to the careful baseline is smaller than in November. For Opus, both were perfect at every effort, and AI mode
+  used 86 % of the careful baseline's tokens (1.00M against 1.16M) and 80 % of its cost, though in 55 % of the time (3.2
+  against 5.8 minutes). The plain baseline is far behind: Opus lost points at low effort (2.92) and used 1.8-2.2M tokens at
+  medium and high effort.
+- Sonnet scored 92 % in AI mode against 82 % careful and 72 % plain, and was perfect only once (AI mode, medium effort).
+  Its AI-mode losses are all HTTP methods in Q2, at low and high effort: it listed the six responses with the right status
+  and count, but at low effort without any method ("method not shown in these log lines") and at high effort with only the
+  POST of the 500. The method is on the request line logged just before each response (`POST
+  http://localhost:38001/api/document/...`, same `requestId` alias), which it did not look for. All eight Sonnet runs in
+  the earlier AI-mode runs gave the methods; the earlier snippet described the request-response lines. On the careful
+  baseline Sonnet missed the methods the same way at low and medium effort ("The log lines show only the status and URL").
+- The baseline runs that lost points mostly miscounted: Q1 counts such as 1009 or 1006 instead of 1012 and 11 or 6
+  instead of 20 (events in console formats the agent did not match; plain Opus at low effort, the three plain Sonnet runs
+  and careful Sonnet at low and high effort), and 1 instead of 3 for the Q2 responses (the same four plain runs). Q1 was
+  right in all six AI-mode runs, so the `repeated N more times, N+1 in total` lines are counted right without the
+  snippet's explanation.
+- Against November, for the cells run both times (Opus and Sonnet at low and high effort): AI mode used 1.02M tokens
+  against 671k at bb7e3868 (Opus 203k and 431k against 125k and 216k, more than in any of the eight earlier Opus runs),
+  while the baselines used about as much as on 8-9 November (plain 4.21M against 4.18M, careful 1.48M against 1.78M). So
+  AI mode now uses 69 % of the careful baseline's tokens for those cells, against 38 % in November. The scores were lower
+  in all three setups (plain 78 % against 91 %, careful 90 % against 96 %, AI mode 94 % against 100 %), mostly from
+  Sonnet (careful at high effort 4.00 then, 3.42 now; plain 4.00 and 2.92), so part of the AI-mode drop may be run-to-run
+  variation or the newer Claude Code (2.1.321 then); the extra tokens are only in AI mode.
+- The 403 on `POST /api/secured/endpoint`, only logged at DEBUG, was reported by all six plain runs, by one careful run
+  (Opus, medium) and by one AI-mode run (Opus, high), against 17 of the 20 AI-mode runs at bb7e3868. It is not in the key,
+  so it is not scored.
+- Tool calls denied by the read-only allowlist of `run-agents.sh` (for example commands that start with `cd` or a variable
+  assignment, or `for` loops): 16 of 79 in AI mode, 42 of 130 careful, 35 of 186 plain. The earlier results did not count
+  denials.
+- Graded by hand: `grade.py` read the second `MergedAnnotation` warning written as "Same message, but for
+  `opaqueTokenAuthenticationProcessInterceptor`" (right count) as a missing message plus one not in the key (careful Sonnet
+  high, plain Sonnet low), and a security password line with the wrong count and no message text as a message not in the key
+  (careful Sonnet low, plain Sonnet low): 3.34 → 3.42, 2.89 → 2.92 and 2.48 → 2.59.
+- One run per cell, so these are signals: AI mode at 72c1a578 is still the most accurate and cheapest setup, but against
+  the careful baseline it saves less than in November, and Sonnet misses the HTTP methods. Running the same logs with the
+  earlier instructions would show how much of that comes from the shorter snippet.
+
+AI mode across the commits, the same cells (score / tokens / tool calls / time / cost; the earlier columns are from the
+table above):
 
 | Model | Effort | acdcc660 | 9b0a3424 | 39f55f85 | bb7e3868 | 72c1a578 |
 |---|---|---|---|---|---|---|
 | Claude Opus 5.5 | low | 4.00 / 130k / 6 / 45 s / $0.23 | 4.00 / 112k / 5 / 28 s / $0.20 | 4.00 / 184k / 8 / 42 s / $0.28 | 4.00 / 125k / 6 / 51 s / $0.24 | 4.00 / 203k / 12 / 55 s / $0.29 |
 | Claude Sonnet 5.5 | low | 4.00 / 167k / 11 / 37 s / $0.14 | 4.00 / 225k / 11 / 45 s / $0.18 | 4.00 / 172k / 11 / 41 s / $0.13 | 4.00 / 115k / 5 / 26 s / $0.12 | 3.50 / 151k / 8 / 33 s / $0.15 |
-| Claude Opus 5.5 | high | 4.00 / 152k / 9 / 54 s / $0.25 | 4.00 / 282k / 17 / 71 s / $0.40 | 4.00 / 280k / 12 / 60 s / $0.33 | 4.00 / 216k / 9 / 55 s / $0.33 | 4.00 / 431k / 18 / 77 s / $0.52 |
+| Claude Opus 5.5 | high | 4.00 / 152k / 9 / 54 s / $0.25 | 4.00 / 282k / 17 / 71 s / $0.40 | 4.00 / 280k / 12 / 60 s / $0.33 | 4.00 / 216k / 9 / 55 s / $0.33 | 4.00 / 431k / 18 / 76 s / $0.52 |
 | Claude Sonnet 5.5 | high | 4.00 / 234k / 15 / 49 s / $0.15 | 4.00 / 207k / 11 / 48 s / $0.13 | 4.00 / 318k / 17 / 51 s / $0.18 | 4.00 / 215k / 9 / 56 s / $0.20 | 3.58 / 235k / 13 / 47 s / $0.20 |
 | **Total** | | 100 % (4/4 perfect), 683k tokens, 41 calls, 185 s, $0.77 | 100 % (4/4), 826k, 44 calls, 192 s, $0.91 | 100 % (4/4), 954k, 48 calls, 194 s, $0.92 | 100 % (4/4), 671k, 29 calls, 188 s, $0.89 | 94 % (2/4), 1.02M, 51 calls, 212 s, $1.16 |
-
-- Opus was perfect at both efforts, as in the eight earlier runs, but used more tokens than in any of them: 203k at low
-  effort (earlier 112-184k) and 431k at high effort (152-282k), with 12 and 18 tool calls (5-8 and 9-17).
-- Sonnet lost half of Q2 at both efforts. It listed the six responses with the right status and count, but without the
-  method: at low effort none ("method not shown in these log lines"), at high effort only the POST of the 500. The method
-  is on the request line logged just before each response (`POST http://localhost:38001/api/document/...`, same
-  `requestId` alias), which Sonnet did not look for. All eight earlier Sonnet runs gave the methods; the earlier snippet
-  described the request-response lines.
-- Q1 was right in all four runs, so the `repeated N more times, N+1 in total` lines are counted right without the
-  snippet's explanation.
-- The 403 on `POST /api/secured/endpoint`, only logged at DEBUG, was reported by one run (Opus at high effort), against
-  17 of the 20 AI-mode runs at bb7e3868. It is not in the key, so it is not scored.
-- 10 of the 51 tool calls were denied by the read-only allowlist of `run-agents.sh`: nine commands that start with `cd` or
-  a variable assignment or contain a `for` loop, and one `grep` piped into a multi-line `awk` program. The earlier results
-  did not count denials.
-- One run per cell, so this is a signal, not a measurement: with the shorter instructions both Sonnet runs missed the
-  methods and both Opus runs used more tokens than before. Running the same logs with the earlier instructions would show
-  how much of it comes from the snippet.
 
 ## Formatting cost per event
 
