@@ -35,11 +35,37 @@ public final class AiTestEvents {
     /** Kinds of events kept per test to tell which events the failed tests have in common. */
     static final int MAX_KINDS = 50;
 
+    /**
+     * A line describing an event of a test, or the events with the same logger and message: the line of the first one, its id, its kind
+     * (see {@link Events#kinds()}) and how many there were.
+     */
+    public record Line(String text, String id, String kind, int count) {
+
+        /** The line, followed by the count if there was more than one. */
+        @Override
+        public String toString() {
+            return count > 1 ? text + " (" + count + " times)" : text;
+        }
+    }
+
+    // the events with the same logger and message, in a test
+    private static final class Entry {
+        final String text;
+        final String id;
+        final String kind;
+        int count = 1;
+
+        Entry(String text, String id, String kind) {
+            this.text = text;
+            this.id = id;
+            this.kind = kind;
+        }
+    }
+
     /** The WARN and ERROR events of a test. */
     public static final class Events {
         // by logger and message, in order
-        final Map<String, int[]> counts = new LinkedHashMap<>();
-        final Map<String, String> lines = new LinkedHashMap<>();
+        final Map<String, Entry> entries = new LinkedHashMap<>();
         // by kind of event (see kind()), with a line describing one of them
         final Map<String, String> kinds = new LinkedHashMap<>();
         int total;
@@ -48,19 +74,22 @@ public final class AiTestEvents {
             return total == 0;
         }
 
-        /** One line per event, and a last line if there were more. */
-        public synchronized List<String> lines() {
-            List<String> result = new ArrayList<>();
-            int shown = 0;
-            for (Map.Entry<String, String> line : lines.entrySet()) {
-                int count = counts.get(line.getKey())[0];
-                shown += count;
-                result.add(count > 1 ? line.getValue() + " (" + count + " times)" : line.getValue());
-            }
-            if (total > shown) {
-                result.add("... and " + (total - shown) + " more WARN/ERROR events");
+        /** One line per event, events with the same logger and message once (at most {@value #MAX_EVENTS}), in order. */
+        public synchronized List<Line> lines() {
+            List<Line> result = new ArrayList<>(entries.size());
+            for (Entry entry : entries.values()) {
+                result.add(new Line(entry.text, entry.id, entry.kind, entry.count));
             }
             return result;
+        }
+
+        /** The number of events which are not in the lines, as a test had more than {@value #MAX_EVENTS} different ones. */
+        public synchronized int notListed() {
+            int listed = 0;
+            for (Entry entry : entries.values()) {
+                listed += entry.count;
+            }
+            return total - listed;
         }
 
         /**
@@ -174,23 +203,24 @@ public final class AiTestEvents {
         String key = event.getLoggerName() + '|' + event.getFormattedMessage();
         String kind = kind(event);
         String line = null;
+        String id = null;
         for (String owner : owners) {
             Events events = EVENTS.computeIfAbsent(owner, token -> new Events());
             synchronized (events) {
                 events.total++;
                 boolean newKind = !events.kinds.containsKey(kind) && events.kinds.size() < MAX_KINDS;
-                int[] count = events.counts.get(key);
-                boolean newLine = count == null && events.counts.size() < MAX_EVENTS;
-                if (count != null) {
-                    count[0]++;
+                Entry entry = events.entries.get(key);
+                boolean newLine = entry == null && events.entries.size() < MAX_EVENTS;
+                if (entry != null) {
+                    entry.count++;
                 }
                 if (newKind || newLine) {
                     if (line == null) {
-                        line = (own == null && owners.size() > 1 ? "~ " : "") + describe(event);
+                        id = AiEventId.idOf(event);
+                        line = (own == null && owners.size() > 1 ? "~ " : "") + describe(event, id);
                     }
                     if (newLine) {
-                        events.counts.put(key, new int[] { 1 });
-                        events.lines.put(key, line);
+                        events.entries.put(key, new Entry(line, id, kind));
                     }
                     if (newKind) {
                         events.kinds.put(kind, line);
@@ -259,11 +289,15 @@ public final class AiTestEvents {
         return caller == null || caller.equals(thrown) ? result : result + " | called from " + caller;
     }
 
-    /** <code>WARN Logger #id : message | root cause: message | at frame</code>, on one line. */
-    private static String describe(ILoggingEvent event) {
+    /**
+     * <code>WARN Logger #id : message | root cause: message | at frame</code>, on one line; without an exception
+     * <code>WARN Logger #id : message | at frame | called from frame</code> (see {@link #logStatementFrames(ILoggingEvent)}).
+     * Called on the thread which logs the event.
+     */
+    private static String describe(ILoggingEvent event, String id) {
         String logger = event.getLoggerName();
         StringBuilder line = new StringBuilder().append(event.getLevel()).append(' ').append(logger.substring(logger.lastIndexOf('.') + 1))
-                .append(" #").append(AiEventId.idOf(event)).append(" : ").append(cut(event.getFormattedMessage(), MAX_MESSAGE));
+                .append(" #").append(id).append(" : ").append(cut(event.getFormattedMessage(), MAX_MESSAGE));
         IThrowableProxy root = rootCause(event.getThrowableProxy());
         if (root != null) {
             line.append(" | ").append(root.getClassName());
@@ -271,12 +305,54 @@ public final class AiTestEvents {
                 line.append(": ").append(cut(root.getMessage(), MAX_EXCEPTION_MESSAGE));
             }
             line.append(frames(root, event.getLoggerName()));
+        } else {
+            line.append(logStatementFrames(event));
         }
         return line.toString();
     }
 
+    /**
+     * For an event without an exception: <code> | at frame</code>, the log statement, if it is in the project's own code, followed by
+     * <code> | called from frame</code>, the first frame of the project's own code in another class (a nested class or lambda counts
+     * as its outer class). A warning about a wrong value is often logged by the class which checks it, and the fault is in the
+     * caller which passed the value. From the caller data of the event, which logback takes from the stack of the current thread:
+     * this must be called on the thread which logs the event. Empty if there is no caller data.
+     */
+    static String logStatementFrames(ILoggingEvent event) {
+        StackTraceElement[] frames;
+        try {
+            frames = event.getCallerData();
+        } catch (RuntimeException e) {
+            return "";
+        }
+        if (frames == null || frames.length == 0) {
+            return "";
+        }
+        StringBuilder result = new StringBuilder();
+        String logged = outerClass(frames[0].getClassName());
+        if (isProjectCode(frames[0].getClassName())) {
+            result.append(" | at ").append(frames[0]);
+        }
+        for (int i = 1; i < frames.length; i++) {
+            String className = frames[i].getClassName();
+            if (!outerClass(className).equals(logged) && !isFramework(className) && isProjectCode(className)) {
+                result.append(" | called from ").append(frames[i]);
+                break;
+            }
+        }
+        return result.toString();
+    }
+
+    private static String outerClass(String className) {
+        int nested = className.indexOf('$');
+        return nested == -1 ? className : className.substring(0, nested);
+    }
+
+    /** On one line, squeezed if too long, then cut to <code>max</code> characters with a note: the whole event is in the full file. */
     private static String cut(String text, int max) {
+        // squeezed first, so that table borders and padding (WireMock's "Request was not matched") do not fill what is kept
         String singleLine = AiText.singleLine(text);
-        return singleLine.length() > max ? AiText.cut(singleLine, max) + "..." : singleLine;
+        String squeezed = AiText.squeezeIfLonger(singleLine, max);
+        return squeezed.length() > max ? AiText.cut(squeezed, max) + "...[truncated, " + singleLine.length() + " chars]" : squeezed;
     }
 }

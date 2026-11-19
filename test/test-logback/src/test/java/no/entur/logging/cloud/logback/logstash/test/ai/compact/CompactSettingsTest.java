@@ -12,4 +12,14 @@ public class CompactSettingsTest {
         assertThat(CompactSettings.truncate("body", 7)).isEqualTo("body");
         assertThat(CompactSettings.truncate("body u1234 end", 0)).isEqualTo("body u1234 end");
     }
+
+    @Test
+    public void messagesAreSqueezedBeforeTheyAreCutButBodiesAreNot() {
+        // squeezed only if too long; then cut if still too long, with the length of the original
+        assertThat(CompactSettings.truncateSqueezed("a ===== b", 9)).isEqualTo("a ===== b");
+        assertThat(CompactSettings.truncateSqueezed("a ===== b", 8)).isEqualTo("a === b");
+        assertThat(CompactSettings.truncateSqueezed("a =====    b c d", 6)).isEqualTo("a === ...[truncated, 16 chars]");
+        // a body is data
+        assertThat(CompactSettings.truncate("a ===== b", 8)).isEqualTo("a ===== ...[truncated, 9 chars]");
+    }
 }

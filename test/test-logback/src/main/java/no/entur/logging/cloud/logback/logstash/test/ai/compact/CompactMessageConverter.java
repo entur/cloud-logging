@@ -38,6 +38,6 @@ public class CompactMessageConverter extends ClassicConverter {
         if (max <= 0 || message == null || message.length() <= max / 6 || AiEventDetails.of(event).isRequestResponse()) {
             return false;
         }
-        return compactMessage(message).length() > max;
+        return AiText.squeezeIfLonger(compactMessage(message), max).length() > max;
     }
 }

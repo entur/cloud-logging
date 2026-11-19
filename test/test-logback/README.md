@@ -59,7 +59,7 @@ do not write into each other's lines; a file starts with a line `---- JVM pid N 
 One event per line, `LEVEL Logger [mdc] #id : message | fields: {...} | stack trace`, INFO and above (override with `entur.logging.ai.level`, for example `DEBUG`).
 
 - No timestamp, thread or colours. The logger is the simple class name (or the full name if the logger is not named after a class). Errors logged with a `DevOpsLogger` severity show it after the level, `ERROR(WAKE_ME_UP_RIGHT_NOW)`, `ERROR(INTERRUPT_MY_DINNER)` or `ERROR(TELL_ME_TOMORROW)` (in both files).
-- Messages longer than 4096 characters are cut (`...[truncated, N chars]`, with the `#id`), as are exception messages in stack traces; change the limit with `entur.logging.ai.message.max-size=N` (`0` = unlimited). Control characters are escaped (`\u001b`), also in stack traces and in both files, so that `grep` treats the files as text.
+- Messages longer than 4096 characters are squeezed first (runs of spaces and tabs become one space, runs of more than 3 of the same character other than a letter or digit become 3, as in the borders and padding of a table), then cut if still too long (`...[truncated, N chars]`, with the `#id`), as are exception messages in stack traces; bodies are only cut; change the limit with `entur.logging.ai.message.max-size=N` (`0` = unlimited). Control characters are escaped (`\u001b`), also in stack traces and in both files, so that `grep` treats the files as text.
 - MDC entries (present during requests) are appended to the logger as `[key=value, ...]`. The `logging.googleapis.com/` key prefix is removed, and such entries are left out when their value equals another entry's value (by default the trace is the correlation id).
 - Structured fields which are not part of the message, from Logstash markers (`Markers.append("key", value)`, ...), SLF4J key-value pairs and structured arguments without a `{}` placeholder (`kv("key", value)`), are appended as JSON: ` | fields: {"key":value}` (in both files; cut like request-response bodies in the compact file).
 - Stack traces are on the same line as the message (separated by ` | `), root cause first, with framework frames removed, so that `grep` returns a whole trace.
@@ -72,60 +72,75 @@ The same events with timestamps, thread names, full logger names, DEBUG and abov
 Every event is one line here too: a message with line breaks is joined, and the stack trace follows the message, separated by ` | `, so `grep` returns a whole event.
 Every event has an id (`#1a2b3c4d5e6f`) here. In the compact file, only events which lost information (stack trace, truncated message, body or fields) show the id, so `grep -n '#1a2b3c4d5e6f' <file>.<pid>.full` gives the complete event.
 
+Some things are only logged at DEBUG, and so are only in the full file, for example requests rejected by a security filter before request-response logging (`grep -n 'Response 4[0-9][0-9]\|Rejecting access' <file>.*.full`).
+To see the exact JSON the servers log (for example the fields of a log statement), run the tests without AI mode and with `-Dentur.logging.style=machineReadableJson`; with Gradle, print the JSON lines from the test reports:
+`sed -n 's/^  <system-out><!\[CDATA\[{/{/; /^{"/p' build/test-results/test/*.xml | grep 'some message'` (Maven: in the test output). Lines logged before the first Spring context has started are not JSON.
+
 ### Summary file and test markers
 A JUnit Platform `TestExecutionListener` (`AiTestExecutionListener`, registered through `META-INF/services`, so there is nothing to configure with
 Gradle, Maven or an IDE) tells which tests failed and where their log lines are. It does nothing unless `entur.logging.ai.enabled=true`.
 
-`<file>.summary` has a block per test JVM, written when the JVM exits: a line with the number of tests (the only line if nothing failed) and an entry per failed test:
+`<file>.summary` has a block per test JVM, written when the JVM exits: a line with the number of tests (the skipped ones included, as Maven Surefire and Gradle count them; the only line if nothing failed), the command which prints the log lines of a test or test class with its token, and an entry per failed test:
 
 ```
 ---- JVM pid 4711 in /work/app, logs /tmp/test.4711.compact: 118 tests, 1 failed, 0 aborted, 2 skipped ----
-FAILED DocumentEndpointTest.returnsNotFound() #t17
+log lines: sed -n '/#tN start/,/#tN end/p' /tmp/test.4711.compact with the #tN of a test, or of its class (class #tN: set-up, Spring context start)
+FAILED DocumentEndpointTest.returnsNotFound() #t17, class #t12
   org.opentest4j.AssertionFailedError: expected: <404> but was: <500>
   at no.entur.DocumentEndpointTest.returnsNotFound(DocumentEndpointTest.java:42)
   WARN/ERROR logged during the test:
     ERROR DocumentService #1a2b3c4d5e6f : Unable to load document 7 | java.io.IOException: timeout | at no.entur.DocumentStore.load(DocumentStore.java:88)
-  logs: sed -n '/#t17 start/,/#t17 end/p' /tmp/test.4711.compact
-  class logs (set-up, Spring context start): sed -n '/#t12 start/,/#t12 end/p' /tmp/test.4711.compact
 ```
 
 - An entry has the exception (and its root cause, if there is one), each with the stack frame which tells most: the first one in the project's own code (a class loaded from a
   directory of class files, not from a jar), else the first one which is not in a test framework, an assertion library or the JDK. A listed event has that frame of its root cause (`| at ...`) and, if the class which logged the event is further down in the stack trace,
   the frame of that class (`| called from ...`): an exception which is caught and logged is often thrown in code which only got a wrong value, and the fault is in its caller.
+  A listed event without an exception has the frame of its log statement if that is in the project's own code (`| at ...`), and the first frame of the project's own code
+  in another class (`| called from ...`): a warning about a wrong value is often logged by the class which checks it, and the fault is in the caller which passed the value.
   The name is `Class.method()`, followed by the display name in brackets if it tells more (the invocation of a parameterized test, `@DisplayName`).
 - `WARN/ERROR logged during the test` lists what the test logged at WARN and above (up to 8 different events, repeats counted; message, root cause and its first frame
   outside frameworks, with the `#id` of the event in the full file), so that a cause which is only in the log is visible without running a command. It has the events
   logged on the thread of the test, and those of other threads while it ran; if several tests ran then, the latter are marked `~` and may belong to another test.
-  Also events which the compact file collapses as repeated. If the test logged none, the events of the set-up of its class are listed (a Spring context which failed to start).
+  Also events which the compact file collapses as repeated. If the test logged none, the events of the set-up of its class are listed (a Spring context which failed to start),
+  except those which a test class that passed also logged during its set-up (framework warnings at every Spring context start): `... and 2 events which test classes that passed also logged during their set-up`.
 - If the set-up or tear-down of a test class fails (`@BeforeAll`, ...), the class has the entry, with the number of its tests which did not run.
-- Messages are on one line and cut at 500 characters. UUIDs are not replaced by aliases here; see [Aliases](#aliases) for finding them in the log files.
+- Messages are on one line, squeezed like in the compact file if too long, and cut at 500 characters (logged events: 300) with `...[truncated, 812 chars]`; the `#id` of an event gives the whole event in the full file. UUIDs are not replaced by aliases here; see [Aliases](#aliases) for finding them in the log files.
+- Tests which failed the same way have one entry, with a line `the same failure in 2 more tests: returnsGone() at line 51 #t18, OtherTest.returnsNothing() at OtherTest.java:30 #t25` (at most 10 named, then `and 3 more`):
+  the same exception and message, thrown at the same place outside the test's own class (an assertion fails at another line in each test), and the same kinds of WARN/ERROR events
+  (see below), so that tests which fail alike for different reasons have an entry each. The line of each named test is where its test method failed or called what failed,
+  in the file of the frame shown above it unless another file is named; it is left out where it is that of the first test (the invocations of a parameterized test).
 
 With many failed tests the block stays short, and what they have in common comes first:
 
 ```
 ---- JVM pid 4711 in /work/app, logs /tmp/test.4711.compact: 94 tests, 24 failed, 0 aborted, 0 skipped ----
+log lines: sed -n '/#tN start/,/#tN end/p' /tmp/test.4711.compact with the #tN of a test, or of its class (class #tN: set-up, Spring context start)
 WARN/ERROR events logged during several failed tests, likely causes first (one event of each kind):
-  24 of 24 failed, 0 of 70 passed tests: WARN DocumentCache #1a2b3c4d5e6f : Unable to store document 7 | java.lang.IllegalArgumentException: no id | at no.entur.DocumentCache.put(DocumentCache.java:88)
-  9 of 24 failed, 3 of 70 passed tests: WARN DocumentClient #2b3c4d5e6f1a : Retrying request 2
-Failed tests (24), the 5 marked * in detail below:
-* #t17 DocumentEndpointTest.returnsNotFound(): AssertionFailedError: expected: <404> but was: <500>
-  #t18 DocumentEndpointTest.returnsDocument(): AssertionFailedError: expected: not <null>
-  ...
-FAILED DocumentEndpointTest.returnsNotFound() #t17
+  [1] 24 of 24 failed, 0 of 70 passed tests: WARN DocumentCache #1a2b3c4d5e6f : Unable to store document 7 | java.lang.IllegalArgumentException: no id | at no.entur.DocumentCache.put(DocumentCache.java:88)
+  [2] 9 of 24 failed, 3 of 70 passed tests: WARN DocumentClient #2b3c4d5e6f1a : Retrying request 2
+FAILED DocumentEndpointTest.returnsNotFound() #t17, class #t12
+  org.opentest4j.AssertionFailedError: expected: <404> but was: <500>
+  at no.entur.DocumentEndpointTest.returnsNotFound(DocumentEndpointTest.java:42)
+  WARN/ERROR logged during the test: [1] #3c4d5e6f1a2b (above)
+  the same failure in 8 more tests: returnsGone() at line 51 #t18, ...
+...
+Other failed tests (12), one line per failure:
+  #t31 DocumentListTest.listsDocuments(): AssertionFailedError: expected: <3> but was: <0>, and the same in 2 more tests: ...
   ...
 ```
 
 - `WARN/ERROR events logged during several failed tests`: the kinds of events which more than one failed test logged, with the number of failed and of passed tests which
   logged them, and one event of each kind. Events are of the same kind if they have the same logger and were thrown at the same place (root cause and its first frame outside
   frameworks) or, without an exception, have the same message apart from digits. Those logged by a larger share of the failed than of the passed tests are listed
-  (at most 5), the most specific to the failures first: an event of all failed tests and no passed test is likely the cause, one which most tests log is not listed.
-- `Failed tests`: all failed tests (at most 30), one line each with the token and the root cause. Only 5 are written in detail, failures with different exceptions or places
-  first, as the same failure in another test tells little. The log lines of any other test are printed by the same commands with its token.
+  (at most 5, then `... and 2 more kinds`), the most specific to the failures first: an event of all failed tests and no passed test is likely the cause, one which most tests log is not listed.
+  They are numbered, and an entry refers to an event of a listed kind by its number and the `#id` of its own event, `[1] #3c4d5e6f1a2b (3 times)`, instead of repeating it.
+- 5 failures are written in detail; then the other failures, one line each with the token and the root cause (at most 30, then `... and 4 more failures, of 9 tests`).
+  The log lines of any test are printed by the command of the block with its token.
 - As the block is written at JVM exit, a test JVM which is killed leaves none; the build tool reports that.
 
-The commands work because both log files have a marker line at the start and at the end of every test and test class,
+The command works because both log files have a marker line at the start and at the end of every test and test class,
 `---- #t17 start: DocumentEndpointTest.returnsNotFound() ----` and `---- #t17 end (FAILED): ... ----` (`passed`, `FAILED` or `aborted`);
-the token is a counter, unique within the files of a test JVM. Replace `.compact` by `.full` in a command for everything logged during the test.
+the token is a counter, unique within the files of a test JVM. Replace `.compact` by `.full` in the command for everything logged during the test.
 
 - The markers are queued with the log events, so they are in order with what the test thread logs. Events logged by other threads (a server handling a request of the test) are queued when they are written.
 - The test instance is created before the test starts, and with it the Spring application context of the first test of a class. Those lines are in the range of the class, not of the test.
@@ -139,7 +154,7 @@ the token is a counter, unique within the files of a test JVM. Replace `.compact
 - The test instance of a test (and a Spring context it starts) is created on its thread before the test has its token; with tests running at the same time those events have the
   token of the class only if it runs on the same thread. Running the one test again gives its events alone.
 - Logging assertions (`LogbackTestExtension`, `LogStatements`) do not see the markers.
-- If logging does not go to the AI files (a project's own `logback-test.xml`), the summary is still written, without the commands.
+- If logging does not go to the AI files (a project's own `logback-test.xml`), the summary is still written, without the command.
 
 ### Request-response logging
 HTTP and gRPC request-response logging uses the machine-readable sinks, so message and JSON fields are the same as without AI mode and logging assertions behave the same.
@@ -177,56 +192,98 @@ test {
 
 Kotlin DSL: `tasks.test { systemProperties(providers.systemPropertiesPrefixedBy("entur.logging.").get()) }`.
 
-Then add this to the instructions file read by your AI agent. If the file already has a test command (for example with a profile such as
-`-Pquick`), add the `-D` options and the log directory to that command instead of using the generic one below, and remove rules which
-contradict it (such as a rule against `-q`).
+Then add three things to your project: a test script, a few lines in the instructions file read by your AI agent, and (for Claude Code)
+a permission rule.
 
-Each test run gets its own log directory in `/tmp`, so test runs of other projects, or of other checkouts of the same project, never write to the
-same files, also when they run at the same time (the test JVMs of one run share the directory). The directories stay until `/tmp` is cleaned,
-usually at reboot.
+**1. The script**, as `scripts/test-ai` (`chmod +x scripts/test-ai`). It works with Maven and Gradle. If your project already has a test
+command (for example with a profile such as `-Pquick`), add those options to the Maven or Gradle line in it. Remove rules in the
+instructions file which contradict it (such as a rule against `-q`).
+
+```bash
+#!/usr/bin/env bash
+# Runs the tests with compact log output (cloud-logging AI mode): the logs go to files in a new directory in /tmp, and
+# this prints that directory, the exit code and the test summary. Run it from the project root.
+# Extra arguments go to Maven or Gradle:
+#   Maven:  scripts/test-ai -Dtest=FooTest#bar          scripts/test-ai -pl app
+#   Gradle: scripts/test-ai --tests FooTest             scripts/test-ai :app:test --tests FooTest
+L=$(mktemp -d "/tmp/$(basename "$PWD")-tests.XXXXXX") || exit 1
+echo "logs: $L"
+AI=(-Dentur.logging.ai.enabled=true "-Dentur.logging.ai.file=$L/test")
+if [ -x ./gradlew ]; then
+  # the first argument may be the test task of one project (:app:test); --tests must match in every project it runs in
+  task=test
+  case ${1-} in [!-]*) task=$1; shift ;; esac
+  # --rerun: also if the tests are up to date or cached
+  ./gradlew "$task" --rerun -q --console=plain "${AI[@]}" "$@" > "$L/test.out" 2>&1
+else
+  mvn=mvn
+  [ ! -x ./mvnw ] || mvn=./mvnw
+  # no build cache (it would skip the tests); -Dtest needs no match in every module
+  "$mvn" -q test -Dmaven.build.cache.enabled=false -Dsurefire.failIfNoSpecifiedTests=false "${AI[@]}" "$@" > "$L/test.out" 2>&1
+fi
+status=$?
+echo "exit code $status"
+if [ -s "$L/test.summary" ]; then
+  head -60 "$L/test.summary"
+  lines=$(wc -l < "$L/test.summary")
+  if [ "$lines" -gt 60 ]; then
+    echo "... $((lines - 60)) more lines in $L/test.summary"
+    # the count lines of the test JVMs further down: those with failures in full, the others counted
+    ok=': [0-9]+ tests, 0 failed, [0-9]+ aborted, [0-9]+ skipped ----$'
+    failed=$(tail -n +61 "$L/test.summary" | grep '^---- JVM ' | grep -v -E "$ok")
+    passed=$(tail -n +61 "$L/test.summary" | grep '^---- JVM ' | grep -c -E "$ok")
+    n=$(printf '%s' "$failed" | grep -c '^')
+    [ "$n$passed" = 00 ] || echo "test JVMs further down: $n with failures, $passed in which no test failed${failed:+:}"
+    [ -z "$failed" ] || printf '%s\n' "$failed"
+  fi
+else
+  echo "no test summary: no tests ran (or none matched), the build is broken, or AI mode is not on the test classpath. From $L/test.out:"
+  grep -E -A2 '^\[ERROR\]|What went wrong|error:|^e: ' "$L/test.out" | grep -v '^--$' | cut -c1-300 | head -30 | grep . ||
+    grep -v '^WARNING: ' "$L/test.out" | tail -20 | cut -c1-300
+fi
+exit $status
+```
+
+- **Exit code and summary, also on success:** the script prints the exit code and the summary (`573 tests, 0 failed, ...`) also when all
+  tests pass. Agents which filter quiet Maven output themselves (`mvn -q test | tail`) see no result on success, and often run the whole
+  suite again to be sure.
+- **Never silent:** without a summary (no tests ran or none matched, a broken build, the `*-test` artifact missing) it says so and prints the
+  errors from the build output.
+- **Long summaries:** it prints the first 60 lines of the summary, then how many lines are left. Each test JVM appends its own block, and
+  in a build with many modules the first blocks can fill those lines. So it then also prints the count line of each test JVM further down
+  which had failures, and how many others there are: `test JVMs further down: 1 with failures, 12 in which no test failed:`.
+- **No build cache:** with the Maven build cache extension, an unchanged module is restored from the cache and its tests do not run. Gradle
+  has `--rerun` for the same reason.
+- **One log directory per run:** each run gets its own directory in `/tmp`, so test runs of other projects, or of other checkouts of the same
+  project, never write to the same files, also when they run at the same time (the test JVMs of one run share the directory). The
+  directories stay until `/tmp` is cleaned, usually at reboot.
+- **Why a script and not a one-line command:** Claude Code's permission rules cannot approve a command with `$(...)`, variables and
+  redirects, such as this script written as one line ("Quoted text in this command can't be checked before it runs"), so every test run
+  would need a prompt or auto mode. A script needs one rule.
+
+**2. The instructions** (AGENTS.md / CLAUDE.md):
 
 ````markdown
 ## Running tests and reading logs
 
-When running tests, enable compact log output to save context. Logs then go to files in a new directory instead of the console.
-Run each command as one line (it creates the directory and uses it):
+Run the tests with `scripts/test-ai` (compact log output, which saves context: the logs go to files in a new directory instead of the
+console). Arguments go to Maven/Gradle, for example `scripts/test-ai -Dtest=FooTest#bar` (Maven) or `scripts/test-ai --tests FooTest` (Gradle).
 
-    # Gradle (--rerun: also if the tests are up to date)
-    L=$(mktemp -d "/tmp/$(basename "$PWD")-tests.XXXXXX"); echo "logs: $L"; ./gradlew test --rerun -q --console=plain -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=$L/test > $L/test.out 2>&1; echo "exit code $?"; head -60 $L/test.summary 2>/dev/null || head -40 $L/test.out
-    # Maven (if there is no summary: only the Maven error lines, not the plugin and JVM warnings or client stack traces)
-    L=$(mktemp -d "/tmp/$(basename "$PWD")-tests.XXXXXX"); echo "logs: $L"; mvn -q test -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=$L/test > $L/test.out 2>&1; echo "exit code $?"; head -60 $L/test.summary 2>/dev/null || grep '^\[ERROR\]' $L/test.out | cut -c1-300 | head -30
-
-- `<logs>` below is the directory the command printed (`logs: /tmp/myproject-tests.Ab12Cd`); use it in later commands, as variables do not
-  survive from one command to the next. Every run gets a new one, so nothing has to be deleted first.
-- `<logs>/test.summary`: a block per test JVM (module): a line with the number of tests and its log files (each test JVM writes its own
-  `<logs>/test.<pid>.compact` and `.full`), then the failed tests. An entry is `FAILED Class.method() #token`, the exception
-  and where it was thrown, the WARN and ERROR events logged during that test (often the cause; `~`: logged by another thread while several tests ran, may belong
-  to another test), a `logs` command which prints everything logged during that test and a `class logs` command for its test class, which
-  includes the set-up (Spring context start). Read the listed events first, then run those commands; replace `.compact` by `.full` in them for all details (DEBUG, whole stack traces).
-  If tests ran at the same time, the command is a `grep` for the token: it prints the lines logged on the thread of the test, and lines of other
-  threads (a server, an executor) logged while it ran, which have the tokens of all tests running then after a `~` and may belong to any of them.
-- With many failed tests the block starts with `WARN/ERROR events logged during several failed tests`: what the failed tests have in common, with the number of
-  failed and passed tests which logged each event, likely causes first. Start there: one cause often fails many tests. Then all failed tests are listed, one line each
-  (`#token Class.method(): exception`), and only 5 (marked `*`, with different failures) have a full entry; the commands work for any token.
-- Console output (`<logs>/test.out`) only contains the build tool's own summary and failures. A non-zero exit code without failed tests in the summary
-  (or without a summary) means a broken build, for example a compilation error: then read `<logs>/test.out` (`head -40`, or `grep '^\[ERROR\]'` for Maven).
-  Do not use `-i`/`--info` (Gradle) or `-X` (Maven); they are not needed.
-- `<logs>/*.compact`: compact, one event per line (`LEVEL SimpleClassName [mdc] #id : message`), INFO and above. Stack traces are on the same line as the
-  message, root cause first, framework frames removed, 2 frames per exception. Lines `---- #token start/end ... ----` mark the tests, and an event logged on the thread of a test has its token (`WARN Logger #t17 : message`; `~ #t17 #t21`: another thread, while those tests ran). Use `grep` (for example `grep -n 'ERROR\|WARN' <logs>/*.compact`; with several files add `-h`, or name the file), do not read the whole file.
-- `<logs>/*.full`: the same events plus what the compact file leaves out: DEBUG, timestamps, thread names, full logger names,
-  framework start-up/shutdown lines (server ports are kept in the compact file), transport headers (`user-agent`, `accept*`, `grpc-*encoding`, `date`, ...),
-  whole bodies and whole stack traces. Some things are only logged at DEBUG and so only appear here, for example requests rejected by
-  a security filter before request-response logging (`grep -n 'Response 4[0-9][0-9]\|Rejecting access' <logs>/*.full`). Look for those directly in this file with `grep -n`; an `#id` in the compact file (truncated stack trace, message, body or fields)
-  finds the complete event with `grep -n '#id' <logs>/*.full` (one line per event there too, with the whole stack trace; pipe through `tr '|' '\n'` to read a trace).
-- Include `-Dentur.logging.ai.level=DEBUG` to also get DEBUG in the compact file (`-Dentur.logging.ai.full.level=INFO` limits the `.full` file).
-- Request/response logging (HTTP, gRPC) is a single line: `message | header: value; ... | body: <body>`. Other structured fields of an event follow the message as ` | fields: {json}`.
-- Repeated WARN/ERROR events are collapsed in `<logs>/*.compact`: the first is printed, the rest are summarized later in a line
-  `repeated N more times, N+1 in total (first #id, last #id): message` whose total includes that first event. Counting restarts when logging
-  is reconfigured (e.g. a new Spring context), so a message can have several such lines. For exact counts grep `<logs>/*.full` for the
-  logger and the message, as the same message can come from several loggers: `grep -c 'DocumentEndpoint .* : Hello world' <logs>/*.full`.
-- UUIDs and hex ids are replaced by aliases (`u1`, `h1`, ...) in both files; the first time an alias appears in `<logs>/*.full` it is followed by its value, `u7(<uuid>)`, so grep `<logs>/*.full` for a raw id to find its alias. Aliases are per file (test JVM).
-- To see the exact JSON the servers log (for example the fields of a log statement), run the tests without AI mode and with
-  `-Dentur.logging.style=machineReadableJson`. With Gradle, print the JSON lines from the test reports:
-  `sed -n 's/^  <system-out><!\[CDATA\[{/{/; /^{"/p' build/test-results/test/*.xml | grep 'some message'` (Maven: in the test output).
-  Lines logged before the first Spring context has started are not JSON.
+- It prints the log directory (`logs: /tmp/...`, `<logs>` below), the exit code and `<logs>/test.summary`: per test JVM the number of
+  tests, the command which prints the log lines of a test with its token (`#t17`; `.full` instead of `.compact` in it: everything), then
+  each failed test with its exception and the WARN/ERROR events logged during it (often the cause). With many failed tests, the events
+  which they have in common come first, numbered, and tests which failed the same way have one entry.
+- `<logs>/test.<pid>.compact` has one event per line (INFO and above, short stack traces), `<logs>/test.<pid>.full` everything (DEBUG,
+  whole stack traces and bodies). Search them with `grep -n` instead of reading them; `grep -n '#id' <logs>/*.full` prints the whole
+  event of an `#id` from the summary or the compact file.
 ````
+
+**3. The permission rule** (Claude Code), in `.claude/settings.json`:
+
+```json
+{
+  "permissions": {
+    "allow": ["Bash(scripts/test-ai:*)"]
+  }
+}
+```

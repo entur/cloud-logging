@@ -115,6 +115,45 @@ public class AiTestExecutionListenerTest {
         return range;
     }
 
+    /** The line of the first statement in a method of a fixture source file, which starts as given. */
+    private static int lineOf(String file, String method, String statement) throws IOException {
+        List<String> source = Files.readAllLines(Path.of("src/test/java", AiTestExecutionListenerTest.class.getPackageName().replace('.', '/'), file),
+                StandardCharsets.UTF_8);
+        int start = -1;
+        for (int i = 0; i < source.size(); i++) {
+            if (start == -1 && source.get(i).contains(" void " + method + "(")) {
+                start = i;
+            } else if (start != -1 && source.get(i).strip().startsWith(statement)) {
+                return i + 1;
+            }
+        }
+        throw new AssertionError("No " + statement + " in " + method + " of " + file);
+    }
+
+    private static int indexOf(List<String> summary, String start) {
+        for (int i = 0; i < summary.size(); i++) {
+            if (summary.get(i).startsWith(start)) {
+                return i;
+            }
+        }
+        throw new AssertionError("No line " + start + " in " + summary);
+    }
+
+    /** Runs the fixtures with AI files, and returns the summary as at JVM exit. */
+    private static List<String> summaryOf(Path directory, Class<?>... fixtures) throws IOException {
+        Path file = directory.resolve("test");
+        LoggerContext context = logging(file, new ArrayList<>());
+        Fixtures.logger = context.getLogger("fixture");
+        try {
+            run(new AiTestExecutionListener(true, file.toString(), file.toString(), () -> true, () -> context), fixtures);
+        } finally {
+            context.stop();
+            Fixtures.logger = null;
+        }
+        writeTotals(file);
+        return lines(Path.of(file + ".summary"));
+    }
+
     private static String token(List<String> summary, String entry) {
         for (String line : summary) {
             Matcher matcher = Pattern.compile(Pattern.quote(entry) + " #(t\\d+)").matcher(line);
@@ -144,19 +183,25 @@ public class AiTestExecutionListenerTest {
         List<String> full = lines(Path.of(file + ".full"));
         String text = String.join("\n", summary);
 
-        assertThat(summary.get(0)).matches("---- JVM pid \\d+ in .*, logs .*test\\.compact: 9 tests, 5 failed, 1 aborted, 1 skipped, 2 not run, "
+        assertThat(summary.get(0)).matches("---- JVM pid \\d+ in .*, logs .*test\\.compact: 10 tests, 5 failed, 1 aborted, 1 skipped, 2 not run, "
                 + "1 failed test classes \\(set-up or tear-down\\) ----");
 
-        // the exception, where it was thrown in the test and the command printing the log lines of the test
+        // one command for the log lines of every test and test class, with its token
+        assertThat(summary.get(1)).isEqualTo("log lines: sed -n '/#tN start/,/#tN end/p' " + file + ".compact with the #tN of a test, "
+                + "or of its class (class #tN: set-up, Spring context start)");
+
+        // the exception, where it was thrown in the test, and the token of the test and of its class
         String failed = token(summary, "Fixtures$MixedFixture.b_logsAndFails()");
-        int entry = summary.indexOf("FAILED Fixtures$MixedFixture.b_logsAndFails() #" + failed);
+        int entry = indexOf(summary, "FAILED Fixtures$MixedFixture.b_logsAndFails() #" + failed + ", class #");
+        String classToken = summary.get(entry).substring(summary.get(entry).lastIndexOf('#') + 1);
         assertThat(summary.get(entry + 1)).isEqualTo("  org.opentest4j.AssertionFailedError: expected: <404> but was: <500>");
         assertThat(summary.get(entry + 2)).matches("  at .*Fixtures\\$MixedFixture\\.b_logsAndFails\\(Fixtures\\.java:\\d+\\)");
         // what the test logged at WARN and above, without running a command
         assertThat(summary.get(entry + 3)).isEqualTo("  WARN/ERROR logged during the test:");
-        assertThat(summary.get(entry + 4)).matches("    WARN fixture #[0-9a-f]{12} : document service is slow");
-        assertThat(summary.get(entry + 5)).isEqualTo("  logs: sed -n '/#" + failed + " start/,/#" + failed + " end/p' " + file + ".compact");
-        assertThat(summary.get(entry + 6)).matches("  class logs \\(set-up, Spring context start\\): sed -n '/#t\\d+ start/,/#t\\d+ end/p' .*");
+        // with the log statement (an event without an exception), the caller is a test framework here
+        assertThat(summary.get(entry + 4)).matches("    WARN fixture #[0-9a-f]{12} : document service is slow \\| at .*Fixtures\\$MixedFixture\\.b_logsAndFails\\(Fixtures\\.java:\\d+\\)");
+        assertThat(summary.get(entry + 5)).startsWith("FAILED ");
+        assertThat(range(compact, classToken).get(0)).isEqualTo("---- #" + classToken + " start: Fixtures$MixedFixture ----");
 
         assertThat(range(compact, failed)).containsExactly(
                 "---- #" + failed + " start: Fixtures$MixedFixture.b_logsAndFails() ----",
@@ -175,19 +220,21 @@ public class AiTestExecutionListenerTest {
         assertThat(text).contains("FAILED Fixtures$MixedFixture.g_parameterized() [[2] ");
         assertThat(text).doesNotContain("g_parameterized() [[1] ");
         token(summary, "Fixtures$MixedFixture.h_displayName() [returns not found]");
-        // more failed tests than are written in detail: all are listed, and the same failure in another test is not repeated in detail
-        assertThat(summary.get(1)).isEqualTo("Failed tests (6), the 5 marked * in detail below:");
-        assertThat(summary.subList(2, 8).stream().filter(line -> line.startsWith("* ")).count()).isEqualTo(5);
-        assertThat(summary.subList(2, 8).stream().filter(line -> line.startsWith("  ")).toList()).hasSize(1);
-        assertThat(text).containsMatch("\n  #t\\d+ Fixtures\\$MixedFixture\\.i_sameFailure\\(\\): UnsupportedOperationException: not yet\n");
-        assertThat(text).containsMatch("\n\\* #t\\d+ Fixtures\\$MixedFixture\\.b_logsAndFails\\(\\): AssertionFailedError: expected: <404> but was: <500>\n");
+        // the same failure in another test is not repeated: the entry names the test, with the line where it called what failed
+        assertThat(text).containsMatch("FAILED Fixtures\\$MixedFixture\\.h_displayName\\(\\) \\[returns not found\\] #t\\d+, class #t\\d+\n"
+                + "  java.lang.UnsupportedOperationException: not yet\n"
+                + "  at .*Fixtures\\$MixedFixture\\.helper\\(Fixtures\\.java:\\d+\\)\n"
+                + "  the same failure in 1 more test: i_sameFailure\\(\\) at line " + lineOf("Fixtures.java", "i_sameFailure", "helper();")
+                + " #t\\d+\n");
         assertThat(text).doesNotContain("FAILED Fixtures$MixedFixture.i_sameFailure()");
+        // 5 failures, so no list of other ones
+        assertThat(text).doesNotContain("Other failed tests");
         // a failed set-up: the class has the entry, with its own log lines
         String setUp = token(summary, "Fixtures$BrokenSetUpFixture (test class set-up or tear-down)");
         assertThat(text).contains("FAILED Fixtures$BrokenSetUpFixture (test class set-up or tear-down) #" + setUp + ", 2 tests not run\n"
                 + "  java.lang.IllegalStateException: no database\n"
                 + "  at ");
-        assertThat(text).containsMatch("  WARN/ERROR logged during the set-up or tear-down:\n    ERROR fixture #[0-9a-f]{12} : unable to start\n");
+        assertThat(text).containsMatch("  WARN/ERROR logged during the set-up or tear-down:\n    ERROR fixture #[0-9a-f]{12} : unable to start \\| at .*Fixtures\\$BrokenSetUpFixture\\.\\w+\\(Fixtures\\.java:\\d+\\)(\n|$)");
         assertThat(range(compact, setUp)).containsExactly(
                 "---- #" + setUp + " start: Fixtures$BrokenSetUpFixture ----",
                 "ERROR #" + setUp + " unable to start",
@@ -226,8 +273,8 @@ public class AiTestExecutionListenerTest {
 
         // the lines between the markers of the failed test include those of the other test, so the entry greps for the token instead
         assertThat(range(compact, failed).stream().anyMatch(line -> line.endsWith("the other test"))).isTrue();
-        assertThat(String.join("\n", summary)).contains("  logs (other tests ran at the same time: the lines of the test's thread, and of other threads (~) which may be its own): grep '#"
-                + failed + " ' " + file + ".compact\n");
+        assertThat(summary).contains("  logs (other tests ran at the same time: the lines of the test's thread, and of other threads (~) which may be its own): grep '#"
+                + failed + " ' " + file + ".compact");
         assertThat(compact.stream().filter(line -> line.contains("#" + failed + " ")).toList()).containsExactly(
                 "---- #" + failed + " start: Fixtures$ParallelFixture.fails() ----",
                 "WARN #" + failed + " the failing test",
@@ -236,10 +283,11 @@ public class AiTestExecutionListenerTest {
         // the events of the test, and of another thread while both tests ran
         String text = String.join("\n", summary);
         assertThat(text).contains("  WARN/ERROR logged during the test (~: by another thread while several tests ran, may belong to another test):\n");
-        assertThat(text).containsMatch("    WARN fixture #[0-9a-f]{12} : the failing test\n    ~ WARN fixture #[0-9a-f]{12} : from another thread\n");
+        assertThat(text).containsMatch("    WARN fixture #[0-9a-f]{12} : the failing test \\| at [^\n]*\n    ~ WARN fixture #[0-9a-f]{12} : from another thread \\| at [^\n]*\n");
         assertThat(text).doesNotContain("the other test");
-        // one class: its lines are those between its markers
-        assertThat(String.join("\n", summary)).containsMatch("  class logs \\(set-up, Spring context start\\): sed -n '/#t\\d+ start/,/#t\\d+ end/p' ");
+        // one class: its lines are those between its markers, which the command of the block prints
+        assertThat(text).containsMatch("\nFAILED Fixtures\\$ParallelFixture\\.fails\\(\\) #t\\d+, class #t\\d+\n");
+        assertThat(summary.get(1)).startsWith("log lines: sed -n '/#tN start/,/#tN end/p' ");
         assertThat(compact.stream().filter(line -> line.endsWith("from another thread")).findFirst().orElseThrow()).matches("WARN ~ #t\\d+ #t\\d+ from another thread");
     }
 
@@ -259,14 +307,115 @@ public class AiTestExecutionListenerTest {
         List<String> summary = lines(Path.of(file + ".summary"));
         assertThat(summary.get(0)).matches("---- JVM pid \\d+ in .*: 9 tests, 7 failed, 0 aborted, 0 skipped ----");
         // logged during every failed test and no test which passed; the warning which every test logs is not listed
-        assertThat(summary.get(1)).isEqualTo("WARN/ERROR events logged during several failed tests, likely causes first (one event of each kind):");
-        assertThat(summary.get(2)).matches("  7 of 7 failed, 0 of 2 passed tests: WARN fixture #[0-9a-f]{12} : Unable to store document \\d \\| "
+        assertThat(summary.get(2)).isEqualTo("WARN/ERROR events logged during several failed tests, likely causes first (one event of each kind):");
+        assertThat(summary.get(3)).matches("  \\[1\\] 7 of 7 failed, 0 of 2 passed tests: WARN fixture #[0-9a-f]{12} : Unable to store document \\d \\| "
                 + "java.lang.IllegalStateException: no connection \\| at .*Fixtures\\$SharedCauseFixture\\.store\\(Fixtures\\.java:\\d+\\)");
-        assertThat(summary.get(3)).isEqualTo("Failed tests (7), the 5 marked * in detail below:");
-        assertThat(summary.subList(4, 11).stream().filter(line -> line.startsWith("* #t")).count()).isEqualTo(5);
-        assertThat(summary.subList(4, 11).stream().filter(line -> line.startsWith("  #t")).count()).isEqualTo(2);
-        assertThat(summary.stream().filter(line -> line.startsWith("FAILED ")).count()).isEqualTo(5);
         assertThat(summary.stream().filter(line -> line.contains("passed tests: ")).count()).isEqualTo(1);
+        // the entries refer to it, with the id of their own event; the other warning is listed in full
+        assertThat(summary.stream().filter(line -> line.startsWith("FAILED ")).count()).isEqualTo(5);
+        assertThat(summary.stream().filter(line -> line.matches("  WARN/ERROR logged during the test: \\[1\\] #[0-9a-f]{12} \\(above\\), and")).count()).isEqualTo(5);
+        assertThat(summary.stream().filter(line -> line.matches("    WARN fixture #[0-9a-f]{12} : Slow response \\| at .*")).count()).isEqualTo(5);
+        assertThat(summary.stream().filter(line -> line.contains(": Unable to store document")).count()).isEqualTo(1);
+        // each test failed in its own way (another message), so the 2 tests which are not in detail are listed after them
+        int others = summary.indexOf("Other failed tests (2), one line per failure:");
+        assertThat(others).isGreaterThan(indexOf(summary, "FAILED Fixtures$SharedCauseFixture.missing() [[5] 5]"));
+        assertThat(summary.subList(others + 1, summary.size())).hasSize(2);
+        assertThat(summary.get(others + 1)).matches("  #t\\d+ Fixtures\\$SharedCauseFixture\\.missing\\(\\) \\[\\[6\\] 6\\]: AssertionFailedError: expected: <document 6> but was: <null>");
+    }
+
+    @Test
+    public void aWarningWithoutAnExceptionHasTheCallerOfTheClassWhichLoggedIt(@TempDir Path directory) throws Exception {
+        Path file = directory.resolve("test");
+        LoggerContext context = logging(file, new ArrayList<>());
+        Fixtures.logger = context.getLogger("fixture");
+        try {
+            run(new AiTestExecutionListener(true, file.toString(), file.toString(), () -> true, () -> context), Fixtures.CallerFixture.class);
+        } finally {
+            context.stop();
+            Fixtures.logger = null;
+        }
+        writeTotals(file);
+
+        // the class which checked the value logged the warning; the fault is in the caller which passed it
+        assertThat(String.join("\n", lines(Path.of(file + ".summary")))).containsMatch("\n    WARN fixture #[0-9a-f]{12} : Value -5 is out of range "
+                + "\\| at .*FixtureChecks\\.isInRange\\(FixtureChecks\\.java:\\d+\\) "
+                + "\\| called from .*Fixtures\\$CallerFixture\\.passesAWrongValue\\(Fixtures\\.java:\\d+\\)$");
+    }
+
+    @Test
+    public void testsWhichFailedTheSameWayHaveOneEntryUnlessTheyLoggedOtherEvents(@TempDir Path directory) throws Exception {
+        List<String> summary = summaryOf(directory, Fixtures.SameMessageFixture.class);
+        String text = String.join("\n", summary);
+
+        // the same assertion fails in all four tests, after one error in two of them and another one in the other two
+        assertThat(summary.get(3)).matches("  \\[1\\] 2 of 4 failed, 0 of 0 passed tests: ERROR fixture #[0-9a-f]{12} : Database is down \\| at .*");
+        assertThat(summary.get(4)).matches("  \\[2\\] 2 of 4 failed, 0 of 0 passed tests: ERROR fixture #[0-9a-f]{12} : Cache is full \\| at .*");
+        assertThat(summary.stream().filter(line -> line.startsWith("FAILED ")).toList()).hasSize(2);
+        assertThat(text).containsMatch("\nFAILED Fixtures\\$SameMessageFixture\\.a_databaseDown\\(\\) #t\\d+, class #t\\d+\n"
+                + "  org.opentest4j.AssertionFailedError: expected: <200> but was: <500>\n"
+                + "  at .*Fixtures\\$SameMessageFixture\\.a_databaseDown\\(Fixtures\\.java:\\d+\\)\n"
+                + "  WARN/ERROR logged during the test: \\[1\\] #[0-9a-f]{12} \\(2 times\\) \\(above\\)\n"
+                + "  the same failure in 1 more test: b_databaseDownToo\\(\\) at line "
+                + lineOf("Fixtures.java", "b_databaseDownToo", "assertEquals(") + " #t\\d+\n");
+        assertThat(text).containsMatch("\nFAILED Fixtures\\$SameMessageFixture\\.c_cacheFull\\(\\) #t\\d+, class #t\\d+\n"
+                + "  org.opentest4j.AssertionFailedError: expected: <200> but was: <500>\n"
+                + "  at [^\n]*\n"
+                + "  WARN/ERROR logged during the test: \\[2\\] #[0-9a-f]{12} \\(above\\)\n"
+                + "  the same failure in 1 more test: d_cacheFullToo\\(\\) at line " + lineOf("Fixtures.java", "d_cacheFullToo", "assertEquals(")
+                + " #t\\d+$");
+    }
+
+    @Test
+    public void aTestInAnotherFileIsNamedWithTheFileOfItsLine(@TempDir Path directory) throws Exception {
+        List<String> summary = summaryOf(directory, Fixtures.SameCauseFixture.class, OtherFileFixture.class);
+        String text = String.join("\n", summary);
+
+        // both fail in the class they call: one entry, which shows that frame, and the line of the other test is in another file
+        assertThat(summary.stream().filter(line -> line.startsWith("FAILED ")).toList()).hasSize(1);
+        assertThat(text).containsMatch("\nFAILED Fixtures\\$SameCauseFixture\\.callsBroken\\(\\) #t\\d+, class #t\\d+\n"
+                + "  java.lang.IllegalStateException: broken\n"
+                + "  at .*FixtureChecks\\.broken\\(FixtureChecks\\.java:\\d+\\)\n"
+                + "  the same failure in 1 more test: OtherFileFixture\\.callsBrokenToo\\(\\) at OtherFileFixture\\.java:"
+                + lineOf("OtherFileFixture.java", "callsBrokenToo", "FixtureChecks.broken();") + " #t\\d+$");
+    }
+
+    @Test
+    public void setUpEventsWhichPassingClassesAlsoLoggedAreLeftOutAndCounted(@TempDir Path directory) throws Exception {
+        List<String> summary = summaryOf(directory, Fixtures.NoisySetUpFixture.class, Fixtures.NoisySetUpFailingFixture.class,
+                Fixtures.OnlyNoisySetUpFailingFixture.class);
+        String text = String.join("\n", summary);
+
+        // the tests logged nothing: the events of the set-up of their class, without the warning which the class that passed logged too
+        assertThat(text).containsMatch("\nFAILED Fixtures\\$NoisySetUpFailingFixture\\.fails\\(\\) #t\\d+, class #t\\d+\n"
+                + "  org.opentest4j.AssertionFailedError: expected: <1> but was: <2>\n"
+                + "  at [^\n]*\n"
+                + "  WARN/ERROR logged during the set-up of the test class:\n"
+                + "    WARN fixture #[0-9a-f]{12} : Cache directory is missing \\| at [^\n]*\n"
+                + "    \\.\\.\\. and 1 event which test classes that passed also logged during their set-up\n");
+        // the same assertion, but other events: another entry
+        assertThat(text).containsMatch("\nFAILED Fixtures\\$OnlyNoisySetUpFailingFixture\\.fails\\(\\) #t\\d+, class #t\\d+\n"
+                + "  org.opentest4j.AssertionFailedError: expected: <1> but was: <2>\n"
+                + "  at [^\n]*\n"
+                + "  WARN/ERROR logged during the set-up of the test class: only 1 event which test classes that passed also logged during their set-up(\n|$)");
+        assertThat(text).doesNotContain("Using a deprecated filter");
+    }
+
+    @Test
+    public void manyFailuresAreNamedAndCountedWhereTheyAreCut(@TempDir Path directory) throws Exception {
+        List<String> summary = summaryOf(directory, Fixtures.ManyFailuresFixture.class);
+        String text = String.join("\n", summary);
+
+        assertThat(summary.get(0)).matches("---- JVM pid \\d+ in .*: 55 tests, 55 failed, 0 aborted, 0 skipped ----");
+        // 5 failures in detail, the first one of 15 tests of which 10 are named
+        assertThat(summary.stream().filter(line -> line.startsWith("FAILED ")).toList()).hasSize(5);
+        assertThat(text).containsMatch("\n  the same failure in 14 more tests: a_same\\(\\) \\[\\[2\\] 2\\] #t\\d+, (a_same\\(\\) \\[\\[\\d+\\] \\d+\\] #t\\d+, ){9}"
+                + "and 4 more\n");
+        // then the other 36 failures, one line each, of which 30 are listed
+        int others = summary.indexOf("Other failed tests (36), one line per failure:");
+        assertThat(others).isGreaterThan(0);
+        assertThat(summary.subList(others + 1, summary.size())).hasSize(31);
+        assertThat(summary.get(others + 1)).matches("  #t\\d+ Fixtures\\$ManyFailuresFixture\\.b_distinct\\(\\) \\[\\[5\\] 5\\]: AssertionFailedError: expected: <0> but was: <5>");
+        assertThat(summary.get(summary.size() - 1)).isEqualTo("  ... and 6 more failures, of 6 tests");
     }
 
     @Test

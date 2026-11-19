@@ -73,6 +73,54 @@ public final class AiText {
     }
 
     /**
+     * The text with runs of spaces and tabs replaced by a single space, and runs of more than 3 of the same character which is not a
+     * letter, digit or whitespace replaced by 3 of it: the borders and padding of tables and banners
+     * (<code>=====</code>, <code>-----</code>, <code>|   x   |</code>) would otherwise fill the part of a long message which is kept when it
+     * is cut. Letters and digits (and so aliases) are kept. One pass, no regular expression.
+     */
+    public static String squeeze(String text) {
+        StringBuilder builder = null;
+        int i = 0;
+        while (i < text.length()) {
+            char c = text.charAt(i);
+            int end = i + 1;
+            if (c == ' ' || c == '\t') {
+                while (end < text.length() && (text.charAt(end) == ' ' || text.charAt(end) == '\t')) {
+                    end++;
+                }
+                if (end - i > 1 || c == '\t') {
+                    builder = startedBuilder(builder, text, i).append(' ');
+                    i = end;
+                    continue;
+                }
+            } else if (!Character.isLetterOrDigit(c) && !Character.isWhitespace(c) && !Character.isSurrogate(c)) {
+                while (end < text.length() && text.charAt(end) == c) {
+                    end++;
+                }
+                if (end - i > 3) {
+                    builder = startedBuilder(builder, text, i).append(c).append(c).append(c);
+                    i = end;
+                    continue;
+                }
+            }
+            if (builder != null) {
+                builder.append(text, i, end);
+            }
+            i = end;
+        }
+        return builder == null ? text : builder.toString();
+    }
+
+    private static StringBuilder startedBuilder(StringBuilder builder, String text, int end) {
+        return builder != null ? builder : new StringBuilder(text.length()).append(text, 0, end);
+    }
+
+    /** The text {@link #squeeze(String) squeezed} if it is longer than <code>max</code> (if <code>max</code> is positive), else the text itself. */
+    public static String squeezeIfLonger(String text, int max) {
+        return max > 0 && text.length() > max ? squeeze(text) : text;
+    }
+
+    /**
      * The text cut to at most <code>max</code> characters, but not inside an alias (<code>u12</code> from <code>u1234</code> would be
      * another alias) or a surrogate pair. The text itself if it is not longer.
      */

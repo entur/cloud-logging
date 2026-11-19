@@ -190,6 +190,14 @@ public class RequestResponseFilesTest {
         assertThat(full(event)).isEqualTo("payload: 1234567890");
         assertThat(eventId.convert(event)).matches(" #[0-9a-f]{12}");
 
+        // a message which only had its table borders and padding squeezed is not cut, and needs no id
+        System.setProperty(CompactSettings.AI_MESSAGE_MAX_PROPERTY, "7");
+        LoggingEvent table = new LoggingEvent("f", new LoggerContext().getLogger("x"), Level.INFO, "a ====\n  b", null, null);
+        table.setMDCPropertyMap(Map.of());
+        assertThat(compact(table)).isEqualTo("a === b");
+        assertThat(full(table)).isEqualTo("a ==== b");
+        assertThat(eventId.convert(table)).isEmpty();
+
         LoggingEvent shortMessage = new LoggingEvent("f", new LoggerContext().getLogger("x"), Level.INFO, "short", null, null);
         shortMessage.setMDCPropertyMap(Map.of());
         assertThat(eventId.convert(shortMessage)).isEmpty();

@@ -149,7 +149,7 @@ public class DeduplicatingAppender extends ForwardingAppender {
             return "";
         }
         // alias before cutting, so that a UUID is not cut in half (and cut so that an alias is not cut either)
-        String singleLine = AiAliases.aliasUuids(AiText.singleLine(message));
+        String singleLine = AiText.squeezeIfLonger(AiAliases.aliasUuids(AiText.singleLine(message)), MAX_SUMMARY_MESSAGE);
         return singleLine.length() > MAX_SUMMARY_MESSAGE ? AiText.cut(singleLine, MAX_SUMMARY_MESSAGE) + "..." : singleLine;
     }
 }

@@ -39,6 +39,24 @@ public class AiTextTest {
     }
 
     @Test
+    public void squeezesTableBordersAndPadding() {
+        // WireMock's "Request was not matched": the differing header was beyond the part which was kept
+        String table = "Request was not matched\n=======================\n\n" + "-".repeat(119) + "\n"
+                + "| Closest stub" + " ".repeat(45) + "| Request" + " ".repeat(50) + "|\n" + "-".repeat(119) + "\n"
+                + "X-Api-Uid: uid-30" + " ".repeat(41) + "| X-Api-Uid: key-30" + " ".repeat(29) + "<<<<< Header does not match\n";
+        assertThat(AiText.squeeze(AiText.singleLine(table))).isEqualTo("Request was not matched === --- | Closest stub | Request | --- "
+                + "X-Api-Uid: uid-30 | X-Api-Uid: key-30 <<< Header does not match ");
+        // up to 3 of the same character, letters, digits (and so aliases) and single spaces are kept
+        assertThat(AiText.squeeze("a...b -- c u1111 2000 x")).isSameInstanceAs("a...b -- c u1111 2000 x");
+        assertThat(AiText.squeeze("a\t\tb\tc ****")).isEqualTo("a b c ***");
+        assertThat(AiText.squeeze("\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00")).isEqualTo("\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00");
+        // only if longer than the limit
+        assertThat(AiText.squeezeIfLonger("a     b", 7)).isEqualTo("a     b");
+        assertThat(AiText.squeezeIfLonger("a     b", 6)).isEqualTo("a b");
+        assertThat(AiText.squeezeIfLonger("a     b", 0)).isEqualTo("a     b");
+    }
+
+    @Test
     public void onlyASingleValueIsJson() {
         assertThat(AiText.isValidJson("{\"a\":[1,2]}")).isTrue();
         assertThat(AiText.isValidJson("1\n2")).isFalse();
