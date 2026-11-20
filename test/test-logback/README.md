@@ -158,6 +158,7 @@ the token is a counter, unique within the files of a test JVM. Replace `.compact
 
 ### Request-response logging
 HTTP and gRPC request-response logging uses the machine-readable sinks, so message and JSON fields are the same as without AI mode and logging assertions behave the same.
+An HTTP call is two events, the request (`POST /api/x | ...`) and the response (`404 Not Found /api/x (in 2 ms) | ...`); the method is only in the request's message. With correlation-id tracing, both have the same `requestId` in the MDC, so a grep for a response's `requestId` value finds its request.
 The files render each event on a single line without pretty-printing or colours, `message | header: value; ... | body: <body>`, with headers and body taken from the request-response marker
 (HTTP: `AiLogLevelLogstashLogbackSink` / `AiOndemandLogLevelLogstashLogbackSink` also attach the whole body of JSON, XML, `text/*` and form requests and responses, which JSON output does not show).
 As the files show the whole body, the message's note about the JSON output's body (`[truncated ~N KB]`) is left out.
@@ -275,13 +276,7 @@ console). Arguments go to Maven/Gradle, for example `scripts/test-ai -Dtest=FooT
   which they have in common come first, numbered, and tests which failed the same way have one entry.
 - `<logs>/test.<pid>.compact` has one event per line (INFO and above, short stack traces), `<logs>/test.<pid>.full` everything (DEBUG,
   whole stack traces and bodies). Search them with `grep -n` instead of reading them; `grep -n '#id' <logs>/*.full` prints the whole
-  event of an `#id` from the summary or the compact file. A compact line is `LEVEL Logger #t17 [mdc] #id : message | ...`.
-- For exact counts use `grep -c` on `.full` with level, logger and message (`grep -c ' WARN .*MyService .* : Hello' <logs>/*.full`): the
-  compact file writes a repeated WARN/ERROR once and then as `repeated N more times, N+1 in total`, a total which includes that first line.
-- An HTTP call is logged as two lines with the same `requestId`: the request (`POST http://localhost:8080/api/x | header: value | body: ...`)
-  and the response (`404 Not Found http://localhost:8080/api/x (in 2 ms) | ...`). The method is only on the request line.
-- Some events are only logged at DEBUG, so they are only in `.full`: for example requests a security filter rejects before
-  request-response logging (`grep -n 'Response 4[0-9][0-9]\|Rejecting access' <logs>/*.full`).
+  event of an `#id` from the summary or the compact file.
 ````
 
 **3. The permission rule** (Claude Code), in `.claude/settings.json`:
