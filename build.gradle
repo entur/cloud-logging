@@ -142,6 +142,13 @@ configure(jvmProjects()) {
         useJUnitPlatform {
             includeEngines 'junit-jupiter'
         }
+        // forward all entur.logging.* properties to the test JVMs, for example for AI mode
+        // (./gradlew test --rerun -Dentur.logging.ai.enabled=true -Dentur.logging.ai.file=/tmp/test)
+        // or for the servers' JSON output on the console (-Dentur.logging.style=machineReadableJson);
+        // not to test-logback's own unit tests, which test the AI-mode classes with their defaults
+        if (project.path != ':test:test-logback') {
+            systemProperties providers.systemPropertiesPrefixedBy('entur.logging.').get()
+        }
     }
 
     dependencies {

@@ -7,9 +7,15 @@ dependencies {
     api ("ch.qos.logback:logback-classic")
     api ("ch.qos.logback:logback-core")
 
+    // AI mode: AiBodyMarker, structured fields and request-response details read from the JSON of an event
+    api ("net.logstash.logback:logstash-logback-encoder:${logbackLogstashVersion}")
+    api ("tools.jackson.core:jackson-core")
+    // AI mode: DevOpsLogger severities (DevOpsMarker) in both files
+    api project(":api")
+
+    // AI mode: AiTestExecutionListener; the launcher is on the classpath whenever it loads the listener
+    compileOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.junit.platform:junit-platform-launcher")
+
     api ("org.entur.logback-logstash-syntax-highlighting-decorators:logback-logstash-syntax-highlighting-decorators:${logbackLogstashSyntaxHighlightingDecoratorsVersion}")
 }
-
-
-
-

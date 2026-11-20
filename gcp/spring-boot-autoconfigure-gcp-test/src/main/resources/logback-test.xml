@@ -1,15 +1,28 @@
 <configuration>
 
-    <include resource="logback/logback-spring-test.xml" />
+    <!-- Optional: -Dentur.logging.ai.enabled=true routes all logging to compact files, see logback/logback-ai.xml -->
+    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+        <key>entur.logging.ai.enabled</key>
+        <value>true</value>
+    </condition>
 
-    <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.logback.logstash.test.CompositeConsoleAsyncAppenderLogging">
-        <discardingThreshold>0</discardingThreshold>
-        <maxFlushTime>0</maxFlushTime>
-        <appender-ref ref="STDOUT" />
-    </appender>
+    <if>
+        <then>
+            <include resource="logback/logback-ai.xml" />
+        </then>
+        <else>
+            <include resource="logback/logback-spring-test.xml" />
 
-    <root>
-        <appender-ref ref="STDOUT_ASYNC" />
-    </root>
+            <appender name="STDOUT_ASYNC" class="no.entur.logging.cloud.logback.logstash.test.CompositeConsoleAsyncAppenderLogging">
+                <discardingThreshold>0</discardingThreshold>
+                <maxFlushTime>0</maxFlushTime>
+                <appender-ref ref="STDOUT" />
+            </appender>
+
+            <root>
+                <appender-ref ref="STDOUT_ASYNC" />
+            </root>
+        </else>
+    </if>
 
 </configuration>
