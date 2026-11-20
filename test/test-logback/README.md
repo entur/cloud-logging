@@ -158,6 +158,7 @@ the token is a counter, unique within the files of a test JVM. Replace `.compact
 
 ### Request-response logging
 HTTP and gRPC request-response logging uses the machine-readable sinks, so message and JSON fields are the same as without AI mode and logging assertions behave the same.
+An HTTP call is two events, the request (`POST /api/x | ...`) and the response (`404 Not Found /api/x (in 2 ms) | ...`); the method is only in the request's message. With correlation-id tracing, both have the same `requestId` in the MDC, so a grep for a response's `requestId` value finds its request.
 The files render each event on a single line without pretty-printing or colours, `message | header: value; ... | body: <body>`, with headers and body taken from the request-response marker
 (HTTP: `AiLogLevelLogstashLogbackSink` / `AiOndemandLogLevelLogstashLogbackSink` also attach the whole body of JSON, XML, `text/*` and form requests and responses, which JSON output does not show).
 As the files show the whole body, the message's note about the JSON output's body (`[truncated ~N KB]`) is left out.
@@ -273,14 +274,9 @@ console). Arguments go to Maven/Gradle, for example `scripts/test-ai -Dtest=FooT
   tests, the command which prints the log lines of a test with its token (`#t17`; `.full` instead of `.compact` in it: everything), then
   each failed test with its exception and the WARN/ERROR events logged during it (often the cause). With many failed tests, the events
   which they have in common come first, numbered, and tests which failed the same way have one entry.
-- `<logs>/test.<pid>.compact` has one event per line (`LEVEL Logger #t17 [mdc] #id : message | ...`, INFO and above, short stack
-  traces), `<logs>/test.<pid>.full` everything (DEBUG, some events only there such as requests a security filter rejects, whole stack
-  traces and bodies). Search them with `grep -n` instead of reading them; `grep -n '#id' <logs>/*.full` prints the whole event of an
-  `#id` from the summary or the compact file.
-- A repeated WARN/ERROR is one compact line, then `repeated N more times, N+1 in total` (the first included). Exact counts:
-  `grep -c ' WARN .*MyService .* : Hello' <logs>/*.full` (level, logger, message; one count per file).
-- An HTTP call is two lines with the same `requestId`: the request (`POST /api/x | ...`, the only one with the method) and the
-  response (`404 Not Found /api/x (in 2 ms) | ...`).
+- `<logs>/test.<pid>.compact` has one event per line (INFO and above, short stack traces), `<logs>/test.<pid>.full` everything (DEBUG,
+  whole stack traces and bodies). Search them with `grep -n` instead of reading them; `grep -n '#id' <logs>/*.full` prints the whole
+  event of an `#id` from the summary or the compact file.
 ````
 
 **3. The permission rule** (Claude Code), in `.claude/settings.json`:
