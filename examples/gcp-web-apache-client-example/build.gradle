@@ -32,12 +32,8 @@ dependencies {
 
     testImplementation ("com.google.truth:truth:${googleTruthVersion}")
     testImplementation ("com.google.truth.extensions:truth-java8-extension:${googleTruthVersion}")
-}
 
-bootRun {
-    // example for running locally with one-line logging
-    dependencies {
-        implementation project(":gcp:spring-boot-starter-gcp-web-test");
-        implementation project(":gcp:request-response-spring-boot-starter-gcp-web-test");
-    }
+    // for running locally with one-line logging: on the bootRun classpath, but not packaged by bootJar
+    developmentOnly project(":gcp:spring-boot-starter-gcp-web-test")
+    developmentOnly project(":gcp:request-response-spring-boot-starter-gcp-web-test")
 }
