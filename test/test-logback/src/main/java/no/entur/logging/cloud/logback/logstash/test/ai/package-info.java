@@ -1,5 +1,5 @@
 /**
- * AI mode: test logging written to a compact and a full file instead of the console (see the README of this module). This package
+ * AI mode: test logging written to a compact and a full file instead of the console (see AI-MODE.md in this module). This package
  * switches the files on and writes them; the other modules use {@link no.entur.logging.cloud.logback.logstash.test.ai.AiLoggingControl}
  * and {@link no.entur.logging.cloud.logback.logstash.test.ai.AiBodyMarker}.
  * <p>
