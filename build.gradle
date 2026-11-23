@@ -29,7 +29,7 @@ subprojects {
     buildscript {
         dependencies {
             constraints {
-                classpath("tools.jackson.core:jackson-core:3.2.4") {
+                classpath("tools.jackson.core:jackson-core:3.3.0") {
                     because 'Security issues'
                 }
                 classpath("tools.jackson.core:jackson-databind:3.2.4") {
