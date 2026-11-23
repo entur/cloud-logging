@@ -65,7 +65,7 @@ ext {
 
     // Security: override the Jackson versions from the Spring Boot BOM.
     // Remove once springBootVersion manages these (or newer) versions.
-    jacksonBomVersion = '3.2.4'
+    jacksonBomVersion = '3.3.0'
 }
 
 // Split projects into buildable: examples and libraries. 
