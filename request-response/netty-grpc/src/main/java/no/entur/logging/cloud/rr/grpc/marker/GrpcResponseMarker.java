@@ -1,16 +1,28 @@
 package no.entur.logging.cloud.rr.grpc.marker;
 
+import no.entur.logging.cloud.appender.scope.LoggingScopePostProcessing;
 import tools.jackson.core.JsonGenerator;
+import no.entur.logging.cloud.rr.grpc.message.GrpcPayload;
 import no.entur.logging.cloud.rr.grpc.message.GrpcResponse;
 
 import java.io.IOException;
 
-public class GrpcResponseMarker extends GrpcConnectionMarker<GrpcResponse> {
+public class GrpcResponseMarker extends GrpcConnectionMarker<GrpcResponse> implements LoggingScopePostProcessing {
 
 	private static final long serialVersionUID = 1L;
 
 	public GrpcResponseMarker(GrpcResponse message) {
 		super(GrpcResponseMarker.class.getName(), message);
+	}
+
+	@Override
+	public void performPostProcessing() {
+		// the log statement is going to be written; map the body before it is handed to the async logging thread,
+		// unless the payload is configured to be mapped on the async logging thread
+		GrpcPayload payload = message.getPayload();
+		if(payload != null) {
+			payload.prepareForAsyncAppender();
+		}
 	}
 
 	@Override

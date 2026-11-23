@@ -1,6 +1,7 @@
 package no.entur.logging.cloud.rr.grpc.marker;
 
 import io.grpc.Status;
+import no.entur.logging.cloud.rr.grpc.message.GrpcPayload;
 import no.entur.logging.cloud.rr.grpc.message.GrpcResponse;
 import org.junit.jupiter.api.Test;
 import tools.jackson.core.JsonGenerator;
@@ -24,7 +25,7 @@ public class GrpcConnectionMarkerTest {
         headers.put("grpc-status-details", new RawValue("{\"code\":3,\"message\":\"My error message\"}"));
         headers.put("grpc-message", "My error message");
 
-        GrpcResponse response = new GrpcResponse(headers, null, "/my.Service/method", null, "local", 1, Status.Code.INVALID_ARGUMENT, 10);
+        GrpcResponse response = new GrpcResponse(headers, null, "/my.Service/method", (GrpcPayload) null, "local", 1, Status.Code.INVALID_ARGUMENT, 10);
 
         JsonNode headersNode = write(new GrpcResponseMarker(response)).get("http").get("headers");
 
