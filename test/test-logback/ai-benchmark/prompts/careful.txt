@@ -1,0 +1,29 @@
+You are helping debug a Java test run (Gradle, JUnit 5, Spring Boot). The JUnit XML test reports of the run were copied to:
+  @LOGS@/xml/gcp-web-example/*.xml
+  @LOGS@/xml/gcp-grpc-spring-example/*.xml
+There is one XML file per test class; the log output of each test class (as printed on the console during the tests) is in its <system-out> element.
+
+How to read these logs (from the project's instructions for AI agents):
+- The log output is in the <system-out> element of each report. Colour codes appear as `?[0;35m` and similar. The output switches between three formats from test to test; every event is printed exactly once, in one of them:
+  1. classic text, one line per event: `HH:mm:ss.SSS  LEVEL --- [thread] logger : message` (logger abbreviated and cut from the left to 40 characters; a stack trace follows on lines starting with a tab and `at `),
+  2. pretty-printed JSON over several lines (`"logger_name"`, MDC fields, `"severity"` = DEBUG/INFO/WARNING/ERROR, `"message"`; a stack trace is part of the message as `\n\tat ...`),
+  3. single-line JSON with the same fields.
+- Normalise to one event per line (colours removed, pretty JSON joined into one line) and pipe it; nothing is saved, so define the function in every command:
+      N() { sed -E 's/\?\[[0-9;]*m//g' @LOGS@/xml/*/*.xml | awk '!j && /^(.*CDATA\[)? *\{$/ {j=1;b="";next} j && /^\}$/ {print "{" b "}";j=0;next} j {sub(/^ +/,"");b=b $0;next} {print}'; }
+  Always cut long lines (`| cut -c1-300`), JSON lines can be very long.
+- WARN/ERROR events, two separate commands (add the counts): classic `N | grep -E '^[0-9:.]+ +(WARN|ERROR) --- '`, JSON `N | grep -E '"severity" ?: ?"(WARNING|ERROR)"'`.
+- Count one message of one logger, again classic plus JSON:
+      N | grep -cE '^[0-9:.]+ +WARN --- .*DocumentEndpoint +: Hello world'
+      N | grep -cE 'DocumentEndpoint".*"severity" ?: ?"WARNING".*"message" ?: ?"Hello world'
+- HTTP request-response logging: the response message looks like `500 Internal Server Error http://localhost:PORT/path (in 2 ms)`, the request like `POST http://localhost:PORT/path`: `N | grep -oE '[45][0-9]{2} [A-Za-z ]+ http://[^ "]+'`.
+- Application frames of a stack trace: `N | grep -A12 'some message' | grep -oE 'at (com\.example)[^ ]*\([A-Za-z]+\.java:[0-9]+\)'`.
+
+Rules: use only these files. Do not read any other files (no source code) and do not modify anything. Prefer grep/head/wc style commands; do not read whole files.
+
+Answer these questions:
+1. List every distinct WARN and ERROR message of the run. Treat events that differ only in ids or ports as the same message. For each, give level, logger class, the message, the total number of times it was logged and, if it has a stack trace, the exception class.
+2. Which HTTP requests (method and path) got a 4xx or 5xx response? Give the status and how many times.
+3. How many times was an embedded Tomcat server started, how many times a gRPC server, and on which port did the gRPC server listen?
+4. For the ERROR events that have a stack trace, give the exception class and the source file and line where it was thrown in the application's own code (packages no.entur.grpc.example and org.entur.example).
+
+Reply with a numbered list, one section per question, and nothing else. For question 1 use one line per message: LEVEL | logger class | message | count | exception class or -.
