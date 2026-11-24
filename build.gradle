@@ -2,7 +2,7 @@
 // and Apache HttpComponents 5 versions. Remove once the plugin ships patched versions.
 buildscript {
     dependencies {
-        classpath(platform("com.fasterxml.jackson:jackson-bom:2.22.4"))
+        classpath(platform("com.fasterxml.jackson:jackson-bom:2.23.0"))
         constraints {
             classpath("org.apache.httpcomponents.client5:httpclient5:5.6.5") {
                 because 'Security issues'
@@ -29,10 +29,10 @@ subprojects {
     buildscript {
         dependencies {
             constraints {
-                classpath("tools.jackson.core:jackson-core:3.2.4") {
+                classpath("tools.jackson.core:jackson-core:3.3.0") {
                     because 'Security issues'
                 }
-                classpath("tools.jackson.core:jackson-databind:3.2.4") {
+                classpath("tools.jackson.core:jackson-databind:3.3.0") {
                     because 'Security issues'
                 }
             }
@@ -58,14 +58,14 @@ ext {
     commonsIoVersion = '2.22.0'
 
     grpcVersion = '1.85.1'
-    grpcCommonsVersion = '2.79.0'
+    grpcCommonsVersion = '2.81.0'
     grpcProtobufVersion = '4.36.2'
 
     jsonAssertVersion = '0.8.0'
 
     // Security: override the Jackson versions from the Spring Boot BOM.
     // Remove once springBootVersion manages these (or newer) versions.
-    jacksonBomVersion = '3.2.4'
+    jacksonBomVersion = '3.3.0'
 }
 
 // Split projects into buildable: examples and libraries. 
